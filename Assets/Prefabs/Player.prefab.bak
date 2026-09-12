@@ -2601,7 +2601,6 @@ GameObject:
   - component: {fileID: 7985263626957455923}
   - component: {fileID: 9082146297184825607}
   - component: {fileID: 4981090094168221985}
-  - component: {fileID: 1000000000000000001}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -2705,47 +2704,6 @@ MonoBehaviour:
     m_Bits: 64
   cam: {fileID: 0}
   rotationSpeed: 400
-  sprintMultiplier: 1.6
-  rollDistance: 4
-  rollDuration: 1.5
-  rollCooldown: 2.5
-  rollIFrame: 1.5
-  rollCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0.6
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 0.25
-      value: 1.3
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 1
-      value: 0.2
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  rollNeedsGround: 1
-  rollBufferTime: 0.15
-  logRollDebug: 1
 --- !u!54 &8807426808987672018
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -2770,7 +2728,7 @@ Rigidbody:
   m_ImplicitTensor: 1
   m_UseGravity: 1
   m_IsKinematic: 0
-  m_Interpolate: 1
+  m_Interpolate: 0
   m_Constraints: 80
   m_CollisionDetection: 0
 --- !u!136 &4974008657548356682
@@ -2810,7 +2768,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AutoAttack
   detector: {fileID: 1129838663952604652}
   gun: {fileID: 5628642350786249570}
-  playerMove: {fileID: 0}
   attackRate: 0.3
 --- !u!114 &9082146297184825607
 MonoBehaviour:
@@ -2841,24 +2798,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 99e054693f6fe474c9a920ee609e5300, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerStatus
---- !u!114 &1000000000000000001
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7640777319044402237}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7afca46af1414017a41b493d26b5ab06, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  handBone: {fileID: 626410421658210160}
-  weaponBone: {fileID: 4010816845943011062}
-  handBoneName: Hand_Right
-  weaponBoneName: ArmPosition_Right
-  alwaysFollow: 0
-  blendOutHold: 0.2
 --- !u!1 &7738332526512525993
 GameObject:
   m_ObjectHideFlags: 0
