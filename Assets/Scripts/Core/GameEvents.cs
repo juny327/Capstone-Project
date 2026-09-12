@@ -35,6 +35,10 @@ public static class GameEvents
 
     public static Action<float> OnBulletSpeedChanged;
 
+    // 무기 시스템 (07번 설계)
+    public static Action<IWeapon> OnWeaponSwapped;       // 활성 무기가 바뀔 때
+    public static Action<IWeapon> OnWeaponStatsChanged;  // 레벨업·모디파이어 적용 시
+
     public static Action<BossHealth> OnBossSpawned; // 보스 ui 연결용임
 
     public static Action OnGameWin; // 보스 처리 고나련
