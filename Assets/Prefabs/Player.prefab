@@ -605,6 +605,37 @@ Transform:
   - {fileID: 3366087984275002645}
   m_Father: {fileID: 6780317609077990238}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2583384713310759083
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6592672375028753140}
+  m_Layer: 0
+  m_Name: WeaponSocket_R
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6592672375028753140
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2583384713310759083}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.45720807, y: 0.5260043, z: -0.5051517, w: -0.5090207}
+  m_LocalPosition: {x: -7.8629146, y: -0.022728905, z: -3.3600318}
+  m_LocalScale: {x: 99.99989, y: 99.999985, z: 99.999855}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 626410421658210160}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2587523997681487063
 GameObject:
   m_ObjectHideFlags: 0
@@ -905,6 +936,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ce96f0c59c3ab8f498286cdff1af31c5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyDetector
+  enemyTag: Enemy
+  bossTag: Boss
 --- !u!135 &3142443937847199292
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -1691,6 +1724,7 @@ Transform:
   - {fileID: 7617410364187040215}
   - {fileID: 8706863537444587785}
   - {fileID: 6726532375942335222}
+  - {fileID: 6592672375028753140}
   m_Father: {fileID: 3767510222227387296}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &5194833109672417325
@@ -2602,6 +2636,7 @@ GameObject:
   - component: {fileID: 9082146297184825607}
   - component: {fileID: 4981090094168221985}
   - component: {fileID: 1000000000000000001}
+  - component: {fileID: 8744353814000383104}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -2803,7 +2838,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7640777319044402237}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2855b2abda997b748a27b9e2415895e8, type: 3}
   m_Name: 
@@ -2859,6 +2894,31 @@ MonoBehaviour:
   weaponBoneName: ArmPosition_Right
   alwaysFollow: 0
   blendOutHold: 0.2
+--- !u!114 &8744353814000383104
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7640777319044402237}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cbc60558268f85940b6cb6154533a71c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponController
+  maxHeldSlots: 4
+  maxSubUnitSlots: 2
+  starterWeapon: {fileID: 11400000, guid: e61cedaa53406ed4f8ea56c742ecc880, type: 2}
+  detector: {fileID: 1129838663952604652}
+  sockets:
+  - socket: 0
+    point: {fileID: 6592672375028753140}
+  - socket: 3
+    point: {fileID: 5451664751410845561}
+  enableDirectSwapInput: 1
+  swapKey: 31
+  swapWithScrollWheel: 1
+  raiseLegacyStatEvents: 1
 --- !u!1 &7738332526512525993
 GameObject:
   m_ObjectHideFlags: 0

@@ -24,6 +24,16 @@ public enum WeaponSocket
     Root,
 }
 
+/// <summary>투사체 무기의 조준 방식.</summary>
+public enum WeaponAimMode
+{
+    /// <summary>캐릭터가 바라보는 방향(= 마우스 방향)으로 쏜다. 기존 소총(Gun)과 같은 방식.</summary>
+    AimDirection,
+
+    /// <summary>감지 범위 안의 가장 가까운 적을 향해 쏜다. 유도형·보조 무기용.</summary>
+    NearestTarget,
+}
+
 /// <summary>
 /// 무기 밸런싱 데이터의 공통 부분.
 ///

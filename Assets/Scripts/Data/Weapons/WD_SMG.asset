@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0fedd2a6f982e0e4b8c3250923d0f859, type: 3}
+  m_Name: WD_SMG
+  m_EditorClassIdentifier: Assembly-CSharp::ProjectileWeaponData
+  weaponName: "\uAE30\uAD00\uB2E8\uCD1D"
+  description: "\uBE60\uB978 \uC5F0\uC0AC, \uB113\uC740 \uD0C4 \uD37C\uC9D0"
+  icon: {fileID: 0}
+  weaponPrefab: {fileID: 4085249434206812143, guid: 2e5dc36225e989c4c90719b5e9141ea7, type: 3}
+  socket: 0
+  fireInterval: 0.12
+  damage: 1.33
+  critChance: 0.03
+  critMultiplier: 2
+  maxLevel: 5
+  perLevelBonus:
+    damageAdd: 0
+    damageMul: 1
+    fireIntervalMul: 1
+    critChanceAdd: 0
+    critMultiplierAdd: 0
+    projectileSpeedAdd: 0
+    projectileCountAdd: 0
+    pierceAdd: 0
+    rangeAdd: 0
+    subUnitAdd: 0
+  requiresTarget: 1
+  projectilePrefab: {fileID: 5875018044698817663, guid: 47d42afc0830c50448915274e6d3e535, type: 3}
+  projectileSpeed: 25
+  projectileLifeTime: 2
+  projectileCount: 1
+  spreadAngle: 5
+  pierceCount: 0
+  muzzleFlashPrefab: {fileID: 2916273817513264348, guid: 95044fb3908b36c46bc62060360f7ba6, type: 3}
+  casingPrefab: {fileID: 8464276986609709168, guid: 4aa9530848b0025449ef44e32d3f9a41, type: 3}

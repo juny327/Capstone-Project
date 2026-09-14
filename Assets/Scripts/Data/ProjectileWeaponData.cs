@@ -12,6 +12,10 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Weapon/Projectile Weapon Data", order = 0)]
 public class ProjectileWeaponData : WeaponData
 {
+    [Header("Aim")]
+    [Tooltip("AimDirection: 캐릭터가 바라보는 방향(마우스 방향)으로 쏜다. NearestTarget: 가장 가까운 적을 자동 조준한다")]
+    public WeaponAimMode aimMode = WeaponAimMode.AimDirection;
+
     [Header("Projectile")]
     public GameObject projectilePrefab;
     public float projectileSpeed = 20f;

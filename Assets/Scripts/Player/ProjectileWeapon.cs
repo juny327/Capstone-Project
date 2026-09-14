@@ -28,8 +28,11 @@ public class ProjectileWeapon : WeaponBase
         SpawnEffect(cfg.muzzleFlashPrefab, Muzzle);
         SpawnEffect(cfg.casingPrefab, casingPoint);
 
-        // 사거리 제한은 없으므로 감지 범위 내 최근접 적을 향한다
-        Vector3 baseDir = ResolveFireDirection(in context, float.PositiveInfinity, out _);
+        // 기본은 캐릭터가 바라보는 방향(= 마우스 방향)으로 쏜다. 기존 소총(Gun)이 muzzle.forward 로 쏘던 것과 같다.
+        // NearestTarget 이면 감지 범위 안 최근접 적을 자동 조준한다 (사거리 제한 없음)
+        Vector3 baseDir = cfg.aimMode == WeaponAimMode.NearestTarget
+            ? ResolveFireDirection(in context, float.PositiveInfinity, out _)
+            : context.AimDirection;
 
         for (int i = 0; i < stats.ProjectileCount; i++)
         {
