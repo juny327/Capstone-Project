@@ -69,7 +69,12 @@ public class EnemyManager : MonoBehaviour
 
             if (enemies.Count < maxEnemyCount)
             {
-                SpawnEnemy();
+                int requestedSpawnCount = Random.Range(0, 100) < 75 ? 1 : 2; // 1: 75%, 2: 25%
+                int spawnCount = Mathf.Min(requestedSpawnCount, maxEnemyCount - enemies.Count);
+                for (int i = 0; i < spawnCount && enemies.Count < maxEnemyCount; i++)
+                {
+                    SpawnEnemy();
+                }
             }
         }
     }

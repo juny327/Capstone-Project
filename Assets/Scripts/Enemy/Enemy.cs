@@ -54,25 +54,26 @@ public class Enemy : MonoBehaviour, IDamageable, IPoolable
         brain.Initialize(this);
         movement.Initialize(this);
         attack.Initialize(this);
+
+        // Spawn position and component references are now ready.
+        var agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
+        if (agent != null)
+        {
+            agent.enabled = true;
+            agent.Warp(transform.position);
+        }
+        state = EnemyState.Idle;
+        brain.OnStateEnter(state);
     }
 
     public void OnSpawn()
     {
         currentHp = data.maxHp;
-
-        // 오류 해결을 위한 코드 인스펙터에서 agent끄고 여기서 키라는데
-        var agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
-        if (agent != null)
-        {
-            agent.enabled = true;
-            agent.Warp(transform.position); // 🔥 중요
-        }
-
-        ChangeState(EnemyState.Idle);
     }
 
     public void OnDespawn()
     {
+        attack?.CancelAttack();
         OnDeath = null;
         OnCriticalHit = null;
 
@@ -91,6 +92,9 @@ public class Enemy : MonoBehaviour, IDamageable, IPoolable
     public void ChangeState(EnemyState newState)
     {
         if (state == newState) return;
+
+        if (newState != EnemyState.Attack)
+            attack?.CancelAttack();
 
         state = newState;
         brain.OnStateEnter(newState);
@@ -113,6 +117,7 @@ public class Enemy : MonoBehaviour, IDamageable, IPoolable
         if (currentHp <= 0)
         {
             Die();
+            return;
         }
         if (info.isCritical)
         {

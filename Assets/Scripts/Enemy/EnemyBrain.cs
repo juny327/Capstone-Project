@@ -85,6 +85,8 @@ public class EnemyBrain : MonoBehaviour
 
     void UpdateAttack()
     {
+        // Commit to the warning/dash/recovery even if the target moves away.
+        if (enemy.attack.IsBusy) return;
         if (enemy.target == null) return;
 
         float dist = Vector3.Distance(

@@ -8,6 +8,9 @@ public abstract class EnemyAttack : MonoBehaviour
 
     public float attackCooldown = 1f;
 
+    public virtual bool IsBusy => false;
+    public virtual void CancelAttack() { }
+
     public virtual void Initialize(Enemy enemy)
     {
         this.enemy = enemy;
@@ -15,6 +18,7 @@ public abstract class EnemyAttack : MonoBehaviour
 
     public void TryAttack()
     {
+        if (IsBusy) return;
         if (Time.time < lastAttackTime + attackCooldown)
             return;
 

@@ -1,0 +1,1 @@
+PASS: MonsterB -> DashAttack / telegraph material -> shader references verified.
