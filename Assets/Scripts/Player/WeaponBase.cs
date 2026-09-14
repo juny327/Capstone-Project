@@ -115,6 +115,12 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
 
     // ───────── 파생 클래스가 구현/확장하는 부분 ─────────
 
+    /// <summary>
+    /// 지금 쏠(휘두를) 대상이 이 무기의 사거리 안에 있는지. 기본은 항상 true 다.
+    /// 근접 무기처럼 사거리가 감지 범위보다 짧은 무기가 재정의해, 허공에 휘두르며 쿨다운을 쓰지 않게 한다.
+    /// </summary>
+    public virtual bool HasTargetInReach(in WeaponFireContext context) => true;
+
     /// <summary>실제 발사 동작.</summary>
     protected abstract void OnFire(in WeaponRuntimeStats stats, in WeaponFireContext context);
 

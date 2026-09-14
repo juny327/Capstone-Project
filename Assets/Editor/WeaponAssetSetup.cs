@@ -3,6 +3,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using UnityEditor;
+using UnityEditor.Animations;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -24,6 +25,10 @@ using UnityEngine.SceneManagement;
 ///  6-1) 소켓 자동 정렬. 새 총구가 기존 Muzzle 자리에 오도록 계산한다.
 ///       Play 를 멈추면 그 시점의 소켓 값(손으로 고친 것 포함)이 Player.prefab 에 저장된다
 ///  7)   테스트: 모든 무기 지급 / 드론 레벨업 / 전체 연사 +15%
+///
+/// 편집 모드에서 실행 (추가 에셋)
+///  8) Futura Weapons 검 A(주황)로 W_Sword 모델 교체 — 색상표 텍스처·재질 연결 포함
+///  9) Human Melee Animations FREE 의 한 손 공격·전투 대기를 PlayerAnimator 에 연결 + 검 쥐는 방향 재조정
 ///
 /// 여러 번 실행해도 안전하다. 이미 있는 프리팹·에셋·소켓은 건너뛴다(손으로 조정한 값을 지키기 위해).
 /// 다시 만들려면 해당 파일을 지우고 실행한다.
@@ -78,6 +83,25 @@ public static class WeaponAssetSetup
 
     const float SwordLength = 1.2f;
     const float DroneModelScale = 0.8f;
+
+    // Futura Weapons 검 A. 모든 Futura 모델은 64x64 색상표 텍스처 하나를 UV 로 나눠 쓴다
+    const string FuturaRoot = "Assets/FuturaWeapons";
+    const string FuturaSwordPath = FuturaRoot + "/Models/Sword_A_Orange.fbx";
+    const string FuturaTexturePath = FuturaRoot + "/Textures/FuturaPalette.png";
+    const string FuturaMaterialPath = FuturaRoot + "/Materials/FuturaPalette.mat";
+    const string SwordPrefabPath = WeaponPrefabDir + "/W_Sword.prefab";
+    const string FuturaHandlePart = "pCube5";   // 검 A 의 손잡이 부품
+    const string FuturaBladePart = "pCube3";    // 검 A 의 칼날 부품
+
+    // Human Melee Animations FREE (Kevin Iglesias) — 남성 한 손 무기 클립
+    const string MeleeAnimDir = "Assets/Kevin Iglesias/Human Animations/Animations/Male/Combat/1H";
+    const string SlashClipFbx = MeleeAnimDir + "/HumanM@Attack1H01_R.fbx";
+    const string MeleeIdleClipFbx = MeleeAnimDir + "/HumanM@CombatIdle1H01.fbx";
+    const string PlayerControllerPath = "Assets/Animations/Player/PlayerAnimator.controller";
+    const string UpperMaskPath = "Assets/Animations/Player/Mask/Upper.mask";
+    const string MeleeLayerName = "MeleeLayer";     // WeaponController 가 이 이름으로 찾는다
+    const string SlashParam = "Slash";              // MeleeWeapon 이 이 이름으로 호출한다
+    const float BladeTiltDeg = 20f;                 // 주먹에서 칼날이 손가락 쪽으로 기우는 각도
 
     static readonly string[] DataFiles = { "WD_Rifle", "WD_SMG", "WD_Sniper", "WD_Sword", "WD_Drone" };
 
@@ -143,6 +167,15 @@ public static class WeaponAssetSetup
     [MenuItem(Menu + "7. 테스트 - 전체 연사 +15% (Play 중)", false, 53)]
     static void MenuStep7Rate() => BoostFireRate();
 
+    [MenuItem(Menu + "7. 테스트 - 무기 상태 점검 (Play 중)", false, 54)]
+    static void MenuStep7Inspect() => InspectWeapons();
+
+    [MenuItem(Menu + "8. Futura 검 A로 W_Sword 교체", false, 71)]
+    static void MenuStep8Sword() => ReplaceSwordWithFutura();
+
+    [MenuItem(Menu + "9. 검 휘두르기 애니메이션 연결", false, 72)]
+    static void MenuStep9Melee() => SetupMeleeAnimation();
+
     // 에셋·프리팹을 고치는 메뉴는 편집 모드에서만, 테스트 메뉴는 Play 중에만 켠다
     [MenuItem(Menu + "전체 실행 (1~5단계)", true)]
     [MenuItem(Menu + "1. 임포트 설정 · 공용 재질", true)]
@@ -151,12 +184,15 @@ public static class WeaponAssetSetup
     [MenuItem(Menu + "4. WeaponData 에셋 생성", true)]
     [MenuItem(Menu + "5. Player 프리팹 연결", true)]
     [MenuItem(Menu + "6-2. 기존 AssaultRifle 끄기", true)]
+    [MenuItem(Menu + "8. Futura 검 A로 W_Sword 교체", true)]
+    [MenuItem(Menu + "9. 검 휘두르기 애니메이션 연결", true)]
     static bool EditModeOnly() => !EditorApplication.isPlayingOrWillChangePlaymode;
 
     [MenuItem(Menu + "6-1. 소켓 자동 정렬 (Play 중)", true)]
     [MenuItem(Menu + "7. 테스트 - 모든 무기 지급 (Play 중)", true)]
     [MenuItem(Menu + "7. 테스트 - 드론 레벨업 (Play 중)", true)]
     [MenuItem(Menu + "7. 테스트 - 전체 연사 +15% (Play 중)", true)]
+    [MenuItem(Menu + "7. 테스트 - 무기 상태 점검 (Play 중)", true)]
     static bool PlayModeOnly() => EditorApplication.isPlaying;
 
     // ── 0) 사전 점검 ────────────────────────────────────────────
@@ -192,16 +228,8 @@ public static class WeaponAssetSetup
     // 공용 재질 한 벌로 연결하면 색을 한 곳에서 관리할 수 있다.
     static bool SetupImportAndMaterials()
     {
-        // 배치 모드에서는 이름 검색이 실패할 수 있어 패키지 경로로 한 번 더 찾는다
-        Shader lit = Shader.Find("Universal Render Pipeline/Lit");
-        if (lit == null)
-            lit = AssetDatabase.LoadAssetAtPath<Shader>("Packages/com.unity.render-pipelines.universal/Shaders/Lit.shader");
-
-        if (lit == null)
-        {
-            Debug.LogError($"{Tag} URP Lit 셰이더를 찾지 못했습니다.");
-            return false;
-        }
+        Shader lit = FindLitShader();
+        if (lit == null) return false;
 
         EnsureFolder(MaterialsDir);
 
@@ -936,6 +964,82 @@ public static class WeaponAssetSetup
             "Play 를 멈춘 뒤 WD_* 에셋의 Fire Interval 이 원래 값 그대로인지 확인하세요 (SO 원본 보호 검증).");
     }
 
+    // 보유 무기마다 활성 상태·렌더러·화면 위치를 출력하고, 근접 무기가 있으면 그것으로 바꾼 뒤 한 번 더 출력한다
+    static void InspectWeapons()
+    {
+        WeaponController controller = FindLiveController(false);
+        if (controller == null) return;
+
+        Transform socket = FindLiveSocket(out _, true);
+        Transform hand = socket != null ? socket.parent : null;
+        Camera cam = Camera.main != null ? Camera.main : Object.FindFirstObjectByType<Camera>();
+
+        var sb = new System.Text.StringBuilder();
+        sb.AppendLine(
+            $"{Tag} 무기 상태 점검 — 활성 인덱스 {controller.ActiveIndex}, 손에 드는 무기 {controller.HeldWeapons.Count}개, " +
+            $"카메라 {(cam != null ? cam.name : "없음")}");
+
+        int meleeIndex = -1;
+        for (int i = 0; i < controller.HeldWeapons.Count; i++)
+        {
+            var weapon = controller.HeldWeapons[i] as WeaponBase;
+            if (weapon == null) continue;
+
+            if (weapon.Data != null && weapon.Data.Kind == WeaponKind.Melee)
+                meleeIndex = i;
+
+            sb.AppendLine(DescribeWeapon(i, weapon, hand, cam));
+        }
+
+        Debug.Log(sb.ToString());
+
+        if (meleeIndex >= 0 && meleeIndex != controller.ActiveIndex)
+        {
+            controller.SwapTo(meleeIndex);
+            var melee = controller.HeldWeapons[meleeIndex] as WeaponBase;
+            Debug.Log($"{Tag} 근접 무기로 교체한 뒤:\n{DescribeWeapon(meleeIndex, melee, hand, cam)}");
+        }
+    }
+
+    static string DescribeWeapon(int index, WeaponBase weapon, Transform hand, Camera cam)
+    {
+        Transform model = weapon.transform.Find("Model");
+        Renderer[] all = weapon.GetComponentsInChildren<Renderer>(true);
+        Renderer[] shown = all.Where(r => r.enabled && r.gameObject.activeInHierarchy).ToArray();
+        string kind = weapon.Data != null ? weapon.Data.Kind.ToString() : "?";
+
+        string text =
+            $"  [{index}] {weapon.name} ({kind}) IsActive={weapon.IsActive}, 오브젝트 활성={weapon.gameObject.activeInHierarchy}, " +
+            $"Model 활성={(model != null ? model.gameObject.activeSelf.ToString() : "없음")}, 켜진 렌더러 {shown.Length}/{all.Length}, " +
+            $"실제 배율 {weapon.transform.lossyScale.x:F3}";
+
+        if (shown.Length > 0)
+        {
+            Bounds b = shown[0].bounds;
+            foreach (Renderer r in shown)
+                b.Encapsulate(r.bounds);
+
+            text += $"\n       월드 범위 중심 {Fmt(b.center)} 크기 {Fmt(b.size)}";
+            if (hand != null)
+                text += $", 손에서 {Vector3.Distance(hand.position, b.center):F2}m";
+
+            if (cam != null)
+            {
+                bool inView = GeometryUtility.TestPlanesAABB(GeometryUtility.CalculateFrustumPlanes(cam), b);
+                Vector3 vp = cam.WorldToViewportPoint(b.center);
+                text += $", 카메라 시야 안={inView}, 화면 좌표 ({vp.x:F2}, {vp.y:F2}) 거리 {vp.z:F1}m";
+            }
+        }
+
+        string materials = string.Join(", ", all
+            .SelectMany(r => r.sharedMaterials)
+            .Where(m => m != null)
+            .Select(m => $"{m.name}[{(m.shader != null ? m.shader.name : "셰이더 없음")}]")
+            .Distinct());
+        text += $"\n       재질: {materials}";
+        return text;
+    }
+
     static WeaponController FindLiveController(bool quiet)
     {
         var controller = Object.FindFirstObjectByType<WeaponController>();
@@ -958,7 +1062,521 @@ public static class WeaponAssetSetup
         return socket;
     }
 
+    // ── 8) Futura 검 A 로 W_Sword 교체 ──────────────────────────
+    // W_Sword 프리팹을 지우고 다시 만들면 WD_Sword 의 참조가 끊기므로, 프리팹을 열어 Model 아래만 바꾼다.
+    // 칼날 방향과 손잡이 위치는 부품(손잡이 pCube5, 칼날 pCube3)의 실제 위치로 계산한다.
+    public static void ReplaceSwordWithFutura()
+    {
+        var swordAsset = AssetDatabase.LoadAssetAtPath<GameObject>(FuturaSwordPath);
+        if (swordAsset == null)
+        {
+            Debug.LogError($"{Tag} {FuturaSwordPath} 가 없습니다.");
+            return;
+        }
+
+        if (AssetDatabase.LoadMainAssetAtPath(SwordPrefabPath) == null)
+        {
+            Debug.LogError($"{Tag} {SwordPrefabPath} 가 없습니다. 3단계를 먼저 실행하세요.");
+            return;
+        }
+
+        Material palette = SetupFuturaPalette();
+        if (palette == null) return;
+
+        SetupFuturaModelImport(FuturaSwordPath, palette);
+
+        GameObject root = PrefabUtility.LoadPrefabContents(SwordPrefabPath);
+
+        try
+        {
+            Transform model = root.transform.Find("Model");
+            if (model == null)
+                model = CreateChild("Model", root.transform);
+
+            // 이전 모델(Knife_01) 제거
+            for (int i = model.childCount - 1; i >= 0; i--)
+                Object.DestroyImmediate(model.GetChild(i).gameObject);
+
+            model.localPosition = Vector3.zero;
+            model.localRotation = Quaternion.identity;
+            model.localScale = Vector3.one;
+
+            GameObject inst = InstantiateUnder(swordAsset, model, root.scene);
+            WarnIfColliders(inst, "Futura 검");
+
+            Transform handle = FindDeep(inst.transform, FuturaHandlePart);
+            Transform blade = FindDeep(inst.transform, FuturaBladePart);
+            if (handle == null || blade == null)
+            {
+                Debug.LogError($"{Tag} Futura 검에서 손잡이({FuturaHandlePart})·칼날({FuturaBladePart}) 부품을 찾지 못했습니다.");
+                return;
+            }
+
+            // 1) 칼날이 +Z(정면)를 향하게. 칼날의 넓은 면은 위를 향한 채로 둔다 (위에서 보는 카메라에 잘 보인다)
+            Vector3 handleCenter = BoundsOf(CollectVertices(handle.gameObject, model)).center;
+            Vector3 bladeCenter = BoundsOf(CollectVertices(blade.gameObject, model)).center;
+            Vector3 dir = bladeCenter - handleCenter;
+            dir.y = 0f;
+            model.localRotation = Quaternion.FromToRotation(dir.normalized, Vector3.forward);
+
+            // 2) 전체 길이를 SwordLength 로
+            Bounds all = BoundsOf(CollectVertices(inst, root.transform));
+            model.localScale = Vector3.one * (SwordLength / Mathf.Max(all.size.z, 0.001f));
+
+            // 3) 손잡이 중심을 원점(= 손 소켓)에
+            Vector3 grip = BoundsOf(CollectVertices(handle.gameObject, root.transform)).center;
+            model.localPosition = -grip;
+
+            Bounds result = BoundsOf(CollectVertices(inst, root.transform));
+            PrefabUtility.SaveAsPrefabAsset(root, SwordPrefabPath);
+
+            Debug.Log(
+                $"{Tag} W_Sword 를 Futura 검 A 로 교체: 회전 {Fmt(model.localEulerAngles)}, 배율 ×{model.localScale.x:F2}, " +
+                $"이동 {Fmt(model.localPosition)} → 칼끝 +Z {result.max.z:F2}m, 손잡이 끝 {result.min.z:F2}m, 전체 {result.size.z:F2}m");
+        }
+        finally
+        {
+            PrefabUtility.UnloadPrefabContents(root);
+        }
+    }
+
+    // 색상표 텍스처는 필터·압축·밉맵을 끄지 않으면 옆 칸 색이 번진다
+    static Material SetupFuturaPalette()
+    {
+        if (!(AssetImporter.GetAtPath(FuturaTexturePath) is TextureImporter importer))
+        {
+            Debug.LogError($"{Tag} {FuturaTexturePath} 가 없습니다.");
+            return null;
+        }
+
+        if (importer.filterMode != FilterMode.Point
+            || importer.textureCompression != TextureImporterCompression.Uncompressed
+            || importer.mipmapEnabled)
+        {
+            importer.filterMode = FilterMode.Point;
+            importer.textureCompression = TextureImporterCompression.Uncompressed;
+            importer.mipmapEnabled = false;
+            importer.SaveAndReimport();
+        }
+
+        var texture = AssetDatabase.LoadAssetAtPath<Texture2D>(FuturaTexturePath);
+        var mat = AssetDatabase.LoadAssetAtPath<Material>(FuturaMaterialPath);
+
+        if (mat == null)
+        {
+            Shader lit = FindLitShader();
+            if (lit == null) return null;
+
+            EnsureFolder(Path.GetDirectoryName(FuturaMaterialPath).Replace('\\', '/'));
+
+            mat = new Material(lit);
+            mat.SetTexture("_BaseMap", texture);
+            mat.SetColor("_BaseColor", Color.white);
+            mat.SetFloat("_Smoothness", 0.2f);
+            AssetDatabase.CreateAsset(mat, FuturaMaterialPath);
+            AssetDatabase.SaveAssets();
+            Debug.Log($"{Tag} 색상표 재질 생성: {FuturaMaterialPath}");
+        }
+
+        return mat;
+    }
+
+    // Futura FBX 는 재질 이름이 파일마다 다르다(Solid, Transparent, phong2 ...).
+    // 텍스처 경로도 제작자 PC 를 가리키므로, 이름과 상관없이 전부 색상표 재질 하나로 연결한다
+    static void SetupFuturaModelImport(string path, Material palette)
+    {
+        if (!(AssetImporter.GetAtPath(path) is ModelImporter importer)) return;
+
+        importer.animationType = ModelImporterAnimationType.None;
+        importer.importAnimation = false;
+        importer.importCameras = false;
+        importer.importLights = false;
+        importer.materialImportMode = ModelImporterMaterialImportMode.ImportViaMaterialDescription;
+        importer.materialLocation = ModelImporterMaterialLocation.InPrefab;
+
+        foreach (string matName in MaterialNamesIn(path, importer))
+            importer.AddRemap(new AssetImporter.SourceAssetIdentifier(typeof(Material), matName), palette);
+
+        importer.SaveAndReimport();
+    }
+
+    // ── 9) 검 휘두르기 애니메이션 연결 ──────────────────────────
+    // Human Melee Animations FREE 의 한 손 공격·전투 대기 클립을 PlayerAnimator 의 새 상체 레이어(MeleeLayer)에 연결한다.
+    //  · 파라미터 Slash(Trigger): MeleeWeapon 이 휘두를 때마다 이 이름으로 호출한다 (없으면 조용히 건너뛴다)
+    //  · MeleeLayer: Upper 마스크, Override, 기본 가중치 0. WeaponController 가 근접 무기를 들 때만 1 로 켠다
+    //  · 상태 MeleeIdle(기본, 전투 대기) → Slash(공격) → MeleeIdle
+    //  · Slash 속도는 검 공격 간격 안에 끝나게, Hit Delay 는 오른손이 가장 빠른 순간에 맞춘다
+    //  · W_Sword 는 총처럼 칼날이 앞으로 뻗어 있으므로, 주먹에 세워 쥐는 방향으로 다시 맞춘다
+    public static void SetupMeleeAnimation()
+    {
+        AnimationClip slash = PrepareMeleeClip(SlashClipFbx, false);
+        AnimationClip idle = PrepareMeleeClip(MeleeIdleClipFbx, true);
+        if (slash == null || idle == null) return;
+
+        var controller = AssetDatabase.LoadAssetAtPath<AnimatorController>(PlayerControllerPath);
+        var mask = AssetDatabase.LoadAssetAtPath<AvatarMask>(UpperMaskPath);
+        var sword = AssetDatabase.LoadAssetAtPath<MeleeWeaponData>($"{WeaponDataDir}/WD_Sword.asset");
+        if (controller == null || mask == null || sword == null)
+        {
+            Debug.LogError($"{Tag} PlayerAnimator·Upper 마스크·WD_Sword 중 하나를 찾지 못했습니다.");
+            return;
+        }
+
+        // 1) 파라미터
+        if (!controller.parameters.Any(p => p.name == SlashParam))
+            controller.AddParameter(SlashParam, AnimatorControllerParameterType.Trigger);
+
+        // 2) 레이어. 레이어 배열은 복사본이라 고친 뒤 다시 넣어야 반영된다
+        int layerIndex = System.Array.FindIndex(controller.layers, l => l.name == MeleeLayerName);
+        if (layerIndex < 0)
+        {
+            controller.AddLayer(MeleeLayerName);
+            layerIndex = controller.layers.Length - 1;
+        }
+
+        AnimatorControllerLayer[] layers = controller.layers;
+        layers[layerIndex].avatarMask = mask;
+        layers[layerIndex].blendingMode = AnimatorLayerBlendingMode.Override;
+        layers[layerIndex].defaultWeight = 0f;
+        controller.layers = layers;
+
+        AnimatorStateMachine sm = controller.layers[layerIndex].stateMachine;
+
+        // 기존 상태들의 Write Defaults 를 따른다 (섞이면 자세가 튄다)
+        bool writeDefaults = true;
+        foreach (ChildAnimatorState child in controller.layers[0].stateMachine.states)
+        {
+            if (child.state == null) continue;
+            writeDefaults = child.state.writeDefaultValues;
+            break;
+        }
+
+        // 3) 상태
+        AnimatorState idleState = FindOrAddState(sm, "MeleeIdle", idle, new Vector3(300f, 0f, 0f), writeDefaults);
+        AnimatorState slashState = FindOrAddState(sm, "Slash", slash, new Vector3(300f, 120f, 0f), writeDefaults);
+        sm.defaultState = idleState;
+
+        // 4) 속도와 타격 시점 — 다음 공격 전에 끝나도록 공격 간격의 90% 안에 맞춘다
+        float speed = Mathf.Max(1f, slash.length / (sword.fireInterval * 0.9f));
+        slashState.speed = speed;
+
+        float impact = FindImpactTime(slash, out bool fromCurve);
+        float hitDelay = impact / speed;
+        sword.hitDelay = hitDelay;
+        EditorUtility.SetDirty(sword);
+
+        // 5) 전이: Any State → Slash (트리거), Slash → MeleeIdle (끝나면)
+        AnimatorStateTransition toSlash = null;
+        foreach (AnimatorStateTransition t in sm.anyStateTransitions)
+        {
+            if (t.destinationState != slashState) continue;
+            toSlash = t;
+            break;
+        }
+
+        if (toSlash == null)
+            toSlash = sm.AddAnyStateTransition(slashState);
+
+        for (int i = toSlash.conditions.Length - 1; i >= 0; i--)
+            toSlash.RemoveCondition(toSlash.conditions[i]);
+
+        toSlash.AddCondition(AnimatorConditionMode.If, 0f, SlashParam);
+        toSlash.hasExitTime = false;
+        toSlash.hasFixedDuration = true;
+        toSlash.duration = 0.08f;
+        toSlash.offset = 0f;
+        toSlash.canTransitionToSelf = false;
+
+        AnimatorStateTransition back = null;
+        foreach (AnimatorStateTransition t in slashState.transitions)
+        {
+            if (t.destinationState != idleState) continue;
+            back = t;
+            break;
+        }
+
+        if (back == null)
+            back = slashState.AddTransition(idleState);
+
+        for (int i = back.conditions.Length - 1; i >= 0; i--)
+            back.RemoveCondition(back.conditions[i]);
+
+        back.hasExitTime = true;
+        back.exitTime = 0.95f;
+        back.hasFixedDuration = true;
+        back.duration = 0.1f;
+
+        EditorUtility.SetDirty(toSlash);
+        EditorUtility.SetDirty(back);
+        EditorUtility.SetDirty(sm);
+        EditorUtility.SetDirty(controller);
+        AssetDatabase.SaveAssets();
+
+        Debug.Log(
+            $"{Tag} 검 휘두르기 연결: {MeleeLayerName}(레이어 {layerIndex}), 공격 '{slash.name}' {slash.length:F2}초 → 속도 ×{speed:F2}, " +
+            $"타격 시점 {impact:F2}초({(fromCurve ? "오른손이 가장 빠른 순간" : "곡선이 없어 길이의 40%로 추정")}) → WD_Sword Hit Delay {hitDelay:F2}초, " +
+            $"대기 '{idle.name}' {idle.length:F2}초, Write Defaults {(writeDefaults ? "On" : "Off")}");
+
+        // 6) 검 쥐는 방향
+        AlignSwordGrip();
+    }
+
+    // 캐릭터에 옮겨 쓰려면 Humanoid 여야 한다. 루트 설정은 구르기와 같은 기준으로 맞춘다
+    // (회전·높이는 포즈에 굽고, 수평 이동은 루트 모션으로 빼서 버린다 — 이 프로젝트는 Apply Root Motion 이 꺼져 있다)
+    static AnimationClip PrepareMeleeClip(string path, bool loop)
+    {
+        if (!(AssetImporter.GetAtPath(path) is ModelImporter importer))
+        {
+            Debug.LogError($"{Tag} {path} 를 찾지 못했습니다. Human Melee Animations FREE 를 먼저 가져오세요.");
+            return null;
+        }
+
+        if (importer.animationType != ModelImporterAnimationType.Human)
+            Debug.LogWarning($"{Tag} {Path.GetFileName(path)} 가 Humanoid 가 아닙니다({importer.animationType}). 캐릭터에 옮겨 쓸 수 없습니다.");
+
+        ModelImporterClipAnimation[] clips = importer.clipAnimations;
+        if (clips == null || clips.Length == 0)
+            clips = importer.defaultClipAnimations;
+
+        bool changed = false;
+        foreach (ModelImporterClipAnimation c in clips)
+        {
+            if (c.loopTime == loop && c.lockRootRotation && c.lockRootHeightY && !c.lockRootPositionXZ
+                && c.keepOriginalOrientation && c.keepOriginalPositionY && c.keepOriginalPositionXZ)
+                continue;
+
+            c.loopTime = loop;
+            c.lockRootRotation = true;       // Rotation      → Bake Into Pose
+            c.lockRootHeightY = true;        // Position (Y)  → Bake Into Pose
+            c.lockRootPositionXZ = false;    // Position (XZ) → 루트 모션으로 빼서 버린다
+            c.keepOriginalOrientation = true;
+            c.keepOriginalPositionY = true;
+            c.keepOriginalPositionXZ = true;
+            changed = true;
+        }
+
+        if (changed)
+        {
+            importer.clipAnimations = clips;
+            importer.SaveAndReimport();
+        }
+
+        foreach (Object o in AssetDatabase.LoadAllAssetsAtPath(path))
+        {
+            if (o is AnimationClip clip && !clip.name.StartsWith("__preview__"))
+                return clip;
+        }
+
+        Debug.LogError($"{Tag} {path} 안에서 AnimationClip 을 찾지 못했습니다.");
+        return null;
+    }
+
+    // 공격 클립의 오른손 움직임을 시간대별로 출력한다 (타격 시점 검증용, 배치 모드에서 -executeMethod 로 실행)
+    public static void LogSlashProfile()
+    {
+        AnimationClip clip = null;
+        foreach (Object o in AssetDatabase.LoadAllAssetsAtPath(SlashClipFbx))
+        {
+            if (o is AnimationClip c && !c.name.StartsWith("__preview__")) { clip = c; break; }
+        }
+
+        if (clip == null)
+        {
+            Debug.LogError($"{Tag} {SlashClipFbx} 에서 클립을 찾지 못했습니다.");
+            return;
+        }
+
+        var curves = new Dictionary<string, AnimationCurve>();
+        foreach (EditorCurveBinding b in AnimationUtility.GetCurveBindings(clip))
+        {
+            if (b.propertyName.StartsWith("RightHandT.") || b.propertyName.StartsWith("RightHandQ."))
+                curves[b.propertyName] = AnimationUtility.GetEditorCurve(clip, b);
+        }
+
+        if (curves.Count < 7)
+        {
+            Debug.LogError($"{Tag} RightHandT/Q 곡선이 부족합니다 ({curves.Count}개).");
+            return;
+        }
+
+        Vector3 Pos(float t) => new Vector3(curves["RightHandT.x"].Evaluate(t), curves["RightHandT.y"].Evaluate(t), curves["RightHandT.z"].Evaluate(t));
+        Quaternion Rot(float t) => new Quaternion(curves["RightHandQ.x"].Evaluate(t), curves["RightHandQ.y"].Evaluate(t),
+                                                  curves["RightHandQ.z"].Evaluate(t), curves["RightHandQ.w"].Evaluate(t)).normalized;
+
+        var sb = new System.Text.StringBuilder();
+        sb.AppendLine($"{Tag} SLASH PROFILE '{clip.name}' {clip.length:F3}s  (t | pos x y z | vel x y z | speed | wrist deg/s)");
+
+        const float dt = 0.025f;
+        for (float t = dt; t <= clip.length + 0.0001f; t += dt)
+        {
+            Vector3 p0 = Pos(t - dt), p1 = Pos(t);
+            Vector3 v = (p1 - p0) / dt;
+            float wrist = Quaternion.Angle(Rot(t - dt), Rot(t)) / dt;
+            sb.AppendLine($"  {t:F3} | {p1.x:F3} {p1.y:F3} {p1.z:F3} | {v.x:F2} {v.y:F2} {v.z:F2} | {v.magnitude:F2} | {wrist:F0}");
+        }
+
+        Debug.Log(sb.ToString());
+    }
+
+    static AnimatorState FindOrAddState(AnimatorStateMachine sm, string name, Motion motion, Vector3 position, bool writeDefaults)
+    {
+        AnimatorState state = null;
+        foreach (ChildAnimatorState child in sm.states)
+        {
+            if (child.state == null || child.state.name != name) continue;
+            state = child.state;
+            break;
+        }
+
+        if (state == null)
+            state = sm.AddState(name, position);
+
+        state.motion = motion;
+        state.writeDefaultValues = writeDefaults;
+        EditorUtility.SetDirty(state);
+        return state;
+    }
+
+    // 휴머노이드 클립에는 오른손 목표 위치 곡선(RightHandT.x/y/z)이 들어 있다.
+    // 준비·마무리 동작(처음과 끝 10%)을 빼고, 오른손이 가장 빠르게 움직이는 순간을 타격 시점으로 본다
+    static float FindImpactTime(AnimationClip clip, out bool fromCurve)
+    {
+        AnimationCurve cx = null, cy = null, cz = null;
+        foreach (EditorCurveBinding b in AnimationUtility.GetCurveBindings(clip))
+        {
+            if (b.propertyName == "RightHandT.x") cx = AnimationUtility.GetEditorCurve(clip, b);
+            else if (b.propertyName == "RightHandT.y") cy = AnimationUtility.GetEditorCurve(clip, b);
+            else if (b.propertyName == "RightHandT.z") cz = AnimationUtility.GetEditorCurve(clip, b);
+        }
+
+        fromCurve = cx != null && cy != null && cz != null;
+        if (!fromCurve) return clip.length * 0.4f;
+
+        int steps = Mathf.Max(30, Mathf.CeilToInt(clip.length * 120f));
+        float dt = clip.length / steps;
+        Vector3 prev = new Vector3(cx.Evaluate(0f), cy.Evaluate(0f), cz.Evaluate(0f));
+        float bestSpeed = -1f, bestTime = clip.length * 0.4f;
+
+        for (int i = 1; i <= steps; i++)
+        {
+            float t = i * dt;
+            var p = new Vector3(cx.Evaluate(t), cy.Evaluate(t), cz.Evaluate(t));
+            float v = (p - prev).magnitude / dt;
+            prev = p;
+
+            if (t < clip.length * 0.1f || t > clip.length * 0.9f) continue;
+            if (v <= bestSpeed) continue;
+
+            bestSpeed = v;
+            bestTime = t - dt * 0.5f;
+        }
+
+        return bestTime;
+    }
+
+    // 검을 주먹에 세워 쥐는 방향으로 W_Sword 의 Model 을 다시 맞춘다.
+    //  · 칼날: 새끼손가락 쪽 → 검지 쪽(주먹을 관통하는 방향)에서 손가락 쪽으로 BladeTiltDeg 만큼 기움
+    //  · 칼날의 넓은 면: 손바닥 방향 (칼날 끝이 손가락이 가리키는 쪽을 향한다)
+    //  · 손잡이 중심: 손목과 손가락 뿌리 사이, 손바닥 안쪽
+    // 손가락 뿌리 본은 손에 고정되어 있으므로 프리팹 기본 자세만으로 계산할 수 있다 (추정값 — 눈으로 확인할 것)
+    static bool AlignSwordGrip()
+    {
+        Vector3 bladeS, faceS, gripS;   // 소켓(= 무기 루트) 기준
+
+        GameObject player = PrefabUtility.LoadPrefabContents(PlayerPrefabPath);
+        try
+        {
+            Transform hand = FindDeep(player.transform, HandBoneName);
+            Transform socket = hand != null ? hand.Find(SocketName) : null;
+            Transform index = hand != null ? hand.Find("Index_Proximal_Right") : null;
+            Transform rest = hand != null ? hand.Find("RestOfFingers_Proximal_Right") : null;
+            Transform thumb = hand != null ? hand.Find("Thumb_Proximal_Right") : null;
+
+            if (socket == null || index == null || rest == null || thumb == null)
+            {
+                Debug.LogError($"{Tag} 손 소켓 또는 손가락 본(Index/RestOfFingers/Thumb_Proximal_Right)을 찾지 못해 검 쥐는 방향을 맞추지 못했습니다.");
+                return false;
+            }
+
+            Vector3 knuckles = (index.position + rest.position) * 0.5f;
+            float palmLength = Vector3.Distance(hand.position, knuckles);
+            Vector3 fingerDir = (knuckles - hand.position).normalized;
+            Vector3 across = Vector3.ProjectOnPlane(index.position - rest.position, fingerDir).normalized;   // 새끼 → 검지
+            Vector3 palm = Vector3.Cross(fingerDir, across).normalized;
+
+            // 엄지가 있는 쪽을 손바닥 쪽으로 본다
+            if (Vector3.Dot(thumb.position - knuckles, palm) < 0f)
+                palm = -palm;
+
+            float tilt = BladeTiltDeg * Mathf.Deg2Rad;
+            Vector3 blade = (across * Mathf.Cos(tilt) + fingerDir * Mathf.Sin(tilt)).normalized;
+            Vector3 grip = Vector3.Lerp(hand.position, knuckles, 0.65f) + palm * (palmLength * 0.35f);
+
+            bladeS = socket.InverseTransformDirection(blade);
+            faceS = socket.InverseTransformDirection(palm);
+            gripS = socket.InverseTransformPoint(grip);
+        }
+        finally
+        {
+            PrefabUtility.UnloadPrefabContents(player);
+        }
+
+        GameObject root = PrefabUtility.LoadPrefabContents(SwordPrefabPath);
+        try
+        {
+            Transform model = root.transform.Find("Model");
+            Transform handle = FindDeep(root.transform, FuturaHandlePart);
+            Transform bladePart = FindDeep(root.transform, FuturaBladePart);
+
+            if (model == null || handle == null || bladePart == null)
+            {
+                Debug.LogError($"{Tag} W_Sword 에서 Model·손잡이·칼날 부품을 찾지 못했습니다. 8번을 먼저 실행하세요.");
+                return false;
+            }
+
+            // 먼저 칼날 +Z·넓은 면 +Y 인 기준 자세를 다시 만든다 (여러 번 실행해도 결과가 같도록)
+            model.localPosition = Vector3.zero;
+            model.localRotation = Quaternion.identity;
+            Vector3 handleCenter = BoundsOf(CollectVertices(handle.gameObject, model)).center;
+            Vector3 bladeCenter = BoundsOf(CollectVertices(bladePart.gameObject, model)).center;
+            Vector3 dir = bladeCenter - handleCenter;
+            dir.y = 0f;
+            Quaternion canonical = Quaternion.FromToRotation(dir.normalized, Vector3.forward);
+
+            // 기준 자세의 +Z(칼날) → bladeS, +Y(넓은 면) → faceS
+            model.localRotation = Quaternion.LookRotation(bladeS, faceS) * canonical;
+
+            Vector3 gripNow = BoundsOf(CollectVertices(handle.gameObject, root.transform)).center;
+            model.localPosition = gripS - gripNow;
+
+            PrefabUtility.SaveAsPrefabAsset(root, SwordPrefabPath);
+
+            Debug.Log(
+                $"{Tag} 검 쥐는 방향 조정: 칼날 방향(소켓 기준) {Fmt(bladeS)}, 넓은 면 {Fmt(faceS)}, 손잡이 중심 {Fmt(gripS)} → " +
+                $"Model 회전 {Fmt(model.localEulerAngles)} / 위치 {Fmt(model.localPosition)} (배율 ×{model.localScale.x:F2} 유지). " +
+                "추정값이므로 Play 중 휘두르는 모습을 보고 필요하면 W_Sword 의 Model 회전을 손으로 고치세요.");
+            return true;
+        }
+        finally
+        {
+            PrefabUtility.UnloadPrefabContents(root);
+        }
+    }
+
     // ── 헬퍼 ────────────────────────────────────────────────────
+
+    // 배치 모드에서는 이름 검색이 실패할 수 있어 패키지 경로로 한 번 더 찾는다
+    static Shader FindLitShader()
+    {
+        Shader lit = Shader.Find("Universal Render Pipeline/Lit");
+        if (lit == null)
+            lit = AssetDatabase.LoadAssetAtPath<Shader>("Packages/com.unity.render-pipelines.universal/Shaders/Lit.shader");
+
+        if (lit == null)
+            Debug.LogError($"{Tag} URP Lit 셰이더를 찾지 못했습니다.");
+
+        return lit;
+    }
 
     static GameObject CreateRoot(string name, Scene scene)
     {

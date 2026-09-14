@@ -25,11 +25,48 @@ public class MeleeWeapon : WeaponBase
 
     private Coroutine swingRoutine;
 
+    // 사거리 확인용 재사용 버퍼. 적 루트 위치로 거리를 재므로 콜라이더 반지름만큼 여유를 둔다
+    private readonly List<Transform> nearby = new List<Transform>();
+    private const float ReachMargin = 0.5f;
+
     private Animator ownerAnim;
     private bool hasSlashParam;
     private bool animChecked;
 
     private static readonly int HashSlash = Animator.StringToHash("Slash");
+
+    /// <summary>
+    /// 감지 범위(10m)가 검 사거리(3m)보다 넓어서, 확인하지 않으면 허공에 휘두르며 쿨다운을 쓴다.
+    /// 사거리 + 여유 안, 그리고 정면 부채꼴 안에 적이 있을 때만 휘두른다.
+    /// </summary>
+    public override bool HasTargetInReach(in WeaponFireContext context)
+    {
+        if (context.Targets == null || context.OwnerRoot == null) return false;
+
+        WeaponRuntimeStats stats = Stats;
+        float reach = stats.Range + ReachMargin;
+        float halfArc = stats.ArcAngle * 0.5f;
+
+        Vector3 origin = context.OwnerRoot.position;
+        Vector3 forward = context.OwnerRoot.forward;
+        forward.y = 0f;
+
+        int count = context.Targets.GetTargets(origin, 8, nearby);
+
+        for (int i = 0; i < count; i++)
+        {
+            Vector3 dir = nearby[i].position - origin;
+            dir.y = 0f;
+
+            // 가까운 순으로 정렬되어 있으므로 여기서 멀면 나머지도 멀다
+            if (dir.sqrMagnitude > reach * reach) break;
+
+            if (dir.sqrMagnitude < 0.0001f || Vector3.Angle(forward, dir) <= halfArc)
+                return true;
+        }
+
+        return false;
+    }
 
     protected override void OnFire(in WeaponRuntimeStats stats, in WeaponFireContext context)
     {

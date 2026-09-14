@@ -76,6 +76,10 @@ public class WeaponController : MonoBehaviour
     private bool isDead;
     private Animator anim;
 
+    // 상체 레이어 인덱스 (없으면 -1). 총은 ShootLayer, 근접 무기는 MeleeLayer 를 켠다
+    private int shootLayer = -1;
+    private int meleeLayer = -1;
+
     // ───────── 공개 API (업그레이드 시스템이 호출) ─────────
 
     /// <summary>손에 드는 무기 목록 (스왑 대상).</summary>
@@ -217,7 +221,7 @@ public class WeaponController : MonoBehaviour
         activeHeldIndex = index;
 
         // 근접 무기를 들면 상체 사격 레이어를 꺼야 소총 자세가 덮어쓰지 않는다
-        ApplyShootLayerForActive();
+        ApplyUpperBodyLayers();
 
         RaiseLegacyStats();
         GameEvents.OnWeaponSwapped?.Invoke(ActiveWeapon);
@@ -228,6 +232,16 @@ public class WeaponController : MonoBehaviour
     void Awake()
     {
         anim = GetComponent<Animator>();
+
+        if (anim != null)
+        {
+            shootLayer = anim.GetLayerIndex("ShootLayer");
+            meleeLayer = anim.GetLayerIndex("MeleeLayer");
+
+            // 이름이 바뀌었어도 기존처럼 두 번째 레이어를 사격 레이어로 본다
+            if (shootLayer < 0 && anim.layerCount >= 2)
+                shootLayer = 1;
+        }
 
         if (detector == null)
             detector = GetComponentInChildren<EnemyDetector>();
@@ -264,6 +278,7 @@ public class WeaponController : MonoBehaviour
     void OnPlayerDead()
     {
         isDead = true;
+        SuppressUpperBodyLayers();
 
         for (int i = 0; i < subUnits.Count; i++)
             subUnits[i].SetActive(false);
@@ -287,6 +302,7 @@ public class WeaponController : MonoBehaviour
             if (i != activeHeldIndex) continue;
             if (!w.CanFire) continue;
             if (!ShouldFire(w)) continue;
+            if (!w.HasTargetInReach(in ctx)) continue;   // 사거리 밖이면 쿨다운을 쓰지 않고 기다린다
 
             w.Fire(in ctx);
         }
@@ -299,6 +315,7 @@ public class WeaponController : MonoBehaviour
 
             if (!w.CanFire) continue;
             if (!ShouldFire(w)) continue;
+            if (!w.HasTargetInReach(in ctx)) continue;   // 사거리 밖이면 쿨다운을 쓰지 않고 기다린다
 
             w.Fire(in ctx);
         }
@@ -383,17 +400,36 @@ public class WeaponController : MonoBehaviour
     }
 
     /// <summary>
-    /// 활성 무기 종류에 따라 상체 사격 레이어(ShootLayer, index 1)를 제어한다.
-    /// 근접 무기를 들었는데 이 레이어가 켜져 있으면 상체가 소총 사격 자세로 덮어써진다.
+    /// 활성 무기 종류에 맞춰 상체 레이어를 켠다.
+    ///   · 투사체 → ShootLayer (소총 조준 자세)
+    ///   · 근접   → MeleeLayer (검 대기·휘두르기)
+    /// 근접 무기를 들었는데 ShootLayer 가 켜져 있으면 상체가 소총 자세로 덮어써진다.
+    /// 구르기가 끝날 때 PlayerMove 도 이것을 호출해 들고 있는 무기에 맞는 자세로 되돌린다.
     /// </summary>
-    void ApplyShootLayerForActive()
+    public void ApplyUpperBodyLayers()
     {
-        if (anim == null || anim.layerCount < 2) return;
+        if (anim == null) return;
 
         IWeapon active = ActiveWeapon;
-        bool useShootPose = active == null || active.Data.Kind == WeaponKind.Projectile;
+        WeaponKind kind = active != null && active.Data != null ? active.Data.Kind : WeaponKind.Projectile;
 
-        anim.SetLayerWeight(1, useShootPose ? 1f : 0f);
+        SetLayerWeight(shootLayer, kind == WeaponKind.Projectile ? 1f : 0f);
+        SetLayerWeight(meleeLayer, kind == WeaponKind.Melee ? 1f : 0f);
+    }
+
+    /// <summary>구르기·사망처럼 전신 동작이 필요할 때 상체 레이어를 모두 끈다.</summary>
+    public void SuppressUpperBodyLayers()
+    {
+        if (anim == null) return;
+
+        SetLayerWeight(shootLayer, 0f);
+        SetLayerWeight(meleeLayer, 0f);
+    }
+
+    void SetLayerWeight(int index, float weight)
+    {
+        if (index >= 0 && index < anim.layerCount)
+            anim.SetLayerWeight(index, weight);
     }
 
     /// <summary>

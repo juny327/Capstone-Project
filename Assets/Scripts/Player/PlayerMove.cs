@@ -368,8 +368,8 @@ public class PlayerMove : MonoBehaviour
         if (hasRollParam)
             anim.SetTrigger(HashRoll);
 
-        // 상체 사격 레이어를 꺼서 구르는 중에 총을 겨누지 않게 한다
-        SetShootLayerWeight(0f);
+        // 상체 레이어(사격·근접)를 꺼서 구르는 중에 총을 겨누거나 검 자세가 섞이지 않게 한다
+        SetUpperBodyLayers(false);
 
         if (stats != null && rollIFrame > 0f)
             stats.SetInvulnerable(rollIFrame);
@@ -426,7 +426,7 @@ public class PlayerMove : MonoBehaviour
 
         if (isDead) return;   // 구르는 도중 사망했다면 사망 연출을 되돌리지 않는다
 
-        SetShootLayerWeight(1f);
+        SetUpperBodyLayers(true);
         anim.SetBool(HashIsMove, move != Vector2.zero);
     }
 
@@ -434,6 +434,22 @@ public class PlayerMove : MonoBehaviour
     {
         if (anim == null || anim.layerCount < 2) return;
         anim.SetLayerWeight(1, weight);
+    }
+
+    // 무기 시스템이 있으면 들고 있는 무기에 맞는 상체 레이어를 WeaponController 가 고른다.
+    // (예전처럼 무조건 사격 레이어를 켜면 검을 들고 구른 뒤 소총 자세로 돌아간다)
+    void SetUpperBodyLayers(bool on)
+    {
+        var weapons = GetComponent<WeaponController>();
+
+        if (weapons != null && weapons.enabled)
+        {
+            if (on) weapons.ApplyUpperBodyLayers();
+            else weapons.SuppressUpperBodyLayers();
+            return;
+        }
+
+        SetShootLayerWeight(on ? 1f : 0f);
     }
 
     void OnEnemyEntered(bool hasEnemy)
