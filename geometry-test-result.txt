@@ -1,2 +1,0 @@
-﻿PASS: 28228 assertions across 1000 body sizes, path lengths and swept movement sequences.
-﻿

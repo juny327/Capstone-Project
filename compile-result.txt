@@ -1,7 +1,0 @@
-C:\Users\박준영\Downloads\NoNameProj-main\NoNameProj-main\NoName_Proj\Assets\Scripts\Map\MapGenerator.cs(12,24): warning CS0108: 'MapGenerator.renderer'은(는) 상속된 'Component.renderer' 멤버를 숨깁니다. 숨기려면 new 키워드를 사용하세요.
-C:\Users\박준영\Downloads\NoNameProj-main\NoNameProj-main\NoName_Proj\Assets\Scripts\Items\ExpOrb.cs(22,14): warning CS0108: 'ExpOrb.renderer'은(는) 상속된 'Component.renderer' 멤버를 숨깁니다. 숨기려면 new 키워드를 사용하세요.
-C:\Users\박준영\Downloads\NoNameProj-main\NoNameProj-main\NoName_Proj\Assets\Scripts\Upgrade\UpgradeUI.cs(9,37): warning CS0649: 'UpgradeUI.manager' 필드에는 할당되지 않으므로 항상 null 기본값을 사용합니다.
-C:\Users\박준영\Downloads\NoNameProj-main\NoNameProj-main\NoName_Proj\Assets\Shader\EnemyOutlineFeature.cs(10,40): warning CS0649: 'EnemyOutlineFeature.enemyLayer' 필드에는 할당되지 않으므로 항상  기본값을 사용합니다.
-C:\Users\박준영\Downloads\NoNameProj-main\NoNameProj-main\NoName_Proj\Assets\Shader\EnemyOutlineFeature.cs(9,39): warning CS0649: 'EnemyOutlineFeature.outlineMaterial' 필드에는 할당되지 않으므로 항상 null 기본값을 사용합니다.
-C:\Users\박준영\Downloads\NoNameProj-main\NoNameProj-main\NoName_Proj\Assets\Shader\EnemyOutlineFeature.cs(8,39): warning CS0649: 'EnemyOutlineFeature.stencilWriteMaterial' 필드에는 할당되지 않으므로 항상 null 기본값을 사용합니다.
-C:\Users\박준영\Downloads\NoNameProj-main\NoNameProj-main\NoName_Proj\Assets\Scripts\Player\PlayerMove.cs(46,40): warning CS0649: 'PlayerMove.groundLayer' 필드에는 할당되지 않으므로 항상  기본값을 사용합니다.
