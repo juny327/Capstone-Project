@@ -15,6 +15,7 @@ public class MapGenerator : MonoBehaviour
     public MonsterSpawnerPlacer monsterPlacer;
     public ItemSpawnerPlacer itemPlacer;
     public BossSpawnPlacer bossPlacer;
+    public StageObjectPlacer stageObjectPlacer;
     public NavMeshSurface navMeshSurface;
 
     private IMapGenerationStrategy strategy;
@@ -35,6 +36,8 @@ public class MapGenerator : MonoBehaviour
         strategy.Generate(map);
         
         renderer.Render(map);
+        if (stageObjectPlacer != null)
+            stageObjectPlacer.Place(map, renderer.tileSize);
         BuildMesh();
         monsterPlacer.Place(map, renderer.tileSize);
         itemPlacer.Place(map, renderer.tileSize);
