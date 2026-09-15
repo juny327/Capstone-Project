@@ -11,4 +11,7 @@ public class StageData : ScriptableObject
 
     [Min(0.1f)]
     public float spawnInterval = 3f;
+
+    [Min(0.1f)]
+    public float rangedProjectileSpeed = 3.5f;
 }

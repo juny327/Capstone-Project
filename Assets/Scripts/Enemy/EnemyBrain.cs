@@ -77,7 +77,7 @@ public class EnemyBrain : MonoBehaviour
             enemy.transform.position,
             enemy.target.position);
 
-        if (dist < enemy.data.attackRange)
+        if (dist < enemy.data.attackRange && enemy.attack.HasLineOfSight())
         {
             enemy.ChangeState(EnemyState.Attack);
         }
@@ -93,7 +93,7 @@ public class EnemyBrain : MonoBehaviour
             enemy.transform.position,
             enemy.target.position);
 
-        if (dist > enemy.data.attackRange)
+        if (dist > enemy.data.attackRange || !enemy.attack.HasLineOfSight())
         {
             enemy.ChangeState(EnemyState.Chase);
             return;

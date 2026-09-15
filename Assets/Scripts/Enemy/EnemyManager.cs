@@ -12,6 +12,7 @@ public class EnemyManager : MonoBehaviour
     public Enemy[] enemyPrefabs;
     public Transform player;
     public float spawnInterval = 3f;
+    [Min(0.1f)] public float rangedProjectileSpeed = 3.5f;
     public int maxEnemyCount = 20;
 
     [Header("Spawn Distance")]

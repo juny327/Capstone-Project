@@ -9,6 +9,7 @@ public abstract class EnemyAttack : MonoBehaviour
     public float attackCooldown = 1f;
 
     public virtual bool IsBusy => false;
+    public virtual bool HasLineOfSight() => true;
     public virtual void CancelAttack() { }
 
     public virtual void Initialize(Enemy enemy)

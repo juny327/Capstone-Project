@@ -20,6 +20,7 @@ public class StageManager : MonoBehaviour
     {
         EnemyManager.Instance.maxEnemyCount = currentStage.maxEnemyCount;
         EnemyManager.Instance.spawnInterval = currentStage.spawnInterval;
+        EnemyManager.Instance.rangedProjectileSpeed = currentStage.rangedProjectileSpeed;
         GameEvents.OnStageProgress?.Invoke(killCount, currentStage.killTarget);
     }
 

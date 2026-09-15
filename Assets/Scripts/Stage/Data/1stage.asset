@@ -16,3 +16,4 @@ MonoBehaviour:
   killTarget: 15
   maxEnemyCount: 50
   spawnInterval: 3
+  rangedProjectileSpeed: 6
