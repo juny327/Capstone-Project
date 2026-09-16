@@ -12,6 +12,7 @@ public class EnemyManager : MonoBehaviour
     public Enemy[] enemyPrefabs;
     public Transform player;
     public float spawnInterval = 3f;
+    [Min(0.1f)] public float rangedProjectileSpeed = 3.5f;
     public int maxEnemyCount = 20;
 
     [Header("Spawn Distance")]
@@ -69,7 +70,12 @@ public class EnemyManager : MonoBehaviour
 
             if (enemies.Count < maxEnemyCount)
             {
-                SpawnEnemy();
+                int requestedSpawnCount = Random.Range(0, 100) < 75 ? 1 : 2; // 1: 75%, 2: 25%
+                int spawnCount = Mathf.Min(requestedSpawnCount, maxEnemyCount - enemies.Count);
+                for (int i = 0; i < spawnCount && enemies.Count < maxEnemyCount; i++)
+                {
+                    SpawnEnemy();
+                }
             }
         }
     }

@@ -77,7 +77,7 @@ public class EnemyBrain : MonoBehaviour
             enemy.transform.position,
             enemy.target.position);
 
-        if (dist < enemy.data.attackRange)
+        if (dist < enemy.data.attackRange && enemy.attack.HasLineOfSight())
         {
             enemy.ChangeState(EnemyState.Attack);
         }
@@ -85,13 +85,15 @@ public class EnemyBrain : MonoBehaviour
 
     void UpdateAttack()
     {
+        // Commit to the warning/dash/recovery even if the target moves away.
+        if (enemy.attack.IsBusy) return;
         if (enemy.target == null) return;
 
         float dist = Vector3.Distance(
             enemy.transform.position,
             enemy.target.position);
 
-        if (dist > enemy.data.attackRange)
+        if (dist > enemy.data.attackRange || !enemy.attack.HasLineOfSight())
         {
             enemy.ChangeState(EnemyState.Chase);
             return;
