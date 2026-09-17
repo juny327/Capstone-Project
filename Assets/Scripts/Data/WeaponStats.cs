@@ -31,6 +31,8 @@ public struct WeaponModifier
     public float rangeAdd;
     [Tooltip("드론 수 증가")]
     public int subUnitAdd;
+    [Tooltip("장판·설치물 유지 시간 증가(초)")]
+    public float durationAdd;
 
     public static WeaponModifier Identity => new WeaponModifier
     {
@@ -64,6 +66,7 @@ public struct WeaponModifier
             pierceAdd = x.pierceAdd + y.pierceAdd,
             rangeAdd = x.rangeAdd + y.rangeAdd,
             subUnitAdd = x.subUnitAdd + y.subUnitAdd,
+            durationAdd = x.durationAdd + y.durationAdd,
         };
     }
 
@@ -86,6 +89,7 @@ public struct WeaponModifier
             pierceAdd = s.pierceAdd * times,
             rangeAdd = s.rangeAdd * times,
             subUnitAdd = s.subUnitAdd * times,
+            durationAdd = s.durationAdd * times,
         };
     }
 }
@@ -113,6 +117,9 @@ public struct WeaponRuntimeStats
     public float ArcAngle;
     public int MaxTargets;
     public int SubUnitCount;
+
+    /// <summary>장판·설치물 유지 시간(초).</summary>
+    public float Duration;
 }
 
 /// <summary>

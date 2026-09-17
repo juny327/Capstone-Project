@@ -1760,6 +1760,7 @@ Transform:
   - {fileID: 4174765881167191627}
   - {fileID: 2480561948657019658}
   - {fileID: 6494887098562687394}
+  - {fileID: 8876644716469741553}
   m_Father: {fileID: 6252889607513107976}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &5207677542077073243
@@ -2158,6 +2159,37 @@ Transform:
   m_Children:
   - {fileID: 6019401833169187226}
   m_Father: {fileID: 276185952146055379}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &6944332879991657054
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8876644716469741553}
+  m_Layer: 0
+  m_Name: WeaponSocket_Back
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8876644716469741553
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6944332879991657054}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.1, z: -0.18}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8835001999029462647}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &7106663478439685411
 GameObject:
@@ -2906,8 +2938,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cbc60558268f85940b6cb6154533a71c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WeaponController
-  maxHeldSlots: 4
-  maxSubUnitSlots: 2
+  maxHeldSlots: 3
+  maxSubUnitSlots: 3
   starterWeapon: {fileID: 11400000, guid: e61cedaa53406ed4f8ea56c742ecc880, type: 2}
   detector: {fileID: 1129838663952604652}
   sockets:
@@ -2915,6 +2947,8 @@ MonoBehaviour:
     point: {fileID: 6592672375028753140}
   - socket: 3
     point: {fileID: 5451664751410845561}
+  - socket: 2
+    point: {fileID: 8876644716469741553}
   enableDirectSwapInput: 1
   swapKey: 31
   swapWithScrollWheel: 1

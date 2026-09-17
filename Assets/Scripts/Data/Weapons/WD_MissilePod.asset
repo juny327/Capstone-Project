@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ec4a62211a461948b1fc97a54c5ad69, type: 3}
+  m_Name: WD_MissilePod
+  m_EditorClassIdentifier: Assembly-CSharp::MissilePodWeaponData
+  weaponName: "\uC720\uB3C4 \uBBF8\uC0AC\uC77C \uD3EC\uB4DC"
+  description: "\uB4F1\uC5D0 \uBD99\uC740 \uBC1C\uC0AC\uB300\uC5D0\uC11C \uC801\uC744
+    \uCAD3\uB294 \uBBF8\uC0AC\uC77C\uC744 \uC3DC\uB2E4."
+  icon: {fileID: 0}
+  weaponPrefab: {fileID: 1710488024370701860, guid: 4c44f6ab244d0994d868748168c73d0d, type: 3}
+  socket: 2
+  fireInterval: 2
+  damage: 3
+  critChance: 0.05
+  critMultiplier: 2
+  maxLevel: 5
+  perLevelBonus:
+    damageAdd: 0
+    damageMul: 1
+    fireIntervalMul: 1
+    critChanceAdd: 0
+    critMultiplierAdd: 0
+    projectileSpeedAdd: 0
+    projectileCountAdd: 1
+    pierceAdd: 0
+    rangeAdd: 0.15
+    subUnitAdd: 0
+    durationAdd: 0
+  requiresTarget: 1
+  missilePrefab: {fileID: 5853923745167364070, guid: 5dfcecb7bdca3d7448185f49d7f13b7a, type: 3}
+  missileCount: 2
+  speed: 12
+  turnRate: 360
+  climbTime: 0.25
+  lifeTime: 4
+  blastRadius: 1.2
+  hitLayers:
+    serializedVersion: 2
+    m_Bits: 129
+  cameraShake: 0
+  launchHeight: 0.4
+  launchSpread: 0.3
+  searchRange: 10
+  explosionFxPrefab: {fileID: 1828176872806910, guid: b3b421b9c91f1c54d987532a8e60e53c, type: 3}
+  explosionFxBaseRadius: 6.7220817
+  explosionFxScale: 0.6

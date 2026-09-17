@@ -43,10 +43,10 @@ public class WeaponController : MonoBehaviour
 
     [Header("Slots")]
     [Tooltip("손에 드는 무기(투사체/근접) 보유 가능 수")]
-    [Min(1)] [SerializeField] private int maxHeldSlots = 4;
+    [Min(1)] [SerializeField] private int maxHeldSlots = 3;
 
-    [Tooltip("서브유닛(드론) 보유 가능 수")]
-    [Min(1)] [SerializeField] private int maxSubUnitSlots = 2;
+    [Tooltip("서브유닛(드론·오브·방전장 등) 보유 가능 수")]
+    [Min(1)] [SerializeField] private int maxSubUnitSlots = 3;
 
     [Header("Start")]
     [Tooltip("게임 시작 시 장착할 무기. 비워두면 무기 없이 시작한다")]
@@ -171,6 +171,49 @@ public class WeaponController : MonoBehaviour
 
         RaiseLegacyStats();
         return WeaponAcquireResult.Equipped;
+    }
+
+    /// <summary>게임 시작 시 장착하도록 지정된 기본 무기. 초기화에 쓴다.</summary>
+    public WeaponData StarterWeapon => starterWeapon;
+
+    /// <summary>
+    /// 보유 무기를 전부 지우고 기본 무기만 다시 장착한다 (테스트용).
+    ///
+    /// 서브유닛은 하나도 남기지 않는다. 드론·오브처럼 개체를 만드는 무기는
+    /// SetActive(false) 로 개체를 먼저 치운 뒤 지운다 — 그냥 Destroy 하면
+    /// 플레이어 밑에 개체만 남아 유령처럼 계속 돈다.
+    /// </summary>
+    public void ResetWeapons(WeaponData starter)
+    {
+        for (int i = held.Count - 1; i >= 0; i--)
+            DestroyWeapon(held[i]);
+
+        held.Clear();
+
+        for (int i = subUnits.Count - 1; i >= 0; i--)
+            DestroyWeapon(subUnits[i]);
+
+        subUnits.Clear();
+
+        activeHeldIndex = -1;
+        SuppressUpperBodyLayers();
+
+        if (starter != null)
+        {
+            Acquire(starter);
+            return;
+        }
+
+        RaiseLegacyStats();
+        GameEvents.OnWeaponSwapped?.Invoke(null);
+    }
+
+    void DestroyWeapon(WeaponBase weapon)
+    {
+        if (weapon == null) return;
+
+        weapon.SetActive(false);   // 드론·오브 등 개체 정리
+        Destroy(weapon.gameObject);
     }
 
     /// <summary>모든 무기에 업그레이드 증분을 적용한다 (연사·치명타 등 범용 강화).</summary>

@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 26f0c4e32211f2248a430416d0a6ef1e, type: 3}
+  m_Name: WD_AcidPool
+  m_EditorClassIdentifier: Assembly-CSharp::ZoneWeaponData
+  weaponName: "\uB098\uB178 \uC0B0\uC131 \uC7A5\uD310"
+  description: "\uB098\uB178 \uC785\uC790\uAC00 \uBFCC\uB824\uC9C4 \uBC14\uB2E5\uC774
+    \uB2FF\uC740 \uC801\uC744 \uB179\uC778\uB2E4."
+  icon: {fileID: 0}
+  weaponPrefab: {fileID: 7048045787229728693, guid: 7b6ed05e3d8c3bc47bb57bf532181986, type: 3}
+  socket: 3
+  fireInterval: 4
+  damage: 1
+  critChance: 0.05
+  critMultiplier: 2
+  maxLevel: 5
+  perLevelBonus:
+    damageAdd: 0
+    damageMul: 1
+    fireIntervalMul: 1
+    critChanceAdd: 0
+    critMultiplierAdd: 0
+    projectileSpeedAdd: 0
+    projectileCountAdd: 1
+    pierceAdd: 0
+    rangeAdd: 0
+    subUnitAdd: 0
+    durationAdd: 0.5
+  requiresTarget: 1
+  zonePrefab: {fileID: 4316722357875551514, guid: 4e37935964403ad408f10de896d45fc0, type: 3}
+  zoneCount: 1
+  zoneRadius: 1.5
+  duration: 3
+  tickInterval: 0.5
+  searchRange: 10
+  fallbackSpread: 0

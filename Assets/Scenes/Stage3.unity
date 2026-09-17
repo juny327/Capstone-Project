@@ -4378,6 +4378,21 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 7b3ac41e575f30c4c8e7832bb7bf1c88, type: 2}
   - {fileID: 11400000, guid: 9ac95302bbc73874baa9b52c3bb20053, type: 2}
   - {fileID: 11400000, guid: bf3a989154be14a4796394ff0482b4fe, type: 2}
+  - {fileID: 11400000, guid: 7960e332768621042b9bbe097debd6ab, type: 2}
+  - {fileID: 11400000, guid: b0e3f552fdf733443b6fae6178fbd596, type: 2}
+  - {fileID: 11400000, guid: ca7bf36ec61ca5c48900e1555f016783, type: 2}
+  - {fileID: 11400000, guid: c44be728a2a768640818de43749a6440, type: 2}
+  - {fileID: 11400000, guid: b0d7d6c4d1539cb4f89511ef585e5798, type: 2}
+  - {fileID: 11400000, guid: 0cf5643b3c67cd74887b23699fdca336, type: 2}
+  - {fileID: 11400000, guid: 20f9dc09961eeae479edf03e42b545a9, type: 2}
+  - {fileID: 11400000, guid: e664390996db15149a46d053f27ba4e3, type: 2}
+  - {fileID: 11400000, guid: cf7f46aab623c7f4ca6302b9f038c28b, type: 2}
+  - {fileID: 11400000, guid: 653d00dd8466af24ba8efe45a439f2bf, type: 2}
+  - {fileID: 11400000, guid: 119ee3e1aa0d3fc4a8a9760dcfa955a8, type: 2}
+  - {fileID: 11400000, guid: 66de79e6fab60b4438026cc345c0f520, type: 2}
+  - {fileID: 11400000, guid: 93d9507dd17435a47a67c8a4514150a7, type: 2}
+  - {fileID: 11400000, guid: faf619b85efd07c4282faf9a2a4c6f3f, type: 2}
+  - {fileID: 11400000, guid: ec71a2c5e99a4c949885c25396a67bba, type: 2}
 --- !u!4 &1892265791
 Transform:
   m_ObjectHideFlags: 0
@@ -4522,6 +4537,7 @@ MonoBehaviour:
   - {fileID: 8162335778504266055, guid: 8bd3d77cd8392274183d5dc9bc9bf826, type: 3}
   player: {fileID: 0}
   spawnInterval: 3
+  rangedProjectileSpeed: 3.5
   maxEnemyCount: 20
   minSpawnDistance: 10
   maxSpawnDistance: 25

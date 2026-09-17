@@ -1,0 +1,50 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 65bfacf9a0a78534e85b03eb11f1ad85, type: 3}
+  m_Name: WD_EMPField
+  m_EditorClassIdentifier: Assembly-CSharp::PulseWeaponData
+  weaponName: "EMP \uBC29\uC804\uC7A5"
+  description: "\uC8FC\uAE30\uC801\uC73C\uB85C \uC8FC\uBCC0\uC5D0 \uC804\uC790\uAE30
+    \uBC29\uC804\uC744 \uC77C\uC73C\uD0A8\uB2E4."
+  icon: {fileID: 0}
+  weaponPrefab: {fileID: 7318451920503675641, guid: 123208a484ed2cc4a87d350aeab6e6cf, type: 3}
+  socket: 3
+  fireInterval: 1.5
+  damage: 2.2
+  critChance: 0.05
+  critMultiplier: 2
+  maxLevel: 5
+  perLevelBonus:
+    damageAdd: 0.6
+    damageMul: 1
+    fireIntervalMul: 1
+    critChanceAdd: 0
+    critMultiplierAdd: 0
+    projectileSpeedAdd: 0
+    projectileCountAdd: 0
+    pierceAdd: 0
+    rangeAdd: 0.2
+    subUnitAdd: 0
+  requiresTarget: 1
+  radius: 2.2
+  hitLayers:
+    serializedVersion: 2
+    m_Bits: 129
+  cameraShake: 0
+  reachMargin: 0.5
+  ringFxPrefab: {fileID: 4932088507883938021, guid: 7328fc3afdef7ca499963abd23b5dedb, type: 3}
+  ringFxBaseRadius: 5.68
+  burstFxPrefab: {fileID: 2965222256817593503, guid: cf63d46aaaa77684197ea3357a3f699c, type: 3}
+  burstFxHeight: 1
+  hitFxPrefab: {fileID: 952961124639765284, guid: 93cc8b0c0c8acc040ba7154ba7983b50, type: 3}
+  maxHitFx: 4
+  hitFxHeight: 1
