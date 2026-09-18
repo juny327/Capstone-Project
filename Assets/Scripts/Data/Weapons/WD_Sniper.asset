@@ -32,14 +32,21 @@ MonoBehaviour:
     projectileSpeedAdd: 0
     projectileCountAdd: 0
     pierceAdd: 0
+    magazineAdd: 0
+    reloadTimeMul: 1
     rangeAdd: 0
     subUnitAdd: 0
+    durationAdd: 0
   requiresTarget: 1
+  aimMode: 0
   projectilePrefab: {fileID: 5875018044698817663, guid: 47d42afc0830c50448915274e6d3e535, type: 3}
   projectileSpeed: 60
   projectileLifeTime: 5
   projectileCount: 1
   spreadAngle: 0
   pierceCount: 3
+  magazineSize: 5
+  reloadTime: 2.6
+  autoReload: 1
   muzzleFlashPrefab: {fileID: 2916273817513264348, guid: 95044fb3908b36c46bc62060360f7ba6, type: 3}
   casingPrefab: {fileID: 8464276986609709168, guid: 4aa9530848b0025449ef44e32d3f9a41, type: 3}

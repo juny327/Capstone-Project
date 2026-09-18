@@ -14,6 +14,9 @@ public class PlayerStatsUI : MonoBehaviour
     public Animator anim;
     public TextMeshProUGUI hpText;
     public TextMeshProUGUI moveSpeedText;
+
+    [Tooltip("탄약 표시. 탄창을 쓰지 않는 무기(검·드론)를 들면 자동으로 숨긴다")]
+    public TextMeshProUGUI ammoText;
     
 
     PlayerStats stats;
@@ -25,6 +28,7 @@ public class PlayerStatsUI : MonoBehaviour
         GameEvents.OnBulletDamageChanged += UpdateBulletDamage;
         GameEvents.OnMoveSpeedChanged += UpdateMoveSpeed;
         GameEvents.OnBulletSpeedChanged += UpdateBulletSpeed;
+        GameEvents.OnAmmoChanged += UpdateAmmo;
     }
 
     void OnDisable()
@@ -34,6 +38,7 @@ public class PlayerStatsUI : MonoBehaviour
         GameEvents.OnBulletDamageChanged -= UpdateBulletDamage;
         GameEvents.OnMoveSpeedChanged -= UpdateMoveSpeed;
         GameEvents.OnBulletSpeedChanged -= UpdateBulletSpeed;
+        GameEvents.OnAmmoChanged -= UpdateAmmo;
 
         if (stats != null)
         {
@@ -132,5 +137,23 @@ public class PlayerStatsUI : MonoBehaviour
         if(bulletSpeedText == null) return;
 
         bulletSpeedText.text = "GunSpeed : " + speed;
+    }
+
+    /// <summary>
+    /// 탄약 표시. 탄창 크기가 0 이면 탄창을 쓰지 않는 무기(검·드론)이므로 숨긴다.
+    /// 장전 중에는 무기가 현재 탄약을 0 으로 보내므로 "Reloading" 으로 표시한다.
+    /// </summary>
+    void UpdateAmmo(int ammo, int magazine)
+    {
+        if (ammoText == null) return;
+
+        if (magazine <= 0)
+        {
+            ammoText.gameObject.SetActive(false);
+            return;
+        }
+
+        ammoText.gameObject.SetActive(true);
+        ammoText.text = ammo <= 0 ? "Reloading..." : $"{ammo} / {magazine}";
     }
 }

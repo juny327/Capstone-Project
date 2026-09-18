@@ -36,6 +36,9 @@ public static class GameEvents
     public static Action<float> OnBulletSpeedChanged;
 
     // 무기 시스템 (07번 설계)
+    /// <summary>손에 든 무기의 탄약이 바뀔 때 (현재 탄약, 탄창 크기). 탄창 크기 0 이면 표시하지 않는다.</summary>
+    public static Action<int, int> OnAmmoChanged;
+
     public static Action<IWeapon> OnWeaponSwapped;       // 활성 무기가 바뀔 때
     public static Action<IWeapon> OnWeaponStatsChanged;  // 레벨업·모디파이어 적용 시
 
