@@ -19,15 +19,19 @@ public class UpgradeCard : MonoBehaviour
     public AudioClip failSound;
 
     UpgradeData data;
+    bool clicked;
 
     public void Setup(UpgradeData upgrade)
     {
         data = upgrade;
+        clicked = false;
 
         icon.sprite = upgrade.icon;
         title.text = upgrade.upgradeName;
         description.text = upgrade.description;
-        cost.text = $"cost Exp : {upgrade.costExp}";
+
+        if (cost != null)
+            cost.gameObject.SetActive(false);
     }
 
     void OnEnable()
@@ -44,6 +48,10 @@ public class UpgradeCard : MonoBehaviour
 
     public void OnClick()
     {
+        if (data == null || clicked)
+            return;
+
+        clicked = true;
         GameEvents.OnUpgradeSelected?.Invoke(data);
     }
 
@@ -51,7 +59,8 @@ public class UpgradeCard : MonoBehaviour
     {
         if (d != data) return;
 
-        animator.Play("Success");
+        if (animator != null)
+            animator.Play("Success");
 
         if (audioSource && successSound)
             audioSource.PlayOneShot(successSound);
@@ -61,7 +70,10 @@ public class UpgradeCard : MonoBehaviour
     {
         if (d != data) return;
 
-        animator.Play("Fail");
+        clicked = false;
+
+        if (animator != null)
+            animator.Play("Fail");
 
         if (audioSource && failSound)
             audioSource.PlayOneShot(failSound);

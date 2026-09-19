@@ -4,14 +4,17 @@ using UnityEngine;
 
 public class PlayerStats : MonoBehaviour, IDamageable
 {
+    [Header("Level")]
     public int level = 1;
     public int currentExp = 0;
+    public int expToNextLevel = 10;
+    public float expGrowthRate = 1.3f;
 
     public int maxHp = 100;
     public int currentHp;
     public GameObject deathParticle;
 
-    public event Action<int,int> OnHpChanged;
+    public event Action<int, int> OnHpChanged;
     public event Action<int> OnExpChanged;
     private Animator anim;
 
@@ -43,7 +46,23 @@ public class PlayerStats : MonoBehaviour, IDamageable
 
     public void AddExp(int amount)
     {
+        if (amount <= 0)
+            return;
+
         currentExp += amount;
+
+        while (currentExp >= expToNextLevel)
+        {
+            currentExp -= expToNextLevel;
+            level++;
+
+            expToNextLevel = Mathf.Max(
+                1,
+                Mathf.CeilToInt(expToNextLevel * expGrowthRate)
+            );
+
+            GameEvents.OnPlayerLevelUp?.Invoke(level);
+        }
 
         OnExpChanged?.Invoke(currentExp);
     }
@@ -60,7 +79,7 @@ public class PlayerStats : MonoBehaviour, IDamageable
 
     public void AddHP(int amount)
     {
-        if(amount + currentHp > maxHp)
+        if (amount + currentHp > maxHp)
         {
             currentHp = maxHp;
         }
