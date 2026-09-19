@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f02d2fdfd51dff14dbff6dcc4c1846a4, type: 3}
   m_Name: FireBallEffect
   m_EditorClassIdentifier: Assembly-CSharp::FireBallEffect
-  projectilePrefab: {fileID: 0}
+  projectilePrefab: {fileID: 9071736701767874264, guid: 0a5f48aa0d0381948af03a195e560f88, type: 3}
   damage: 100
   fireInterval: 4
   projectileSpeed: 15
