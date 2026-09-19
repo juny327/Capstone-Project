@@ -15,5 +15,5 @@ MonoBehaviour:
   upgradeName: Heal
   description: HP + 10
   icon: {fileID: 2715409951904314068, guid: 97da73e1e810d264792bc5a70ff6e6b4, type: 3}
-  costExp: 3
+  costExp: 0
   effect: {fileID: 11400000, guid: 917e6d09cc8d2d64fac118d9065b0337, type: 2}

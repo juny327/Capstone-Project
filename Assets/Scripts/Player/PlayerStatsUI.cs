@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using Unity.VisualScripting.Antlr3.Runtime.Misc;
 
 public class PlayerStatsUI : MonoBehaviour
 {
@@ -17,6 +16,28 @@ public class PlayerStatsUI : MonoBehaviour
 
     [Tooltip("탄약 표시. 탄창을 쓰지 않는 무기(검·드론)를 들면 자동으로 숨긴다")]
     public TextMeshProUGUI ammoText;
+
+    [Tooltip("현재 레벨 표시")]
+    public TextMeshProUGUI levelText;
+
+    [Tooltip("다음 레벨까지의 진행도 바 (Image Type: Filled)")]
+    public Image expBar;
+
+    [Tooltip("총알 모양 표시. 왼쪽부터 채워진다")]
+    public Image[] ammoPips;
+
+    [Header("Colors")]
+    [Tooltip("체력 60% 초과")]
+    public Color hpHealthyColor = new Color(0.35f, 0.85f, 0.35f, 1f);
+
+    [Tooltip("체력 30~60%")]
+    public Color hpWarnColor = new Color(0.95f, 0.80f, 0.25f, 1f);
+
+    [Tooltip("체력 30% 이하")]
+    public Color hpDangerColor = new Color(0.90f, 0.25f, 0.25f, 1f);
+
+    public Color ammoPipFullColor = new Color(1f, 0.93f, 0.70f, 1f);
+    public Color ammoPipEmptyColor = new Color(1f, 1f, 1f, 0.18f);
     
 
     PlayerStats stats;
@@ -45,6 +66,7 @@ public class PlayerStatsUI : MonoBehaviour
             stats.OnHpChanged -= UpdateHp;
             stats.OnHpChanged -= UpdateHpText;
             stats.OnExpChanged -= UpdateExp;
+            stats.OnLevelChanged -= UpdateLevel;
         }
     }
 
@@ -67,17 +89,26 @@ public class PlayerStatsUI : MonoBehaviour
         stats.OnHpChanged += UpdateHp;
         stats.OnHpChanged += UpdateHpText;
         stats.OnExpChanged += UpdateExp;
+        stats.OnLevelChanged += UpdateLevel;
 
         // 초기 UI 업데이트
         UpdateHp(stats.currentHp, stats.maxHp);
         UpdateHpText(stats.currentHp, stats.maxHp);
         UpdateExp(stats.currentExp);
 
-        Gun gun = t.GetComponentInChildren<Gun>();
-        if (gun != null)
+        // 활성 무기의 실제 스탯을 읽는다.
+        //
+        // WeaponController 도 스왑·획득 때 이벤트를 쏘지만, 스테이지를 넘어오면 플레이어가
+        // 이미 살아 있어 Start 가 다시 돌지 않는다. 그래서 여기서 한 번 직접 읽어 줘야
+        // 새 씬의 HUD 가 빈 채로 남지 않는다.
+        WeaponController weapons = t.GetComponent<WeaponController>();
+
+        if (weapons != null && weapons.ActiveWeapon != null)
         {
-            UpdateBulletDamage(gun.bulletDamage);
-            UpdateBulletSpeed(gun.bulletSpeed);
+            WeaponRuntimeStats weaponStats = weapons.ActiveWeapon.Stats;
+
+            UpdateBulletDamage(weaponStats.Damage);
+            UpdateBulletSpeed(weaponStats.ProjectileSpeed);
         }
 
         PlayerMove move = t.GetComponent<PlayerMove>();
@@ -91,7 +122,14 @@ public class PlayerStatsUI : MonoBehaviour
     {
         if (hpBar == null) return;
 
-        hpBar.fillAmount = (float)hp / max;
+        float ratio = max > 0 ? Mathf.Clamp01((float)hp / max) : 0f;
+
+        hpBar.fillAmount = ratio;
+
+        // 구간별 색. 숫자를 읽지 않아도 위급함이 눈에 들어온다 (13번 10-3)
+        hpBar.color = ratio > 0.6f ? hpHealthyColor
+                    : ratio > 0.3f ? hpWarnColor
+                                   : hpDangerColor;
 
         if (anim != null)
         {
@@ -107,15 +145,29 @@ public class PlayerStatsUI : MonoBehaviour
 
     void UpdateExp(int exp)
     {
-        if (expText == null) return;
+        // 레벨업이 목표가 된 이상, 남은 양을 알 수 있어야 한다 (13번 11-7)
+        int need = stats != null ? stats.ExpToNext : 0;
 
-        expText.text = "EXP : " + exp;
+        if (expText != null)
+            expText.text = need > 0 ? $"{exp} / {need}" : exp.ToString();
+
+        if (expBar != null)
+            expBar.fillAmount = need > 0 ? Mathf.Clamp01((float)exp / need) : 0f;
+
+        UpdateLevel(stats != null ? stats.level : 1);
+    }
+
+    void UpdateLevel(int level)
+    {
+        if (levelText == null) return;
+
+        levelText.text = $"Lv.{level}";
     }
     void UpdateMoveSpeed(float speed)
     {
         if (moveSpeedText == null) return;
 
-        moveSpeedText.text = "Speed : " + speed.ToString("F1");
+        moveSpeedText.text = $"이동 {speed:F1}";
     }
 
     void UpdateStageProgress(int current, int target)
@@ -129,14 +181,15 @@ public class PlayerStatsUI : MonoBehaviour
     {
         if (bulletDamageText == null) return;
 
-        bulletDamageText.text = "BulletPower : " + damage;
+        // 자릿수를 고정하지 않으면 업그레이드가 누적됐을 때 10.000001 처럼 나온다
+        bulletDamageText.text = $"공격력 {damage:F1}";
     }
-    
+
     void UpdateBulletSpeed(float speed)
     {
         if(bulletSpeedText == null) return;
 
-        bulletSpeedText.text = "GunSpeed : " + speed;
+        bulletSpeedText.text = $"탄속 {speed:F0}";
     }
 
     /// <summary>
@@ -145,15 +198,49 @@ public class PlayerStatsUI : MonoBehaviour
     /// </summary>
     void UpdateAmmo(int ammo, int magazine)
     {
-        if (ammoText == null) return;
+        bool hasMagazine = magazine > 0;
 
-        if (magazine <= 0)
+        if (ammoText != null)
         {
-            ammoText.gameObject.SetActive(false);
-            return;
+            ammoText.gameObject.SetActive(hasMagazine);
+
+            if (hasMagazine)
+                ammoText.text = ammo <= 0 ? "Reloading..." : $"{ammo} / {magazine}";
         }
 
-        ammoText.gameObject.SetActive(true);
-        ammoText.text = ammo <= 0 ? "Reloading..." : $"{ammo} / {magazine}";
+        UpdateAmmoPips(ammo, magazine, hasMagazine);
+    }
+
+    /// <summary>
+    /// 총알 모양 칸을 채운다.
+    ///
+    /// 탄창이 칸 수보다 크면(소총 30, 기관단총 45) 한 칸이 여러 발을 대표한다.
+    /// 45개를 그리면 읽히지 않으므로, 칸 수를 고정하고 비율로 채우는 편이 낫다.
+    /// </summary>
+    void UpdateAmmoPips(int ammo, int magazine, bool hasMagazine)
+    {
+        if (ammoPips == null || ammoPips.Length == 0) return;
+
+        // 탄창이 칸 수보다 적으면(스나이퍼 5발) 실제 발수만큼만 쓴다 — 한 칸이 정확히 한 발이 된다
+        int used = hasMagazine ? Mathf.Min(magazine, ammoPips.Length) : 0;
+
+        float ratio = magazine > 0 ? Mathf.Clamp01((float)ammo / magazine) : 0f;
+
+        // 한 발이라도 남았으면 칸 하나는 켜 둔다 (Ceil)
+        int filled = Mathf.CeilToInt(ratio * used);
+
+        for (int i = 0; i < ammoPips.Length; i++)
+        {
+            Image pip = ammoPips[i];
+
+            if (pip == null) continue;
+
+            bool inUse = i < used;
+
+            pip.gameObject.SetActive(inUse);
+
+            if (inUse)
+                pip.color = i < filled ? ammoPipFullColor : ammoPipEmptyColor;
+        }
     }
 }

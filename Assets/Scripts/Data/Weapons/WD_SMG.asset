@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ProjectileWeaponData
   weaponName: "\uAE30\uAD00\uB2E8\uCD1D"
   description: "\uBE60\uB978 \uC5F0\uC0AC, \uB113\uC740 \uD0C4 \uD37C\uC9D0"
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 34a07a0c7f623034f9bacb81a19db604, type: 3}
   weaponPrefab: {fileID: 4085249434206812143, guid: 2e5dc36225e989c4c90719b5e9141ea7, type: 3}
   socket: 0
   fireInterval: 0.12

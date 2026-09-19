@@ -24,10 +24,36 @@ public class UpgradeCard : MonoBehaviour
     {
         data = upgrade;
 
-        icon.sprite = upgrade.icon;
-        title.text = upgrade.upgradeName;
-        description.text = upgrade.description;
-        cost.text = $"cost Exp : {upgrade.costExp}";
+        if (upgrade == null) return;
+
+        // 문구는 효과에게 묻는다. 서브유닛 카드는 WeaponData 의 이름·설명을 돌려주고,
+        // 스탯 카드는 UpgradeData 의 값을 그대로 돌려준다 (13번 7-3).
+        UpgradeEffect effect = upgrade.effect;
+
+        if (title != null)
+            title.text = effect != null ? effect.GetTitle(upgrade) : upgrade.upgradeName;
+
+        if (description != null)
+            description.text = effect != null ? effect.GetDescription(upgrade) : upgrade.description;
+
+        if (icon != null)
+        {
+            Sprite sprite = effect != null ? effect.GetIcon(upgrade) : upgrade.icon;
+
+            icon.sprite = sprite;
+            icon.enabled = sprite != null;   // 아이콘이 아직 없으면 빈 네모가 보이지 않게 끈다
+        }
+
+        // 레벨업 보상이라 비용이 없다. 0 이면 표시 자체를 숨긴다
+        if (cost != null)
+        {
+            bool hasCost = upgrade.costExp > 0;
+
+            cost.gameObject.SetActive(hasCost);
+
+            if (hasCost)
+                cost.text = $"cost Exp : {upgrade.costExp}";
+        }
     }
 
     void OnEnable()

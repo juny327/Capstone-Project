@@ -15,7 +15,7 @@ MonoBehaviour:
   weaponName: "\uC720\uB3C4 \uBBF8\uC0AC\uC77C \uD3EC\uB4DC"
   description: "\uB4F1\uC5D0 \uBD99\uC740 \uBC1C\uC0AC\uB300\uC5D0\uC11C \uC801\uC744
     \uCAD3\uB294 \uBBF8\uC0AC\uC77C\uC744 \uC3DC\uB2E4."
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 5bdb12705f8fc944b8e7887db4e7b596, type: 3}
   weaponPrefab: {fileID: 1710488024370701860, guid: 4c44f6ab244d0994d868748168c73d0d, type: 3}
   socket: 2
   fireInterval: 2
@@ -32,6 +32,8 @@ MonoBehaviour:
     projectileSpeedAdd: 0
     projectileCountAdd: 1
     pierceAdd: 0
+    magazineAdd: 0
+    reloadTimeMul: 1
     rangeAdd: 0.15
     subUnitAdd: 0
     durationAdd: 0

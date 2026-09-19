@@ -15,7 +15,7 @@ MonoBehaviour:
   weaponName: "EMP \uBC29\uC804\uC7A5"
   description: "\uC8FC\uAE30\uC801\uC73C\uB85C \uC8FC\uBCC0\uC5D0 \uC804\uC790\uAE30
     \uBC29\uC804\uC744 \uC77C\uC73C\uD0A8\uB2E4."
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 971bd5c98b4099049ad2ba215cc09f75, type: 3}
   weaponPrefab: {fileID: 7318451920503675641, guid: 123208a484ed2cc4a87d350aeab6e6cf, type: 3}
   socket: 3
   fireInterval: 1.5
@@ -32,8 +32,11 @@ MonoBehaviour:
     projectileSpeedAdd: 0
     projectileCountAdd: 0
     pierceAdd: 0
+    magazineAdd: 0
+    reloadTimeMul: 1
     rangeAdd: 0.2
     subUnitAdd: 0
+    durationAdd: 0
   requiresTarget: 1
   radius: 2.2
   hitLayers:

@@ -15,5 +15,5 @@ MonoBehaviour:
   upgradeName: powerc
   description: zsdfdasf
   icon: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
-  costExp: 2
+  costExp: 0
   effect: {fileID: 11400000, guid: 6d1fc9d9d5b5732458e2e746dabd74c5, type: 2}

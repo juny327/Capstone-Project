@@ -17,6 +17,9 @@ public static class GameEvents
 
     public static Action<UpgradeData> OnUpgradeFailed;
 
+    /// <summary>업그레이드 확인창의 확인 버튼을 눌렀을 때. 이때 카드 창을 닫고 게임을 재개한다.</summary>
+    public static Action OnUpgradeConfirmed;
+
     public static Action OnPlayerDeadStart;
     
     public static Action OnPlayerDeadEnd;
@@ -41,6 +44,15 @@ public static class GameEvents
 
     public static Action<IWeapon> OnWeaponSwapped;       // 활성 무기가 바뀔 때
     public static Action<IWeapon> OnWeaponStatsChanged;  // 레벨업·모디파이어 적용 시
+
+    /// <summary>
+    /// 보유 무기 목록이 바뀔 때 (획득·초기화). 슬롯 UI 가 처음부터 다시 그린다.
+    /// 서브유닛을 얻으면 활성 무기가 바뀌지 않아 OnWeaponSwapped 가 나가지 않으므로 이 이벤트가 필요하다.
+    /// </summary>
+    public static Action OnWeaponsChanged;
+
+    /// <summary>레벨업 시 (새 레벨). 업그레이드 카드를 띄운다.</summary>
+    public static Action<int> OnLevelUp;
 
     public static Action<BossHealth> OnBossSpawned; // 보스 ui 연결용임
 
