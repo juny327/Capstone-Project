@@ -5,6 +5,8 @@ public static class GameEvents
 {
     public static Action OnEnemyKilled;
 
+    public static Action<int> OnPlayerLevelUp;
+
     public static Action OnStageClear;
 
     public static Action OnOpenUpgradeUI;
@@ -18,12 +20,12 @@ public static class GameEvents
     public static Action<UpgradeData> OnUpgradeFailed;
 
     public static Action OnPlayerDeadStart;
-    
+
     public static Action OnPlayerDeadEnd;
-    
+
     public static Action OnPlayerDead;
 
-    public static Action<int,int> OnStageProgress;
+    public static Action<int, int> OnStageProgress;
 
     public static Action<float> OnBulletDamageChanged;
 

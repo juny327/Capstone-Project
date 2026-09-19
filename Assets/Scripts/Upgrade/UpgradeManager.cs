@@ -3,15 +3,9 @@ using UnityEngine;
 
 public class UpgradeManager : MonoBehaviour
 {
-    public List<UpgradeData> upgradePool;
+    public UpgradePoolData upgradePool;
 
-    PlayerStats playerStats;
     GameObject player;
-
-    void Awake()
-    {
-
-    }
 
     void OnEnable()
     {
@@ -28,20 +22,12 @@ public class UpgradeManager : MonoBehaviour
     void SetPlayer(Transform p)
     {
         player = p.gameObject;
-        playerStats = player.GetComponent<PlayerStats>();
     }
 
     void TryUpgrade(UpgradeData data)
     {
-        if (playerStats.currentExp < data.costExp)
-        {
-            GameEvents.OnUpgradeFailed?.Invoke(data);
-            return;
-        }
-
-        playerStats.SpendExp(data.costExp);
-
-        data.effect.Apply(player);
+        if (data.effect != null)
+            data.effect.Apply(player);
 
         GameEvents.OnUpgradeSuccess?.Invoke(data);
     }
@@ -49,11 +35,18 @@ public class UpgradeManager : MonoBehaviour
     public List<UpgradeData> GetRandomUpgrades(int count)
     {
         List<UpgradeData> result = new();
-        List<UpgradeData> pool = new(upgradePool);
+
+        if (upgradePool == null || upgradePool.upgrades == null)
+            return result;
+
+        List<UpgradeData> pool = new(upgradePool.upgrades);
+
+        count = Mathf.Min(count, pool.Count);
 
         for (int i = 0; i < count; i++)
         {
             int index = Random.Range(0, pool.Count);
+
             result.Add(pool[index]);
             pool.RemoveAt(index);
         }
