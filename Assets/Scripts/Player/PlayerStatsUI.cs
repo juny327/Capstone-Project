@@ -26,6 +26,19 @@ public class PlayerStatsUI : MonoBehaviour
     [Tooltip("총알 모양 표시. 왼쪽부터 채워진다")]
     public Image[] ammoPips;
 
+    [Header("Stamina / Roll")]
+    [Tooltip("스태미나 바 (Image Type: Filled)")]
+    public Image staminaBar;
+
+    [Tooltip("구르기 아이콘")]
+    public Image rollIcon;
+
+    [Tooltip("구르기 쿨타임을 덮는 이미지 (Image Type: Filled, Radial 360)")]
+    public Image rollCooldownFill;
+
+    [Tooltip("구르기가 준비되기까지 남은 초")]
+    public TextMeshProUGUI rollCooldownText;
+
     [Header("Colors")]
     [Tooltip("체력 60% 초과")]
     public Color hpHealthyColor = new Color(0.35f, 0.85f, 0.35f, 1f);
@@ -38,9 +51,22 @@ public class PlayerStatsUI : MonoBehaviour
 
     public Color ammoPipFullColor = new Color(1f, 0.93f, 0.70f, 1f);
     public Color ammoPipEmptyColor = new Color(1f, 1f, 1f, 0.18f);
+
+    [Tooltip("평소 스태미나 색")]
+    public Color staminaColor = new Color(0.45f, 0.80f, 1f, 1f);
+
+    [Tooltip("스태미나가 바닥나 달릴 수 없는 동안")]
+    public Color staminaExhaustedColor = new Color(0.95f, 0.45f, 0.35f, 1f);
+
+    public Color rollReadyColor = Color.white;
+    public Color rollCoolingColor = new Color(1f, 1f, 1f, 0.35f);
     
 
     PlayerStats stats;
+
+    // 스태미나와 쿨타임은 매 프레임 연속으로 변한다.
+    // 이벤트로 쏘면 초당 수십 번이라, 여기서는 폴링이 더 단순하고 싸다.
+    PlayerMove playerMove;
 
     void OnEnable()
     {
@@ -111,10 +137,51 @@ public class PlayerStatsUI : MonoBehaviour
             UpdateBulletSpeed(weaponStats.ProjectileSpeed);
         }
 
-        PlayerMove move = t.GetComponent<PlayerMove>();
-        if (move != null)
+        playerMove = t.GetComponent<PlayerMove>();
+
+        if (playerMove != null)
         {
-            UpdateMoveSpeed(move.CurrentSpeed);   
+            UpdateMoveSpeed(playerMove.CurrentSpeed);
+        }
+    }
+
+    void Update()
+    {
+        if (playerMove == null) return;
+
+        UpdateStamina();
+        UpdateRollCooldown();
+    }
+
+    void UpdateStamina()
+    {
+        if (staminaBar == null) return;
+
+        staminaBar.fillAmount = playerMove.StaminaNormalized;
+
+        // 바닥나면 색을 바꿔, 왜 안 달려지는지 바로 알 수 있게 한다
+        staminaBar.color = playerMove.IsExhausted ? staminaExhaustedColor : staminaColor;
+    }
+
+    void UpdateRollCooldown()
+    {
+        float remaining = playerMove.RollCooldownRemaining;
+        float total = playerMove.RollCooldownTotal;
+
+        if (rollCooldownFill != null)
+            rollCooldownFill.fillAmount = total > 0f ? Mathf.Clamp01(remaining / total) : 0f;
+
+        if (rollIcon != null)
+            rollIcon.color = remaining > 0f ? rollCoolingColor : rollReadyColor;
+
+        if (rollCooldownText != null)
+        {
+            bool cooling = remaining > 0.05f;
+
+            rollCooldownText.gameObject.SetActive(cooling);
+
+            if (cooling)
+                rollCooldownText.text = remaining.ToString("F1");
         }
     }
 
