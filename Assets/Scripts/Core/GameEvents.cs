@@ -41,6 +41,12 @@ public static class GameEvents
     public static Action<IWeapon> OnWeaponSwapped;       // 활성 무기가 바뀔 때
     public static Action<IWeapon> OnWeaponStatsChanged;  // 레벨업·모디파이어 적용 시
 
+    /// <summary>
+    /// 보유 무기 목록이 바뀔 때 (획득). 슬롯 UI 가 처음부터 다시 그린다.
+    /// 서브유닛을 얻으면 활성 무기가 바뀌지 않아 OnWeaponSwapped 가 나가지 않으므로 따로 필요하다.
+    /// </summary>
+    public static Action OnWeaponsChanged;
+
     public static Action<BossHealth> OnBossSpawned; // 보스 ui 연결용임
 
     public static Action OnGameWin; // 보스 처리 고나련

@@ -76,6 +76,9 @@ public class WeaponController : MonoBehaviour
     private bool isDead;
     private Animator anim;
 
+    /// <summary>지금까지 받은 범용 업그레이드 누적분. 새로 얻는 무기에 그대로 얹어 준다.</summary>
+    private WeaponModifier globalModifier = WeaponModifier.Identity;
+
     // 상체 레이어 인덱스 (없으면 -1). 총은 ShootLayer, 근접 무기는 MeleeLayer 를 켠다
     private int shootLayer = -1;
     private int meleeLayer = -1;
@@ -96,6 +99,12 @@ public class WeaponController : MonoBehaviour
 
     public bool HasFreeHeldSlot => held.Count < maxHeldSlots;
     public bool HasFreeSubUnitSlot => subUnits.Count < maxSubUnitSlots;
+
+    /// <summary>손 무기 슬롯 수. 슬롯 UI 가 빈 칸을 그리는 데 쓴다.</summary>
+    public int MaxHeldSlots => maxHeldSlots;
+
+    /// <summary>서브유닛 슬롯 수.</summary>
+    public int MaxSubUnitSlots => maxSubUnitSlots;
 
     public bool Has(WeaponData data) => Find(data) != null;
 
@@ -145,6 +154,8 @@ public class WeaponController : MonoBehaviour
 
             existing.SetLevel(existing.Level + 1);
             RaiseLegacyStats();
+            GameEvents.OnWeaponsChanged?.Invoke();
+
             return WeaponAcquireResult.LeveledUp;
         }
 
@@ -155,6 +166,9 @@ public class WeaponController : MonoBehaviour
 
         WeaponBase weapon = SpawnWeapon(data);
         if (weapon == null) return WeaponAcquireResult.Invalid;
+
+        // 이미 받아 둔 범용 강화를 새 무기에도 적용한다
+        weapon.ApplyModifier(globalModifier);
 
         if (isSub)
         {
@@ -170,12 +184,21 @@ public class WeaponController : MonoBehaviour
         }
 
         RaiseLegacyStats();
+        GameEvents.OnWeaponsChanged?.Invoke();
+
         return WeaponAcquireResult.Equipped;
     }
 
-    /// <summary>모든 무기에 업그레이드 증분을 적용한다 (연사·치명타 등 범용 강화).</summary>
+    /// <summary>
+    /// 모든 무기에 업그레이드 증분을 적용한다 (공격력·연사·치명타 등 범용 강화).
+    ///
+    /// 누적분을 따로 보관해 **나중에 얻는 무기에도 같은 강화가 적용되도록** 한다.
+    /// 보관하지 않으면 "공격력을 먼저 올리고 무기를 나중에 얻은" 경우 그 무기만 약해진다.
+    /// </summary>
     public void ApplyGlobalModifier(in WeaponModifier modifier)
     {
+        globalModifier = WeaponModifier.Combine(globalModifier, modifier);
+
         for (int i = 0; i < held.Count; i++)
             held[i].ApplyModifier(modifier);
 
@@ -271,8 +294,21 @@ public class WeaponController : MonoBehaviour
 
     void Start()
     {
-        if (starterWeapon != null)
-            Acquire(starterWeapon);
+        // 로비에서 고른 주 무기를 쓰고, 없으면 프리팹에 지정된 무기로 떨어진다.
+        //
+        // 폴백이 중요하다 — 에디터에서 Stage 씬을 직접 Play 하면 로비를 거치지 않아
+        // 선택값이 없다. 이때 무기 없이 시작하면 테스트가 막힌다.
+        //
+        // 생성 직후에 갈아 끼우지 않고 여기서 읽는 이유:
+        // Instantiate 는 Awake 만 즉시 실행하고 Start 는 프레임 끝에 돈다.
+        // 생성 직후 바꿔 놔도 뒤늦게 돈 Start 가 starterWeapon 을 또 장착해 버린다.
+        WeaponData starter = starterWeapon;
+
+        if (GameAppManager.Instance != null && GameAppManager.Instance.SelectedWeapon != null)
+            starter = GameAppManager.Instance.SelectedWeapon;
+
+        if (starter != null)
+            Acquire(starter);
     }
 
     void OnPlayerDead()
