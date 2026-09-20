@@ -30,16 +30,6 @@ public class ProjectileWeaponData : WeaponData
     [Tooltip("관통 가능한 적 수. 0이면 첫 적에게 맞고 사라진다")]
     [Min(0)] public int pierceCount = 0;
 
-    [Header("Ammo")]
-    [Tooltip("탄창 크기. 0 이면 무제한이라 장전하지 않는다")]
-    [Min(0)] public int magazineSize = 30;
-
-    [Tooltip("장전에 걸리는 시간(초). 모션 클립은 2.67초이며 코드가 배속을 맞춘다")]
-    [Min(0.1f)] public float reloadTime = 2f;
-
-    [Tooltip("탄이 떨어지면 자동으로 장전한다")]
-    public bool autoReload = true;
-
     [Header("Effects")]
     public GameObject muzzleFlashPrefab;
     public GameObject casingPrefab;
@@ -56,10 +46,6 @@ public class ProjectileWeaponData : WeaponData
         s.SpreadAngle = Mathf.Max(0f, spreadAngle);
         s.ProjectileCount = Mathf.Max(1, projectileCount + m.projectileCountAdd);
         s.PierceCount = Mathf.Max(0, pierceCount + m.pierceAdd);
-
-        // 0 은 "무제한" 이라는 뜻이므로 업그레이드가 붙어도 0 을 유지한다
-        s.MagazineSize = magazineSize <= 0 ? 0 : Mathf.Max(1, magazineSize + m.magazineAdd);
-        s.ReloadTime = Mathf.Max(0.1f, reloadTime * m.reloadTimeMul);
 
         return s;
     }

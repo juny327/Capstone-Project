@@ -60,49 +60,8 @@ public class PlayerMove : MonoBehaviour
 
     private bool sprintHeld;
 
-    /// <summary>현재 실제로 스프린트 중인지 (입력 유지 + 실제 이동 중 + 구르기 아님 + 스태미나 있음)</summary>
-    public bool IsSprinting =>
-        sprintHeld && move != Vector2.zero && !isRolling && !isDead && !exhausted && stamina > 0f;
-
-    // ─────────────────────────────────────────────
-    // 스태미나
-    // ─────────────────────────────────────────────
-    [Header("Stamina")]
-    [SerializeField] private float maxStamina = 100f;
-
-    [Tooltip("달리는 동안 초당 소모량")]
-    [SerializeField] private float sprintDrainPerSecond = 25f;
-
-    [Tooltip("걷는 동안 초당 회복량. 서 있을 때보다 느리다")]
-    [SerializeField] private float walkRecoverPerSecond = 8f;
-
-    [Tooltip("서 있을 때 초당 회복량")]
-    [SerializeField] private float idleRecoverPerSecond = 18f;
-
-    [Tooltip("달리기를 멈춘 뒤 회복이 시작되기까지의 시간(초)")]
-    [SerializeField] private float recoverDelay = 0.5f;
-
-    [Tooltip("바닥난 뒤 다시 달릴 수 있게 되는 비율. 0.25 면 25% 찰 때까지 못 달린다")]
-    [Range(0f, 1f)]
-    [SerializeField] private float exhaustedRecoverRatio = 0.25f;
-
-    private float stamina;
-    private float recoverTimer;
-
-    /// <summary>완전히 바닥나 잠시 달릴 수 없는 상태. 찔끔찔끔 달리는 것을 막는다.</summary>
-    private bool exhausted;
-
-    public float Stamina => stamina;
-    public float MaxStamina => maxStamina;
-
-    /// <summary>0~1. HUD 바에 그대로 쓴다.</summary>
-    public float StaminaNormalized => maxStamina > 0f ? Mathf.Clamp01(stamina / maxStamina) : 0f;
-
-    /// <summary>바닥나서 회복을 기다리는 중인지. HUD 에서 색을 바꾸는 데 쓴다.</summary>
-    public bool IsExhausted => exhausted;
-
-    /// <summary>구르기를 다시 쓸 수 있게 되기까지의 총 시간(초).</summary>
-    public float RollCooldownTotal => rollDuration + rollCooldown;
+    /// <summary>현재 실제로 스프린트 중인지 (입력 유지 + 실제 이동 중 + 구르기 아님)</summary>
+    public bool IsSprinting => sprintHeld && move != Vector2.zero && !isRolling && !isDead;
 
     // ─────────────────────────────────────────────
     // 구르기
@@ -177,8 +136,6 @@ public class PlayerMove : MonoBehaviour
 
         CacheAnimatorParams();
         CacheRollCurveAverage();
-
-        stamina = maxStamina;
     }
 
     // 커브의 평균 배율을 구해 둔다.
@@ -270,8 +227,6 @@ public class PlayerMove : MonoBehaviour
         if (rollCdTimer > 0f)
             rollCdTimer -= Time.fixedDeltaTime;
 
-        TickStamina(Time.fixedDeltaTime);
-
         // ── 구르는 중에는 일반 이동/회전을 전부 건너뛴다 ──
         if (isRolling)
         {
@@ -348,48 +303,6 @@ public class PlayerMove : MonoBehaviour
             anim.SetBool(HashIsMove, move != Vector2.zero);
     }
 
-    /// <summary>
-    /// 스태미나 갱신. 달리면 닳고, 멈추거나 걸으면 회복한다.
-    ///
-    /// 걷는 중에는 회복이 느리다 — 그래야 "쉬어야 다시 달릴 수 있다"는 감각이 생긴다.
-    /// 바닥나면 일정 비율까지 차야 다시 달릴 수 있다. 그러지 않으면 0 근처에서
-    /// 한 프레임씩 달렸다 멈췄다를 반복해 조작감이 망가진다.
-    /// </summary>
-    void TickStamina(float deltaTime)
-    {
-        if (isDead) return;
-
-        if (IsSprinting)
-        {
-            stamina -= sprintDrainPerSecond * deltaTime;
-            recoverTimer = recoverDelay;
-
-            if (stamina <= 0f)
-            {
-                stamina = 0f;
-                exhausted = true;
-            }
-
-            return;
-        }
-
-        if (recoverTimer > 0f)
-        {
-            recoverTimer -= deltaTime;
-            return;
-        }
-
-        // 구르는 중에는 회복하지 않는다
-        if (isRolling) return;
-
-        float rate = move != Vector2.zero ? walkRecoverPerSecond : idleRecoverPerSecond;
-
-        stamina = Mathf.Min(maxStamina, stamina + rate * deltaTime);
-
-        if (exhausted && stamina >= maxStamina * exhaustedRecoverRatio)
-            exhausted = false;
-    }
-
     void OnSprint(InputAction.CallbackContext context)
     {
         sprintHeld = context.performed;
@@ -458,10 +371,6 @@ public class PlayerMove : MonoBehaviour
         // 상체 레이어(사격·근접)를 꺼서 구르는 중에 총을 겨누거나 검 자세가 섞이지 않게 한다
         SetUpperBodyLayers(false);
 
-        // 상체가 꺼지면 장전 모션도 보이지 않는다. 모션 없이 장전이 끝나는 눈속임을 막기 위해
-        // 구르기 시작과 함께 장전을 취소한다 (12번 R2).
-        CancelReload();
-
         if (stats != null && rollIFrame > 0f)
             stats.SetInvulnerable(rollIFrame);
     }
@@ -529,15 +438,6 @@ public class PlayerMove : MonoBehaviour
 
     // 무기 시스템이 있으면 들고 있는 무기에 맞는 상체 레이어를 WeaponController 가 고른다.
     // (예전처럼 무조건 사격 레이어를 켜면 검을 들고 구른 뒤 소총 자세로 돌아간다)
-    /// <summary>구르기 시작 시 진행 중인 장전을 취소한다 (12번 R2).</summary>
-    void CancelReload()
-    {
-        var weapons = GetComponent<WeaponController>();
-
-        if (weapons != null && weapons.enabled)
-            weapons.CancelActiveReload();
-    }
-
     void SetUpperBodyLayers(bool on)
     {
         var weapons = GetComponent<WeaponController>();

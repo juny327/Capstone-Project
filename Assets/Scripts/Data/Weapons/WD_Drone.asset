@@ -15,7 +15,7 @@ MonoBehaviour:
   weaponName: "\uB4DC\uB860"
   description: "\uC8FC\uC704\uB97C \uB3CC\uBA70 \uC790\uB3D9 \uC0AC\uACA9. \uB808\uBCA8
     = \uB4DC\uB860 \uC218"
-  icon: {fileID: 21300000, guid: 8c5dfefd7cba0854eb7c297b96c1b232, type: 3}
+  icon: {fileID: 0}
   weaponPrefab: {fileID: 1993795525855743618, guid: 927753c13baf15f4ab57abe40958a474, type: 3}
   socket: 3
   fireInterval: 0.8
@@ -32,11 +32,8 @@ MonoBehaviour:
     projectileSpeedAdd: 0
     projectileCountAdd: 0
     pierceAdd: 0
-    magazineAdd: 0
-    reloadTimeMul: 1
     rangeAdd: 0
     subUnitAdd: 1
-    durationAdd: 0
   requiresTarget: 1
   dronePrefab: {fileID: 7734045794844672905, guid: 4b075ab29d7979b449c09eb29abf8616, type: 3}
   droneCount: 1

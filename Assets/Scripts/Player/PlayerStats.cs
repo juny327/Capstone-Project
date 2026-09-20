@@ -7,25 +7,12 @@ public class PlayerStats : MonoBehaviour, IDamageable
     public int level = 1;
     public int currentExp = 0;
 
-    [Header("Level")]
-    [Tooltip("1 -> 2 에 필요한 EXP")]
-    [Min(1)] public int baseExp = 5;
-
-    [Tooltip("레벨이 오를 때마다 필요량에 더해지는 값")]
-    [Min(0)] public int expGrowth = 3;
-
-    /// <summary>다음 레벨까지 필요한 EXP.</summary>
-    public int ExpToNext => Mathf.Max(1, baseExp + expGrowth * (level - 1));
-
     public int maxHp = 100;
     public int currentHp;
     public GameObject deathParticle;
 
     public event Action<int,int> OnHpChanged;
     public event Action<int> OnExpChanged;
-
-    /// <summary>레벨이 올랐을 때 (새 레벨). HUD 표시용.</summary>
-    public event Action<int> OnLevelChanged;
     private Animator anim;
 
     // 사망 가드 - 사망 후 추가 피격으로 Die()가 반복 호출되는 것을 막는다
@@ -57,19 +44,6 @@ public class PlayerStats : MonoBehaviour, IDamageable
     public void AddExp(int amount)
     {
         currentExp += amount;
-
-        // 한 번에 여러 레벨이 오를 수 있다 (한꺼번에 몰살했을 때).
-        //
-        // 차감을 먼저 하고 level++ 해야 한다 — ExpToNext 가 level 에 의존하므로
-        // 순서를 바꾸면 필요량이 한 레벨씩 밀린다.
-        while (currentExp >= ExpToNext)
-        {
-            currentExp -= ExpToNext;
-            level++;
-
-            OnLevelChanged?.Invoke(level);
-            GameEvents.OnLevelUp?.Invoke(level);
-        }
 
         OnExpChanged?.Invoke(currentExp);
     }

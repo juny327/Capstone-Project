@@ -24,32 +24,13 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
     private float cooldown;
     private int level = 1;
 
-    // 탄창 (12번 문서). 탄창 크기 0 인 무기(근접·서브유닛)는 이 값들을 쓰지 않는다.
-    private int ammo;
-    private float reloadRemaining;
-
     /// <summary>이 무기를 소유한 컨트롤러. 플레이어 루트 참조용.</summary>
     protected WeaponController Owner { get; private set; }
 
     public WeaponData Data => data;
     public int Level => level;
-
-    /// <summary>쿨다운이 끝나고, 장전 중이 아니며, 탄약이 남아 있어야 쏠 수 있다.</summary>
-    public bool CanFire => cooldown <= 0f && IsActive && !IsReloading && HasAmmo;
-
+    public bool CanFire => cooldown <= 0f && IsActive;
     public bool IsActive { get; private set; } = true;
-
-    // ───────── 탄창 ─────────
-
-    /// <summary>탄창 크기. 0 이면 무제한이라 장전 자체를 하지 않는다.</summary>
-    public int MagazineSize => data != null ? Stats.MagazineSize : 0;
-
-    public int Ammo => ammo;
-
-    public bool IsReloading => reloadRemaining > 0f;
-
-    /// <summary>탄창을 쓰지 않는 무기이거나, 탄이 남아 있는가.</summary>
-    public bool HasAmmo => MagazineSize <= 0 || ammo > 0;
 
     /// <summary>누적 업그레이드 + 레벨 보너스.</summary>
     protected WeaponModifier TotalModifier =>
@@ -80,30 +61,12 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
             SetActive(true);
 
         cooldown = 0f;
-
-        // 탄창을 가득 채운 상태로 시작한다
-        ammo = Stats.MagazineSize;
-        reloadRemaining = 0f;
     }
 
     public void Tick(float deltaTime)
     {
         if (cooldown > 0f)
             cooldown -= deltaTime;
-
-        if (reloadRemaining > 0f)
-        {
-            reloadRemaining -= deltaTime;
-
-            if (reloadRemaining <= 0f)
-            {
-                reloadRemaining = 0f;
-                ammo = Stats.MagazineSize;
-
-                OnReloadFinished();
-                RaiseAmmoChanged();
-            }
-        }
 
         OnTick(deltaTime);
     }
@@ -115,68 +78,6 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
         OnFire(in stats, in context);
 
         cooldown = stats.FireInterval;
-
-        // 산탄이어도 1회 발사는 탄약 1 소모다 (12번 R3).
-        // 탄 수만큼 깎으면 산탄 업그레이드가 곧 탄약 소모 증가가 되어 벌칙이 된다.
-        if (stats.MagazineSize > 0)
-        {
-            ammo = Mathf.Max(0, ammo - 1);
-            RaiseAmmoChanged();
-        }
-    }
-
-    /// <summary>
-    /// 장전을 시작한다. 탄창이 가득이거나 이미 장전 중이면 아무 일도 하지 않는다.
-    /// 탄이 남아 있어도 수동으로 장전할 수 있다 (12번 R1).
-    /// </summary>
-    public void StartReload()
-    {
-        WeaponRuntimeStats stats = Stats;
-
-        if (stats.MagazineSize <= 0) return;   // 탄창을 쓰지 않는 무기
-        if (IsReloading) return;
-        if (ammo >= stats.MagazineSize) return;
-        if (!IsActive) return;
-
-        reloadRemaining = stats.ReloadTime;
-
-        OnReloadStarted(stats.ReloadTime);
-        RaiseAmmoChanged();
-    }
-
-    /// <summary>탄이 떨어졌고 자동 장전을 쓰는 무기면 장전을 시작한다.</summary>
-    public void TryAutoReload()
-    {
-        if (IsReloading || HasAmmo) return;
-        if (!AutoReload) return;
-
-        StartReload();
-    }
-
-    /// <summary>장전을 취소한다. 스왑·구르기·사망에서 부른다. 탄약은 그대로 둔다 (12번 R4).</summary>
-    public void CancelReload()
-    {
-        if (!IsReloading) return;
-
-        reloadRemaining = 0f;
-
-        OnReloadCanceled();
-        RaiseAmmoChanged();
-    }
-
-    /// <summary>자동 장전 여부. 투사체 무기가 데이터 값으로 재정의한다.</summary>
-    protected virtual bool AutoReload => true;
-
-    /// <summary>
-    /// 손에 든 무기의 탄약 변화를 HUD 에 알린다.
-    /// 서브유닛은 스왑 대상이 아니므로 발행하지 않는다 — 발행하면 HUD 숫자가 드론 것으로 덮인다.
-    /// </summary>
-    protected void RaiseAmmoChanged()
-    {
-        if (!IsActive) return;
-        if (data == null || data.IsAlwaysActive) return;
-
-        GameEvents.OnAmmoChanged?.Invoke(IsReloading ? 0 : ammo, MagazineSize);
     }
 
     public void ApplyModifier(in WeaponModifier modifier)
@@ -209,15 +110,7 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
             renderers[i].enabled = active;
 
         if (active)
-        {
-            cooldown = 0f;       // 스왑 직후 바로 쏠 수 있게
-            RaiseAmmoChanged();  // HUD 를 이 무기의 탄약으로 바꾼다
-            return;
-        }
-
-        // 손에서 빠질 때 장전을 취소한다. 탄약은 유지되므로 다시 들면 그 상태 그대로다 (12번 R4).
-        // 취소하지 않으면 무기를 바꿔 둔 사이에 장전이 끝난다.
-        CancelReload();
+            cooldown = 0f;   // 스왑 직후 바로 쏠 수 있게
     }
 
     // ───────── 파생 클래스가 구현/확장하는 부분 ─────────
@@ -233,15 +126,6 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
 
     /// <summary>매 프레임 추가 처리가 필요한 무기용 (드론 궤도 등).</summary>
     protected virtual void OnTick(float deltaTime) { }
-
-    /// <summary>장전이 시작될 때. 투사체 무기가 애니메이션을 재생한다.</summary>
-    protected virtual void OnReloadStarted(float duration) { }
-
-    /// <summary>장전이 끝나 탄창이 찼을 때.</summary>
-    protected virtual void OnReloadFinished() { }
-
-    /// <summary>장전이 도중에 취소됐을 때 (스왑·구르기·사망).</summary>
-    protected virtual void OnReloadCanceled() { }
 
     /// <summary>레벨·모디파이어가 바뀌었을 때. 드론이 수를 맞추는 데 쓴다.</summary>
     protected virtual void OnStatsChanged() { }

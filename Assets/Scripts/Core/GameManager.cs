@@ -27,15 +27,9 @@ public class GameManager : MonoBehaviour
         GameEvents.OnGameWin -= OnGameWin;
     }
 
-    // 클리어 연출이 겹쳐 돌면 씬 전환이 여러 번 일어난다
-    bool clearing;
-
     void OnStageClear()
     {
-        if (clearing) return;
-
-        clearing = true;
-        StartCoroutine(StageClearFlow());
+    StartCoroutine(StageClearFlow());
     }
 
     IEnumerator StageClearFlow()
@@ -50,11 +44,9 @@ public class GameManager : MonoBehaviour
         // 3. Stage Clear UI 끄기
         GameEvents.OnHideStageClearUI?.Invoke();
 
-        // 4. 다음 스테이지로
-        //
-        // 업그레이드는 이제 레벨업에서 받는다 (13번 U8-A). 클리어 시점에 카드를 또 띄우면
-        // 레벨업 카드와 역할이 겹치므로, 클리어는 다음 스테이지로 넘기는 역할만 한다.
-        GameEvents.OnNextStage?.Invoke();
+        // 4. Upgrade UI 열기
+        Time.timeScale = 0f;
+        GameEvents.OnOpenUpgradeUI?.Invoke();
     }
 
     void LoadNextStage()

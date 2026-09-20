@@ -8,57 +8,6 @@ public class ProjectileWeapon : WeaponBase
 {
     private ProjectileWeaponData Config => (ProjectileWeaponData)data;
 
-    // 장전 애니메이션. MeleeWeapon 의 Slash 처리와 같은 방식이다 —
-    // 파라미터가 아직 없어도 조용히 건너뛰어 경고가 쌓이지 않게 한다.
-    private static readonly int HashReload = Animator.StringToHash("Reload");
-    private static readonly int HashReloadSpeed = Animator.StringToHash("ReloadSpeed");
-
-    /// <summary>Reload.anim 길이(초). 이 길이를 장전 시간에 맞춰 배속으로 재생한다.</summary>
-    private const float ReloadClipLength = 2.67f;
-
-    private Animator ownerAnim;
-    private bool hasReloadParam;
-    private bool hasReloadSpeedParam;
-    private bool animChecked;
-
-    protected override bool AutoReload => Config == null || Config.autoReload;
-
-    protected override void OnReloadStarted(float duration)
-    {
-        if (!animChecked) CacheAnimator();
-        if (ownerAnim == null || !hasReloadParam) return;
-
-        // 클립(2.67초)을 데이터의 장전 시간에 맞춰 배속 재생한다
-        if (hasReloadSpeedParam && duration > 0.01f)
-            ownerAnim.SetFloat(HashReloadSpeed, ReloadClipLength / duration);
-
-        ownerAnim.SetTrigger(HashReload);
-    }
-
-    protected override void OnReloadCanceled()
-    {
-        if (ownerAnim == null || !hasReloadParam) return;
-
-        // 트리거가 남아 있으면 다음 상태 전이에서 장전이 한 번 더 재생된다
-        ownerAnim.ResetTrigger(HashReload);
-    }
-
-    void CacheAnimator()
-    {
-        animChecked = true;
-
-        if (Owner == null) return;
-
-        ownerAnim = Owner.GetComponent<Animator>();
-        if (ownerAnim == null) return;
-
-        foreach (AnimatorControllerParameter p in ownerAnim.parameters)
-        {
-            if (p.nameHash == HashReload) hasReloadParam = true;
-            else if (p.nameHash == HashReloadSpeed) hasReloadSpeedParam = true;
-        }
-    }
-
     protected override void OnFire(in WeaponRuntimeStats stats, in WeaponFireContext context)
     {
         ProjectileWeaponData cfg = Config;

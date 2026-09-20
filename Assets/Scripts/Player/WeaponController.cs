@@ -43,10 +43,10 @@ public class WeaponController : MonoBehaviour
 
     [Header("Slots")]
     [Tooltip("손에 드는 무기(투사체/근접) 보유 가능 수")]
-    [Min(1)] [SerializeField] private int maxHeldSlots = 2;
+    [Min(1)] [SerializeField] private int maxHeldSlots = 4;
 
-    [Tooltip("서브유닛(드론·오브·방전장 등) 보유 가능 수")]
-    [Min(1)] [SerializeField] private int maxSubUnitSlots = 3;
+    [Tooltip("서브유닛(드론) 보유 가능 수")]
+    [Min(1)] [SerializeField] private int maxSubUnitSlots = 2;
 
     [Header("Start")]
     [Tooltip("게임 시작 시 장착할 무기. 비워두면 무기 없이 시작한다")]
@@ -65,9 +65,6 @@ public class WeaponController : MonoBehaviour
     [SerializeField] private Key swapKey = Key.Q;
     [SerializeField] private bool swapWithScrollWheel = true;
 
-    [Tooltip("수동 장전 키. 탄창이 남아 있어도 장전할 수 있다")]
-    [SerializeField] private Key reloadKey = Key.R;
-
     [Header("Legacy HUD")]
     [Tooltip("PlayerStatsUI 가 구독하는 기존 이벤트를 활성 무기 기준으로 발행한다")]
     [SerializeField] private bool raiseLegacyStatEvents = true;
@@ -78,9 +75,6 @@ public class WeaponController : MonoBehaviour
     private int activeHeldIndex = -1;
     private bool isDead;
     private Animator anim;
-
-    /// <summary>지금까지 받은 범용 업그레이드 누적분. 새로 얻는 무기에 그대로 얹어 준다.</summary>
-    private WeaponModifier globalModifier = WeaponModifier.Identity;
 
     // 상체 레이어 인덱스 (없으면 -1). 총은 ShootLayer, 근접 무기는 MeleeLayer 를 켠다
     private int shootLayer = -1;
@@ -102,12 +96,6 @@ public class WeaponController : MonoBehaviour
 
     public bool HasFreeHeldSlot => held.Count < maxHeldSlots;
     public bool HasFreeSubUnitSlot => subUnits.Count < maxSubUnitSlots;
-
-    /// <summary>손 무기 슬롯 수. 슬롯 UI 가 빈 칸을 그리는 데 쓴다.</summary>
-    public int MaxHeldSlots => maxHeldSlots;
-
-    /// <summary>서브유닛 슬롯 수.</summary>
-    public int MaxSubUnitSlots => maxSubUnitSlots;
 
     public bool Has(WeaponData data) => Find(data) != null;
 
@@ -157,8 +145,6 @@ public class WeaponController : MonoBehaviour
 
             existing.SetLevel(existing.Level + 1);
             RaiseLegacyStats();
-            GameEvents.OnWeaponsChanged?.Invoke();
-
             return WeaponAcquireResult.LeveledUp;
         }
 
@@ -169,9 +155,6 @@ public class WeaponController : MonoBehaviour
 
         WeaponBase weapon = SpawnWeapon(data);
         if (weapon == null) return WeaponAcquireResult.Invalid;
-
-        // 이미 받아 둔 범용 강화를 새 무기에도 적용한다
-        weapon.ApplyModifier(globalModifier);
 
         if (isSub)
         {
@@ -187,66 +170,12 @@ public class WeaponController : MonoBehaviour
         }
 
         RaiseLegacyStats();
-        GameEvents.OnWeaponsChanged?.Invoke();
-
         return WeaponAcquireResult.Equipped;
     }
 
-    /// <summary>게임 시작 시 장착하도록 지정된 기본 무기. 초기화에 쓴다.</summary>
-    public WeaponData StarterWeapon => starterWeapon;
-
-    /// <summary>
-    /// 보유 무기를 전부 지우고 기본 무기만 다시 장착한다 (테스트용).
-    ///
-    /// 서브유닛은 하나도 남기지 않는다. 드론·오브처럼 개체를 만드는 무기는
-    /// SetActive(false) 로 개체를 먼저 치운 뒤 지운다 — 그냥 Destroy 하면
-    /// 플레이어 밑에 개체만 남아 유령처럼 계속 돈다.
-    /// </summary>
-    public void ResetWeapons(WeaponData starter)
-    {
-        for (int i = held.Count - 1; i >= 0; i--)
-            DestroyWeapon(held[i]);
-
-        held.Clear();
-
-        for (int i = subUnits.Count - 1; i >= 0; i--)
-            DestroyWeapon(subUnits[i]);
-
-        subUnits.Clear();
-
-        activeHeldIndex = -1;
-        SuppressUpperBodyLayers();
-
-        if (starter != null)
-        {
-            Acquire(starter);
-            return;
-        }
-
-        RaiseLegacyStats();
-        GameEvents.OnWeaponSwapped?.Invoke(null);
-        GameEvents.OnWeaponsChanged?.Invoke();
-    }
-
-    void DestroyWeapon(WeaponBase weapon)
-    {
-        if (weapon == null) return;
-
-        weapon.SetActive(false);   // 드론·오브 등 개체 정리
-        Destroy(weapon.gameObject);
-    }
-
-    /// <summary>
-    /// 모든 무기에 업그레이드 증분을 적용한다 (공격력·연사·치명타 등 범용 강화).
-    ///
-    /// 누적분을 따로 보관해, **나중에 얻는 무기에도 같은 강화가 적용되도록** 한다.
-    /// 보관하지 않으면 "공격력 업그레이드를 먼저 먹고 서브유닛을 나중에 얻은" 플레이어의
-    /// 서브유닛만 약해진다.
-    /// </summary>
+    /// <summary>모든 무기에 업그레이드 증분을 적용한다 (연사·치명타 등 범용 강화).</summary>
     public void ApplyGlobalModifier(in WeaponModifier modifier)
     {
-        globalModifier = WeaponModifier.Combine(globalModifier, modifier);
-
         for (int i = 0; i < held.Count; i++)
             held[i].ApplyModifier(modifier);
 
@@ -342,28 +271,14 @@ public class WeaponController : MonoBehaviour
 
     void Start()
     {
-        // 로비에서 고른 주 무기를 쓰고, 없으면 프리팹에 지정된 무기로 떨어진다 (13번 7-1).
-        //
-        // 폴백이 중요하다 — 에디터에서 Stage 씬을 직접 Play 하면 로비를 거치지 않아
-        // 선택값이 없다. 이때 무기 없이 시작하면 테스트가 막힌다.
-        //
-        // 생성 직후에 무기를 갈아 끼우지 않고 여기서 읽는 이유:
-        // Instantiate 는 Awake 만 즉시 실행하고 Start 는 프레임 끝에 돈다.
-        // 생성 직후 바꿔 놔도 뒤늦게 돈 Start 가 starterWeapon 을 또 장착해 버린다.
-        WeaponData starter = starterWeapon;
-
-        if (GameAppManager.Instance != null && GameAppManager.Instance.SelectedWeapon != null)
-            starter = GameAppManager.Instance.SelectedWeapon;
-
-        if (starter != null)
-            Acquire(starter);
+        if (starterWeapon != null)
+            Acquire(starterWeapon);
     }
 
     void OnPlayerDead()
     {
         isDead = true;
         SuppressUpperBodyLayers();
-        CancelActiveReload();   // 사망 연출 중에 장전이 끝나 HUD 가 갱신되지 않게 한다
 
         for (int i = 0; i < subUnits.Count; i++)
             subUnits[i].SetActive(false);
@@ -374,7 +289,6 @@ public class WeaponController : MonoBehaviour
         if (isDead) return;
 
         HandleSwapInput();
-        HandleReloadInput();
 
         float dt = Time.deltaTime;
         WeaponFireContext ctx = new WeaponFireContext(detector, transform);
@@ -386,15 +300,7 @@ public class WeaponController : MonoBehaviour
             w.Tick(dt);
 
             if (i != activeHeldIndex) continue;
-
-            if (!w.CanFire)
-            {
-                // 탄이 떨어졌으면 자동 장전을 시작한다. 손에 든 무기만 장전하므로
-                // 스왑으로 장전 시간을 회피할 수 없다.
-                w.TryAutoReload();
-                continue;
-            }
-
+            if (!w.CanFire) continue;
             if (!ShouldFire(w)) continue;
             if (!w.HasTargetInReach(in ctx)) continue;   // 사거리 밖이면 쿨다운을 쓰지 않고 기다린다
 
@@ -423,32 +329,6 @@ public class WeaponController : MonoBehaviour
         if (!weapon.Data.requiresTarget) return true;
 
         return detector != null && detector.HasTarget;
-    }
-
-    /// <summary>수동 장전 (12번 R1). 탄창이 남아 있어도 누르면 장전한다.</summary>
-    void HandleReloadInput()
-    {
-        if (!enableDirectSwapInput) return;
-        if (Keyboard.current == null) return;
-        if (!Keyboard.current[reloadKey].wasPressedThisFrame) return;
-
-        ReloadActiveWeapon();
-    }
-
-    /// <summary>손에 든 무기를 장전한다. 다른 시스템(UI 버튼 등)에서도 부를 수 있다.</summary>
-    public void ReloadActiveWeapon()
-    {
-        if (activeHeldIndex < 0 || activeHeldIndex >= held.Count) return;
-
-        held[activeHeldIndex].StartReload();
-    }
-
-    /// <summary>진행 중인 장전을 취소한다. 구르기·사망에서 부른다 (12번 R2).</summary>
-    public void CancelActiveReload()
-    {
-        if (activeHeldIndex < 0 || activeHeldIndex >= held.Count) return;
-
-        held[activeHeldIndex].CancelReload();
     }
 
     void HandleSwapInput()

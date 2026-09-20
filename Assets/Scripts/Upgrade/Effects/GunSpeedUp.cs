@@ -1,10 +1,5 @@
 using UnityEngine;
 
-/// <summary>
-/// 탄속 증가 (13번 3장).
-///
-/// DamageUpgrade 와 같은 이유로 옛 Gun 이 아니라 무기 스탯 체계에 적용한다.
-/// </summary>
 [CreateAssetMenu(menuName = "Upgrade/Effects/GunSpeed")]
 public class GunSpeedUp : UpgradeEffect
 {
@@ -12,26 +7,11 @@ public class GunSpeedUp : UpgradeEffect
 
     public override void Apply(GameObject player)
     {
-        if (player == null) return;
+        Gun gun = player.GetComponentInChildren<Gun>();
 
-        WeaponController controller = player.GetComponent<WeaponController>();
-
-        if (controller == null)
+        if (gun != null)
         {
-            Debug.LogError($"[{name}] 플레이어에 WeaponController 가 없습니다.");
-            return;
+            gun.AddSpeed(amount);
         }
-
-        WeaponModifier modifier = WeaponModifier.Identity;
-        modifier.projectileSpeedAdd = amount;
-
-        controller.ApplyGlobalModifier(modifier);
-    }
-
-    public override string GetDescription(UpgradeData data)
-    {
-        string body = string.IsNullOrWhiteSpace(data.description) ? string.Empty : data.description + "\n\n";
-
-        return $"{body}탄속 +{amount:F0}";
     }
 }

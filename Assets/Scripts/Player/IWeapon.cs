@@ -13,20 +13,8 @@ public interface IWeapon
     /// <summary>기본값 + 누적 모디파이어를 합성한 실제 스탯.</summary>
     WeaponRuntimeStats Stats { get; }
 
-    /// <summary>쿨다운이 끝나고 탄약이 있어 발사 가능한지.</summary>
+    /// <summary>쿨다운이 끝나 발사 가능한지.</summary>
     bool CanFire { get; }
-
-    /// <summary>남은 탄약. 탄창을 쓰지 않는 무기는 항상 0 이다.</summary>
-    int Ammo { get; }
-
-    /// <summary>탄창 크기. 0 이면 무제한(근접·서브유닛).</summary>
-    int MagazineSize { get; }
-
-    /// <summary>장전 중인지.</summary>
-    bool IsReloading { get; }
-
-    /// <summary>장전을 시작한다. 탄창이 가득이거나 이미 장전 중이면 아무 일도 하지 않는다.</summary>
-    void StartReload();
 
     /// <summary>쿨다운 진행. 비활성(스왑되어 손에 없는) 상태에서도 호출된다.</summary>
     void Tick(float deltaTime);

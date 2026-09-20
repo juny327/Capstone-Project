@@ -1760,7 +1760,6 @@ Transform:
   - {fileID: 4174765881167191627}
   - {fileID: 2480561948657019658}
   - {fileID: 6494887098562687394}
-  - {fileID: 8876644716469741553}
   m_Father: {fileID: 6252889607513107976}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &5207677542077073243
@@ -1898,6 +1897,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7263766654890774483}
   - component: {fileID: 7824709635573339692}
+  - component: {fileID: 5628642350786249570}
   m_Layer: 0
   m_Name: AssaultRifle
   m_TagString: Untagged
@@ -2039,6 +2039,25 @@ SkinnedMeshRenderer:
     m_Center: {x: -34.27955, y: -49.079704, z: 120.48372}
     m_Extent: {x: 95.48148, y: 94.6697, z: 10.629513}
   m_DirtyAABB: 0
+--- !u!114 &5628642350786249570
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6216311896340534446}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4f57c38812287de4a8b969554ee3ff41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Gun
+  muzzle: {fileID: 2337451427552330319}
+  bulletCase: {fileID: 7835941851446250285}
+  bulletPrefab: {fileID: 5875018044698817663, guid: 47d42afc0830c50448915274e6d3e535, type: 3}
+  muzzleFlashPrefab: {fileID: 2916273817513264348, guid: 95044fb3908b36c46bc62060360f7ba6, type: 3}
+  bulletCasePrefab: {fileID: 8464276986609709168, guid: 4aa9530848b0025449ef44e32d3f9a41, type: 3}
+  bulletSpeed: 20
+  bulletDamage: 2
 --- !u!1 &6564958761596548974
 GameObject:
   m_ObjectHideFlags: 0
@@ -2139,37 +2158,6 @@ Transform:
   m_Children:
   - {fileID: 6019401833169187226}
   m_Father: {fileID: 276185952146055379}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &6944332879991657054
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 8876644716469741553}
-  m_Layer: 0
-  m_Name: WeaponSocket_Back
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &8876644716469741553
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6944332879991657054}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.1, z: -0.18}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 8835001999029462647}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &7106663478439685411
 GameObject:
@@ -2644,6 +2632,7 @@ GameObject:
   - component: {fileID: 7790926773569145238}
   - component: {fileID: 8807426808987672018}
   - component: {fileID: 4974008657548356682}
+  - component: {fileID: 7985263626957455923}
   - component: {fileID: 9082146297184825607}
   - component: {fileID: 4981090094168221985}
   - component: {fileID: 1000000000000000001}
@@ -2842,6 +2831,22 @@ CapsuleCollider:
   m_Height: 2.0397058
   m_Direction: 1
   m_Center: {x: 0, y: 0.9711249, z: 0}
+--- !u!114 &7985263626957455923
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7640777319044402237}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2855b2abda997b748a27b9e2415895e8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AutoAttack
+  detector: {fileID: 1129838663952604652}
+  gun: {fileID: 5628642350786249570}
+  playerMove: {fileID: 0}
+  attackRate: 0.3
 --- !u!114 &9082146297184825607
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2856,8 +2861,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerStats
   level: 1
   currentExp: 0
-  baseExp: 5
-  expGrowth: 3
   maxHp: 100
   currentHp: 0
   deathParticle: {fileID: 1250969030787328715, guid: 085974e0352f08649851bbacca7ab84b, type: 3}
@@ -2903,8 +2906,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cbc60558268f85940b6cb6154533a71c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WeaponController
-  maxHeldSlots: 2
-  maxSubUnitSlots: 3
+  maxHeldSlots: 4
+  maxSubUnitSlots: 2
   starterWeapon: {fileID: 11400000, guid: e61cedaa53406ed4f8ea56c742ecc880, type: 2}
   detector: {fileID: 1129838663952604652}
   sockets:
@@ -2912,12 +2915,9 @@ MonoBehaviour:
     point: {fileID: 6592672375028753140}
   - socket: 3
     point: {fileID: 5451664751410845561}
-  - socket: 2
-    point: {fileID: 8876644716469741553}
   enableDirectSwapInput: 1
   swapKey: 31
   swapWithScrollWheel: 1
-  reloadKey: 32
   raiseLegacyStatEvents: 1
 --- !u!1 &7738332526512525993
 GameObject:

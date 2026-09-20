@@ -6,9 +6,6 @@ public class StageManager : MonoBehaviour
 
     int killCount = 0;
 
-    /// <summary>클리어를 이미 알렸는지. 중복 발행을 막는다.</summary>
-    bool cleared;
-
     void OnEnable()
     {
         GameEvents.OnEnemyKilled += OnEnemyKilled;
@@ -30,17 +27,11 @@ public class StageManager : MonoBehaviour
     void OnEnemyKilled()
     {
         killCount++;
-        GameEvents.OnStageProgress?.Invoke(killCount, currentStage.killTarget);
+        GameEvents.OnStageProgress?.Invoke(killCount, currentStage.killTarget); 
 
-        if (cleared) return;
-
-        // 킬 목표가 0 인 스테이지(보스전)는 처치 수로 끝나지 않는다.
-        // 이 가드가 없으면 0 >= 0 이 성립해 **적을 잡을 때마다** 클리어가 발행된다.
-        if (currentStage.killTarget <= 0) return;
-
-        if (killCount < currentStage.killTarget) return;
-
-        cleared = true;   // 클리어는 한 번만
-        GameEvents.OnStageClear?.Invoke();
+        if (killCount >= currentStage.killTarget)
+        {
+            GameEvents.OnStageClear?.Invoke();
+        }
     }
 }
