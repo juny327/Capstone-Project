@@ -1776,6 +1776,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UpgradeSuccessUI
   panel: {fileID: 1885698930}
   text: {fileID: 796151593}
+  showPopup: 0
 --- !u!1 &811100623
 GameObject:
   m_ObjectHideFlags: 0
@@ -3716,11 +3717,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: af9cf7b0802d606489897f30190b74e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UpgradeManager
-  upgradePool:
-  - {fileID: 11400000, guid: a36f0e1f2cd6bee4d90327402d803513, type: 2}
-  - {fileID: 11400000, guid: 278163beaef920b4c9defa897c485a9f, type: 2}
-  - {fileID: 11400000, guid: 3c1dc8f1e21e150418f7e6f0b3611a6e, type: 2}
-  - {fileID: 11400000, guid: febbe4264debaea46a4c459b9cf4fa61, type: 2}
+  upgradePool: {fileID: 11400000, guid: a4e0b91e269b6984c973c89be9bc6240, type: 2}
 --- !u!4 &1823725593
 Transform:
   m_ObjectHideFlags: 0
@@ -4427,6 +4424,7 @@ MonoBehaviour:
   - {fileID: 8162335778504266055, guid: 8bd3d77cd8392274183d5dc9bc9bf826, type: 3}
   player: {fileID: 0}
   spawnInterval: 3
+  rangedProjectileSpeed: 3.5
   maxEnemyCount: 20
   minSpawnDistance: 10
   maxSpawnDistance: 25
