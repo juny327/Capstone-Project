@@ -15,6 +15,13 @@ public class PlayerStatsUI : MonoBehaviour
     public TextMeshProUGUI hpText;
     public TextMeshProUGUI moveSpeedText;
 
+    [Header("Ammo")]
+    [Tooltip("탄약 표시. 탄창을 쓰지 않는 무기(검·드론)를 들면 자동으로 숨긴다")]
+    public TextMeshProUGUI ammoText;
+
+    [Tooltip("총알 모양 표시. 왼쪽부터 채워진다")]
+    public Image[] ammoPips;
+
     [Header("Stamina / Roll")]
     [Tooltip("스태미나 바 (Image Type: Filled)")]
     public Image staminaBar;
@@ -28,7 +35,10 @@ public class PlayerStatsUI : MonoBehaviour
     [Tooltip("구르기가 준비되기까지 남은 초")]
     public TextMeshProUGUI rollCooldownText;
 
-    [Header("Stamina / Roll Colors")]
+    [Header("Ammo / Stamina / Roll Colors")]
+    public Color ammoPipFullColor = new Color(1f, 0.93f, 0.70f, 1f);
+    public Color ammoPipEmptyColor = new Color(1f, 1f, 1f, 0.18f);
+
     public Color staminaColor = new Color(0.45f, 0.80f, 1f, 1f);
 
     [Tooltip("스태미나가 바닥나 달릴 수 없는 동안")]
@@ -50,6 +60,7 @@ public class PlayerStatsUI : MonoBehaviour
         GameEvents.OnBulletDamageChanged += UpdateBulletDamage;
         GameEvents.OnMoveSpeedChanged += UpdateMoveSpeed;
         GameEvents.OnBulletSpeedChanged += UpdateBulletSpeed;
+        GameEvents.OnAmmoChanged += UpdateAmmo;
     }
 
     void OnDisable()
@@ -59,6 +70,7 @@ public class PlayerStatsUI : MonoBehaviour
         GameEvents.OnBulletDamageChanged -= UpdateBulletDamage;
         GameEvents.OnMoveSpeedChanged -= UpdateMoveSpeed;
         GameEvents.OnBulletSpeedChanged -= UpdateBulletSpeed;
+        GameEvents.OnAmmoChanged -= UpdateAmmo;
 
         if (stats != null)
         {
@@ -198,5 +210,57 @@ public class PlayerStatsUI : MonoBehaviour
         if(bulletSpeedText == null) return;
 
         bulletSpeedText.text = "GunSpeed : " + speed;
+    }
+
+    /// <summary>
+    /// 탄약 표시. 탄창 크기가 0 이면 탄창을 쓰지 않는 무기(검·드론)이므로 숨긴다.
+    /// 장전 중에는 무기가 현재 탄약을 0 으로 보내므로 "Reloading" 으로 표시한다.
+    /// </summary>
+    void UpdateAmmo(int ammo, int magazine)
+    {
+        bool hasMagazine = magazine > 0;
+
+        if (ammoText != null)
+        {
+            ammoText.gameObject.SetActive(hasMagazine);
+
+            if (hasMagazine)
+                ammoText.text = ammo <= 0 ? "Reloading..." : $"{ammo} / {magazine}";
+        }
+
+        UpdateAmmoPips(ammo, magazine, hasMagazine);
+    }
+
+    /// <summary>
+    /// 총알 모양 칸을 채운다.
+    ///
+    /// 탄창이 칸 수보다 크면(소총 30, 기관단총 45) 한 칸이 여러 발을 대표한다.
+    /// 45개를 그리면 읽히지 않으므로, 칸 수를 고정하고 비율로 채우는 편이 낫다.
+    /// </summary>
+    void UpdateAmmoPips(int ammo, int magazine, bool hasMagazine)
+    {
+        if (ammoPips == null || ammoPips.Length == 0) return;
+
+        // 탄창이 칸 수보다 적으면(스나이퍼 5발) 실제 발수만큼만 쓴다 — 한 칸이 정확히 한 발이 된다
+        int used = hasMagazine ? Mathf.Min(magazine, ammoPips.Length) : 0;
+
+        float ratio = magazine > 0 ? Mathf.Clamp01((float)ammo / magazine) : 0f;
+
+        // 한 발이라도 남았으면 칸 하나는 켜 둔다 (Ceil)
+        int filled = Mathf.CeilToInt(ratio * used);
+
+        for (int i = 0; i < ammoPips.Length; i++)
+        {
+            Image pip = ammoPips[i];
+
+            if (pip == null) continue;
+
+            bool inUse = i < used;
+
+            pip.gameObject.SetActive(inUse);
+
+            if (inUse)
+                pip.color = i < filled ? ammoPipFullColor : ammoPipEmptyColor;
+        }
     }
 }

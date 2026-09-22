@@ -26,6 +26,12 @@ public struct WeaponModifier
     public int projectileCountAdd;
     public int pierceAdd;
 
+    [Header("Ammo")]
+    [Tooltip("탄창 크기 증가")]
+    public int magazineAdd;
+    [Tooltip("장전 시간 배율. 0.8 이면 20% 빨라진다")]
+    public float reloadTimeMul;
+
     [Header("Melee / SubUnit")]
     [Tooltip("근접 사거리 또는 드론 사거리 증가")]
     public float rangeAdd;
@@ -36,6 +42,7 @@ public struct WeaponModifier
     {
         damageMul = 1f,
         fireIntervalMul = 1f,
+        reloadTimeMul = 1f,
     };
 
     /// <summary>곱셈 항등원이 0으로 남아 있으면 1로 보정한다.</summary>
@@ -44,6 +51,7 @@ public struct WeaponModifier
         WeaponModifier r = this;
         if (r.damageMul <= 0f) r.damageMul = 1f;
         if (r.fireIntervalMul <= 0f) r.fireIntervalMul = 1f;
+        if (r.reloadTimeMul <= 0f) r.reloadTimeMul = 1f;
         return r;
     }
 
@@ -64,6 +72,8 @@ public struct WeaponModifier
             pierceAdd = x.pierceAdd + y.pierceAdd,
             rangeAdd = x.rangeAdd + y.rangeAdd,
             subUnitAdd = x.subUnitAdd + y.subUnitAdd,
+            magazineAdd = x.magazineAdd + y.magazineAdd,
+            reloadTimeMul = x.reloadTimeMul * y.reloadTimeMul,
         };
     }
 
@@ -86,6 +96,8 @@ public struct WeaponModifier
             pierceAdd = s.pierceAdd * times,
             rangeAdd = s.rangeAdd * times,
             subUnitAdd = s.subUnitAdd * times,
+            magazineAdd = s.magazineAdd * times,
+            reloadTimeMul = Mathf.Pow(s.reloadTimeMul, times),
         };
     }
 }
@@ -113,6 +125,13 @@ public struct WeaponRuntimeStats
     public float ArcAngle;
     public int MaxTargets;
     public int SubUnitCount;
+
+    // 탄창
+    /// <summary>탄창 크기. 0 이면 무제한(근접·서브유닛).</summary>
+    public int MagazineSize;
+
+    /// <summary>장전에 걸리는 시간(초).</summary>
+    public float ReloadTime;
 }
 
 /// <summary>

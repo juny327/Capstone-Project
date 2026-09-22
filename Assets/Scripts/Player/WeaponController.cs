@@ -65,6 +65,9 @@ public class WeaponController : MonoBehaviour
     [SerializeField] private Key swapKey = Key.Q;
     [SerializeField] private bool swapWithScrollWheel = true;
 
+    [Tooltip("수동 장전 키. 탄창이 남아 있어도 장전할 수 있다")]
+    [SerializeField] private Key reloadKey = Key.R;
+
     [Header("Legacy HUD")]
     [Tooltip("PlayerStatsUI 가 구독하는 기존 이벤트를 활성 무기 기준으로 발행한다")]
     [SerializeField] private bool raiseLegacyStatEvents = true;
@@ -315,6 +318,7 @@ public class WeaponController : MonoBehaviour
     {
         isDead = true;
         SuppressUpperBodyLayers();
+        CancelActiveReload();   // 사망 연출 중에 장전이 끝나 HUD 가 갱신되지 않게 한다
 
         for (int i = 0; i < subUnits.Count; i++)
             subUnits[i].SetActive(false);
@@ -325,6 +329,7 @@ public class WeaponController : MonoBehaviour
         if (isDead) return;
 
         HandleSwapInput();
+        HandleReloadInput();
 
         float dt = Time.deltaTime;
         WeaponFireContext ctx = new WeaponFireContext(detector, transform);
@@ -336,7 +341,15 @@ public class WeaponController : MonoBehaviour
             w.Tick(dt);
 
             if (i != activeHeldIndex) continue;
-            if (!w.CanFire) continue;
+
+            if (!w.CanFire)
+            {
+                // 탄이 떨어졌으면 자동 장전을 시작한다. 손에 든 무기만 장전하므로
+                // 스왑으로 장전 시간을 회피할 수 없다.
+                w.TryAutoReload();
+                continue;
+            }
+
             if (!ShouldFire(w)) continue;
             if (!w.HasTargetInReach(in ctx)) continue;   // 사거리 밖이면 쿨다운을 쓰지 않고 기다린다
 
@@ -365,6 +378,32 @@ public class WeaponController : MonoBehaviour
         if (!weapon.Data.requiresTarget) return true;
 
         return detector != null && detector.HasTarget;
+    }
+
+    /// <summary>수동 장전 (12번 R1). 탄창이 남아 있어도 누르면 장전한다.</summary>
+    void HandleReloadInput()
+    {
+        if (!enableDirectSwapInput) return;
+        if (Keyboard.current == null) return;
+        if (!Keyboard.current[reloadKey].wasPressedThisFrame) return;
+
+        ReloadActiveWeapon();
+    }
+
+    /// <summary>손에 든 무기를 장전한다. 다른 시스템(UI 버튼 등)에서도 부를 수 있다.</summary>
+    public void ReloadActiveWeapon()
+    {
+        if (activeHeldIndex < 0 || activeHeldIndex >= held.Count) return;
+
+        held[activeHeldIndex].StartReload();
+    }
+
+    /// <summary>진행 중인 장전을 취소한다. 구르기·사망에서 부른다 (12번 R2).</summary>
+    public void CancelActiveReload()
+    {
+        if (activeHeldIndex < 0 || activeHeldIndex >= held.Count) return;
+
+        held[activeHeldIndex].CancelReload();
     }
 
     void HandleSwapInput()
