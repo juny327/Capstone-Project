@@ -48,7 +48,7 @@ public class Bullet : MonoBehaviour, IPoolable
         rb.linearVelocity = Vector3.zero;
     }
 
-    public void OnDespawn()
+    public virtual void OnDespawn()
     {
         rb.linearVelocity = Vector3.zero;
         alreadyHit.Clear();       // ★ 반드시
@@ -118,6 +118,10 @@ public class Bullet : MonoBehaviour, IPoolable
             };
 
             d.TakeDamage(info);
+
+            // 착탄 후 파생 효과(전격 연쇄 · 파열 · 폭발)가 끼어드는 자리.
+            // 여기 한 곳만 열어 두면 무기마다 Bullet 을 복사하지 않아도 된다.
+            OnHit(root, transform.position, damage);
         }
 
         // 관통이 남아 있으면 계속 날아간다
@@ -129,6 +133,16 @@ public class Bullet : MonoBehaviour, IPoolable
 
         ReturnToPool();
     }
+
+    /// <summary>
+    /// 적을 맞히고 피해를 준 직후. 파생 클래스가 추가 효과를 붙인다.
+    ///
+    /// 관통으로 여러 명을 맞히면 **명중할 때마다** 호출된다.
+    /// </summary>
+    /// <param name="target">맞은 적의 루트 (IDamageable 을 가진 오브젝트)</param>
+    /// <param name="point">착탄 위치</param>
+    /// <param name="dealtDamage">치명타가 반영된 실제 피해량</param>
+    protected virtual void OnHit(Transform target, Vector3 point, float dealtDamage) { }
 
     void SpawnHitEffect(Collider other)
     {

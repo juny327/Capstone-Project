@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b657ddd3b4c685448c61224f09a9ddf, type: 3}
+  m_Name: WD_ChargeLaser
+  m_EditorClassIdentifier: Assembly-CSharp::ChargeBeamWeaponData
+  weaponName: "\uCDA9\uC804 \uB808\uC774\uC800"
+  description: "\uCD1D\uAD6C\uC5D0 \uD798\uC744 \uBAA8\uC558\uB2E4\uAC00 \uC77C\uC9C1\uC120\uC744
+    \uAFF0\uB6AB\uB294\uB2E4. \uB290\uB9AC\uC9C0\uB9CC \uD55C \uBC29\uC774 \uD06C\uB2E4."
+  icon: {fileID: 21300000, guid: b99fc7fc0c734fb4cbdb85288b4617b4, type: 3}
+  weaponPrefab: {fileID: 1597846053522236169, guid: f2e9bd52ecb8a42468a639ed1b81eb23, type: 3}
+  socket: 0
+  fireInterval: 2.2
+  damage: 18
+  critChance: 0.15
+  critMultiplier: 2.5
+  maxLevel: 5
+  perLevelBonus:
+    damageAdd: 3
+    damageMul: 1
+    fireIntervalMul: 1
+    critChanceAdd: 0
+    critMultiplierAdd: 0
+    projectileSpeedAdd: 0
+    projectileCountAdd: 0
+    pierceAdd: 0
+    magazineAdd: 0
+    reloadTimeMul: 1
+    rangeAdd: 0
+    subUnitAdd: 0
+  requiresTarget: 1
+  range: 18
+  beamRadius: 0.25
+  beamDuration: 0.15
+  hitLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  cameraShake: 0.25
+  magazineSize: 3
+  reloadTime: 2.5
+  autoReload: 1
+  beamMaterial: {fileID: 2100000, guid: 5d90de9dbfa086c47b0889319c447945, type: 2}
+  beamColor: {r: 0.35, g: 0.95, b: 1, a: 1}
+  beamWidth: 0.35
+  chargeWidth: 0.3
+  muzzleFlashPrefab: {fileID: 2916273817513264348, guid: 95044fb3908b36c46bc62060360f7ba6, type: 3}
+  hitEffectPrefab: {fileID: 4324968127605537629, guid: c694cdd4158a7394bb9c62a42fc6bd6b, type: 3}

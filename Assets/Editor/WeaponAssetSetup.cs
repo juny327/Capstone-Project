@@ -72,6 +72,9 @@ public static class WeaponAssetSetup
         public string Prefab;
         public string Model;
         public Vector3 ExpectedMuzzle;   // 문서 1-2 표의 값. 방향이 맞게 만들어졌는지 대조용
+
+        /// <summary>붙일 무기 컴포넌트. 비우면 ProjectileWeapon.</summary>
+        public System.Type Component;
     }
 
     static readonly GunSpec[] Guns =
@@ -79,6 +82,24 @@ public static class WeaponAssetSetup
         new GunSpec { Prefab = "W_Rifle", Model = "AR_3", ExpectedMuzzle = new Vector3(0f, 0.278f, 0.828f) },
         new GunSpec { Prefab = "W_SMG", Model = "SMG_1", ExpectedMuzzle = new Vector3(0f, 0.313f, 0.671f) },
         new GunSpec { Prefab = "W_Sniper", Model = "Sniper_1", ExpectedMuzzle = new Vector3(0f, 0.184f, 1.531f) },
+
+        // 확장 3종. 아래 값은 2026-09-23 실행에서 계산된 실제 총구 좌표다.
+        // 셋 다 +Z 라 기존 3종과 방향이 같다 (뒤로 쏘지 않는다).
+        new GunSpec { Prefab = "W_Shotgun", Model = "Grenade_2", ExpectedMuzzle = new Vector3(0f, 0.335f, 1.253f) },
+        new GunSpec
+        {
+            Prefab = "W_TeslaRifle",
+            Model = "AR_6",
+            ExpectedMuzzle = new Vector3(0f, 0.275f, 0.763f),
+            Component = typeof(ChainBeamWeapon),
+        },
+        new GunSpec
+        {
+            Prefab = "W_ChargeLaser",
+            Model = "Sniper_3",
+            ExpectedMuzzle = new Vector3(0f, 0.181f, 1.513f),
+            Component = typeof(ChargeBeamWeapon),
+        },
     };
 
     const float SwordLength = 1.2f;
@@ -129,6 +150,15 @@ public static class WeaponAssetSetup
         Debug.Log(
             $"{Tag} 1~5단계 완료. 다음: Play → 스테이지 진입 → '6-1. 소켓 자동 정렬 (Play 중)' 실행 " +
             "→ 확인 후 Play 정지(소켓 값 자동 저장) → '6-2. 기존 AssaultRifle 끄기'");
+    }
+
+    /// <summary>
+    /// 무기 프리팹만 생성한다. 이미 있는 프리팹은 건너뛰므로 무기를 추가했을 때 다시 돌리면 된다.
+    /// WeaponData 는 건드리지 않는다 (확장 무기는 NewWeaponSetup 이 따로 만든다).
+    /// </summary>
+    public static void BuildWeaponPrefabsOnly()
+    {
+        if (Preflight()) BuildPrefabs();
     }
 
     [MenuItem(Menu + "1. 임포트 설정 · 공용 재질", false, 11)]
@@ -413,7 +443,9 @@ public static class WeaponAssetSetup
         var modelAsset = AssetDatabase.LoadAssetAtPath<GameObject>($"{GunsDir}/{spec.Model}.fbx");
 
         GameObject root = CreateRoot(spec.Prefab, scene);
-        var weapon = root.AddComponent<ProjectileWeapon>();
+
+        System.Type weaponType = spec.Component ?? typeof(ProjectileWeapon);
+        var weapon = (WeaponBase)root.AddComponent(weaponType);
 
         // 방향 보정은 Model 에서만 한다. FBX 인스턴스에는 (-90°, ×100)이 들어 있어 건드리면 안 된다
         Transform model = CreateChild("Model", root.transform);

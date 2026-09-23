@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: Bullet
   m_EditorClassIdentifier: Assembly-CSharp::PoolConfig
   prefab: {fileID: 5875018044698817663, guid: 47d42afc0830c50448915274e6d3e535, type: 3}
-  initialSize: 10
+  initialSize: 24
   expandable: 1

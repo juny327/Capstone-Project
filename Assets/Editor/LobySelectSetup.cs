@@ -26,7 +26,19 @@ public static class LobySelectSetup
     const string FontPath = "Assets/Font/RiaSans-Bold SDF.asset";
 
     /// <summary>고를 수 있는 주 무기. 이 순서가 버튼 순서가 된다.</summary>
-    static readonly string[] Weapons = { "WD_Rifle", "WD_SMG", "WD_Sniper", "WD_Sword" };
+    static readonly string[] Weapons =
+    {
+        "WD_Rifle", "WD_SMG", "WD_Sniper", "WD_Sword",
+        "WD_Shotgun", "WD_TeslaRifle", "WD_ChargeLaser",
+    };
+
+    // 한 줄에 4개까지. 7개를 한 줄로 늘어놓으면 가로 1660px 이 되어
+    // 루트(1000)를 크게 넘고 설명 텍스트와 어긋난다.
+    const int PerRow = 4;
+    const float ButtonW = 220f;
+    const float ButtonH = 105f;
+    const float StepX = 240f;
+    const float StepY = 125f;
 
     [MenuItem("Tools/Loby Setup/주 무기 선택 UI 만들기")]
     public static void Build()
@@ -60,19 +72,31 @@ public static class LobySelectSetup
         // ───── 루트 ─────
         GameObject root = NewUI(RootName, canvas.transform);
         RectTransform rootRect = root.GetComponent<RectTransform>();
-        SetRect(rootRect, new Vector2(0.5f, 0.5f), new Vector2(0f, -40f), new Vector2(1000f, 260f));
+        int rows = Mathf.CeilToInt(weapons.Length / (float)PerRow);
 
-        // ───── 버튼 4개 ─────
+        SetRect(rootRect, new Vector2(0.5f, 0.5f), new Vector2(0f, -40f),
+            new Vector2(1000f, 170f + StepY * rows));
+
+        // ───── 무기 버튼 (한 줄 PerRow 개씩) ─────
         Button[] buttons = new Button[weapons.Length];
 
-        float step = 240f;
-        float startX = -(step * (weapons.Length - 1)) * 0.5f;
+        // 줄이 늘어난 만큼 위에서 시작해, 아래 설명 텍스트와 겹치지 않게 한다
+        float firstRowY = 50f + StepY * (rows - 1) * 0.5f;
 
         for (int i = 0; i < weapons.Length; i++)
         {
+            int row = i / PerRow;
+            int col = i % PerRow;
+
+            // 마지막 줄이 덜 찼을 때도 가운데 정렬되도록 줄마다 다시 계산한다
+            int countInRow = Mathf.Min(PerRow, weapons.Length - row * PerRow);
+            float startX = -(StepX * (countInRow - 1)) * 0.5f;
+
             GameObject go = NewUI($"Weapon_{i}_{weapons[i].name}", root.transform);
             RectTransform rect = go.GetComponent<RectTransform>();
-            SetRect(rect, new Vector2(0.5f, 0.5f), new Vector2(startX + step * i, 50f), new Vector2(220f, 110f));
+            SetRect(rect, new Vector2(0.5f, 0.5f),
+                new Vector2(startX + StepX * col, firstRowY - StepY * row),
+                new Vector2(ButtonW, ButtonH));
 
             Image image = go.AddComponent<Image>();
             image.color = new Color(0.85f, 0.85f, 0.85f, 1f);
@@ -102,7 +126,10 @@ public static class LobySelectSetup
         // ───── 설명 ─────
         GameObject descGo = NewUI("Description", root.transform);
         RectTransform descRect = descGo.GetComponent<RectTransform>();
-        SetRect(descRect, new Vector2(0.5f, 0.5f), new Vector2(0f, -75f), new Vector2(960f, 90f));
+        // 버튼 줄이 몇 개든 그 아래에 놓는다
+        float descY = firstRowY - StepY * (rows - 1) - ButtonH * 0.5f - 60f;
+
+        SetRect(descRect, new Vector2(0.5f, 0.5f), new Vector2(0f, descY), new Vector2(960f, 90f));
 
         TextMeshProUGUI desc = descGo.AddComponent<TextMeshProUGUI>();
         if (font != null) desc.font = font;

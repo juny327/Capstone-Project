@@ -32,6 +32,10 @@ public static class WeaponIconRender
         ("WD_Sniper", "weaponPrefab"),
         ("WD_Sword",  "weaponPrefab"),
         ("WD_Drone",  "dronePrefab"),   // 보이는 모델이 유닛 프리팹에 있다
+
+        ("WD_Shotgun",     "weaponPrefab"),
+        ("WD_TeslaRifle",  "weaponPrefab"),
+        ("WD_ChargeLaser", "weaponPrefab"),
     };
 
     [MenuItem("Tools/HUD Layout/무기 아이콘을 실제 모델로 굽기")]

@@ -51,6 +51,14 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
     /// <summary>탄창을 쓰지 않는 무기이거나, 탄이 남아 있는가.</summary>
     public bool HasAmmo => MagazineSize <= 0 || ammo > 0;
 
+    /// <summary>
+    /// 다음 발사까지 남은 시간(초). 0 이하면 쏠 수 있다.
+    ///
+    /// 충전형 무기가 "얼마나 모였는지"를 연출하는 데 쓴다 —
+    /// 발사 간격이 곧 충전 시간이므로 별도 상태를 들 필요가 없다.
+    /// </summary>
+    protected float CooldownRemaining => cooldown;
+
     /// <summary>누적 업그레이드 + 레벨 보너스.</summary>
     protected WeaponModifier TotalModifier =>
         WeaponModifier.Combine(accumulated, data.perLevelBonus.Scaled(level - 1));

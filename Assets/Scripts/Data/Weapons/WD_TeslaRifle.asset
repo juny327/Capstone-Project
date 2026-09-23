@@ -1,0 +1,63 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dbd0b4e213e51b84b96fc3b29bd41a2a, type: 3}
+  m_Name: WD_TeslaRifle
+  m_EditorClassIdentifier: Assembly-CSharp::ChainBeamWeaponData
+  weaponName: "\uC804\uACA9 \uC18C\uCD1D"
+  description: "\uCEE4\uC11C \uBC29\uD5A5\uC73C\uB85C \uC587\uC740 \uC804\uAE30 \uB808\uC774\uC800\uB97C
+    \uC3DC\uB2E4. \uB9DE\uC740 \uC801\uC5D0\uC11C \uC8FC\uC704\uB85C \uC804\uAE30\uAC00
+    \uC57D\uD558\uAC8C \uD37C\uC9C4\uB2E4."
+  icon: {fileID: 21300000, guid: 88bdb340ffedbad41b66a8bac3b12090, type: 3}
+  weaponPrefab: {fileID: 7530073237280035592, guid: 960c5bfa0146625449615e130d50370b, type: 3}
+  socket: 0
+  fireInterval: 0.5
+  damage: 3.2
+  critChance: 0.08
+  critMultiplier: 2
+  maxLevel: 5
+  perLevelBonus:
+    damageAdd: 0.5
+    damageMul: 1
+    fireIntervalMul: 1
+    critChanceAdd: 0
+    critMultiplierAdd: 0
+    projectileSpeedAdd: 0
+    projectileCountAdd: 0
+    pierceAdd: 0
+    magazineAdd: 0
+    reloadTimeMul: 1
+    rangeAdd: 0
+    subUnitAdd: 0
+  requiresTarget: 1
+  range: 14
+  beamRadius: 0.12
+  beamDuration: 0.08
+  hitLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  cameraShake: 0.05
+  chainCount: 2
+  chainRange: 4.5
+  chainFalloff: 0.5
+  hitHeight: 0.8
+  magazineSize: 20
+  reloadTime: 1.8
+  autoReload: 1
+  beamMaterial: {fileID: 2100000, guid: 5d90de9dbfa086c47b0889319c447945, type: 2}
+  beamColor: {r: 0.55, g: 0.85, b: 1, a: 1}
+  arcColor: {r: 0.45, g: 0.7, b: 1, a: 0.75}
+  beamWidth: 0.06
+  arcWidth: 0.04
+  jitter: 0.12
+  segments: 8
+  muzzleFlashPrefab: {fileID: 2916273817513264348, guid: 95044fb3908b36c46bc62060360f7ba6, type: 3}
+  hitEffectPrefab: {fileID: 4324968127605537629, guid: c694cdd4158a7394bb9c62a42fc6bd6b, type: 3}
