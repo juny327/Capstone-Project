@@ -55,6 +55,19 @@ public static class GameEvents
     public static Action OnGameWin; // 보스 처리 고나련
 
     // 밋밋한거 바꾼거
+    // 스테이지 클리어 보상 (무기 · 부착물 …)
+    /// <summary>보상 카드를 띄울 때. 스테이지 흐름이 발행한다.</summary>
+    public static Action OnStageRewardOpen;
+
+    /// <summary>카드를 골랐을 때. StageRewardManager 가 받아 적용한다.</summary>
+    public static Action<StageReward> OnStageRewardSelected;
+
+    /// <summary>
+    /// 보상 적용이 끝났을 때. 스테이지 흐름이 이 신호를 기다렸다 다음 씬으로 넘어간다.
+    /// 줄 보상이 없으면 null 로 발행된다.
+    /// </summary>
+    public static Action<StageReward> OnStageRewardApplied;
+
     public static Action OnShowStageClearUI;
     public static Action OnHideStageClearUI;
     // 이거 두개

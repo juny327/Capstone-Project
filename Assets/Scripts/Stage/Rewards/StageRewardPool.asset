@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 94d653f850c466b46ac0fe8f975b4793, type: 3}
+  m_Name: StageRewardPool
+  m_EditorClassIdentifier: Assembly-CSharp::StageRewardPool
+  rewards:
+  - {fileID: 11400000, guid: 86e9589e417d7c64d9f3a19fbc47b01f, type: 2}
+  - {fileID: 11400000, guid: d86f57fa3b8fed8409c2a7951b443934, type: 2}
+  - {fileID: 11400000, guid: f66473642f6ffc54a80abdbcdade69fa, type: 2}
+  - {fileID: 11400000, guid: 1ad227cc17d5736419603df624e619a6, type: 2}
+  - {fileID: 11400000, guid: 00fc9c0c2d7cae944890471bcf980f3d, type: 2}
+  - {fileID: 11400000, guid: 4e9061728dd579f409774d52cd78e4a0, type: 2}
+  - {fileID: 11400000, guid: a0775b2d1fd4dad4f8e72fe2dec9f912, type: 2}
