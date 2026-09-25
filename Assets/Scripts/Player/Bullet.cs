@@ -119,6 +119,10 @@ public class Bullet : MonoBehaviour, IPoolable
 
             d.TakeDamage(info);
 
+            // 프레임 끝에 한 번만 난다 — 관통이면 같은 프레임에 여러 번 들어온다
+            if (SoundManager.Instance != null)
+                SoundManager.Instance.ReportHit(isCritical);
+
             // 착탄 후 파생 효과(전격 연쇄 · 파열 · 폭발)가 끼어드는 자리.
             // 여기 한 곳만 열어 두면 무기마다 Bullet 을 복사하지 않아도 된다.
             OnHit(root, transform.position, damage);

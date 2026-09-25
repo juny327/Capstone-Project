@@ -52,6 +52,9 @@ public class ChargeBeamWeapon : WeaponBase
             return;
         }
 
+        // 모으던 소리를 끊는다 — 쏘는 순간 멎어야 "다 모아서 쐈다" 로 들린다
+        StopChargeSound();
+
         Vector3 origin = Muzzle.position;
         Vector3 dir = context.AimDirection;
 
@@ -59,6 +62,62 @@ public class ChargeBeamWeapon : WeaponBase
         ShowBeam(cfg, origin, origin + dir * stats.Range);
 
         SpawnFx(cfg.muzzleFlashPrefab, origin, Quaternion.LookRotation(dir));
+
+        // 다음 발을 위한 충전이 곧바로 시작된다.
+        // 적이 있을 때만 쏘므로, 이 소리도 전투 중에만 난다.
+        StartChargeSound(cfg, stats.FireInterval);
+    }
+
+    // ───────── 충전 소리 ─────────
+
+    private AudioSource chargeSource;
+
+    /// <summary>
+    /// 충전음을 **끝에서부터 맞춰** 재생한다.
+    ///
+    /// 받아 온 클립(8초)이 충전 시간(2.2초)보다 훨씬 길다. 앞부분부터 틀면
+    /// 한창 올라가는 중에 발사되어 "다 모았다" 는 느낌이 나지 않는다.
+    /// 클립의 **마지막 `duration` 초**만 틀면 고조되는 지점이 발사 순간과 맞는다.
+    /// </summary>
+    void StartChargeSound(ChargeBeamWeaponData cfg, float duration)
+    {
+        if (cfg.chargeSound == null || duration <= 0.05f) return;
+
+        EnsureChargeSource(cfg);
+
+        if (chargeSource == null) return;
+
+        chargeSource.clip = cfg.chargeSound;
+        chargeSource.volume = cfg.chargeVolume;
+
+        float offset = cfg.chargeSound.length - duration;
+
+        // 클립이 충전 시간보다 짧으면 처음부터 (먼저 끝나도 어색하지 않다)
+        chargeSource.time = Mathf.Max(0f, offset);
+        chargeSource.Play();
+    }
+
+    void StopChargeSound()
+    {
+        if (chargeSource != null && chargeSource.isPlaying)
+            chargeSource.Stop();
+    }
+
+    void EnsureChargeSource(ChargeBeamWeaponData cfg)
+    {
+        if (chargeSource != null) return;
+
+        // 전용 AudioSource 를 둔다. SoundManager 풀은 재생 중에 끊을 수단이 없다.
+        GameObject go = new GameObject("ChargeSound");
+        go.transform.SetParent(transform, false);
+
+        chargeSource = go.AddComponent<AudioSource>();
+        chargeSource.playOnAwake = false;
+        chargeSource.loop = false;
+        chargeSource.spatialBlend = 0f;   // 플레이어 무기라 2D
+
+        if (SoundManager.Instance != null)
+            chargeSource.outputAudioMixerGroup = SoundManager.Instance.SfxGroup;
     }
 
     void ApplyBeamDamage(ChargeBeamWeaponData cfg, in WeaponRuntimeStats stats,
@@ -105,6 +164,10 @@ public class ChargeBeamWeapon : WeaponBase
             });
 
             SpawnFx(cfg.hitEffectPrefab, point, Quaternion.LookRotation(-dir));
+
+            // 관통이라 한 프레임에 여러 명이 들어온다. 소리는 프레임 끝에 한 번만.
+            if (SoundManager.Instance != null)
+                SoundManager.Instance.ReportHit(isCritical);
         }
     }
 
@@ -261,6 +324,15 @@ public class ChargeBeamWeapon : WeaponBase
 
         if (beam != null) beam.enabled = false;
         if (charge != null) charge.enabled = false;
+
+        // 손에 없는 무기가 계속 충전음을 내면 안 된다
+        StopChargeSound();
+    }
+
+    protected override void OnReloadStarted(float duration)
+    {
+        // 장전 중에는 충전이 멈춘다
+        StopChargeSound();
     }
 
     void OnDestroy()

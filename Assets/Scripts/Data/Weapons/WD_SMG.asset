@@ -36,6 +36,13 @@ MonoBehaviour:
     rangeAdd: 0
     subUnitAdd: 0
   requiresTarget: 1
+  fireSounds:
+  - {fileID: 8300000, guid: 39e709d10c7c7384185160ccd9940e19, type: 3}
+  fireVolume: 0.38
+  firePitchRange: {x: 0.96, y: 1.04}
+  reloadStartSound: {fileID: 8300000, guid: 0134019f5dd95c640a25be0da776e24f, type: 3}
+  reloadEndSound: {fileID: 8300000, guid: 72d73c3f83644ce4db326744eddb1211, type: 3}
+  reloadVolume: 0.8
   aimMode: 0
   projectilePrefab: {fileID: 5875018044698817663, guid: 47d42afc0830c50448915274e6d3e535, type: 3}
   projectileSpeed: 25

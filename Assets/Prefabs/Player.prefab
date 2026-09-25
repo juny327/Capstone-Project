@@ -2741,6 +2741,14 @@ MonoBehaviour:
   cam: {fileID: 0}
   rotationSpeed: 400
   sprintMultiplier: 1.6
+  sounds: {fileID: 11400000, guid: 5de4a2c4d3bf9594fadc82ef2d98904d, type: 2}
+  stepDistance: 2.2
+  maxStamina: 100
+  sprintDrainPerSecond: 25
+  walkRecoverPerSecond: 8
+  idleRecoverPerSecond: 18
+  recoverDelay: 0.5
+  exhaustedRecoverRatio: 0.25
   rollDistance: 4
   rollDuration: 1.5
   rollCooldown: 2.5
@@ -2861,6 +2869,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerStats
   level: 1
   currentExp: 0
+  expToNextLevel: 10
+  expGrowthRate: 1.3
   maxHp: 100
   currentHp: 0
   deathParticle: {fileID: 1250969030787328715, guid: 085974e0352f08649851bbacca7ab84b, type: 3}
@@ -2918,6 +2928,7 @@ MonoBehaviour:
   enableDirectSwapInput: 1
   swapKey: 31
   swapWithScrollWheel: 1
+  reloadKey: 32
   raiseLegacyStatEvents: 1
 --- !u!1 &7738332526512525993
 GameObject:

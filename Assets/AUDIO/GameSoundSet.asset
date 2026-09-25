@@ -1,0 +1,92 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c43c9f0d34639224d94d3184e849544a, type: 3}
+  m_Name: GameSoundSet
+  m_EditorClassIdentifier: Assembly-CSharp::GameSoundSet
+  levelUp:
+    clips:
+    - {fileID: 8300000, guid: 10656d2c7bf4f364eb420a6bc39516b7, type: 3}
+    volume: 0.9
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0
+  upgradeOpen:
+    clips:
+    - {fileID: 8300000, guid: 0561ebbc46d9d9546b7f68b82f2f1d97, type: 3}
+    volume: 0.7
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0
+  weaponAcquired:
+    clips:
+    - {fileID: 8300000, guid: 7e5dbe951060c1b4da370b840ee96145, type: 3}
+    volume: 0.8
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0
+  hit:
+    clips:
+    - {fileID: 8300000, guid: c386e507c4fa5a2449893ef52fa03ab7, type: 3}
+    - {fileID: 8300000, guid: e41c4405d5ab82f46a9c020e6342647a, type: 3}
+    - {fileID: 8300000, guid: 16d1118492a9f294383160f8e3ca9a37, type: 3}
+    - {fileID: 8300000, guid: d5bb80e18d1c85e458aae1a2b0ae1848, type: 3}
+    - {fileID: 8300000, guid: b8c8c1931eb111545abda9695c6fa112, type: 3}
+    volume: 0.3
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0.04
+  criticalHit:
+    clips:
+    - {fileID: 8300000, guid: 068c21036e0bcaa4f974f16931341bd3, type: 3}
+    - {fileID: 8300000, guid: 2b2c79b126afa654da9e28bd00e28cf0, type: 3}
+    - {fileID: 8300000, guid: 7f9eeeb584a40d246b77d3661e8a0980, type: 3}
+    - {fileID: 8300000, guid: 65d738db04ec62a4098dc88f201c409e, type: 3}
+    - {fileID: 8300000, guid: e3a91b4174b044d45afaae0f2415356e, type: 3}
+    volume: 0.6
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0.04
+  enemyKilled:
+    clips:
+    - {fileID: 8300000, guid: 7f605232da260d545a53e92685c609fc, type: 3}
+    - {fileID: 8300000, guid: 5d293cd6cf3815d4e917da5618af844b, type: 3}
+    - {fileID: 8300000, guid: 81a1a13688f232044ac80c6810ba0440, type: 3}
+    - {fileID: 8300000, guid: 24415c45c1cb4ce47bc4f0830252fac2, type: 3}
+    - {fileID: 8300000, guid: accad34b3033bfe409a1702656ac3b0c, type: 3}
+    volume: 0.45
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0.06
+  weaponSwap:
+    clips:
+    - {fileID: 8300000, guid: 994c076fc23aa294c8858a051afef90a, type: 3}
+    volume: 0.7
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0
+  playerDead:
+    clips:
+    - {fileID: 8300000, guid: 670987b1567025e45a709ee09df2bcb8, type: 3}
+    volume: 1
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0
+  stageClear:
+    clips:
+    - {fileID: 8300000, guid: bd0282eb3e3c9c944a3b08abcf8a1c04, type: 3}
+    volume: 0.9
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0
+  stageRewardOpen:
+    clips:
+    - {fileID: 8300000, guid: f3abd364bbdd71645b933fd5370e004d, type: 3}
+    volume: 0.8
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0
+  bossSpawn:
+    clips:
+    - {fileID: 8300000, guid: 7464c16cdf354f94a9d16d5aea57efa6, type: 3}
+    volume: 1
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0

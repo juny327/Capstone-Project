@@ -48,6 +48,12 @@ public class ChargeBeamWeaponData : WeaponData
     [Tooltip("충전이 끝났을 때 총구에 맺히는 빛의 크기")]
     [Min(0.01f)] public float chargeWidth = 0.3f;
 
+    [Header("Charge Sound")]
+    [Tooltip("힘을 모으는 동안 나는 소리. 발사하는 순간 끊긴다")]
+    public AudioClip chargeSound;
+
+    [Range(0f, 1f)] public float chargeVolume = 0.55f;
+
     [Header("Effects")]
     public GameObject muzzleFlashPrefab;
     public GameObject hitEffectPrefab;

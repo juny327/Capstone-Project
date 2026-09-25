@@ -38,6 +38,13 @@ MonoBehaviour:
     rangeAdd: 0
     subUnitAdd: 0
   requiresTarget: 1
+  fireSounds:
+  - {fileID: 8300000, guid: 9dc53fb1462d7834281b89d51ad7d7c4, type: 3}
+  fireVolume: 0.5
+  firePitchRange: {x: 0.96, y: 1.04}
+  reloadStartSound: {fileID: 8300000, guid: 87793c96ae4e8cc479acb0087a81befd, type: 3}
+  reloadEndSound: {fileID: 8300000, guid: 156334c5cbcdce44b8c384027a7d8f99, type: 3}
+  reloadVolume: 0.8
   range: 14
   beamRadius: 0.12
   beamDuration: 0.08

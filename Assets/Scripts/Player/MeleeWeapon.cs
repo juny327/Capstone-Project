@@ -178,6 +178,10 @@ public class MeleeWeapon : WeaponBase
                 cameraShake = cfg.cameraShake,   // 근접은 흔들어야 타격감이 난다
             });
 
+            // 최대 5명을 한 번에 때린다. SoundManager 가 프레임 끝에 한 번만 낸다.
+            if (SoundManager.Instance != null)
+                SoundManager.Instance.ReportHit(isCritical);
+
             applied++;
         }
 

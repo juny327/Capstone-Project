@@ -72,6 +72,39 @@ public abstract class WeaponData : ScriptableObject
     [Tooltip("감지 범위에 적이 있어야만 발동한다. 오라/장판형은 끈다")]
     public bool requiresTarget = true;
 
+    // 소리를 데이터에 두는 이유: 무기를 추가할 때 `.asset` 하나로 끝나는 규칙을
+    // 소리까지 포함해 지키기 위해서다. 코드를 고치지 않아도 새 무기가 소리를 낸다.
+    [Header("Sound")]
+    [Tooltip("발사(휘두르기) 소리. 여러 개면 무작위로 하나를 고른다. 비우면 조용히 넘어간다")]
+    public AudioClip[] fireSounds;
+
+    [Range(0f, 1f)] public float fireVolume = 0.7f;
+
+    [Tooltip("발사마다 피치를 이 범위에서 무작위로. 같은 클립이 반복되면 기계음처럼 들린다")]
+    public Vector2 firePitchRange = new Vector2(0.96f, 1.04f);
+
+    [Tooltip("장전을 시작할 때. 클립 길이를 장전 시간에 맞춰 배속 재생한다")]
+    public AudioClip reloadStartSound;
+
+    [Tooltip("장전이 끝났을 때의 '철컥'. 이제 쏠 수 있다는 신호")]
+    public AudioClip reloadEndSound;
+
+    [Range(0f, 1f)] public float reloadVolume = 0.8f;
+
+    /// <summary>
+    /// 발사음 하나를 고른다. 없으면 null.
+    ///
+    /// 같은 클립이 반복되면 기계음처럼 들린다. 변형이 여러 개면 돌려 쓰고,
+    /// 하나뿐이면 `firePitchRange` 의 피치 흔들기로 버틴다.
+    /// </summary>
+    public AudioClip PickFireSound()
+    {
+        if (fireSounds == null || fireSounds.Length == 0) return null;
+        if (fireSounds.Length == 1) return fireSounds[0];
+
+        return fireSounds[Random.Range(0, fireSounds.Length)];
+    }
+
     public abstract WeaponKind Kind { get; }
 
     /// <summary>스왑과 무관하게 항상 동작하는 무기인지 (드론 등).</summary>

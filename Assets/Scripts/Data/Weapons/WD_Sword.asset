@@ -36,6 +36,14 @@ MonoBehaviour:
     rangeAdd: 0
     subUnitAdd: 0
   requiresTarget: 1
+  fireSounds:
+  - {fileID: 8300000, guid: e3760d5047edad749ac1e25cd676ab46, type: 3}
+  - {fileID: 8300000, guid: 0c03edc4efa519a439adaf03a0af417a, type: 3}
+  fireVolume: 0.65
+  firePitchRange: {x: 0.96, y: 1.04}
+  reloadStartSound: {fileID: 0}
+  reloadEndSound: {fileID: 0}
+  reloadVolume: 0.8
   range: 3
   arcAngle: 120
   maxTargets: 5

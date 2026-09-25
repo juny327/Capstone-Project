@@ -108,6 +108,9 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
                 reloadRemaining = 0f;
                 ammo = Stats.MagazineSize;
 
+                PlaySound(data != null ? data.reloadEndSound : null,
+                    data != null ? data.reloadVolume : 1f);
+
                 OnReloadFinished();
                 RaiseAmmoChanged();
             }
@@ -123,6 +126,8 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
         OnFire(in stats, in context);
 
         cooldown = stats.FireInterval;
+
+        PlayFireSound();
 
         // 산탄이어도 1회 발사는 탄약 1 소모다 (12번 R3).
         // 탄 수만큼 깎으면 산탄 업그레이드가 곧 탄약 소모 증가가 되어 벌칙이 된다.
@@ -147,6 +152,8 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
         if (!IsActive) return;
 
         reloadRemaining = stats.ReloadTime;
+
+        PlayReloadStartSound(stats.ReloadTime);
 
         OnReloadStarted(stats.ReloadTime);
         RaiseAmmoChanged();
@@ -174,6 +181,56 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
 
     /// <summary>자동 장전 여부. 투사체 무기가 데이터 값으로 재정의한다.</summary>
     protected virtual bool AutoReload => true;
+
+    // ───────── 소리 ─────────
+
+    void PlayFireSound()
+    {
+        if (data == null) return;
+
+        AudioClip clip = data.PickFireSound();
+
+        if (clip == null) return;
+
+        float min = Mathf.Min(data.firePitchRange.x, data.firePitchRange.y);
+        float max = Mathf.Max(data.firePitchRange.x, data.firePitchRange.y);
+
+        if (min <= 0f) min = 1f;
+        if (max <= 0f) max = 1f;
+
+        PlaySound(clip, data.fireVolume, Random.Range(min, max));
+    }
+
+    /// <summary>
+    /// 장전 소리를 **장전 시간에 맞춰 배속 재생**한다.
+    ///
+    /// 장전 시간이 무기마다 다른데(소총 2.0 · 기관단총 1.8 · 스나이퍼 2.6초)
+    /// 클립 길이는 하나다. 애니메이션을 `ReloadSpeed` 로 맞춘 것과 같은 방식이다.
+    /// </summary>
+    void PlayReloadStartSound(float duration)
+    {
+        if (data == null || data.reloadStartSound == null) return;
+
+        float pitch = 1f;
+        float length = data.reloadStartSound.length;
+
+        // 너무 크게 늘이거나 줄이면 소리가 우스워진다
+        if (duration > 0.05f && length > 0.05f)
+            pitch = Mathf.Clamp(length / duration, 0.6f, 1.8f);
+
+        PlaySound(data.reloadStartSound, data.reloadVolume, pitch);
+    }
+
+    /// <summary>
+    /// 플레이어 무기 소리는 2D 로 낸다 — 탑다운 카메라라 거리 감쇠가 어색하다.
+    /// `SoundManager` 가 없으면 조용히 넘어간다 (씬 구성이 덜 된 경우).
+    /// </summary>
+    protected void PlaySound(AudioClip clip, float volume, float pitch = 1f)
+    {
+        if (clip == null || SoundManager.Instance == null) return;
+
+        SoundManager.Instance.PlayClip(clip, volume, pitch);
+    }
 
     /// <summary>
     /// 손에 든 무기의 탄약 변화를 HUD 에 알린다.

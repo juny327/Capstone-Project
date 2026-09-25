@@ -37,6 +37,13 @@ MonoBehaviour:
     rangeAdd: 0
     subUnitAdd: 1
   requiresTarget: 1
+  fireSounds:
+  - {fileID: 8300000, guid: 458536c98a619d94a915aeca331c24f0, type: 3}
+  fireVolume: 0.3
+  firePitchRange: {x: 0.96, y: 1.04}
+  reloadStartSound: {fileID: 0}
+  reloadEndSound: {fileID: 0}
+  reloadVolume: 0.8
   dronePrefab: {fileID: 7734045794844672905, guid: 4b075ab29d7979b449c09eb29abf8616, type: 3}
   droneCount: 1
   maxDroneCount: 5

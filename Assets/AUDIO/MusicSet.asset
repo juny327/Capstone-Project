@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a97bef3925f65f4298c79de06a43a63, type: 3}
+  m_Name: MusicSet
+  m_EditorClassIdentifier: Assembly-CSharp::MusicSet
+  tracks:
+  - sceneName: Loby
+    clip: {fileID: 8300000, guid: 95bb1ef3f660ccb4c95cddaeca43dcf6, type: 3}
+    volume: 0.45
+  - sceneName: Stage1
+    clip: {fileID: 8300000, guid: 852051582039ea642851f6a0bb77a667, type: 3}
+    volume: 0.4
+  - sceneName: Stage2
+    clip: {fileID: 8300000, guid: 5593140fa251de04a96ec5877574fb12, type: 3}
+    volume: 0.4
+  - sceneName: Stage3
+    clip: {fileID: 8300000, guid: 8fa049dba01860b48b074a564b9a297c, type: 3}
+    volume: 0.42
+  - sceneName: StageBoss
+    clip: {fileID: 8300000, guid: 580007ae6fdf0ab428021a778a1160ad, type: 3}
+    volume: 0.5
+  - sceneName: EndingScene
+    clip: {fileID: 8300000, guid: 42b531f711c31c140b128489e3122eb6, type: 3}
+    volume: 0.45

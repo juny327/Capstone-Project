@@ -67,6 +67,16 @@ public class PlayerMove : MonoBehaviour
     // ─────────────────────────────────────────────
     // 스태미나
     // ─────────────────────────────────────────────
+    [Header("Sound")]
+    [Tooltip("플레이어 몸에서 나는 소리. 비우면 조용히 넘어간다")]
+    [SerializeField] private PlayerSoundSet sounds;
+
+    [Tooltip("이만큼 움직일 때마다 발소리 한 번. 작을수록 잦아진다")]
+    [Min(0.1f)] [SerializeField] private float stepDistance = 2.2f;
+
+    private float footstepDistance;
+    private Vector3 lastFootstepPos;
+
     [Header("Stamina")]
     [SerializeField] private float maxStamina = 100f;
 
@@ -179,6 +189,7 @@ public class PlayerMove : MonoBehaviour
         CacheRollCurveAverage();
 
         stamina = maxStamina;
+        lastFootstepPos = transform.position;
     }
 
     // 커브의 평균 배율을 구해 둔다.
@@ -271,6 +282,7 @@ public class PlayerMove : MonoBehaviour
             rollCdTimer -= Time.fixedDeltaTime;
 
         TickStamina(Time.fixedDeltaTime);
+        TickFootstep();
 
         // ── 구르는 중에는 일반 이동/회전을 전부 건너뛴다 ──
         if (isRolling)
@@ -323,6 +335,8 @@ public class PlayerMove : MonoBehaviour
         if (!wasGround && currentGround)
         {
             anim.SetBool(HashIsJump, false);
+
+            PlaySound(sounds != null ? sounds.land : null);
         }
 
         wasGround = currentGround;
@@ -367,6 +381,11 @@ public class PlayerMove : MonoBehaviour
             if (stamina <= 0f)
             {
                 stamina = 0f;
+
+                // 이미 바닥난 상태에서 매 프레임 울리지 않게 전환 순간만 잡는다
+                if (!exhausted)
+                    PlaySound(sounds != null ? sounds.exhausted : null);
+
                 exhausted = true;
             }
 
@@ -387,7 +406,64 @@ public class PlayerMove : MonoBehaviour
         stamina = Mathf.Min(maxStamina, stamina + rate * deltaTime);
 
         if (exhausted && stamina >= maxStamina * exhaustedRecoverRatio)
+        {
             exhausted = false;
+
+            PlaySound(sounds != null ? sounds.staminaReady : null);
+        }
+    }
+
+    // ───────── 소리 ─────────
+
+    /// <summary>
+    /// 발소리는 **이동 거리로 간격을 잡는다.**
+    ///
+    /// 애니메이션 이벤트를 쓰지 않는 이유: `Run_gunMiddle_AR.anim` 의 이벤트 목록이 비어 있고,
+    /// 클립을 교체하면 이벤트가 전부 날아간다. `MeleeWeapon` 이 `hitDelay` 를 쓴 것과 같은 이유다.
+    ///
+    /// 거리로 재면 **걷기와 달리기가 저절로 구분된다** — 빠르면 같은 시간에 더 멀리 가므로
+    /// 발소리도 그만큼 잦아진다. 속도 업그레이드를 받아도 따로 손댈 것이 없다.
+    /// </summary>
+    void TickFootstep()
+    {
+        Vector3 delta = transform.position - lastFootstepPos;
+        delta.y = 0f;
+
+        // ⚠ 기준점은 **항상** 갱신한다. 멈춰 있는 동안 갱신을 건너뛰면
+        //    다시 걸을 때 그동안의 이동이 한꺼번에 쌓여 발소리가 즉시 터진다.
+        lastFootstepPos = transform.position;
+
+        if (sounds == null || isRolling || !currentGround)
+        {
+            footstepDistance = 0f;
+            return;
+        }
+
+        // 입력이 없으면 미끄러지는 동안 발소리가 나지 않게 한다
+        if (move == Vector2.zero)
+        {
+            footstepDistance = 0f;
+            return;
+        }
+
+        footstepDistance += delta.magnitude;
+
+        if (footstepDistance < stepDistance) return;
+
+        footstepDistance = 0f;
+
+        PlaySound(sounds.footstep);
+    }
+
+    /// <summary>
+    /// `SoundManager` 가 변형 고르기 · 피치 흔들기 · 최소 간격을 모두 처리한다.
+    /// 씬 전환 중에는 매니저가 없을 수 있어 조용히 넘어간다.
+    /// </summary>
+    void PlaySound(GameSoundSet.Entry entry)
+    {
+        if (entry == null || SoundManager.Instance == null) return;
+
+        SoundManager.Instance.Play(entry);
     }
 
     void OnSprint(InputAction.CallbackContext context)
@@ -403,6 +479,8 @@ public class PlayerMove : MonoBehaviour
         {
             anim.SetBool(HashIsJump, true);
             rb.AddForce(Vector3.up * jumpPower, ForceMode.Impulse);
+
+            PlaySound(sounds != null ? sounds.jump : null);
         }
     }
 
@@ -454,6 +532,8 @@ public class PlayerMove : MonoBehaviour
         anim.SetBool(HashIsMove, false);
         if (hasRollParam)
             anim.SetTrigger(HashRoll);
+
+        PlaySound(sounds != null ? sounds.roll : null);
 
         // 상체 레이어(사격·근접)를 꺼서 구르는 중에 총을 겨누거나 검 자세가 섞이지 않게 한다
         SetUpperBodyLayers(false);
