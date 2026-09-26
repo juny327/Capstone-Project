@@ -47,7 +47,23 @@ public class PlayerStatsUI : MonoBehaviour
     public Color rollReadyColor = Color.white;
     public Color rollCoolingColor = new Color(1f, 1f, 1f, 0.35f);
 
+    [Header("Parry")]
+    [Tooltip("패링을 헛쳤을 때 회피 아이콘을 잠깐 이 색으로. 5초가 왜 묶였는지 바로 알 수 있게 한다")]
+    public Color parryWhiffColor = new Color(1f, 0.35f, 0.3f, 1f);
+
+    [Tooltip("패링에 성공했을 때")]
+    public Color parrySuccessColor = new Color(0.55f, 0.95f, 1f, 1f);
+
+    [Min(0f)] public float parryFlashDuration = 0.3f;
+
     PlayerStats stats;
+
+    // 회피 아이콘 — 캐릭터마다 다르다 (구르기 / 방패). 원래 스프라이트를 기억해 두고 되돌린다
+    Sprite defaultRollSprite;
+    bool defaultRollSpriteCached;
+    ParryController parry;
+    float parryFlashTimer;
+    Color parryFlashColor;
 
     // 스태미나와 쿨타임은 매 프레임 연속으로 변한다.
     // 이벤트로 쏘면 초당 수십 번이라, 여기서는 폴링이 더 단순하고 싸다.
@@ -78,6 +94,9 @@ public class PlayerStatsUI : MonoBehaviour
             stats.OnHpChanged -= UpdateHpText;
             stats.OnExpChanged -= UpdateExp;
         }
+
+        if (parry != null)
+            parry.OnParryResolved -= OnParryResolved;
     }
 
     void Start()
@@ -134,6 +153,46 @@ public class PlayerStatsUI : MonoBehaviour
         {
             UpdateMoveSpeed(playerMove.CurrentSpeed);
         }
+
+        ApplyDodgeIcon(t);
+    }
+
+    /// <summary>
+    /// 회피 아이콘을 캐릭터에 맞춘다. 쿨타임 표시는 PlayerMove.RollCooldownRemaining 이
+    /// 회피 종류에 맞는 값을 돌려주므로 그대로 쓴다 — 여기서는 그림과 깜빡임만 바꾼다.
+    /// </summary>
+    void ApplyDodgeIcon(Transform player)
+    {
+        if (parry != null)
+            parry.OnParryResolved -= OnParryResolved;
+
+        parry = null;
+        parryFlashTimer = 0f;
+
+        if (rollIcon != null && !defaultRollSpriteCached)
+        {
+            defaultRollSprite = rollIcon.sprite;
+            defaultRollSpriteCached = true;
+        }
+
+        CharacterLoadout loadout = player != null ? player.GetComponent<CharacterLoadout>() : null;
+        CharacterData character = loadout != null ? loadout.Data : null;
+
+        if (rollIcon != null)
+            rollIcon.sprite = character != null && character.dodgeIcon != null ? character.dodgeIcon : defaultRollSprite;
+
+        if (character == null || character.dodge != DodgeType.Parry) return;
+
+        parry = player.GetComponent<ParryController>();
+
+        if (parry != null)
+            parry.OnParryResolved += OnParryResolved;
+    }
+
+    void OnParryResolved(bool success)
+    {
+        parryFlashTimer = parryFlashDuration;
+        parryFlashColor = success ? parrySuccessColor : parryWhiffColor;
     }
 
     void Update()
@@ -162,8 +221,16 @@ public class PlayerStatsUI : MonoBehaviour
         if (rollCooldownFill != null)
             rollCooldownFill.fillAmount = total > 0f ? Mathf.Clamp01(remaining / total) : 0f;
 
+        if (parryFlashTimer > 0f)
+            parryFlashTimer -= Time.deltaTime;
+
         if (rollIcon != null)
-            rollIcon.color = remaining > 0f ? rollCoolingColor : rollReadyColor;
+        {
+            if (parryFlashTimer > 0f)
+                rollIcon.color = parryFlashColor;
+            else
+                rollIcon.color = remaining > 0f ? rollCoolingColor : rollReadyColor;
+        }
 
         if (rollCooldownText != null)
         {

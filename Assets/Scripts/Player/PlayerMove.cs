@@ -159,11 +159,46 @@ public class PlayerMove : MonoBehaviour
     /// <summary>구르는 중인지. AutoAttack이 발사를 멈추는 데 사용한다.</summary>
     public bool IsRolling => isRolling;
 
-    /// <summary>구르기 쿨다운 남은 시간(초). 0이면 사용 가능.</summary>
-    public float RollCooldownRemaining => Mathf.Max(0f, rollCdTimer);
+    // ─────────────────────────────────────────────
+    // 회피 종류 (캐릭터-2종-확장-설계.md 7장)
+    // ─────────────────────────────────────────────
+    [Header("Dodge")]
+    [Tooltip("회피 키가 하는 일. CharacterLoadout 이 캐릭터에 맞게 바꾼다 (사수 = 구르기, 검사 = 패링)")]
+    [SerializeField] private DodgeType dodgeType = DodgeType.Roll;
 
-    /// <summary>구르기를 다시 쓸 수 있게 되기까지의 총 시간(초). HUD 비율 계산에 쓴다.</summary>
-    public float RollCooldownTotal => rollDuration + rollCooldown;
+    private ParryController parry;
+
+    /// <summary>패링을 쓰는지. 패링 컴포넌트가 없으면 구르기로 떨어진다.</summary>
+    bool UsesParry => dodgeType == DodgeType.Parry && parry != null;
+
+    public DodgeType Dodge => dodgeType;
+
+    /// <summary>회피(구르기 또는 패링) 쿨다운 남은 시간(초). 0이면 사용 가능. HUD 가 그대로 쓴다.</summary>
+    public float RollCooldownRemaining => UsesParry ? parry.CooldownRemaining : Mathf.Max(0f, rollCdTimer);
+
+    /// <summary>회피를 다시 쓸 수 있게 되기까지의 총 시간(초). HUD 비율 계산에 쓴다.</summary>
+    public float RollCooldownTotal => UsesParry ? parry.CooldownTotal : rollDuration + rollCooldown;
+
+    /// <summary>
+    /// 캐릭터 설정 적용 (CharacterLoadout). 이동 배율은 슬로우 · 업그레이드와 같은 목록에 넣어 자연스럽게 곱해지게 한다.
+    /// </summary>
+    public void ApplyCharacter(float moveSpeedMultiplier, float characterMaxStamina, DodgeType dodge)
+    {
+        if (!Mathf.Approximately(moveSpeedMultiplier, 1f) && moveSpeedMultiplier > 0f)
+            AddSpeedModifier(moveSpeedMultiplier);
+
+        maxStamina = Mathf.Max(1f, characterMaxStamina);
+        stamina = maxStamina;
+        exhausted = false;
+
+        dodgeType = dodge;
+
+        if (parry == null)
+            parry = GetComponent<ParryController>();
+
+        if (dodgeType == DodgeType.Parry && parry == null)
+            Debug.LogWarning("[PlayerMove] 패링 캐릭터인데 ParryController 가 없어 구르기로 대신합니다.", this);
+    }
 
     // Animator 파라미터 캐시 (아직 Animator에 추가하지 않았어도 경고가 뜨지 않도록)
     private static readonly int HashIsMove = Animator.StringToHash("isMove");
@@ -182,12 +217,16 @@ public class PlayerMove : MonoBehaviour
         anim = GetComponent<Animator>();
         stats = GetComponent<PlayerStats>();
 
+        if (parry == null)
+            parry = GetComponent<ParryController>();
+
         if (cam == null)
             cam = Camera.main;
 
         CacheAnimatorParams();
         CacheRollCurveAverage();
 
+        // CharacterLoadout 이 먼저 돌았어도 최대치를 이미 바꿔 두었으므로 결과가 같다
         stamina = maxStamina;
         lastFootstepPos = transform.position;
     }
@@ -492,6 +531,13 @@ public class PlayerMove : MonoBehaviour
     {
         if (!context.performed) return;
         if (isDead) return;
+
+        // 검사는 같은 키로 패링한다. 제자리 동작이라 물리 타이밍을 기다릴 필요가 없다
+        if (UsesParry)
+        {
+            parry.TryParry();
+            return;
+        }
 
         // 여기서는 기록만 한다. 실제 판정은 FixedUpdate에서 (물리 타이밍에 맞추기 위해)
         rollBufferedAt = Time.time;

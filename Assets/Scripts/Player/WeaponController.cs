@@ -88,6 +88,13 @@ public class WeaponController : MonoBehaviour
     /// <summary>지금까지 받은 범용 업그레이드 누적분. 새로 얻는 무기에 그대로 얹어 준다.</summary>
     private WeaponModifier globalModifier = WeaponModifier.Identity;
 
+    // 캐릭터 규칙 (CharacterLoadout 이 설정). 비어 있으면 모든 손 무기를 허용한다
+    private WeaponKind[] allowedHeldKinds;
+    private WeaponData characterStarter;
+
+    // 패링 모션 동안 손 무기 발사를 멈춘다
+    private float suppressFireUntil;
+
     // 상체 레이어 인덱스 (없으면 -1). 총은 ShootLayer, 근접 무기는 MeleeLayer 를 켠다
     private int shootLayer = -1;
     private int meleeLayer = -1;
@@ -137,6 +144,11 @@ public class WeaponController : MonoBehaviour
     public bool CanAcquire(WeaponData data)
     {
         if (data == null) return false;
+
+        // 캐릭터가 쓸 수 없는 종류는 거른다 (검사에게 소총, 사수에게 검이 나오지 않게).
+        // ⚠ Acquire 에는 넣지 않는다 — 테스트 룸 픽업은 SelectHeldWeapon → Acquire 로 바로 가므로
+        //    여기에만 두어야 테스트 룸에서 모든 무기를 시험할 수 있다 (설계 4-4).
+        if (!IsAllowedForCharacter(data)) return false;
 
         IWeapon existing = Find(data);
 
@@ -196,6 +208,33 @@ public class WeaponController : MonoBehaviour
         GameEvents.OnWeaponsChanged?.Invoke();
 
         return WeaponAcquireResult.Equipped;
+    }
+
+    /// <summary>
+    /// 캐릭터 규칙 적용 (CharacterLoadout, Start 전에 부른다).
+    ///   · allowed : 보상 · 획득으로 얻을 수 있는 손 무기 종류. 비우면 전부 허용
+    ///   · starter : 로비 선택이 없거나 이 캐릭터가 쓸 수 없는 무기일 때 대신 들 무기
+    /// </summary>
+    public void ApplyCharacterRules(WeaponKind[] allowed, WeaponData starter)
+    {
+        allowedHeldKinds = allowed;
+        characterStarter = starter;
+    }
+
+    /// <summary>이 캐릭터가 쓸 수 있는 무기인지. 서브유닛(드론)은 두 캐릭터 모두 쓴다.</summary>
+    public bool IsAllowedForCharacter(WeaponData data)
+    {
+        if (data == null) return false;
+        if (data.IsAlwaysActive) return true;
+        if (allowedHeldKinds == null || allowedHeldKinds.Length == 0) return true;
+
+        return System.Array.IndexOf(allowedHeldKinds, data.Kind) >= 0;
+    }
+
+    /// <summary>duration 초 동안 손 무기를 쏘지 않는다. 쿨다운은 그대로 흐른다 (패링 모션용).</summary>
+    public void SuppressFiring(float duration)
+    {
+        suppressFireUntil = Mathf.Max(suppressFireUntil, Time.time + duration);
     }
 
     /// <summary>Set before Start. Scene-owned test players need not change the lobby selection.</summary>
@@ -378,6 +417,12 @@ public class WeaponController : MonoBehaviour
 
         if (hasStarterOverride) starter = starterOverride;
 
+        // 캐릭터가 쓸 수 없는 무기로 시작하지 않게 한다 — 스테이지를 바로 Play 한 검사가
+        // 프리팹 기본값(소총)을 드는 경우, 테스트 룸이 검사에게 소총을 쥐여 주는 경우.
+        // 테스트 룸 픽업은 이 규칙과 무관하게 모든 무기를 집을 수 있다.
+        if (characterStarter != null && (starter == null || !IsAllowedForCharacter(starter)))
+            starter = characterStarter;
+
         if (starter != null)
             Acquire(starter);
         IsInitialized = true;
@@ -410,6 +455,9 @@ public class WeaponController : MonoBehaviour
             w.Tick(dt);
 
             if (i != activeHeldIndex) continue;
+
+            // 패링 모션 중에는 휘두르지 않는다 (쿨다운 Tick 은 위에서 이미 돌았다)
+            if (Time.time < suppressFireUntil) continue;
 
             if (!w.CanFire)
             {

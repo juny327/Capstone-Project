@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cb75d256e0b0ca74d9255a06c9e44fa6, type: 3}
+  m_Name: CH_Swordsman
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterData
+  displayName: "\uAC80\uC0AC"
+  summary: "\uCCB4\uB825 140 \xB7 \uBC1B\uB294 \uD53C\uD574 -15% \xB7 \uC774\uB3D9
+    +10% \xB7 \uD68C\uD53C: \uD328\uB9C1"
+  accentColor: {r: 1, g: 0.62, b: 0.3, a: 1}
+  maxHp: 140
+  damageTakenMultiplier: 0.85
+  moveSpeedMultiplier: 1.1
+  maxStamina: 120.00001
+  dodge: 1
+  dodgeIcon: {fileID: 21300000, guid: bb90e5fa651b1404fa53db6dee20af12, type: 3}
+  startWeapons:
+  - {fileID: 11400000, guid: a5c5c099d896ba94a9b198ef0b9b8fc4, type: 2}
+  - {fileID: 11400000, guid: 46bb3f2e7db4bdb488a708673ed6b1f3, type: 2}
+  - {fileID: 11400000, guid: 7cc3048592b43e340bdf8f77ba9a5a1d, type: 2}
+  allowedHeldKinds: 01000000
+  bodyMaterial: {fileID: 0}

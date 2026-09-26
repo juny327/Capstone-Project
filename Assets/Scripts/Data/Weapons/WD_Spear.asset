@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e9f188fced24a347854d377fb9adfd4, type: 3}
+  m_Name: WD_Spear
+  m_EditorClassIdentifier: Assembly-CSharp::MeleeWeaponData
+  weaponName: "\uCC3D"
+  description: "\uB450 \uC190\uC73C\uB85C \uBA40\uB9AC \uCC0C\uB974\uACE0 \uB0B4\uB824\uCC0D\uB294\uB2E4"
+  icon: {fileID: 21300000, guid: 58d8c1fdf1f4ecf4f91741810cbcfa4f, type: 3}
+  weaponPrefab: {fileID: 5825881266557484979, guid: 78fb8db727b07ee4da8d0682b614dc6c, type: 3}
+  socket: 0
+  fireInterval: 0.9
+  damage: 9
+  critChance: 0.1
+  critMultiplier: 2
+  maxLevel: 5
+  perLevelBonus:
+    damageAdd: 0
+    damageMul: 1
+    fireIntervalMul: 1
+    critChanceAdd: 0
+    critMultiplierAdd: 0
+    projectileSpeedAdd: 0
+    projectileCountAdd: 0
+    pierceAdd: 0
+    magazineAdd: 0
+    reloadTimeMul: 1
+    rangeAdd: 0
+    subUnitAdd: 0
+  requiresTarget: 1
+  fireSounds:
+  - {fileID: 8300000, guid: 0c03edc4efa519a439adaf03a0af417a, type: 3}
+  fireVolume: 0.6
+  firePitchRange: {x: 1.08, y: 1.16}
+  reloadStartSound: {fileID: 0}
+  reloadEndSound: {fileID: 0}
+  reloadVolume: 0.8
+  range: 5
+  arcAngle: 40
+  maxTargets: 4
+  hitDelay: 0.42
+  hitLayers:
+    serializedVersion: 2
+    m_Bits: 129
+  cameraShake: 0.15
+  slashEffectPrefab: {fileID: 0}

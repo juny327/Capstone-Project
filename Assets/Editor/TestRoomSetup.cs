@@ -283,7 +283,10 @@ public static class TestRoomSetup
     {
         Scene scene = SceneManager.GetActiveScene();
         var pickups = InScene<TestWeaponPickup>(scene).ToArray();
-        if (pickups.Length != 7 || pickups.Any(p => !WeaponController.IsValidHeldWeapon(p.Weapon)))
+        // 무기마다 픽업이 하나씩 (CharacterSetup 이 대검 · 창을 더해 9종이 된다)
+        TestRoomManager room = InScene<TestRoomManager>(scene).FirstOrDefault();
+        int expected = room != null && room.Weapons != null ? room.Weapons.Count : WeaponNames.Length;
+        if (pickups.Length != expected || pickups.Any(p => !WeaponController.IsValidHeldWeapon(p.Weapon)))
             throw new InvalidOperationException("Saved pickup references are invalid.");
         if (InScene<GameManager>(scene).Any() || InScene<EnemyManager>(scene).Any() || InScene<MapGenerator>(scene).Any())
             throw new InvalidOperationException("Stage gameplay managers leaked into TestRoom.");

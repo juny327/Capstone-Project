@@ -278,7 +278,7 @@ public static class TestRoomValidation
             ClearBullets();
             room.Controller.SelectHeldWeapon(data[i]);
             IWeapon weapon = room.Controller.ActiveWeapon;
-            PositionPlayer(room, new Vector3(i == 3 ? 11.6f : 10, 0.05f, 0));
+            PositionPlayer(room, new Vector3(data[i] is MeleeWeaponData ? 11.6f : 10, 0.05f, 0));   // 근접은 사거리 안으로
             wait = Wait(0.3); while (wait.MoveNext()) yield return null;
             wait = AimAtDummy(room); while (wait.MoveNext()) yield return null;
             Check(room.Detector.HasTarget, data[i].name + " detects the skeleton");

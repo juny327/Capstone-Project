@@ -38,6 +38,23 @@ public class PlayerStats : MonoBehaviour, IDamageable
         invulnerableUntil = 0f;
     }
 
+    // 받는 피해 배율 - 캐릭터마다 다르다 (검사 0.85). 체력만 올리면 회복 카드 가치가 달라져 감소율로 나눠 준다
+    float damageTakenMultiplier = 1f;
+    public float DamageTakenMultiplier => damageTakenMultiplier;
+
+    /// <summary>
+    /// 캐릭터 설정 적용 (CharacterLoadout). Awake 보다 먼저 불려도 늦게 불려도 결과가 같도록
+    /// 최대 체력과 현재 체력을 둘 다 쓴다.
+    /// </summary>
+    public void ApplyCharacter(int characterMaxHp, float takenMultiplier)
+    {
+        maxHp = Mathf.Max(1, characterMaxHp);
+        currentHp = maxHp;
+        damageTakenMultiplier = Mathf.Max(0.01f, takenMultiplier);
+
+        OnHpChanged?.Invoke(currentHp, maxHp);
+    }
+
     void Awake()
     {
         currentHp = maxHp;
@@ -100,9 +117,13 @@ public class PlayerStats : MonoBehaviour, IDamageable
     public void TakeDamage(DamageInfo info)
     {
         if (isDead) return;           // 사망 후 중복 처리 차단
-        if (IsInvulnerable) return;   // 구르기 무적 등
+        if (IsInvulnerable) return;   // 구르기 · 패링 무적 등
 
-        currentHp -= (int)info.damage;
+        // 배율 1 이면 예전과 같다. 배율로 1 미만이 되어도 1 이상의 피해는 최소 1 로 둔다
+        int amount = (int)(info.damage * damageTakenMultiplier);
+        if (amount < 1 && info.damage >= 1f) amount = 1;
+
+        currentHp -= amount;
 
         if (currentHp < 0)
             currentHp = 0;

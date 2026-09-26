@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cb75d256e0b0ca74d9255a06c9e44fa6, type: 3}
+  m_Name: CH_Gunner
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterData
+  displayName: "\uC0AC\uC218"
+  summary: "\uCCB4\uB825 100 \xB7 \uD68C\uD53C: \uAD6C\uB974\uAE30"
+  accentColor: {r: 0.45, g: 0.8, b: 1, a: 1}
+  maxHp: 100
+  damageTakenMultiplier: 1
+  moveSpeedMultiplier: 1
+  maxStamina: 100
+  dodge: 0
+  dodgeIcon: {fileID: 0}
+  startWeapons:
+  - {fileID: 11400000, guid: e61cedaa53406ed4f8ea56c742ecc880, type: 2}
+  - {fileID: 11400000, guid: 16be6279c8aab6d4798e7db59d161183, type: 2}
+  - {fileID: 11400000, guid: 180da6784ef99fc4db72586b0150f7a0, type: 2}
+  - {fileID: 11400000, guid: 425b47f8befe4f34485ff97821ad886a, type: 2}
+  - {fileID: 11400000, guid: 21df41de1e2707f43b034c469705ca17, type: 2}
+  - {fileID: 11400000, guid: 74ca696becb4fb443800afef14778251, type: 2}
+  allowedHeldKinds: 00000000
+  bodyMaterial: {fileID: 0}

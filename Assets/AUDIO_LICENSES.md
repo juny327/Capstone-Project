@@ -18,8 +18,9 @@
 | `Abstraction/MusicLoops` | Music Loop Bundle 2026 Q2 (29곡) | [tallbeard.itch.io](https://tallbeard.itch.io/music-loop-bundle) | **CC0** | 없음 | 2026-09-25 |
 | `OpenGameArt/Electricity` | Electricity Sound Effects (`continuousspark`) | [opengameart.org](https://opengameart.org/content/electricity-sound-effects-0) | **CC0** | 없음 | 2026-09-25 |
 | `OpenGameArt/Electricity` | Electricity Game Sound Pack (`chargestart` · `hit`) | [opengameart.org](https://opengameart.org/content/electricity-game-sound-pack) | **CC0** | 없음 | 2026-09-25 |
+| `AUDIO/Parry` | 패링 "팅" 여운 `ParryRing_01~03.wav` | **직접 합성** — 금속 막대 배음(1 : 2.756 : 5.404 : 8.933)을 Python(numpy)으로 합성 | 자체 제작 (제약 없음) | 없음 | 2026-09-26 |
 
-**현재 전부 CC0 다.** 상업 이용 가능하고 크레딧 표기 의무가 없다.
+**현재 전부 CC0 또는 직접 만든 소리다.** 상업 이용 가능하고 크레딧 표기 의무가 없다.
 다만 제작자들이 표기를 반기므로, 게임 크레딧에 아래 정도를 넣어 두면 좋다.
 
 ```

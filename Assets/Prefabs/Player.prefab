@@ -2637,6 +2637,9 @@ GameObject:
   - component: {fileID: 4981090094168221985}
   - component: {fileID: 1000000000000000001}
   - component: {fileID: 8744353814000383104}
+  - component: {fileID: 7364383619408833809}
+  - component: {fileID: 7317769993851224939}
+  - component: {fileID: 4867970890767324770}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -2789,6 +2792,7 @@ MonoBehaviour:
   rollNeedsGround: 1
   rollBufferTime: 0.15
   logRollDebug: 1
+  dodgeType: 0
 --- !u!54 &8807426808987672018
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -2930,6 +2934,105 @@ MonoBehaviour:
   swapWithScrollWheel: 1
   reloadKey: 32
   raiseLegacyStatEvents: 1
+--- !u!114 &7364383619408833809
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7640777319044402237}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 27ef992296cabf14f8f8bfb3ce75a677, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterLoadout
+  fallback: {fileID: 11400000, guid: 23afd2a6b7e1d5f458720ecf74986105, type: 2}
+  defaultBodyMaterial: {fileID: 2100000, guid: 9d4df993be894774282a0b17d51a0723, type: 2}
+--- !u!114 &7317769993851224939
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7640777319044402237}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e6a0d812a333f8c44b7cdd39143587a5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ParryController
+  window: 0.2
+  cooldown: 5
+  invulnerableDuration: 0.6
+  motionDuration: 0.45
+  nearRadius: 2
+  coneRadius: 5
+  coneAngle: 70
+  targetMargin: 0.5
+  enemyLayers:
+    serializedVersion: 2
+    m_Bits: 129
+  pushDistance: 3
+  pushDuration: 0.15
+  deflectSpeedMultiplier: 1.4
+  deflectSpeed: 16
+  deflectLifeTime: 2
+  deflectDamageMultiplier: 1.5
+  deflectFallbackDamage: 8
+  successSound:
+    clips:
+    - {fileID: 8300000, guid: 7f605232da260d545a53e92685c609fc, type: 3}
+    - {fileID: 8300000, guid: 5d293cd6cf3815d4e917da5618af844b, type: 3}
+    - {fileID: 8300000, guid: 81a1a13688f232044ac80c6810ba0440, type: 3}
+    - {fileID: 8300000, guid: 24415c45c1cb4ce47bc4f0830252fac2, type: 3}
+    - {fileID: 8300000, guid: accad34b3033bfe409a1702656ac3b0c, type: 3}
+    volume: 0.75
+    pitchRange: {x: 1, y: 1.12}
+    minInterval: 0
+  ringSound:
+    clips:
+    - {fileID: 8300000, guid: 660770de93051ba4d8bd7d31840aa599, type: 3}
+    - {fileID: 8300000, guid: 97e615f8a573ec640922330b8873f8b3, type: 3}
+    - {fileID: 8300000, guid: c1e56bfcfa069f14fa46f939443f6df1, type: 3}
+    volume: 0.5
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0
+  deflectSound:
+    clips:
+    - {fileID: 8300000, guid: 660770de93051ba4d8bd7d31840aa599, type: 3}
+    - {fileID: 8300000, guid: 97e615f8a573ec640922330b8873f8b3, type: 3}
+    - {fileID: 8300000, guid: c1e56bfcfa069f14fa46f939443f6df1, type: 3}
+    volume: 0.3
+    pitchRange: {x: 1.3, y: 1.45}
+    minInterval: 0
+  whiffSound:
+    clips:
+    - {fileID: 8300000, guid: 0c03edc4efa519a439adaf03a0af417a, type: 3}
+    volume: 0.35
+    pitchRange: {x: 0.75, y: 0.82}
+    minInterval: 0
+  successShake: 0.25
+  flashPrefab: {fileID: 1157294452713321349, guid: 9469d2c9a439dff40a65bbc0f40fa3d7, type: 3}
+  flashForward: 0.9
+  flashHeight: 1.25
+  hitStopScale: 0.05
+  hitStopDuration: 0.06
+  logParry: 0
+--- !u!114 &4867970890767324770
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7640777319044402237}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 35566569a3aa53b48b8035fb5caf6c05, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeleeTwoHandGrip
+  layerName: MeleeLayer
+  twoHandTag: TwoHand
+  guardTag: Guard
+  weight: 1
 --- !u!1 &7738332526512525993
 GameObject:
   m_ObjectHideFlags: 0
