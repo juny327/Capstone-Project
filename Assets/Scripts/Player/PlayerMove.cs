@@ -607,6 +607,21 @@ public class PlayerMove : MonoBehaviour
         anim.SetLayerWeight(1, weight);
     }
 
+    /// <summary>Recover from a test-room boundary without retaining roll/fall velocity.</summary>
+    public void ReturnToSafePosition(Vector3 position)
+    {
+        isRolling = false;
+        rollElapsed = 0f;
+        rollBufferedAt = -999f;
+        rollDir = Vector3.zero;
+        if (hasRollParam && anim != null) anim.ResetTrigger(HashRoll);
+        SetUpperBodyLayers(true);
+        rb.position = position;
+        rb.linearVelocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+        transform.position = position;
+    }
+
     // 무기 시스템이 있으면 들고 있는 무기에 맞는 상체 레이어를 WeaponController 가 고른다.
     // (예전처럼 무조건 사격 레이어를 켜면 검을 들고 구른 뒤 소총 자세로 돌아간다)
     /// <summary>구르기 시작 시 진행 중인 장전을 취소한다 (12번 R2).</summary>

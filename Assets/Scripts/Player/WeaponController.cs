@@ -21,6 +21,9 @@ public enum WeaponAcquireResult
     Invalid,
 }
 
+/// <summary>Selection without duplicate upgrades, used by the practice room.</summary>
+public enum HeldWeaponSelectionResult { Invalid, NotReady, Unchanged, Equipped, Swapped, Replaced }
+
 /// <summary>
 /// 플레이어의 무기를 소유하고 구동한다.
 ///
@@ -77,6 +80,9 @@ public class WeaponController : MonoBehaviour
 
     private int activeHeldIndex = -1;
     private bool isDead;
+    private bool hasStarterOverride;
+    private WeaponData starterOverride;
+    public bool IsInitialized { get; private set; }
     private Animator anim;
 
     /// <summary>지금까지 받은 범용 업그레이드 누적분. 새로 얻는 무기에 그대로 얹어 준다.</summary>
@@ -190,6 +196,66 @@ public class WeaponController : MonoBehaviour
         GameEvents.OnWeaponsChanged?.Invoke();
 
         return WeaponAcquireResult.Equipped;
+    }
+
+    /// <summary>Set before Start. Scene-owned test players need not change the lobby selection.</summary>
+    public bool ConfigureStartingWeapon(WeaponData data)
+    {
+        if (IsInitialized || !IsValidHeldWeapon(data)) return false;
+        hasStarterOverride = true;
+        starterOverride = data;
+        return true;
+    }
+
+    /// <summary>Acquire and equip, select an owned weapon, or replace only the active full slot.</summary>
+    public HeldWeaponSelectionResult SelectHeldWeapon(WeaponData data)
+    {
+        if (!IsInitialized || isDead) return HeldWeaponSelectionResult.NotReady;
+        if (!IsValidHeldWeapon(data)) return HeldWeaponSelectionResult.Invalid;
+
+        for (int i = 0; i < held.Count; i++)
+        {
+            if (held[i].Data != data) continue;
+            if (i == activeHeldIndex) return HeldWeaponSelectionResult.Unchanged;
+            SwapTo(i);
+            return HeldWeaponSelectionResult.Swapped;
+        }
+
+        if (HasFreeHeldSlot)
+        {
+            if (Acquire(data) != WeaponAcquireResult.Equipped) return HeldWeaponSelectionResult.Invalid;
+            SwapTo(held.Count - 1);
+            return HeldWeaponSelectionResult.Equipped;
+        }
+
+        if (activeHeldIndex < 0 || activeHeldIndex >= held.Count) return HeldWeaponSelectionResult.Invalid;
+        // Validate and create first: failure must preserve the previous loadout.
+        WeaponBase replacement = SpawnWeapon(data);
+        if (replacement == null) return HeldWeaponSelectionResult.Invalid;
+        replacement.ApplyModifier(globalModifier);
+        WeaponBase previous = held[activeHeldIndex];
+        previous.SetActive(false); // cancels reload, pending melee hits, charge audio and beams
+        previous.gameObject.SetActive(false);
+        held[activeHeldIndex] = replacement;
+        replacement.SetActive(true);
+        Destroy(previous.gameObject);
+
+        // SwapTo returns early for the same index, so complete this replacement explicitly.
+        ApplyUpperBodyLayers();
+        RaiseLegacyStats();
+        GameEvents.OnWeaponsChanged?.Invoke();
+        GameEvents.OnWeaponSwapped?.Invoke(ActiveWeapon);
+        return HeldWeaponSelectionResult.Replaced;
+    }
+
+    public static bool IsValidHeldWeapon(WeaponData data)
+    {
+        if (data == null || data.IsAlwaysActive || data.weaponPrefab == null) return false;
+        WeaponBase component = data.weaponPrefab.GetComponent<WeaponBase>();
+        return (data is ProjectileWeaponData && component is ProjectileWeapon) ||
+               (data is MeleeWeaponData && component is MeleeWeapon) ||
+               (data is ChainBeamWeaponData && component is ChainBeamWeapon) ||
+               (data is ChargeBeamWeaponData && component is ChargeBeamWeapon);
     }
 
     /// <summary>
@@ -310,8 +376,11 @@ public class WeaponController : MonoBehaviour
         if (GameAppManager.Instance != null && GameAppManager.Instance.SelectedWeapon != null)
             starter = GameAppManager.Instance.SelectedWeapon;
 
+        if (hasStarterOverride) starter = starterOverride;
+
         if (starter != null)
             Acquire(starter);
+        IsInitialized = true;
     }
 
     void OnPlayerDead()

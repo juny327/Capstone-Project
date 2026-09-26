@@ -87,12 +87,19 @@ public class PlayerStatsUI : MonoBehaviour
             anim = GetComponentInChildren<Animator>();
         }
 
-        UpdateStageProgress(0, nowStage.killTarget);
+        if (nowStage != null) UpdateStageProgress(0, nowStage.killTarget);
+        else if (killText != null) killText.gameObject.SetActive(false);
     }
 
     void SetPlayer(Transform t)
     {
-        stats = t.GetComponent<PlayerStats>();
+        if (stats != null)
+        {
+            stats.OnHpChanged -= UpdateHp;
+            stats.OnHpChanged -= UpdateHpText;
+            stats.OnExpChanged -= UpdateExp;
+        }
+        stats = t != null ? t.GetComponent<PlayerStats>() : null;
 
         if (stats == null) return;
 
@@ -105,11 +112,20 @@ public class PlayerStatsUI : MonoBehaviour
         UpdateHpText(stats.currentHp, stats.maxHp);
         UpdateExp(stats.currentExp);
 
-        Gun gun = t.GetComponentInChildren<Gun>();
-        if (gun != null)
+        WeaponController weapons = t.GetComponent<WeaponController>();
+        if (weapons != null && weapons.ActiveWeapon != null)
         {
-            UpdateBulletDamage(gun.bulletDamage);
-            UpdateBulletSpeed(gun.bulletSpeed);
+            UpdateBulletDamage(weapons.ActiveWeapon.Stats.Damage);
+            UpdateBulletSpeed(weapons.ActiveWeapon.Stats.ProjectileSpeed);
+        }
+        else if (weapons == null)
+        {
+            Gun gun = t.GetComponentInChildren<Gun>();
+            if (gun != null)
+            {
+                UpdateBulletDamage(gun.bulletDamage);
+                UpdateBulletSpeed(gun.bulletSpeed);
+            }
         }
 
         playerMove = t.GetComponent<PlayerMove>();
