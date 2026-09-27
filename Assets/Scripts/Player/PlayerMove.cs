@@ -71,11 +71,29 @@ public class PlayerMove : MonoBehaviour
     [Tooltip("플레이어 몸에서 나는 소리. 비우면 조용히 넘어간다")]
     [SerializeField] private PlayerSoundSet sounds;
 
-    [Tooltip("이만큼 움직일 때마다 발소리 한 번. 작을수록 잦아진다")]
+    [Tooltip("발 뼈가 가장 낮았던 높이보다 이만큼(m) 올라가면 '발을 들었다'로 본다")]
+    [Min(0.01f)] [SerializeField] private float footLiftHeight = 0.08f;
+
+    [Tooltip("들었던 발이 가장 낮은 높이 + 이 값(m) 아래로 내려오면 '디뎠다' — 이때 발소리가 난다")]
+    [Min(0f)] [SerializeField] private float footPlantHeight = 0.03f;
+
+    [Tooltip("두 발소리 사이의 최소 간격(초). 모션이 섞이는 동안 한 걸음이 두 번 잡히지 않게")]
+    [Min(0f)] [SerializeField] private float footstepMinInterval = 0.12f;
+
+    [Tooltip("발 뼈를 못 찾을 때(휴머노이드가 아닌 모델)만 쓰는 예비 방식 — 이만큼 움직일 때마다 발소리 한 번")]
     [Min(0.1f)] [SerializeField] private float stepDistance = 2.2f;
 
     private float footstepDistance;
     private Vector3 lastFootstepPos;
+
+    // 발 디딤 감지 (0 = 왼발, 1 = 오른발)
+    private readonly Transform[] feet = new Transform[2];
+    private readonly float[] footLow = { float.MaxValue, float.MaxValue };
+    private readonly bool[] footLifted = new bool[2];
+    private float lastFootstepTime = -999f;
+
+    // 가장 낮은 높이는 더 낮아지면 바로 따라가고, 높아지면 이 속도(m/s)로 천천히 올라간다 — 모션이 바뀌어도 기준이 맞춰진다
+    private const float FootLowRise = 0.1f;
 
     [Header("Stamina")]
     [SerializeField] private float maxStamina = 100f;
@@ -229,6 +247,12 @@ public class PlayerMove : MonoBehaviour
         // CharacterLoadout 이 먼저 돌았어도 최대치를 이미 바꿔 두었으므로 결과가 같다
         stamina = maxStamina;
         lastFootstepPos = transform.position;
+
+        if (anim != null && anim.isHuman)
+        {
+            feet[0] = anim.GetBoneTransform(HumanBodyBones.LeftFoot);
+            feet[1] = anim.GetBoneTransform(HumanBodyBones.RightFoot);
+        }
     }
 
     // 커브의 평균 배율을 구해 둔다.
@@ -376,6 +400,9 @@ public class PlayerMove : MonoBehaviour
             anim.SetBool(HashIsJump, false);
 
             PlaySound(sounds != null ? sounds.land : null);
+
+            // 착지 소리와 첫 발소리가 겹쳐 두 번 울리지 않게
+            lastFootstepTime = Time.time;
         }
 
         wasGround = currentGround;
@@ -455,13 +482,55 @@ public class PlayerMove : MonoBehaviour
     // ───────── 소리 ─────────
 
     /// <summary>
-    /// 발소리는 **이동 거리로 간격을 잡는다.**
+    /// 발소리는 **발이 바닥을 디디는 순간**에 난다.
     ///
-    /// 애니메이션 이벤트를 쓰지 않는 이유: `Run_gunMiddle_AR.anim` 의 이벤트 목록이 비어 있고,
-    /// 클립을 교체하면 이벤트가 전부 날아간다. `MeleeWeapon` 이 `hitDelay` 를 쓴 것과 같은 이유다.
+    /// 예전에는 이동 거리(2.2m)마다 한 번이었는데, 달리기 모션은 초당 3걸음 가까이 딛는 데 비해 소리는 초당 1.4번이라
+    /// 발은 빨리 움직이는데 소리가 드문드문 났다. 이제 애니메이션이 움직인 발 뼈(Humanoid LeftFoot · RightFoot)의 높이를 보고
+    ///   · 발이 가장 낮은 높이보다 footLiftHeight 이상 올라가면 "들었다"
+    ///   · 들었던 발이 다시 가장 낮은 높이 + footPlantHeight 아래로 내려오면 "디뎠다" → 발소리
+    /// 로 판단한다. 모션 · 속도(스프린트 · 속도 업그레이드) · 무기별 상체 모션이 바뀌어도 발과 소리가 저절로 맞는다.
     ///
-    /// 거리로 재면 **걷기와 달리기가 저절로 구분된다** — 빠르면 같은 시간에 더 멀리 가므로
-    /// 발소리도 그만큼 잦아진다. 속도 업그레이드를 받아도 따로 손댈 것이 없다.
+    /// 애니메이션 이벤트를 쓰지 않는 이유: 클립을 교체하면 이벤트가 전부 날아간다 (`MeleeWeapon` 의 hitDelay 와 같은 이유).
+    /// 뼈 위치는 애니메이션이 끝난 뒤라야 이번 프레임 값이므로 LateUpdate 에서 본다.
+    /// </summary>
+    void LateUpdate()
+    {
+        if (isDead || feet[0] == null || feet[1] == null) return;
+
+        for (int i = 0; i < 2; i++)
+            TickFootPlant(i);
+    }
+
+    void TickFootPlant(int i)
+    {
+        float height = feet[i].position.y - transform.position.y;
+
+        footLow[i] = height < footLow[i] ? height : footLow[i] + FootLowRise * Time.deltaTime;
+
+        if (!footLifted[i])
+        {
+            if (height > footLow[i] + footLiftHeight) footLifted[i] = true;
+            return;
+        }
+
+        if (height > footLow[i] + footPlantHeight) return;
+
+        footLifted[i] = false;
+
+        if (!CanStep() || Time.time - lastFootstepTime < footstepMinInterval) return;
+
+        lastFootstepTime = Time.time;
+        PlaySound(sounds.footstep);
+    }
+
+    // 걷는 중일 때만 — 구르기 · 공중 · 제자리(입력 없음) · 일시정지(애니메이터는 멈춘 시간에도 돈다) 중에는 내지 않는다
+    bool CanStep()
+    {
+        return sounds != null && !isRolling && currentGround && move != Vector2.zero && Time.timeScale > 0.01f;
+    }
+
+    /// <summary>
+    /// 예비 방식 — 발 뼈를 못 찾을 때(휴머노이드가 아닌 모델)만 이동 거리로 간격을 잡는다.
     /// </summary>
     void TickFootstep()
     {
@@ -471,6 +540,9 @@ public class PlayerMove : MonoBehaviour
         // ⚠ 기준점은 **항상** 갱신한다. 멈춰 있는 동안 갱신을 건너뛰면
         //    다시 걸을 때 그동안의 이동이 한꺼번에 쌓여 발소리가 즉시 터진다.
         lastFootstepPos = transform.position;
+
+        // 발 디딤으로 소리를 내고 있으면 여기서는 아무것도 하지 않는다
+        if (feet[0] != null && feet[1] != null) return;
 
         if (sounds == null || isRolling || !currentGround)
         {

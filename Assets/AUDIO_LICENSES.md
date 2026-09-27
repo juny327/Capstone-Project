@@ -18,10 +18,15 @@
 | `Abstraction/MusicLoops` | Music Loop Bundle 2026 Q2 (29곡) | [tallbeard.itch.io](https://tallbeard.itch.io/music-loop-bundle) | **CC0** | 없음 | 2026-09-25 |
 | `OpenGameArt/Electricity` | Electricity Sound Effects (`continuousspark`) | [opengameart.org](https://opengameart.org/content/electricity-sound-effects-0) | **CC0** | 없음 | 2026-09-25 |
 | `OpenGameArt/Electricity` | Electricity Game Sound Pack (`chargestart` · `hit`) | [opengameart.org](https://opengameart.org/content/electricity-game-sound-pack) | **CC0** | 없음 | 2026-09-25 |
+| `Torone/Music Loops Pack 2 - Sci-Fi` | Music loops pack 2 - Sci-Fi (반복용 6곡, 배경음 전부) | [torone.itch.io](https://torone.itch.io/music-loops-pack-2-sci-fi) | **CC BY 4.0** | ⚠ **있음** | 2026-09-27 |
 | `AUDIO/Parry` | 패링 "팅" 여운 `ParryRing_01~03.wav` | **직접 합성** — 금속 막대 배음(1 : 2.756 : 5.404 : 8.933)을 Python(numpy)으로 합성 | 자체 제작 (제약 없음) | 없음 | 2026-09-26 |
 
-**현재 전부 CC0 또는 직접 만든 소리다.** 상업 이용 가능하고 크레딧 표기 의무가 없다.
-다만 제작자들이 표기를 반기므로, 게임 크레딧에 아래 정도를 넣어 두면 좋다.
+**효과음은 전부 CC0 또는 직접 만든 소리다.** 상업 이용 가능하고 크레딧 표기 의무가 없다.
+
+> ⚠ **배경음(Torone)은 CC BY 4.0 — 크레딧 표기가 의무다.** 게임 크레딧(또는 설정 · 정보 화면)에 아래 `Music` 줄을 반드시 넣을 것.
+> 라이선스는 제작자 페이지 문구("Those loops are under Creative Common Attribution 4")로 확인했다 (2026-09-27). zip 안에 라이선스 파일은 없다.
+
+나머지 제작자들도 표기를 반기므로 아래처럼 함께 넣어 두면 좋다.
 
 ```
 Sound Effects
@@ -29,14 +34,14 @@ Sound Effects
   SnakeF8 (f8studios.itch.io) — CC0
 
 Music
-  Abstraction (tallbeard.itch.io) — CC0
+  "Music loops pack 2 - Sci-Fi" by Chris "Torone" CB (torone.itch.io) — CC BY 4.0   ← 필수
 
 Electricity SFX
   Brian MacIntosh, faxcorp (opengameart.org) — CC0
 ```
 
 > Abstraction 제작자는 **NFT · AI 학습 · 원본 재판매**에 쓰지 말 것을 명시했다.
-> 게임에 쓰는 것은 문제없다.
+> 게임에 쓰는 것은 문제없다. (2026-09-27 부터 Abstraction 곡은 배경음에서 빠졌다 — 파일은 남아 있다)
 
 ---
 
