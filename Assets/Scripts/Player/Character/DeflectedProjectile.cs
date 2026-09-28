@@ -2,14 +2,14 @@ using System.Reflection;
 using UnityEngine;
 
 /// <summary>
-/// 패링으로 쳐낸 적 투사체. 몬스터가 쏜 그 투사체가 모양 그대로 **반대 방향**으로 날아가 적을 맞힌다.
+/// 패링으로 쳐낸 적 투사체. 몬스터가 쏜 그 투사체가 모양 그대로 **칼면에 거울처럼 반사돼** 날아가 적을 맞힌다.
 ///
 /// 왜 컴포넌트를 따로 붙이는가
 ///  RangedProjectile(Enemy 폴더)은 협업 제약상 고칠 수 없고, 방향을 바꾸는 public 함수도 없다.
 ///  그래서 쳐내는 순간 RangedProjectile 을 잠시 끄고 이 컴포넌트가 비행을 넘겨받는다.
 ///  끝나면 RangedProjectile 을 다시 켜고 풀로 돌려보낸다 — 다음에 몬스터가 쏠 때는 원래대로 난다.
 ///
-///  · 방향 : 날아오던 방향의 정반대 (쏜 몬스터를 쫓아가지 않는다)
+///  · 방향 : ParryController 가 정해 준 방향 (칼면 반사 — 비스듬히 들어오면 반대쪽 비스듬히). 쏜 몬스터를 쫓아가지 않는다
 ///  · 판정 : 원래 투사체처럼 구체 캐스트로 움직인다 (콜라이더가 없는 투사체다)
 ///           Enemy · Boss 태그에 맞으면 피해를 주고 사라지고, 벽에 맞으면 그냥 사라진다. 플레이어는 통과한다
 /// </summary>
@@ -36,9 +36,9 @@ public class DeflectedProjectile : MonoBehaviour
     public bool IsFlying => flying;
 
     /// <summary>
-    /// 적 투사체를 쳐낸다. 날아오던 방향의 반대로, 원래 속도 × speedMultiplier (최소 minSpeed) 로 보낸다.
+    /// 적 투사체를 쳐낸다. direction 쪽으로(수평), 원래 속도 × speedMultiplier (최소 minSpeed) 로 보낸다.
     /// </summary>
-    public static bool Launch(RangedProjectile projectile, float speedMultiplier, float minSpeed, float damage, float lifeTime)
+    public static bool Launch(RangedProjectile projectile, Vector3 direction, float speedMultiplier, float minSpeed, float damage, float lifeTime)
     {
         if (projectile == null || !projectile.enabled || !projectile.gameObject.activeInHierarchy) return false;
 
@@ -46,19 +46,23 @@ public class DeflectedProjectile : MonoBehaviour
         DeflectedProjectile deflected = projectile.GetComponent<DeflectedProjectile>();
         if (deflected == null) deflected = projectile.gameObject.AddComponent<DeflectedProjectile>();
 
-        deflected.Begin(projectile, speedMultiplier, minSpeed, damage, lifeTime);
+        deflected.Begin(projectile, direction, speedMultiplier, minSpeed, damage, lifeTime);
         return true;
     }
 
-    void Begin(RangedProjectile projectile, float speedMultiplier, float minSpeed, float hitDamage, float lifeTime)
+    void Begin(RangedProjectile projectile, Vector3 launchDirection, float speedMultiplier, float minSpeed, float hitDamage, float lifeTime)
     {
         source = projectile;
         trail = GetComponent<TrailRenderer>();
 
-        // 투사체는 진행 방향을 바라보게 회전되어 있다
-        Vector3 back = -transform.forward;
-        back.y = 0f;
-        direction = back.sqrMagnitude > 0.0001f ? back.normalized : -transform.forward;
+        // 방향이 비었으면 날아오던 방향의 반대로 (투사체는 진행 방향을 바라보게 회전되어 있다)
+        launchDirection.y = 0f;
+        if (launchDirection.sqrMagnitude < 0.0001f)
+        {
+            launchDirection = -transform.forward;
+            launchDirection.y = 0f;
+        }
+        direction = launchDirection.sqrMagnitude > 0.0001f ? launchDirection.normalized : -transform.forward;
 
         float original = SpeedField != null ? (float)SpeedField.GetValue(source) : minSpeed;
         speed = Mathf.Max(minSpeed, original * speedMultiplier);

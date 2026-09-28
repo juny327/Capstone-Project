@@ -2745,6 +2745,9 @@ MonoBehaviour:
   rotationSpeed: 400
   sprintMultiplier: 1.6
   sounds: {fileID: 11400000, guid: 5de4a2c4d3bf9594fadc82ef2d98904d, type: 2}
+  footLiftHeight: 0.08
+  footPlantHeight: 0.03
+  footstepMinInterval: 0.12
   stepDistance: 2.2
   maxStamina: 100
   sprintDrainPerSecond: 25
@@ -2976,6 +2979,7 @@ MonoBehaviour:
   deflectSpeedMultiplier: 1.4
   deflectSpeed: 16
   deflectLifeTime: 2
+  deflectMinAngle: 20
   deflectDamageMultiplier: 1.5
   deflectFallbackDamage: 8
   successSound:
@@ -3014,6 +3018,8 @@ MonoBehaviour:
   flashPrefab: {fileID: 1157294452713321349, guid: 9469d2c9a439dff40a65bbc0f40fa3d7, type: 3}
   flashForward: 0.9
   flashHeight: 1.25
+  maxClashEffects: 4
+  clashHeight: 1.1
   hitStopScale: 0.05
   hitStopDuration: 0.06
   logParry: 0

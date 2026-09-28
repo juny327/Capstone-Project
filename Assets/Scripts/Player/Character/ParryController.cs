@@ -8,8 +8,9 @@ using UnityEngine.AI;
 /// 검사의 회피 — 패링 (캐릭터-2종-확장-설계.md 7장).
 ///
 /// 회피 키를 누르면 짧은 판정 창(0.2초) 동안 **주변 원 ∪ 커서 부채꼴** 안을 살핀다.
-///   · 적이나 적 투사체가 걸리면 성공 — 적은 밀쳐내고 경직시키며, 투사체는 그 모양 그대로 반대 방향으로 튕겨낸다
-///     (DeflectedProjectile). 그리고 잠깐 무적. "팅" 소리 · 섬광 · 불꽃 · 아주 짧은 멈칫으로 성공을 알린다
+///   · 적이나 적 투사체가 걸리면 성공 — 적은 밀쳐내고 경직시키며, 투사체는 그 모양 그대로 칼면(캐릭터 정면)에
+///     거울처럼 반사해 튕겨낸다 (DeflectedProjectile). 그리고 잠깐 무적.
+///     "팅" 소리 · 불똥(ParryFlash) · 아주 짧은 멈칫으로 성공을 알린다. 밀어낸 적 · 쳐낸 투사체 자리에서도 불똥이 튄다
 ///   · 아무것도 없으면 헛침 — 무적 없음
 /// 쿨타임은 성공 · 헛침 모두 같다 (구르기 전체 4초보다 길게).
 ///
@@ -62,6 +63,9 @@ public class ParryController : MonoBehaviour
 
     [Min(0.1f)] [SerializeField] private float deflectLifeTime = 2.5f;
 
+    [Tooltip("칼면을 스치듯 들어온 투사체도 이 각도 이상 꺾여 나가게 한다 — 그대로 지나가 보이지 않게")]
+    [Range(0f, 60f)] [SerializeField] private float deflectMinAngle = 20f;
+
     [Tooltip("튕겨낸 투사체 피해 = 들고 있는 무기 공격력 × 이 값")]
     [Min(0f)] [SerializeField] private float deflectDamageMultiplier = 1.5f;
 
@@ -82,12 +86,18 @@ public class ParryController : MonoBehaviour
 
     [Min(0f)] [SerializeField] private float successShake = 0.25f;
 
-    [Tooltip("섬광 · 고리 · 불꽃 (Prefabs/Effect/Parry/ParryFlash). 비우면 연출 없이 소리만")]
+    [Tooltip("불똥 · 섬광 · 고리 (Prefabs/Effect/Parry/ParryFlash). 비우면 연출 없이 소리만")]
     [SerializeField] private ParryFlash flashPrefab;
 
     [Tooltip("섬광이 터지는 자리 — 몸 앞으로 이만큼, 이 높이")]
     [SerializeField] private float flashForward = 0.9f;
     [SerializeField] private float flashHeight = 1.25f;
+
+    [Tooltip("밀어낸 적과 맞닿은 자리에서도 불똥을 튀긴다 — 한 번에 이 수까지 (많으면 화면이 뒤덮인다)")]
+    [Min(0)] [SerializeField] private int maxClashEffects = 4;
+
+    [Tooltip("적과 맞닿은 자리 높이")]
+    [SerializeField] private float clashHeight = 1.1f;
 
     [Tooltip("막는 순간 시간을 이 배율로 늦춘다 (히트 스톱). 1 이면 끈다")]
     [Range(0.01f, 1f)] [SerializeField] private float hitStopScale = 0.05f;
@@ -326,13 +336,20 @@ public class ParryController : MonoBehaviour
         Vector3 origin = transform.position;
         Vector3 forward = PlanarForward();
 
+        // 몸 앞 큰 불똥을 먼저 — 불똥이 떨어질 바닥 높이도 여기서 정한다
+        PlayFlash(origin, forward);
+
+        int clashes = 0;
         foreach (Enemy enemy in enemies)
-            PushEnemy(enemy, origin, forward);
+        {
+            if (PushEnemy(enemy, origin, forward, clashes < maxClashEffects))
+                clashes++;
+        }
 
         int deflected = 0;
         for (int i = 0; i < projectiles.Count; i++)
         {
-            if (Deflect(projectiles[i]))
+            if (Deflect(projectiles[i], origin, forward))
                 deflected++;
         }
 
@@ -344,8 +361,6 @@ public class ParryController : MonoBehaviour
         PlaySound(successSound);
         PlaySound(ringSound);
         if (deflected > 0) PlaySound(deflectSound);
-
-        PlayFlash(origin, forward);
 
         if (hitStopScale < 1f && hitStopDuration > 0f)
             StartCoroutine(HitStop());
@@ -375,24 +390,31 @@ public class ParryController : MonoBehaviour
     /// 경직이 꼭 필요한 이유: 근접 적(MeleeAttack)은 애니메이션 이벤트로 피해를 주고 거리를 다시 재지 않는다.
     /// Hit 모션이 공격 모션을 끊어야 3m 밖으로 밀린 뒤에도 피해가 들어오지 않는다.
     /// </summary>
-    void PushEnemy(Enemy enemy, Vector3 origin, Vector3 forward)
+    /// <returns>맞닿은 자리 불똥을 튀겼는지</returns>
+    bool PushEnemy(Enemy enemy, Vector3 origin, Vector3 forward, bool clashEffect)
     {
-        if (enemy == null) return;
+        if (enemy == null) return false;
 
         // 자폭 적은 Enemy.TakeDamage 도 경직을 걸지 않는다 — 같은 규칙을 따른다 (밀기만)
         if (!(enemy.attack is SuicideAttack))
             enemy.ChangeState(EnemyState.Hit);
 
-        if (pushDistance <= 0f) return;
-
-        NavMeshAgent agent = enemy.GetComponent<NavMeshAgent>();
-        if (agent == null || !agent.enabled || !agent.isOnNavMesh) return;
-
         Vector3 dir = enemy.transform.position - origin;
         dir.y = 0f;
-        dir = dir.sqrMagnitude > 0.0001f ? dir.normalized : forward;
+        float distance = dir.magnitude;
+        dir = distance > 0.01f ? dir / distance : forward;
+
+        // 무기와 적이 맞닿는 자리 — 둘 사이, 몸 앞 1m 를 넘지 않게
+        if (clashEffect && EnsureFlash())
+            flash.Clash(origin + dir * Mathf.Min(1f, distance * 0.6f) + Vector3.up * clashHeight, dir);
+
+        if (pushDistance <= 0f) return clashEffect;
+
+        NavMeshAgent agent = enemy.GetComponent<NavMeshAgent>();
+        if (agent == null || !agent.enabled || !agent.isOnNavMesh) return clashEffect;
 
         StartCoroutine(PushRoutine(enemy, agent, dir));
+        return clashEffect;
     }
 
     // 플레이어 쪽에서 돌린다. 밀리는 도중 적이 죽어 풀로 돌아가면 멈춘다
@@ -417,23 +439,45 @@ public class ParryController : MonoBehaviour
     }
 
     /// <summary>
-    /// 몬스터가 쏜 투사체를 그대로 반대 방향으로 튕겨낸다 (DeflectedProjectile 이 비행을 넘겨받는다).
-    /// 쏜 몬스터를 쫓아가지 않고, 날아오던 방향의 정반대로 곧게 날아간다.
+    /// 몬스터가 쏜 투사체를 칼면에 거울처럼 반사해 튕겨낸다 (DeflectedProjectile 이 비행을 넘겨받는다).
+    /// 비스듬히 들어오면 반대쪽 비스듬히 나가고, 정면으로 들어온 것만 곧장 되돌아간다. 쏜 몬스터를 쫓아가지 않는다.
     /// </summary>
-    bool Deflect(RangedProjectile projectile)
+    bool Deflect(RangedProjectile projectile, Vector3 origin, Vector3 bladeNormal)
     {
         if (projectile == null || !projectile.gameObject.activeInHierarchy) return false;
 
         Vector3 position = projectile.transform.position;
-        Vector3 back = -projectile.transform.forward;
+        Vector3 incoming = projectile.transform.forward;   // 투사체는 진행 방향을 바라본다
+        Vector3 outgoing = ReflectOffBlade(incoming, position - origin, bladeNormal, out Vector3 along);
 
-        if (!DeflectedProjectile.Launch(projectile, deflectSpeedMultiplier, deflectSpeed, DeflectDamage(), deflectLifeTime))
+        if (!DeflectedProjectile.Launch(projectile, outgoing, deflectSpeedMultiplier, deflectSpeed, DeflectDamage(), deflectLifeTime))
             return false;
 
         if (EnsureFlash())
-            flash.Deflect(position, back);
+            flash.Deflect(position, outgoing, along);
 
         return true;
+    }
+
+    /// <summary>
+    /// 칼면 반사. 칼면은 캐릭터 정면(bladeNormal)에 수직으로 서 있다 — 양손 방어 자세 · 맞받아치는 칼날이 그렇다.
+    ///  · 칼면을 따라가는 성분(along)은 그대로, 칼면에 부딪히는 성분은 뒤집는다 = 입사각과 반사각이 같다
+    ///  · 투사체가 있는 쪽(앞 · 뒤)으로 튕겨 나간다 — 등 뒤에서 온 것은 칼등으로 쳐낸 것처럼 뒤로
+    ///  · 칼면을 스치듯 들어와도 deflectMinAngle 만큼은 꺾여 나간다
+    /// </summary>
+    Vector3 ReflectOffBlade(Vector3 incoming, Vector3 offset, Vector3 bladeNormal, out Vector3 along)
+    {
+        incoming.y = 0f;
+        if (incoming.sqrMagnitude < 0.0001f) incoming = -bladeNormal;
+        incoming.Normalize();
+
+        float into = Vector3.Dot(incoming, bladeNormal);
+        along = incoming - bladeNormal * into;
+
+        float side = Vector3.Dot(offset, bladeNormal) >= 0f ? 1f : -1f;
+        float away = Mathf.Max(Mathf.Abs(into), Mathf.Sin(deflectMinAngle * Mathf.Deg2Rad));
+
+        return (along + bladeNormal * (side * away)).normalized;
     }
 
     float DeflectDamage()
@@ -461,7 +505,8 @@ public class ParryController : MonoBehaviour
     {
         if (!EnsureFlash()) return;
 
-        flash.Play(origin + forward * flashForward + Vector3.up * flashHeight, forward);
+        // 플레이어 위치는 발밑이다 — 불똥이 그 높이의 바닥에서 튄다
+        flash.Play(origin + forward * flashForward + Vector3.up * flashHeight, forward, origin.y);
     }
 
     /// <summary>

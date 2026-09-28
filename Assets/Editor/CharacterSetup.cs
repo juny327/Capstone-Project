@@ -1404,79 +1404,157 @@ public static class CharacterSetup
         return true;
     }
 
-    // ── 패링 섬광 ────────────────────────────────────────────────
-    // 섬광(빛 번짐) · 퍼지는 고리 · 불꽃 세 파티클. 텍스처 두 장(부드러운 점 · 고리)도 여기서 그린다 — 외부 에셋 없음.
+    // ── 패링 섬광 · 불똥 ────────────────────────────────────────
+    // 금속끼리 부딪혀 불똥이 튀는 느낌 — 십자 광채 · 섬광 · 짧은 고리 · 길게 늘어진 불똥(바닥에서 튄다) · 잔불 · 주황 조명.
+    // 텍스처 네 장(부드러운 점 · 고리 · 불똥 · 십자 광채)도 여기서 그린다 — 외부 에셋 없음.
     // 재질은 URP Particles/Unlit 가산 혼합이고 색을 1 넘게 줘서 스테이지 블룸(threshold 1)에 번지게 한다.
+    // 어디서 몇 개를 뿜을지는 ParryFlash 가 정한다 (여기 파티클들은 스스로 뿜지 않는다).
     static ParryFlash BuildParryFlash()
     {
         EnsureFolder(ParryFxDir);
 
         Texture2D glowTex = DrawTexture($"{ParryFxDir}/ParryGlow.png", 64, r => Mathf.Pow(Mathf.Clamp01(1f - r), 2.2f));
         Texture2D ringTex = DrawTexture($"{ParryFxDir}/ParryRing.png", 128, r => Mathf.Exp(-Mathf.Pow((r - 0.82f) / 0.07f, 2f)));
+        Texture2D sparkTex = DrawTexture($"{ParryFxDir}/ParrySpark.png", 64, r => Mathf.Pow(Mathf.Clamp01(1f - r), 1.3f));
+        Texture2D starTex = DrawTexture($"{ParryFxDir}/ParryStar.png", 128, StarGlint);
 
-        Material glowMat = AdditiveMaterial($"{ParryFxDir}/ParryGlow.mat", glowTex, new Color(2.6f, 2.3f, 1.7f, 1f));
-        Material ringMat = AdditiveMaterial($"{ParryFxDir}/ParryRing.mat", ringTex, new Color(1.8f, 2.2f, 2.6f, 1f));
-        if (glowMat == null || ringMat == null) return null;
+        // 재질은 밝기(HDR)만 올리고 색은 파티클 색이 정한다. 스테이지 톤매핑(Neutral)은 밝은 색을 노란 흰색으로 누르므로
+        // 주황 · 빨강이 살아남게 파티클 색의 초록 · 파랑을 아주 낮게 둔다 (초록 0.5 만 돼도 화면에서는 연노랑이 된다)
+        Material glowMat = AdditiveMaterial($"{ParryFxDir}/ParryGlow.mat", glowTex, new Color(3f, 3f, 3f, 1f));
+        Material ringMat = AdditiveMaterial($"{ParryFxDir}/ParryRing.mat", ringTex, new Color(2f, 2f, 2f, 1f));
+        Material sparkMat = AdditiveMaterial($"{ParryFxDir}/ParrySpark.mat", sparkTex, new Color(2.6f, 2.6f, 2.6f, 1f));
+        Material starMat = AdditiveMaterial($"{ParryFxDir}/ParryStar.mat", starTex, new Color(3.2f, 3.1f, 2.9f, 1f));
+        if (glowMat == null || ringMat == null || sparkMat == null || starMat == null) return null;
 
         var root = new GameObject("ParryFlash");
         try
         {
+            // 불똥이 튀는 바닥 — ParryFlash 가 막을 때마다 발 높이로 옮긴다
+            var floor = new GameObject("Floor").transform;
+            floor.SetParent(root.transform, false);
+
             ParticleSystem flash = MakeParticles(root.transform, "Flash", glowMat, ps =>
             {
                 var main = ps.main;
                 main.startLifetime = 0.12f;
                 main.startSpeed = 0f;
-                main.startSize = 1.9f;
-                main.startColor = new Color(1f, 0.96f, 0.85f, 1f);
-                main.maxParticles = 2;
-                Burst(ps, 1);
-                SizeOverLife(ps, AnimationCurve.EaseInOut(0f, 0.55f, 1f, 1.25f));
+                main.startSize = 1.5f;
+                main.startColor = new Color(1f, 0.3f, 0.08f, 1f);
+                main.maxParticles = 16;
+                SizeOverLife(ps, AnimationCurve.EaseInOut(0f, 0.6f, 1f, 1.2f));
+                FadeOut(ps);
+            });
+
+            // 십자 광채 — "팅" 하는 순간의 날카로운 빛. 매번 다른 각도로 돈다
+            ParticleSystem glint = MakeParticles(root.transform, "Glint", starMat, ps =>
+            {
+                var main = ps.main;
+                main.startLifetime = 0.11f;
+                main.startSpeed = 0f;
+                main.startSize = 1.7f;
+                main.startRotation = new ParticleSystem.MinMaxCurve(0f, Mathf.PI * 2f);
+                main.startColor = Color.white;
+                main.maxParticles = 16;
+                SizeOverLife(ps, new AnimationCurve(new Keyframe(0f, 0.5f, 0f, 8f), new Keyframe(0.2f, 1f), new Keyframe(1f, 0.15f)));
                 FadeOut(ps);
             });
 
             ParticleSystem ring = MakeParticles(root.transform, "Ring", ringMat, ps =>
             {
                 var main = ps.main;
-                main.startLifetime = 0.22f;
+                main.startLifetime = 0.18f;
                 main.startSpeed = 0f;
-                main.startSize = 3.4f;
-                main.startColor = new Color(0.85f, 0.95f, 1f, 1f);
-                main.maxParticles = 2;
-                Burst(ps, 1);
-                SizeOverLife(ps, new AnimationCurve(new Keyframe(0f, 0.12f, 0f, 6f), new Keyframe(1f, 1f, 0.3f, 0f)));
+                main.startSize = 2.4f;
+                main.startColor = new Color(1f, 0.25f, 0.06f, 0.5f);
+                main.maxParticles = 4;
+                SizeOverLife(ps, new AnimationCurve(new Keyframe(0f, 0.15f, 0f, 6f), new Keyframe(1f, 1f, 0.3f, 0f)));
                 FadeOut(ps);
             });
 
-            ParticleSystem sparks = MakeParticles(root.transform, "Sparks", glowMat, ps =>
+            // 불똥 — 속도 방향으로 길게 늘어진다. 공기 저항으로 느려지며 짧아지고, 중력으로 떨어져 바닥에서 튄다
+            ParticleSystem sparks = MakeParticles(root.transform, "Sparks", sparkMat, ps =>
             {
                 var main = ps.main;
-                main.startLifetime = new ParticleSystem.MinMaxCurve(0.15f, 0.34f);
-                main.startSpeed = new ParticleSystem.MinMaxCurve(5f, 12f);
-                main.startSize = new ParticleSystem.MinMaxCurve(0.05f, 0.1f);
-                main.startColor = new ParticleSystem.MinMaxGradient(new Color(1f, 0.95f, 0.7f, 1f), new Color(1f, 0.7f, 0.3f, 1f));
-                main.gravityModifier = 1.4f;
-                main.maxParticles = 200;
+                main.startLifetime = new ParticleSystem.MinMaxCurve(0.22f, 0.55f);
+                main.startSpeed = 0f;
+                main.startSize = new ParticleSystem.MinMaxCurve(0.045f, 0.09f);
+                main.startColor = new ParticleSystem.MinMaxGradient(Color.white, new Color(1f, 0.85f, 0.7f, 1f));
+                main.gravityModifier = 2f;
+                main.maxParticles = 600;
 
-                var shape = ps.shape;
-                shape.enabled = true;
-                shape.shapeType = ParticleSystemShapeType.Cone;
-                shape.angle = 60f;
-                shape.radius = 0.05f;
+                var drag = ps.limitVelocityOverLifetime;
+                drag.enabled = true;
+                drag.limit = 100f;
+                drag.drag = 2.2f;
+                drag.multiplyDragByParticleSize = false;
+                drag.multiplyDragByParticleVelocity = false;
 
-                SizeOverLife(ps, AnimationCurve.Linear(0f, 1f, 1f, 0f));
-                FadeOut(ps);
+                var collision = ps.collision;
+                collision.enabled = true;
+                collision.type = ParticleSystemCollisionType.Planes;
+                collision.SetPlane(0, floor);
+                collision.bounce = new ParticleSystem.MinMaxCurve(0.25f, 0.45f);
+                collision.dampen = new ParticleSystem.MinMaxCurve(0.3f, 0.5f);
+                collision.lifetimeLoss = 0.2f;
+                collision.radiusScale = 0.5f;
+
+                SizeOverLife(ps, AnimationCurve.Linear(0f, 1f, 1f, 0.45f));
+                HotMetal(ps);
 
                 var r = ps.GetComponent<ParticleSystemRenderer>();
                 r.renderMode = ParticleSystemRenderMode.Stretch;
-                r.lengthScale = 2.5f;
-                r.velocityScale = 0.035f;
+                r.lengthScale = 1f;
+                r.velocityScale = 0.04f;
             });
+
+            // 잔불 — 느리게 흩날리다 꺼지는 작은 불씨
+            ParticleSystem embers = MakeParticles(root.transform, "Embers", sparkMat, ps =>
+            {
+                var main = ps.main;
+                main.startLifetime = new ParticleSystem.MinMaxCurve(0.45f, 1.1f);
+                main.startSpeed = 0f;
+                main.startSize = new ParticleSystem.MinMaxCurve(0.03f, 0.07f);
+                main.startColor = new ParticleSystem.MinMaxGradient(Color.white, new Color(1f, 0.75f, 0.6f, 1f));
+                main.gravityModifier = 0.35f;
+                main.maxParticles = 120;
+
+                var drag = ps.limitVelocityOverLifetime;
+                drag.enabled = true;
+                drag.limit = 100f;
+                drag.drag = 3f;
+                drag.multiplyDragByParticleSize = false;
+                drag.multiplyDragByParticleVelocity = false;
+
+                var noise = ps.noise;
+                noise.enabled = true;
+                noise.strength = 1.2f;
+                noise.frequency = 1.5f;
+                noise.scrollSpeed = 1f;
+
+                SizeOverLife(ps, AnimationCurve.Linear(0f, 1f, 1f, 0.3f));
+                HotMetal(ps);
+            });
+
+            // 막는 순간 주변을 한 번 비추는 주황 조명 (평소에는 꺼 둔다)
+            var lightGo = new GameObject("Light");
+            lightGo.transform.SetParent(root.transform, false);
+            Light light = lightGo.AddComponent<Light>();
+            light.type = LightType.Point;
+            light.color = new Color(1f, 0.62f, 0.3f);
+            light.range = 6f;
+            light.intensity = 0f;
+            light.shadows = LightShadows.None;
+            light.enabled = false;
 
             ParryFlash component = root.AddComponent<ParryFlash>();
             var so = new SerializedObject(component);
             so.FindProperty("flash").objectReferenceValue = flash;
+            so.FindProperty("glint").objectReferenceValue = glint;
             so.FindProperty("ring").objectReferenceValue = ring;
             so.FindProperty("sparks").objectReferenceValue = sparks;
+            so.FindProperty("embers").objectReferenceValue = embers;
+            so.FindProperty("flashLight").objectReferenceValue = light;
+            so.FindProperty("floor").objectReferenceValue = floor;
             so.ApplyModifiedPropertiesWithoutUndo();
 
             PrefabUtility.SaveAsPrefabAsset(root, ParryFlashPath);
@@ -1486,8 +1564,41 @@ public static class CharacterSetup
             Object.DestroyImmediate(root);
         }
 
-        Debug.Log($"{Tag} 패링 섬광: {ParryFlashPath} (섬광 · 고리 · 불꽃)");
+        Debug.Log($"{Tag} 패링 섬광: {ParryFlashPath} (광채 · 섬광 · 고리 · 불똥 · 잔불 · 조명)");
         return AssetDatabase.LoadAssetAtPath<GameObject>(ParryFlashPath).GetComponent<ParryFlash>();
+    }
+
+    /// <summary>달군 쇠처럼 식는 색 — 흰 노랑 → 주황 → 검붉음, 끝에서 사라진다.</summary>
+    static void HotMetal(ParticleSystem ps)
+    {
+        var gradient = new Gradient();
+        gradient.SetKeys(
+            new[]
+            {
+                new GradientColorKey(new Color(1f, 0.55f, 0.2f), 0f),
+                new GradientColorKey(new Color(1f, 0.3f, 0.06f), 0.15f),
+                new GradientColorKey(new Color(1f, 0.16f, 0.02f), 0.5f),
+                new GradientColorKey(new Color(0.7f, 0.06f, 0.01f), 1f),
+            },
+            new[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(1f, 0.6f), new GradientAlphaKey(0f, 1f) });
+
+        var color = ps.colorOverLifetime;
+        color.enabled = true;
+        color.color = gradient;
+    }
+
+    /// <summary>십자 광채 — 가로로 긴 빛줄기 + 세로 빛줄기 + 밝은 심.</summary>
+    static float StarGlint(float x, float y)
+    {
+        float ax = Mathf.Abs(x), ay = Mathf.Abs(y);
+        float r = Mathf.Sqrt(x * x + y * y);
+
+        float horizontal = Mathf.Exp(-ay / 0.025f) * Mathf.Pow(Mathf.Clamp01(1f - ax), 2f);
+        float vertical = Mathf.Exp(-ax / 0.025f) * Mathf.Pow(Mathf.Clamp01(1f - ay * 1.4f), 2f);
+        float core = Mathf.Exp(-(r * r) / (0.1f * 0.1f));
+        float halo = 0.3f * Mathf.Pow(Mathf.Clamp01(1f - r), 3f);
+
+        return Mathf.Clamp01(Mathf.Max(horizontal, vertical) + core + halo);
     }
 
     static ParticleSystem MakeParticles(Transform parent, string name, Material material, Action<ParticleSystem> configure)
@@ -1521,12 +1632,6 @@ public static class CharacterSetup
         return ps;
     }
 
-    static void Burst(ParticleSystem ps, int count)
-    {
-        var emission = ps.emission;
-        emission.SetBursts(new[] { new ParticleSystem.Burst(0f, (short)count) });
-    }
-
     static void SizeOverLife(ParticleSystem ps, AnimationCurve curve)
     {
         var size = ps.sizeOverLifetime;
@@ -1549,6 +1654,16 @@ public static class CharacterSetup
     /// <summary>가운데에서 거리 r(0~1)에 따른 밝기로 흰 텍스처를 그려 PNG 로 저장한다.</summary>
     static Texture2D DrawTexture(string path, int size, Func<float, float> alphaByRadius)
     {
+        return DrawTexture(path, size, (x, y) =>
+        {
+            float r = Mathf.Sqrt(x * x + y * y);
+            return r >= 1f ? 0f : alphaByRadius(r);
+        });
+    }
+
+    /// <summary>가운데가 (0,0), 가장자리가 ±1 인 좌표 (x, y) 에 따른 밝기로 흰 텍스처를 그려 PNG 로 저장한다.</summary>
+    static Texture2D DrawTexture(string path, int size, Func<float, float, float> alphaAt)
+    {
         var tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
         var pixels = new Color32[size * size];
         float half = (size - 1) * 0.5f;
@@ -1557,8 +1672,7 @@ public static class CharacterSetup
         {
             for (int x = 0; x < size; x++)
             {
-                float r = Mathf.Sqrt((x - half) * (x - half) + (y - half) * (y - half)) / half;
-                byte a = (byte)Mathf.RoundToInt(Mathf.Clamp01(r >= 1f ? 0f : alphaByRadius(r)) * 255f);
+                byte a = (byte)Mathf.RoundToInt(Mathf.Clamp01(alphaAt((x - half) / half, (y - half) / half)) * 255f);
                 pixels[y * size + x] = new Color32(255, 255, 255, a);
             }
         }
