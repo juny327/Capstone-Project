@@ -10,6 +10,7 @@ public enum EnemyState
     Hit,
     Dead
 }
+
 public class Enemy : MonoBehaviour, IDamageable, IPoolable
 {
     public EnemyState state;
@@ -28,12 +29,31 @@ public class Enemy : MonoBehaviour, IDamageable, IPoolable
 
     public Transform target;
 
-    public Action<Enemy> OnDeath; // 매니저가 구독할거. list관리할때 지우려고
+    public Action<Enemy> OnDeath;
     public event Action OnCriticalHit;
+
     private EnemyManager manager;
     private HitFlashController hitFlash;
+
     [Header("Orb")]
     public GameObject expOrb;
+
+
+    // Freeze
+    bool isFrozen;
+    Coroutine freezeRoutine;
+
+    public bool IsFrozen => isFrozen;
+
+
+    // Shock
+    bool isShocked;
+    Coroutine shockRoutine;
+
+    public bool IsShocked => isShocked;
+
+
+
     void Awake()
     {
         brain = GetComponent<EnemyBrain>();
@@ -43,6 +63,7 @@ public class Enemy : MonoBehaviour, IDamageable, IPoolable
         ui = GetComponent<EnemyUI>();
         hitFlash = GetComponent<HitFlashController>();
     }
+
 
     public void Initialize(Transform target, EnemyManager manager)
     {
@@ -55,106 +76,279 @@ public class Enemy : MonoBehaviour, IDamageable, IPoolable
         movement.Initialize(this);
         attack.Initialize(this);
 
-        // Spawn position and component references are now ready.
+
         var agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
+
         if (agent != null)
         {
             agent.enabled = true;
             agent.Warp(transform.position);
         }
+
+
         state = EnemyState.Idle;
         brain.OnStateEnter(state);
     }
 
+
+
     public void OnSpawn()
     {
         currentHp = data.maxHp;
+
+        isFrozen = false;
+        freezeRoutine = null;
+
+        isShocked = false;
+        shockRoutine = null;
     }
+
+
 
     public void OnDespawn()
     {
+        if (freezeRoutine != null)
+        {
+            StopCoroutine(freezeRoutine);
+            freezeRoutine = null;
+        }
+
+
+        if (shockRoutine != null)
+        {
+            StopCoroutine(shockRoutine);
+            shockRoutine = null;
+        }
+
+
+        isFrozen = false;
+        isShocked = false;
+
+
         attack?.CancelAttack();
+
         OnDeath = null;
         OnCriticalHit = null;
 
+
         var agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
+
         if (agent != null)
             agent.enabled = false;
     }
 
+
+
     public void Tick()
     {
-        if (state == EnemyState.Dead) return;
+        if (state == EnemyState.Dead)
+            return;
+
+
+        if (isFrozen || isShocked)
+            return;
+
 
         brain.Tick();
     }
 
+
+
     public void ChangeState(EnemyState newState)
     {
-        if (state == newState) return;
+        if (state == newState)
+            return;
+
 
         if (newState != EnemyState.Attack)
             attack?.CancelAttack();
+
 
         state = newState;
         brain.OnStateEnter(newState);
     }
 
+
+
+    // ==========================
+    // Freeze
+    // ==========================
+
+    public void ApplyFreeze(float duration)
+    {
+        if (state == EnemyState.Dead)
+            return;
+
+
+        if (freezeRoutine != null)
+            StopCoroutine(freezeRoutine);
+
+
+        freezeRoutine = StartCoroutine(FreezeRoutine(duration));
+    }
+
+
+
+    IEnumerator FreezeRoutine(float duration)
+    {
+        isFrozen = true;
+
+
+        attack?.CancelAttack();
+        movement?.Stop();
+
+
+        yield return new WaitForSeconds(duration);
+
+
+        isFrozen = false;
+        freezeRoutine = null;
+    }
+
+
+
+
+    // ==========================
+    // Shock
+    // ==========================
+
+    public void ApplyShock(float duration)
+    {
+        if (state == EnemyState.Dead)
+            return;
+
+
+        if (shockRoutine != null)
+            StopCoroutine(shockRoutine);
+
+
+        shockRoutine = StartCoroutine(ShockRoutine(duration));
+    }
+
+
+
+    IEnumerator ShockRoutine(float duration)
+    {
+        isShocked = true;
+
+
+        attack?.CancelAttack();
+        movement?.Stop();
+
+
+        yield return new WaitForSeconds(duration);
+
+
+        isShocked = false;
+        shockRoutine = null;
+    }
+
+
+
+
     public void TakeDamage(DamageInfo info)
     {
-        if (state == EnemyState.Dead) return;
+        if (state == EnemyState.Dead)
+            return;
+
 
         currentHp -= info.damage;
 
         currentHp = Mathf.Max(currentHp, 0f);
-        // hitFlash 발동
+
+
         hitFlash.HitFlash();
+
 
         ui.Show();
         ui.UpdateHealth(currentHp, data.maxHp);
 
-        DamageTextManager.Instance.ShowDamage((int)info.damage, transform.position + Vector3.up * 2f, info.isCritical);
+
+        DamageTextManager.Instance.ShowDamage(
+            (int)info.damage,
+            transform.position + Vector3.up * 2f,
+            info.isCritical
+        );
+
+
         if (currentHp <= 0)
         {
             Die();
             return;
         }
+
+
         if (info.isCritical)
         {
             OnCriticalHit?.Invoke();
+
+
             if (!(attack is SuicideAttack))
             {
                 ChangeState(EnemyState.Hit);
             }
         }
     }
+
+
+
     void Die()
     {
+        if (freezeRoutine != null)
+        {
+            StopCoroutine(freezeRoutine);
+            freezeRoutine = null;
+        }
+
+
+        if (shockRoutine != null)
+        {
+            StopCoroutine(shockRoutine);
+            shockRoutine = null;
+        }
+
+
+        isFrozen = false;
+        isShocked = false;
+
+
         ChangeState(EnemyState.Dead);
 
-        movement.Stop();      
+
+        movement.Stop();
+
 
         animator.Play("Die");
 
+
         OnDeath?.Invoke(this);
 
-        // Animation Event에서 ReturnToPool 실행.
+
         SpawnExpOrb();
     }
+
+
+
     void SpawnExpOrb()
     {
         int expAmount = data.expDrop;
 
-        GameObject orbGO = PoolManager.Instance.Get(expOrb); // 풀에서 바로 가져오기
-        Vector3 spawnPos = transform.position + Vector3.up * 2.5f; // 위에서 드랍
-        orbGO.transform.position = spawnPos;
-        //orbGO.SetActive(true);
-        
-        var orb = orbGO.GetComponent<ExpOrb>();
-        orb.Initialize(expAmount);
 
-        // ExpOrb.cs에서 OnEnable될 때 Rigidbody를 사용해 튀어오르게 구현
+        GameObject orbGO = PoolManager.Instance.Get(expOrb);
+
+
+        Vector3 spawnPos = transform.position + Vector3.up * 2.5f;
+
+
+        orbGO.transform.position = spawnPos;
+
+
+        var orb = orbGO.GetComponent<ExpOrb>();
+
+        orb.Initialize(expAmount);
     }
+
+
 
     void ReturnToPool()
     {
