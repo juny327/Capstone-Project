@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cda3cf38ec277be4cb7d6e404c017602, type: 3}
   m_Name: ElectricShotEffect
   m_EditorClassIdentifier: Assembly-CSharp::IceShotEffect
-  projectilePrefab: {fileID: 0}
+  projectilePrefab: {fileID: 9214688012690911215, guid: 3c5c269b844743048a0029cb4f77daac, type: 3}
   fireInterval: 4
   projectileSpeed: 15
   targetRange: 25
-  freezeDuration: 2
+  shockDuration: 2
   spawnOffset: {x: 0, y: 1, z: 0}
