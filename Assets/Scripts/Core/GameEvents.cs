@@ -72,6 +72,19 @@ public static class GameEvents
     public static Action OnHideStageClearUI;
     // 이거 두개
 
+    // 재화 · 정비(상점)
+    /// <summary>
+    /// 적이 처치됐을 때 (자폭으로 사라진 적은 제외). 위치 · 종류가 필요한 보상(코인 등)이 쓴다.
+    /// OnEnemyKilled 는 처치 수만 세므로 인자가 없다.
+    /// </summary>
+    public static Action<Enemy> OnEnemyDefeated;
+
+    /// <summary>정비(상점) 단계를 열 때. 스테이지 흐름이 보상 카드 다음에 발행한다.</summary>
+    public static Action OnMaintenanceOpen;
+
+    /// <summary>정비를 마쳤을 때 ("다음 스테이지"). 스테이지 흐름이 이 신호를 기다렸다 다음 씬으로 넘어간다.</summary>
+    public static Action OnMaintenanceClosed;
+
     // 테스트용 꼭 지울것
     public static Transform Player;
 }

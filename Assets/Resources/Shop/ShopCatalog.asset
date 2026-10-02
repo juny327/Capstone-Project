@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1ce3363f77025354c8bbdf7036f02fbd, type: 3}
+  m_Name: ShopCatalog
+  m_EditorClassIdentifier: Assembly-CSharp::ShopCatalog
+  weaponPrices:
+  - weapon: {fileID: 11400000, guid: e61cedaa53406ed4f8ea56c742ecc880, type: 2}
+    price: 20
+  - weapon: {fileID: 11400000, guid: 16be6279c8aab6d4798e7db59d161183, type: 2}
+    price: 24
+  - weapon: {fileID: 11400000, guid: 425b47f8befe4f34485ff97821ad886a, type: 2}
+    price: 24
+  - weapon: {fileID: 11400000, guid: 180da6784ef99fc4db72586b0150f7a0, type: 2}
+    price: 28
+  - weapon: {fileID: 11400000, guid: 21df41de1e2707f43b034c469705ca17, type: 2}
+    price: 32
+  - weapon: {fileID: 11400000, guid: 74ca696becb4fb443800afef14778251, type: 2}
+    price: 36
+  - weapon: {fileID: 11400000, guid: a5c5c099d896ba94a9b198ef0b9b8fc4, type: 2}
+    price: 20
+  - weapon: {fileID: 11400000, guid: 46bb3f2e7db4bdb488a708673ed6b1f3, type: 2}
+    price: 30
+  - weapon: {fileID: 11400000, guid: 7cc3048592b43e340bdf8f77ba9a5a1d, type: 2}
+    price: 28
+  defaultWeaponPrice: 30
+  upgradeBaseRate: 0.6
+  upgradeRatePerLevel: 0.15
+  priceStepPerStage: 0.1
+  rerollBase: 3
+  rerollStepPerStage: 1
+  rerollStepPerUse: 2
+  sources:
+  - {fileID: 11400000, guid: a4761d26afa023b49a55a0fb5fbb18d6, type: 2}
+  - {fileID: 11400000, guid: 2d79c38c76ee5664a8a8d9a46c6e7694, type: 2}

@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b54c549f72c15da45a227d676dc24fa9, type: 3}
+  m_Name: EconomySettings
+  m_EditorClassIdentifier: Assembly-CSharp::EconomySettings
+  currencyName: "\uD06C\uB808\uB527"
+  currencyIcon: {fileID: -193848521785882218, guid: e3fc955e340678541a7f69a39fc5aec0, type: 3}
+  coinPrefab: {fileID: 2555631859865218396, guid: 56d6ad08bd2901541a111649550739bc, type: 3}
+  drops:
+  - enemy: {fileID: 11400000, guid: 9f06c567617c12046bd90f15e64b6016, type: 2}
+    coins: 1
+  - enemy: {fileID: 11400000, guid: 742d827480606064b8ac3e80266c83a3, type: 2}
+    coins: 2
+  - enemy: {fileID: 11400000, guid: 1d39fe5fd498031468a59cdf2f7b1d4b, type: 2}
+    coins: 3
+  - enemy: {fileID: 11400000, guid: 076b9dd40d2fbcd42b9e49add08ce8dc, type: 2}
+    coins: 2
+  defaultCoins: 1
+  maxCoinObjects: 4
+  scatterRadius: {x: 0.4, y: 1.3}
+  magnetRadius: 3.5
+  flySpeed: 8
+  flyAcceleration: 30
+  pickupDistance: 0.7
+  clearBonus: 0a0000000f00000014000000
+  collectAllOnClear: 1
+  pickupSound:
+    clips:
+    - {fileID: 8300000, guid: d7cda74adc564da469fbb96527092a80, type: 3}
+    - {fileID: 8300000, guid: 7d13b3255ee05574f9ea24ff8bddc3c8, type: 3}
+    volume: 0.4
+    pitchRange: {x: 0.95, y: 1.15}
+    minInterval: 0.04

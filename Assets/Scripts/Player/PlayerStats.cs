@@ -63,7 +63,8 @@ public class PlayerStats : MonoBehaviour, IDamageable
 
     public void AddExp(int amount)
     {
-        if (amount <= 0)
+        // 죽은 뒤 끌려온 구슬은 무시한다 — 사망 연출 중에 레벨업 카드가 열리지 않게
+        if (isDead || amount <= 0)
             return;
 
         currentExp += amount;

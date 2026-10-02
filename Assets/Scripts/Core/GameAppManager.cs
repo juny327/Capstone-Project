@@ -80,7 +80,18 @@ public class GameAppManager : MonoBehaviour
             DontDestroyOnLoad(Player);
         }
 
-        //PlayerStats.ResetState();
+        // 죽은 채로 다음 스테이지에 들어가지 않는다. GameManager 가 사망 뒤 클리어를 막으므로 정상이면 일어나지 않는다.
+        // ResetState() 로 되살리지 않는 이유: 체력은 0 그대로라 "HP 0 으로 살아 있는" 상태가 된다
+        if (PlayerStats != null && PlayerStats.IsDead)
+        {
+            Debug.LogError("[GameAppManager] 죽은 플레이어로 다음 스테이지에 들어가려 했습니다 — 로비로 돌아갑니다.");
+            ReturnToLobby();
+            return;
+        }
+
+        // 지난 스테이지를 클리어할 때 GameManager 가 건 무적을 푼다
+        if (PlayerStats != null)
+            PlayerStats.ClearInvulnerable();
 
         // 씬 넘어갈 때 위치 리셋
         Player.transform.position = spawnPosition;
