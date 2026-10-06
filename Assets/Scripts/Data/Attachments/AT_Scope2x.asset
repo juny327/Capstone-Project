@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2053801b010909f488af8899e8b93e8a, type: 3}
+  m_Name: AT_Scope2x
+  m_EditorClassIdentifier: Assembly-CSharp::AttachmentData
+  displayName: "2\uBC30\uC728 \uC2A4\uCF54\uD504"
+  description: "MX \uB808\uC77C 2\uBC30\uC728 \uAD11\uD559 \uC870\uC900\uACBD"
+  icon: {fileID: 21300000, guid: 57c19e8dae25a174ca61672231a3f529, type: 3}
+  slot: 0
+  tier: 1
+  families: 1
+  onlyFor: []
+  modifier:
+    damageAdd: 0
+    damageMul: 1
+    fireIntervalMul: 1.1
+    critChanceAdd: 0.1
+    critMultiplierAdd: 0
+    projectileSpeedAdd: 6
+    projectileCountAdd: 0
+    pierceAdd: 0
+    magazineAdd: 0
+    reloadTimeMul: 1
+    rangeAdd: 0
+    subUnitAdd: 0
+  magazinePercent: 0
+  basePrice: 18

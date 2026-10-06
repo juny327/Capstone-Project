@@ -225,6 +225,37 @@ public static class CharacterSetup
         FirstFrame = 0f, LastFrame = 18f, Note = "방어 자세",
     };
 
+    // ── 서브 능력 모션 (KayKit, 커스터마이징-구현계획.md 5-6) ──
+    // 이 FBX 의 클립 목록은 PrepareTakeClips 가 통째로 바꾸므로, 휘두르기 · 패링과 같은 목록에 함께 넣어야 서로 지우지 않는다.
+    // 상태에 태그를 달지 않는다 — MeleeTwoHandGrip 의 왼손 IK(TwoHand · Guard)가 저절로 꺼져 왼팔이 자유롭다.
+
+    // 방패 들기: 왼팔을 몸 앞에 들고 버틴다 (골반 그대로). 끝 프레임에서 멈춰 자세를 유지한다
+    static readonly SwingClip ShieldHold = new SwingClip
+    {
+        Path = KayKitMeleePath, Take = "Melee_Blocking", ClipName = "KK_Shield_Hold",
+        FirstFrame = 0f, LastFrame = 32f, Note = "방패 들기",
+    };
+
+    // 방패 밀치기: 막은 자세에서 앞으로 밀어낸다
+    static readonly SwingClip ShieldBash = new SwingClip
+    {
+        Path = KayKitMeleePath, Take = "Melee_Block_Attack", ClipName = "KK_Shield_Bash",
+        FirstFrame = 0f, LastFrame = 32f, Note = "방패 밀치기",
+    };
+
+    // 와이어 발사: 왼주먹을 앞으로 뻗는다 (펀치 앞부분)
+    static readonly SwingClip HookThrow = new SwingClip
+    {
+        Path = KayKitMeleePath, Take = "Melee_Unarmed_Attack_Punch_A", ClipName = "KK_Hook_Throw",
+        FirstFrame = 0f, LastFrame = 24f, Note = "와이어 발사",
+    };
+
+    static readonly SwingClip[] SubAbilityClips = { ShieldHold, ShieldBash, HookThrow };
+
+    const string ShieldUpParam = "ShieldUp";
+    const string ShieldBashParam = "ShieldBash";
+    const string HookParam = "Hook";
+
     // MeleeStyle 값 순서: (패링 상태, 모션, 방어 자세 여부). 한손검의 "Parry" 는 예전 공용 패링 상태를 그대로 쓴다
     static readonly (string state, SwingClip clip, bool guard)[] ParryStyles =
     {
@@ -770,6 +801,7 @@ public static class CharacterSetup
         // 한 FBX 에서 여러 구간을 자르는 클립은 파일마다 한 번에 준비한다 (임포트 설정의 클립 목록을 통째로 바꾸므로)
         var swingClips = new Dictionary<SwingClip, AnimationClip>();
         foreach (var group in Styles.SelectMany(st => new[] { st.hClip, st.vClip }).Concat(ParryStyles.Select(p => p.clip))
+                     .Concat(SubAbilityClips)
                      .Distinct().GroupBy(c => c.Take != null ? c.Path : null))
         {
             if (group.Key == null)
@@ -919,6 +951,8 @@ public static class CharacterSetup
 
         idle[0].tag = string.Empty;
 
+        AddSubAbilityStates(controller, sm, swingClips, idle, writeDefaults, log);
+
         // 왼손을 자루에 붙이는 IK(MeleeTwoHandGrip.OnAnimatorIK)는 이 레이어의 IK Pass 에서 불린다
         AnimatorControllerLayer[] layers = controller.layers;
         layers[layerIndex].iKPass = true;
@@ -930,6 +964,141 @@ public static class CharacterSetup
 
         Debug.Log($"{Tag} 애니메이터: {StyleParam} · {VariantParam}(Int) · {ParryParam}(Trigger), 대기 {count}종 · 휘두르기 {count * 2}종 · 패링 {count}종.{log}");
         return true;
+    }
+
+    /// <summary>
+    /// 서브 능력 모션만 넣는다 (무기 · 프리팹 · 씬은 건드리지 않는다). CustomizationSetup 이 부른다.
+    /// 근접 무기 애니메이터(휘두르기 · 패링 · 대기)가 먼저 만들어져 있어야 한다.
+    /// </summary>
+    public static bool SetupSubAbilityAnimator()
+    {
+        var controller = AssetDatabase.LoadAssetAtPath<AnimatorController>(ControllerPath);
+        if (controller == null)
+        {
+            Debug.LogError($"{Tag} {ControllerPath} 가 없습니다.");
+            return false;
+        }
+
+        int layerIndex = Array.FindIndex(controller.layers, l => l.name == MeleeLayerName);
+        if (layerIndex < 0)
+        {
+            Debug.LogError($"{Tag} {MeleeLayerName} 가 없습니다. Character Setup 전체 실행을 먼저 하세요.");
+            return false;
+        }
+
+        AnimatorStateMachine sm = controller.layers[layerIndex].stateMachine;
+
+        var idle = new AnimatorState[Styles.Length];
+        for (int s = 0; s < Styles.Length; s++)
+        {
+            idle[s] = FindState(sm, Styles[s].idleState);
+            if (idle[s] == null)
+            {
+                Debug.LogError($"{Tag} 대기 상태 {Styles[s].idleState} 가 없습니다. Character Setup 전체 실행을 먼저 하세요.");
+                return false;
+            }
+        }
+
+        bool writeDefaults = true;
+        foreach (ChildAnimatorState child in controller.layers[0].stateMachine.states)
+        {
+            if (child.state == null) continue;
+            writeDefaults = child.state.writeDefaultValues;
+            break;
+        }
+
+        // 이 FBX 에서 잘라 쓰는 클립 전부를 한 번에 — 일부만 넘기면 휘두르기 · 패링 클립이 지워진다
+        SwingClip[] kayKit = Styles.SelectMany(st => new[] { st.hClip, st.vClip }).Concat(ParryStyles.Select(p => p.clip))
+            .Concat(SubAbilityClips).Distinct().Where(c => c.Take != null && c.Path == KayKitMeleePath).ToArray();
+
+        Dictionary<SwingClip, AnimationClip> clips = PrepareTakeClips(KayKitMeleePath, kayKit);
+        if (clips == null) return false;
+
+        var log = new System.Text.StringBuilder();
+        AddSubAbilityStates(controller, sm, clips, idle, writeDefaults, log);
+
+        EditorUtility.SetDirty(sm);
+        EditorUtility.SetDirty(controller);
+        AssetDatabase.SaveAssets();
+
+        Debug.Log($"{Tag} 서브 능력 모션:{log}");
+        return true;
+    }
+
+    /// <summary>
+    /// 방패 들기(ShieldUp Bool) · 방패 밀치기(ShieldBash Trigger) · 와이어 발사(Hook Trigger) 상태.
+    /// Any State 에서 들어가고, 끝나면 들고 있는 무기(MeleeStyle)의 대기로 돌아간다.
+    /// </summary>
+    static void AddSubAbilityStates(AnimatorController controller, AnimatorStateMachine sm, Dictionary<SwingClip, AnimationClip> clips,
+        AnimatorState[] idle, bool writeDefaults, System.Text.StringBuilder log)
+    {
+        if (!clips.TryGetValue(ShieldHold, out AnimationClip holdClip) || holdClip == null) return;
+        if (!clips.TryGetValue(ShieldBash, out AnimationClip bashClip) || bashClip == null) return;
+        if (!clips.TryGetValue(HookThrow, out AnimationClip hookClip) || hookClip == null) return;
+
+        EnsureParameter(controller, ShieldUpParam, AnimatorControllerParameterType.Bool);
+        EnsureParameter(controller, ShieldBashParam, AnimatorControllerParameterType.Trigger);
+        EnsureParameter(controller, HookParam, AnimatorControllerParameterType.Trigger);
+
+        AnimatorState hold = FindOrAddState(sm, "ShieldUp", holdClip, new Vector3(300f, 560f, 0f), writeDefaults);
+        hold.tag = string.Empty;
+        hold.speed = 1.5f;
+
+        AnimatorState bash = FindOrAddState(sm, "ShieldBash", bashClip, new Vector3(300f, 640f, 0f), writeDefaults);
+        bash.tag = string.Empty;
+        bash.speed = Mathf.Max(1f, bashClip.length / 0.4f);   // 0.4초 안에 밀어낸다
+
+        AnimatorState hook = FindOrAddState(sm, "HookThrow", hookClip, new Vector3(300f, 720f, 0f), writeDefaults);
+        hook.tag = string.Empty;
+        hook.speed = Mathf.Max(1f, hookClip.length / 0.3f);   // 0.3초 안에 뻗는다
+
+        AnimatorStateTransition toHold = FindOrAddAnyTransition(sm, hold);
+        ClearConditions(toHold);
+        toHold.AddCondition(AnimatorConditionMode.If, 0f, ShieldUpParam);
+        toHold.hasExitTime = false;
+        toHold.hasFixedDuration = true;
+        toHold.duration = 0.08f;
+        toHold.canTransitionToSelf = false;
+        EditorUtility.SetDirty(toHold);
+
+        foreach ((AnimatorState state, string param) in new[] { (bash, ShieldBashParam), (hook, HookParam) })
+        {
+            AnimatorStateTransition t = FindOrAddAnyTransition(sm, state);
+            ClearConditions(t);
+            t.AddCondition(AnimatorConditionMode.If, 0f, param);
+            t.hasExitTime = false;
+            t.hasFixedDuration = true;
+            t.duration = 0.05f;
+            t.canTransitionToSelf = false;
+            EditorUtility.SetDirty(t);
+        }
+
+        // 내리면 · 끝나면 들고 있는 무기의 대기로
+        for (int s = 0; s < idle.Length; s++)
+        {
+            AnimatorStateTransition down = FindOrAddTransition(hold, idle[s]);
+            ClearConditions(down);
+            down.AddCondition(AnimatorConditionMode.IfNot, 0f, ShieldUpParam);
+            down.AddCondition(AnimatorConditionMode.Equals, s, StyleParam);
+            down.hasExitTime = false;
+            down.hasFixedDuration = true;
+            down.duration = 0.12f;
+            EditorUtility.SetDirty(down);
+
+            foreach (AnimatorState state in new[] { bash, hook })
+            {
+                AnimatorStateTransition back = FindOrAddTransition(state, idle[s]);
+                ClearConditions(back);
+                back.AddCondition(AnimatorConditionMode.Equals, s, StyleParam);
+                back.hasExitTime = true;
+                back.exitTime = 1f;
+                back.hasFixedDuration = true;
+                back.duration = 0.15f;
+                EditorUtility.SetDirty(back);
+            }
+        }
+
+        log.Append($" 방패 들기 '{holdClip.name}' · 밀치기 '{bashClip.name}' ×{bash.speed:F2} · 와이어 '{hookClip.name}' ×{hook.speed:F2};");
     }
 
     // 세로베기 타격 시점은 무기 데이터에 자리가 없어 프리팹의 MeleeWeapon 에 둔다

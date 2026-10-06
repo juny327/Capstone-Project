@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f2aeb0c8dba934643b15ae454ebae5bd, type: 3}
+  m_Name: ShopSource_Attachment
+  m_EditorClassIdentifier: Assembly-CSharp::AttachmentSource
+  slots: 3
+  attachments:
+  - {fileID: 11400000, guid: 8a2b04d119ebffc4d8ac3a64ddc6e74b, type: 2}
+  - {fileID: 11400000, guid: 347f5896345796643a469d59dcf0a5b1, type: 2}
+  - {fileID: 11400000, guid: 8ea02c9882e0f0143919df0275bdacf4, type: 2}
+  - {fileID: 11400000, guid: 00e6793b8632f41458ed11c6242036c9, type: 2}
+  - {fileID: 11400000, guid: 0e24768c0e595e54d8425236d45b2a63, type: 2}
+  - {fileID: 11400000, guid: 79d31e04e7e8a7a448910e38b6daa055, type: 2}
+  - {fileID: 11400000, guid: 7b73d78ae3d8f0a4e841a2809d3d2657, type: 2}
+  - {fileID: 11400000, guid: a6561639f187b5744bda8cd6b82d2f4f, type: 2}
+  - {fileID: 11400000, guid: 469b9aeaee9b1b643b5330071d6890fb, type: 2}

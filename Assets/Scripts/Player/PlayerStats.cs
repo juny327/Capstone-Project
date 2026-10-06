@@ -1,6 +1,16 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+
+/// <summary>
+/// 피해 가로채기 — 체력을 깎기 전에 묻는다. true 를 돌려주면 그 피해는 들어오지 않는다.
+/// 에너지 방패가 정면 공격을 막는 데 쓴다 (커스터마이징-구현계획.md 9-2).
+/// </summary>
+public interface IDamageFilter
+{
+    bool Absorb(ref DamageInfo info);
+}
 
 public class PlayerStats : MonoBehaviour, IDamageable
 {
@@ -37,6 +47,16 @@ public class PlayerStats : MonoBehaviour, IDamageable
     {
         invulnerableUntil = 0f;
     }
+
+    // 피해 가로채기 (방패 등). 무적 확인 뒤, 체력을 깎기 전에 차례로 묻는다
+    readonly List<IDamageFilter> damageFilters = new List<IDamageFilter>();
+
+    public void AddDamageFilter(IDamageFilter filter)
+    {
+        if (filter != null && !damageFilters.Contains(filter)) damageFilters.Add(filter);
+    }
+
+    public void RemoveDamageFilter(IDamageFilter filter) => damageFilters.Remove(filter);
 
     // 받는 피해 배율 - 캐릭터마다 다르다 (검사 0.85). 체력만 올리면 회복 카드 가치가 달라져 감소율로 나눠 준다
     float damageTakenMultiplier = 1f;
@@ -119,6 +139,10 @@ public class PlayerStats : MonoBehaviour, IDamageable
     {
         if (isDead) return;           // 사망 후 중복 처리 차단
         if (IsInvulnerable) return;   // 구르기 · 패링 무적 등
+
+        // 방패처럼 막는 것이 있으면 피해가 들어오지 않는다 (뒤에서부터 — 가로채기 중 목록이 바뀌어도 안전하게)
+        for (int i = damageFilters.Count - 1; i >= 0; i--)
+            if (i < damageFilters.Count && damageFilters[i] != null && damageFilters[i].Absorb(ref info)) return;
 
         // 배율 1 이면 예전과 같다. 배율로 1 미만이 되어도 1 이상의 피해는 최소 1 로 둔다
         int amount = (int)(info.damage * damageTakenMultiplier);

@@ -73,6 +73,18 @@ public class ShopService
         return true;
     }
 
+    /// <summary>대상을 고르는 상품(부착물)을 그 대상에 산다. 실패하면 고른 대상을 지운다.</summary>
+    public bool TryBuy(ShopOffer offer, IWeapon target)
+    {
+        if (offer == null) return false;
+
+        offer.Target = target;
+        if (TryBuy(offer)) return true;
+
+        offer.Target = null;
+        return false;
+    }
+
     public bool CanReroll => Context != null && Context.Wallet != null && Context.Wallet.CanSpend(RerollCost);
 
     public bool TryReroll()

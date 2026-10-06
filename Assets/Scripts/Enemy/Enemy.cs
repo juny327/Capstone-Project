@@ -325,6 +325,7 @@ public class Enemy : MonoBehaviour, IDamageable, IPoolable
 
 
         SpawnExpOrb();
+        GameEvents.OnEnemyDefeated?.Invoke(this);
     }
 
 

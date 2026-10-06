@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 87e45cf98f4cde44fbcb26774829b893, type: 3}
   m_Name: ShopSource_WeaponPurchase
   m_EditorClassIdentifier: Assembly-CSharp::WeaponPurchaseSource
-  slots: 3
+  slots: 2

@@ -24,7 +24,7 @@ using UnityEngine.SceneManagement;
 /// Play 중 실행
 ///  6-1) 소켓 자동 정렬. 새 총구가 기존 Muzzle 자리에 오도록 계산한다.
 ///       Play 를 멈추면 그 시점의 소켓 값(손으로 고친 것 포함)이 Player.prefab 에 저장된다
-///  7)   테스트: 모든 무기 지급 / 드론 레벨업 / 전체 연사 +15%
+///  (무기 지급은 Tools / 주무기 지급 창 — WeaponGrantWindow)
 ///
 /// 편집 모드에서 실행 (추가 에셋)
 ///  8) Futura Weapons 검 A(주황)로 W_Sword 모델 교체 — 색상표 텍스처·재질 연결 포함
@@ -124,8 +124,6 @@ public static class WeaponAssetSetup
     const string SlashParam = "Slash";              // MeleeWeapon 이 이 이름으로 호출한다
     const float BladeTiltDeg = 20f;                 // 주먹에서 칼날이 손가락 쪽으로 기우는 각도
 
-    static readonly string[] DataFiles = { "WD_Rifle", "WD_SMG", "WD_Sniper", "WD_Sword", "WD_Drone" };
-
     // 6-1: Play 를 멈출 때 소켓 값을 프리팹에 옮기기 위한 키
     const string CaptureKey = "WeaponSetup.CaptureSocketOnExit";
     const string PendingKey = "WeaponSetup.PendingSocket";
@@ -188,25 +186,13 @@ public static class WeaponAssetSetup
     [MenuItem(Menu + "6-2. 기존 AssaultRifle 끄기", false, 32)]
     static void MenuStep6DisableOld() => DisableOldRifle();
 
-    [MenuItem(Menu + "7. 테스트 - 모든 무기 지급 (Play 중)", false, 51)]
-    static void MenuStep7Give() => GiveAllWeapons();
-
-    [MenuItem(Menu + "7. 테스트 - 드론 레벨업 (Play 중)", false, 52)]
-    static void MenuStep7Drone() => LevelUpDrone();
-
-    [MenuItem(Menu + "7. 테스트 - 전체 연사 +15% (Play 중)", false, 53)]
-    static void MenuStep7Rate() => BoostFireRate();
-
-    [MenuItem(Menu + "7. 테스트 - 무기 상태 점검 (Play 중)", false, 54)]
-    static void MenuStep7Inspect() => InspectWeapons();
-
     [MenuItem(Menu + "8. Futura 검 A로 W_Sword 교체", false, 71)]
     static void MenuStep8Sword() => ReplaceSwordWithFutura();
 
     [MenuItem(Menu + "9. 검 휘두르기 애니메이션 연결", false, 72)]
     static void MenuStep9Melee() => SetupMeleeAnimation();
 
-    // 에셋·프리팹을 고치는 메뉴는 편집 모드에서만, 테스트 메뉴는 Play 중에만 켠다
+    // 에셋·프리팹을 고치는 메뉴는 편집 모드에서만, 소켓 정렬은 Play 중에만 켠다
     [MenuItem(Menu + "전체 실행 (1~5단계)", true)]
     [MenuItem(Menu + "1. 임포트 설정 · 공용 재질", true)]
     [MenuItem(Menu + "2. 손 소켓 생성", true)]
@@ -219,10 +205,6 @@ public static class WeaponAssetSetup
     static bool EditModeOnly() => !EditorApplication.isPlayingOrWillChangePlaymode;
 
     [MenuItem(Menu + "6-1. 소켓 자동 정렬 (Play 중)", true)]
-    [MenuItem(Menu + "7. 테스트 - 모든 무기 지급 (Play 중)", true)]
-    [MenuItem(Menu + "7. 테스트 - 드론 레벨업 (Play 중)", true)]
-    [MenuItem(Menu + "7. 테스트 - 전체 연사 +15% (Play 중)", true)]
-    [MenuItem(Menu + "7. 테스트 - 무기 상태 점검 (Play 중)", true)]
     static bool PlayModeOnly() => EditorApplication.isPlaying;
 
     // ── 0) 사전 점검 ────────────────────────────────────────────
@@ -936,142 +918,7 @@ public static class WeaponAssetSetup
         }
     }
 
-    // ── 7) 테스트 (Play 중) ─────────────────────────────────────
-    static void GiveAllWeapons()
-    {
-        WeaponController controller = FindLiveController(false);
-        if (controller == null) return;
-
-        foreach (string file in DataFiles)
-        {
-            var data = AssetDatabase.LoadAssetAtPath<WeaponData>($"{WeaponDataDir}/{file}.asset");
-            if (data == null)
-            {
-                Debug.LogWarning($"{Tag} {file} 에셋이 없습니다.");
-                continue;
-            }
-
-            if (controller.Has(data))
-            {
-                Debug.Log($"{Tag} {data.weaponName}: 이미 보유");
-                continue;
-            }
-
-            WeaponAcquireResult result = controller.Acquire(data);
-            Debug.Log($"{Tag} {data.weaponName}: {result}");
-        }
-
-        Debug.Log($"{Tag} Q 또는 마우스 휠로 무기를 바꿀 수 있습니다. 드론은 스왑과 상관없이 항상 동작합니다.");
-    }
-
-    static void LevelUpDrone()
-    {
-        WeaponController controller = FindLiveController(false);
-        if (controller == null) return;
-
-        var data = AssetDatabase.LoadAssetAtPath<WeaponData>($"{WeaponDataDir}/WD_Drone.asset");
-        if (data == null)
-        {
-            Debug.LogWarning($"{Tag} WD_Drone 에셋이 없습니다.");
-            return;
-        }
-
-        // 이미 있으면 레벨업, 없으면 장착
-        WeaponAcquireResult result = controller.Acquire(data);
-        IWeapon drone = controller.Find(data);
-        Debug.Log($"{Tag} 드론: {result} (레벨 {(drone != null ? drone.Level : 0)})");
-    }
-
-    static void BoostFireRate()
-    {
-        WeaponController controller = FindLiveController(false);
-        if (controller == null) return;
-
-        WeaponModifier modifier = WeaponModifier.Identity;
-        modifier.fireIntervalMul = 0.85f;
-        controller.ApplyGlobalModifier(modifier);
-
-        Debug.Log(
-            $"{Tag} 모든 무기 발사 간격 ×0.85 적용. " +
-            "Play 를 멈춘 뒤 WD_* 에셋의 Fire Interval 이 원래 값 그대로인지 확인하세요 (SO 원본 보호 검증).");
-    }
-
-    // 보유 무기마다 활성 상태·렌더러·화면 위치를 출력하고, 근접 무기가 있으면 그것으로 바꾼 뒤 한 번 더 출력한다
-    static void InspectWeapons()
-    {
-        WeaponController controller = FindLiveController(false);
-        if (controller == null) return;
-
-        Transform socket = FindLiveSocket(out _, true);
-        Transform hand = socket != null ? socket.parent : null;
-        Camera cam = Camera.main != null ? Camera.main : Object.FindFirstObjectByType<Camera>();
-
-        var sb = new System.Text.StringBuilder();
-        sb.AppendLine(
-            $"{Tag} 무기 상태 점검 — 활성 인덱스 {controller.ActiveIndex}, 손에 드는 무기 {controller.HeldWeapons.Count}개, " +
-            $"카메라 {(cam != null ? cam.name : "없음")}");
-
-        int meleeIndex = -1;
-        for (int i = 0; i < controller.HeldWeapons.Count; i++)
-        {
-            var weapon = controller.HeldWeapons[i] as WeaponBase;
-            if (weapon == null) continue;
-
-            if (weapon.Data != null && weapon.Data.Kind == WeaponKind.Melee)
-                meleeIndex = i;
-
-            sb.AppendLine(DescribeWeapon(i, weapon, hand, cam));
-        }
-
-        Debug.Log(sb.ToString());
-
-        if (meleeIndex >= 0 && meleeIndex != controller.ActiveIndex)
-        {
-            controller.SwapTo(meleeIndex);
-            var melee = controller.HeldWeapons[meleeIndex] as WeaponBase;
-            Debug.Log($"{Tag} 근접 무기로 교체한 뒤:\n{DescribeWeapon(meleeIndex, melee, hand, cam)}");
-        }
-    }
-
-    static string DescribeWeapon(int index, WeaponBase weapon, Transform hand, Camera cam)
-    {
-        Transform model = weapon.transform.Find("Model");
-        Renderer[] all = weapon.GetComponentsInChildren<Renderer>(true);
-        Renderer[] shown = all.Where(r => r.enabled && r.gameObject.activeInHierarchy).ToArray();
-        string kind = weapon.Data != null ? weapon.Data.Kind.ToString() : "?";
-
-        string text =
-            $"  [{index}] {weapon.name} ({kind}) IsActive={weapon.IsActive}, 오브젝트 활성={weapon.gameObject.activeInHierarchy}, " +
-            $"Model 활성={(model != null ? model.gameObject.activeSelf.ToString() : "없음")}, 켜진 렌더러 {shown.Length}/{all.Length}, " +
-            $"실제 배율 {weapon.transform.lossyScale.x:F3}";
-
-        if (shown.Length > 0)
-        {
-            Bounds b = shown[0].bounds;
-            foreach (Renderer r in shown)
-                b.Encapsulate(r.bounds);
-
-            text += $"\n       월드 범위 중심 {Fmt(b.center)} 크기 {Fmt(b.size)}";
-            if (hand != null)
-                text += $", 손에서 {Vector3.Distance(hand.position, b.center):F2}m";
-
-            if (cam != null)
-            {
-                bool inView = GeometryUtility.TestPlanesAABB(GeometryUtility.CalculateFrustumPlanes(cam), b);
-                Vector3 vp = cam.WorldToViewportPoint(b.center);
-                text += $", 카메라 시야 안={inView}, 화면 좌표 ({vp.x:F2}, {vp.y:F2}) 거리 {vp.z:F1}m";
-            }
-        }
-
-        string materials = string.Join(", ", all
-            .SelectMany(r => r.sharedMaterials)
-            .Where(m => m != null)
-            .Select(m => $"{m.name}[{(m.shader != null ? m.shader.name : "셰이더 없음")}]")
-            .Distinct());
-        text += $"\n       재질: {materials}";
-        return text;
-    }
-
+    // ── 6-1 이 쓰는 Play 중 검색 ────────────────────────────────
     static WeaponController FindLiveController(bool quiet)
     {
         var controller = Object.FindFirstObjectByType<WeaponController>();
@@ -1401,53 +1248,6 @@ public static class WeaponAssetSetup
 
         Debug.LogError($"{Tag} {path} 안에서 AnimationClip 을 찾지 못했습니다.");
         return null;
-    }
-
-    // 공격 클립의 오른손 움직임을 시간대별로 출력한다 (타격 시점 검증용, 배치 모드에서 -executeMethod 로 실행)
-    public static void LogSlashProfile()
-    {
-        AnimationClip clip = null;
-        foreach (Object o in AssetDatabase.LoadAllAssetsAtPath(SlashClipFbx))
-        {
-            if (o is AnimationClip c && !c.name.StartsWith("__preview__")) { clip = c; break; }
-        }
-
-        if (clip == null)
-        {
-            Debug.LogError($"{Tag} {SlashClipFbx} 에서 클립을 찾지 못했습니다.");
-            return;
-        }
-
-        var curves = new Dictionary<string, AnimationCurve>();
-        foreach (EditorCurveBinding b in AnimationUtility.GetCurveBindings(clip))
-        {
-            if (b.propertyName.StartsWith("RightHandT.") || b.propertyName.StartsWith("RightHandQ."))
-                curves[b.propertyName] = AnimationUtility.GetEditorCurve(clip, b);
-        }
-
-        if (curves.Count < 7)
-        {
-            Debug.LogError($"{Tag} RightHandT/Q 곡선이 부족합니다 ({curves.Count}개).");
-            return;
-        }
-
-        Vector3 Pos(float t) => new Vector3(curves["RightHandT.x"].Evaluate(t), curves["RightHandT.y"].Evaluate(t), curves["RightHandT.z"].Evaluate(t));
-        Quaternion Rot(float t) => new Quaternion(curves["RightHandQ.x"].Evaluate(t), curves["RightHandQ.y"].Evaluate(t),
-                                                  curves["RightHandQ.z"].Evaluate(t), curves["RightHandQ.w"].Evaluate(t)).normalized;
-
-        var sb = new System.Text.StringBuilder();
-        sb.AppendLine($"{Tag} SLASH PROFILE '{clip.name}' {clip.length:F3}s  (t | pos x y z | vel x y z | speed | wrist deg/s)");
-
-        const float dt = 0.025f;
-        for (float t = dt; t <= clip.length + 0.0001f; t += dt)
-        {
-            Vector3 p0 = Pos(t - dt), p1 = Pos(t);
-            Vector3 v = (p1 - p0) / dt;
-            float wrist = Quaternion.Angle(Rot(t - dt), Rot(t)) / dt;
-            sb.AppendLine($"  {t:F3} | {p1.x:F3} {p1.y:F3} {p1.z:F3} | {v.x:F2} {v.y:F2} {v.z:F2} | {v.magnitude:F2} | {wrist:F0}");
-        }
-
-        Debug.Log(sb.ToString());
     }
 
     static AnimatorState FindOrAddState(AnimatorStateMachine sm, string name, Motion motion, Vector3 position, bool writeDefaults)

@@ -327,6 +327,25 @@ public class WeaponController : MonoBehaviour
         return true;
     }
 
+    /// <summary>부착물이 바뀔 때 (장착 · 교체). 장비 HUD · 정비 창 내 장비 판이 다시 그린다.</summary>
+    public event System.Action OnAttachmentsChanged;
+
+    /// <summary>
+    /// 가진 무기에 부착물을 단다 (커스터마이징-구현계획.md 4-6). 같은 부위의 이전 부착물은 replaced 로 돌려주고 사라진다.
+    /// 성공하면 HUD 에 스탯 변경을 알린다.
+    /// </summary>
+    public bool TryAttach(WeaponData target, AttachmentData attachment, out AttachmentData replaced)
+    {
+        replaced = null;
+
+        IWeapon w = Find(target);
+        if (w == null || !w.TryAttach(attachment, out replaced)) return false;
+
+        RaiseLegacyStats();
+        OnAttachmentsChanged?.Invoke();
+        return true;
+    }
+
     // ───────── 스왑 ─────────
 
     public void SwapNext()

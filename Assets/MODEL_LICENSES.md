@@ -11,8 +11,8 @@
 
 | 폴더 | 팩 | 출처 | 라이선스 | 표기 의무 | 받은 날 |
 |---|---|---|---|---|---|
-| `FuturaWeapons` | Futura Weapon Pack (10종 84개 중 3개 사용) | [moisturizedfish.itch.io](https://moisturizedfish.itch.io/futura-weapon-pack) | ⚠ **정식 문구 없음** — 아래 참고 | 권장 | 2026-09-14 · 09-26 |
-| `KayKit/Character Animations 1.1` | KayKit Character Animations 1.1 — Free (근접 모션 FBX 1개, 22개 중 3구간 사용) | [kaylousberg.itch.io](https://kaylousberg.itch.io/kaykit-character-animations) | **CC0 1.0** (폴더의 `License.txt`) | 없음 (권장) | 2026-09-26 |
+| `FuturaWeapons` | Futura Weapon Pack (10종 84개 중 5개 사용) | [moisturizedfish.itch.io](https://moisturizedfish.itch.io/futura-weapon-pack) | ⚠ **정식 문구 없음** — 아래 참고 | 권장 | 2026-09-14 · 09-26 · 10-04 |
+| `KayKit/Character Animations 1.1` | KayKit Character Animations 1.1 — Free (근접 모션 FBX 1개, 22개 중 8구간 사용) | [kaylousberg.itch.io](https://kaylousberg.itch.io/kaykit-character-animations) | **CC0 1.0** (폴더의 `License.txt`) | 없음 (권장) | 2026-09-26 |
 
 **Futura Weapon Pack** — 무료 팩이고, 페이지에 라이선스 문구가 없다.
 상업적 이용을 묻는 댓글에 제작자가 **"Sure, go for it!"** 이라고 답한 것이 허락의 전부다.
@@ -23,10 +23,13 @@
 | `Models/Sword_A_Orange.fbx` | `Futura Weapons/Sword/Style A/orange.fbx` | 검 (`W_Sword`) |
 | `Models/Sword_A_Red.fbx` | `Futura Weapons/Sword/Style A/red.fbx` | 대검 (`W_Greatsword`) |
 | `Models/Halberd_Blue.fbx` | `Futura Weapons/Halberd/blue.fbx` | 창 (`W_Spear`) |
+| `Models/Fist_A_Blue.fbx` | `Futura Weapons/Fists/Style A/blue.fbx` | 그랩 훅 갈고리 머리 · 그림 (`SA_Grapple`) — 2026-10-04 |
+| `Models/Shield_A_BlueWhite.fbx` | `Futura Weapons/Shield/Style A/blue-white.fbx` | 에너지 방패 그림 (`SA_Shield`) — 2026-10-04 |
 
 **KayKit Character Animations** — 공공 영역 기증(CC0)이라 표기 의무는 없다 (제작자는 "Kay Lousberg, www.kaylousberg.com" 표기를 권함).
 `Animations/fbx/Rig_Medium/Rig_Medium_CombatMelee.fbx` 에 근접 모션 22개가 들어 있고, `CharacterSetup` 이 세 구간만
 Humanoid 클립으로 잘라 근접 양손 모션에 쓴다 — `KK_2H_Chop`(내려찍기) · `KK_2H_Slice`(대검 가로베기) · `KK_2H_Stab`(창 찌르기).
+패링(`KK_1H_Parry` · `KK_Guard_Brace`)과 서브 능력(`KK_Shield_Hold` 방패 들기 · `KK_Shield_Bash` 방패 밀치기 · `KK_Hook_Throw` 와이어 발사, 2026-10-04)도 같은 파일에서 자른다.
 
 게임 크레딧 예시:
 
@@ -45,7 +48,7 @@ Melee Animations
 |---|---|---|---|
 | `SciFiWarriorPBRHPPolyart` | 플레이어 모델 · 몸 머티리얼 (HP / Polyart) | ? | ? |
 | `Kevin Iglesias` | 플레이어 근접 · 구르기 애니메이션 | ? | ? |
-| `GunPack` | 총기 모델 | ? | ? |
+| `GunPack` | 총기 모델 · 부착물 그림(`Parts/Scope_1` · `Barrel_Single` → 2배율 스코프 · 확장 총열 아이콘) | ? | ? |
 | `LowPolyWeapons_LITE` | (지금은 안 씀) | ? | ? |
 | `Space_Exploration_GUI_Kit` | HUD 아이콘 (패링 방패 아이콘 포함) | ? | ? |
 

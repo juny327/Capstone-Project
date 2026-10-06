@@ -159,45 +159,4 @@ public static class AudioImportSetup
 
         return false;
     }
-
-    /// <summary>
-    /// 어떤 클립이 어떻게 설정됐는지 확인용. 실제로 반영됐는지 로그 말고 이걸로 본다.
-    /// </summary>
-    [MenuItem("Tools/Audio/현재 설정 확인 (앞 20개)")]
-    public static void Inspect()
-    {
-        List<string> folders = new List<string>();
-
-        foreach (string root in Roots)
-        {
-            if (AssetDatabase.IsValidFolder(root)) folders.Add(root);
-        }
-
-        if (folders.Count == 0)
-        {
-            Debug.LogError($"{Tag} 대상 폴더가 없습니다.");
-            return;
-        }
-
-        string[] guids = AssetDatabase.FindAssets("t:AudioClip", folders.ToArray());
-
-        int limit = Mathf.Min(20, guids.Length);
-
-        for (int i = 0; i < limit; i++)
-        {
-            string path = AssetDatabase.GUIDToAssetPath(guids[i]);
-
-            if (AssetImporter.GetAtPath(path) is not AudioImporter importer) continue;
-
-            AudioClip clip = AssetDatabase.LoadAssetAtPath<AudioClip>(path);
-            AudioImporterSampleSettings s = importer.defaultSampleSettings;
-
-            Debug.Log($"{Tag} {System.IO.Path.GetFileName(path)} — " +
-                      $"{(clip != null ? clip.length.ToString("F2") : "?")}초 · " +
-                      $"{s.loadType} · {s.compressionFormat} · " +
-                      $"mono={importer.forceToMono} · ch={(clip != null ? clip.channels : 0)}");
-        }
-
-        Debug.Log($"{Tag} 전체 {guids.Length}개 중 {limit}개 표시");
-    }
 }

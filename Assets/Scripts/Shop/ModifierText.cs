@@ -11,11 +11,14 @@ public static class ModifierText
 
     public static string Describe(WeaponModifier modifier, WeaponData weapon = null)
     {
+        return Describe(modifier, weapon is MeleeWeaponData, weapon is ChainBeamWeaponData);
+    }
+
+    /// <summary>무기 없이 — 부착물 카드처럼 계열만 알 때. melee = 투사체 수를 "최대 타격"으로, chain = 관통을 "연쇄"로.</summary>
+    public static string Describe(WeaponModifier modifier, bool melee, bool chain)
+    {
         WeaponModifier m = modifier.Sanitized();
         parts.Clear();
-
-        bool melee = weapon is MeleeWeaponData;
-        bool chain = weapon is ChainBeamWeaponData;
 
         if (m.damageAdd != 0f) parts.Add($"피해 {Signed(m.damageAdd)}");
         if (!Mathf.Approximately(m.damageMul, 1f)) parts.Add($"피해 {Percent(m.damageMul - 1f)}");

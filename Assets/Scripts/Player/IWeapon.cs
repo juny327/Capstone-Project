@@ -40,6 +40,18 @@ public interface IWeapon
     /// <summary>레벨 설정. 드론은 이 값이 드론 수가 된다.</summary>
     void SetLevel(int level);
 
+    /// <summary>그 부위에 달린 부착물. 없으면 null.</summary>
+    AttachmentData GetAttachment(AttachmentSlot slot);
+
+    /// <summary>이 무기에 달 수 있는 부착물인가.</summary>
+    bool CanAttach(AttachmentData attachment);
+
+    /// <summary>부착물을 단다. 같은 부위에 있던 것은 replaced 로 돌려준다.</summary>
+    bool TryAttach(AttachmentData attachment, out AttachmentData replaced);
+
+    /// <summary>이 부착물을 달았다면의 스탯 (미리보기 — 아무것도 바꾸지 않는다).</summary>
+    WeaponRuntimeStats PreviewWith(AttachmentData attachment);
+
     /// <summary>
     /// 스왑으로 손에 들렸는지 여부. 서브유닛은 항상 true 로 유지된다.
     /// 비활성 무기는 모델이 숨겨지고 발사되지 않는다.

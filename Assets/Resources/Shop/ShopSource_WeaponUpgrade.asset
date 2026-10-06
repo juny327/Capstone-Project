@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e8a3f4a0277d9748a695eb0aa40b7f7, type: 3}
   m_Name: ShopSource_WeaponUpgrade
   m_EditorClassIdentifier: Assembly-CSharp::WeaponUpgradeSource
-  slots: 2
+  slots: 1

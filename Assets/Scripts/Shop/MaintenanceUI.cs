@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -16,6 +18,9 @@ using UnityEngine.UI;
 ///
 /// 씬 파일에 넣지 않는다. 게임이 시작될 때 Resources/UI/Shop 프리팹을 하나 만들어 씬을 넘어 살려 둔다 (설정창과 같은 방식).
 /// 프리팹은 Tools / 재화 · 상점 / 전체 만들기 가 만든다.
+///
+/// 카드는 두 줄이다 (커스터마이징-구현계획.md 7장) — 위 = 무기 줄(새 무기 · 강화), 아래 = 장비 줄(부착물 · 서브 능력).
+/// 오른쪽 "내 장비" 판에 가진 무기 · 부착물 · 서브 능력이 보인다. 부착물 카드를 누르면 장착할 총을 고른다.
 /// </summary>
 public class MaintenanceUI : MonoBehaviour
 {
@@ -31,10 +36,24 @@ public class MaintenanceUI : MonoBehaviour
     [SerializeField] TMP_Text title;
     [SerializeField] TMP_Text subtitle;
     [SerializeField] CoinCounter windowCounter;
+
+    [Tooltip("카드. 앞의 cardsPerRow 장 = 무기 줄, 뒤 = 장비 줄")]
     [SerializeField] ShopCardView[] cards;
+    [SerializeField] int cardsPerRow = 3;
+
+    [Tooltip("줄 제목 — [0] 무기, [1] 부착물 / 서브 능력")]
+    [SerializeField] TMP_Text[] rowLabels;
+    [Tooltip("줄이 비었을 때 문구 — [0] 무기, [1] 장비")]
+    [SerializeField] TMP_Text[] rowEmptyTexts;
 
     [Tooltip("카드 사이 간격. 진열이 칸보다 적으면 있는 카드만 가운데로 모은다")]
     [SerializeField] float cardSpacing = 30f;
+
+    [Header("내 장비 · 대상 고르기")]
+    [SerializeField] LoadoutPanelView loadout;
+    [SerializeField] GameObject promptRoot;
+    [SerializeField] TMP_Text promptText;
+    [SerializeField] Button cancelButton;
     [SerializeField] TMP_Text emptyText;
     [SerializeField] TMP_Text messageText;
     [SerializeField] Button rerollButton;
@@ -54,6 +73,15 @@ public class MaintenanceUI : MonoBehaviour
 
     readonly ShopService shop = new ShopService();
     float messageLeft;
+
+    // 대상 고르기 (부착물)
+    ShopOffer pending;
+    readonly List<IWeapon> targets = new List<IWeapon>();
+    readonly List<ShopOffer>[] rowsBuffer = { new List<ShopOffer>(), new List<ShopOffer>() };
+    Vector2[] rowCenters;
+
+    /// <summary>부착물을 사는 중 — 장착할 총을 고르고 있다.</summary>
+    public bool IsTargeting => pending != null;
 
     /// <summary>정비 창이 열려 있는지.</summary>
     public bool IsOpen => window != null && window.activeSelf;
@@ -91,7 +119,31 @@ public class MaintenanceUI : MonoBehaviour
 
         if (rerollButton != null) rerollButton.onClick.AddListener(OnReroll);
         if (nextButton != null) nextButton.onClick.AddListener(OnNext);
+        if (cancelButton != null) cancelButton.onClick.AddListener(CancelTargeting);
 
+        if (loadout != null)
+        {
+            loadout.Picked += OnTargetPicked;
+            loadout.Hovered += OnTargetHovered;
+        }
+
+        // 줄마다 카드 자리의 가운데 — 진열이 적으면 있는 카드만 여기로 모은다
+        int rowCount = cards != null && cardsPerRow > 0 ? Mathf.CeilToInt(cards.Length / (float)cardsPerRow) : 0;
+        rowCenters = new Vector2[rowCount];
+        for (int r = 0; r < rowCount; r++)
+        {
+            Vector2 sum = Vector2.zero;
+            int n = 0;
+            for (int i = r * cardsPerRow; i < Mathf.Min(cards.Length, (r + 1) * cardsPerRow); i++)
+            {
+                if (cards[i] == null) continue;
+                sum += ((RectTransform)cards[i].transform).anchoredPosition;
+                n++;
+            }
+            rowCenters[r] = n > 0 ? sum / n : Vector2.zero;
+        }
+
+        if (promptRoot != null) promptRoot.SetActive(false);
         if (window != null) window.SetActive(false);
 
         Sprite icon = CurrencyIcon;
@@ -167,12 +219,14 @@ public class MaintenanceUI : MonoBehaviour
     void OnNext()
     {
         if (!IsOpen) return;
+        CancelTargeting();
         Continue();
     }
 
     /// <summary>창을 닫고 스테이지 흐름에 정비가 끝났다고 알린다.</summary>
     void Continue()
     {
+        EndTargetingState();
         if (window != null) window.SetActive(false);
         UpdateHud(SceneManager.GetActiveScene());
 
@@ -193,33 +247,63 @@ public class MaintenanceUI : MonoBehaviour
 
     // ───────── 진열 ─────────
 
+    /// <summary>위 줄(무기)인지 — 새 무기 · 강화. 나머지(부착물 · 서브 능력 · 회복)는 아래 장비 줄.</summary>
+    static int RowOf(ShopOffer offer)
+    {
+        return offer.Kind == ShopOfferKind.Weapon || offer.Kind == ShopOfferKind.Upgrade ? 0 : 1;
+    }
+
     void Refresh()
     {
         if (!IsOpen || shop.Context == null) return;
 
         Sprite currency = CurrencyIcon;
         var offers = shop.Offers;
-        int shown = cards != null ? Mathf.Min(offers.Count, cards.Length) : 0;
 
-        for (int i = 0; cards != null && i < cards.Length; i++)
+        rowsBuffer[0].Clear();
+        rowsBuffer[1].Clear();
+        foreach (ShopOffer offer in offers) rowsBuffer[RowOf(offer)].Add(offer);
+
+        int rowCount = rowCenters != null ? rowCenters.Length : 0;
+        for (int r = 0; r < rowCount; r++)
         {
-            if (cards[i] == null) continue;
+            List<ShopOffer> list = r < rowsBuffer.Length ? rowsBuffer[r] : null;
+            int start = r * cardsPerRow;
+            int shown = list != null ? Mathf.Min(list.Count, cardsPerRow) : 0;
 
-            if (i < shown)
+            for (int k = 0; k < cardsPerRow && start + k < cards.Length; k++)
             {
-                bool canBuy = shop.CanBuy(offers[i], out string reason);
-                cards[i].Show(offers[i], canBuy, reason, currency);
+                ShopCardView card = cards[start + k];
+                if (card == null) continue;
 
-                // 있는 카드만 가운데로 모은다
-                var rt = (RectTransform)cards[i].transform;
-                float step = rt.sizeDelta.x + cardSpacing;
-                rt.anchoredPosition = new Vector2((i - (shown - 1) * 0.5f) * step, rt.anchoredPosition.y);
+                if (k < shown)
+                {
+                    ShopOffer offer = list[k];
+                    bool canBuy = shop.CanBuy(offer, out string reason);
+                    card.Show(offer, canBuy, reason, currency);
+                    card.SetSelected(offer == pending);
+
+                    // 있는 카드만 그 줄 가운데로 모은다
+                    var rt = (RectTransform)card.transform;
+                    float step = rt.sizeDelta.x + cardSpacing;
+                    rt.anchoredPosition = new Vector2(rowCenters[r].x + (k - (shown - 1) * 0.5f) * step, rowCenters[r].y);
+                }
+                else
+                {
+                    card.Hide();
+                }
             }
-            else
-            {
-                cards[i].Hide();
-            }
+
+            if (rowEmptyTexts != null && r < rowEmptyTexts.Length && rowEmptyTexts[r] != null)
+                rowEmptyTexts[r].gameObject.SetActive(shown == 0);
         }
+
+        // 장비 줄 제목 — 서브 능력 칸이 있는 캐릭터(검사)면 "서브 능력"
+        SubAbilitySlot slot = shop.Context.Player != null ? shop.Context.Player.GetComponent<SubAbilitySlot>() : null;
+        bool abilityRow = slot != null && slot.SlotCount > 0;
+        if (rowLabels != null && rowLabels.Length > 1 && rowLabels[1] != null) rowLabels[1].text = abilityRow ? "서브 능력" : "부착물";
+        if (rowEmptyTexts != null && rowEmptyTexts.Length > 1 && rowEmptyTexts[1] != null)
+            rowEmptyTexts[1].text = abilityRow ? "얻을 수 있는 서브 능력이 없습니다" : "달 수 있는 부착물이 없습니다";
 
         if (emptyText != null) emptyText.gameObject.SetActive(offers.Count == 0);
 
@@ -227,20 +311,62 @@ public class MaintenanceUI : MonoBehaviour
         if (rerollButton != null) rerollButton.interactable = shop.CanReroll;
 
         if (windowCounter != null) windowCounter.Set(shop.Balance);
+        if (loadout != null) loadout.Refresh(shop.Context);
     }
 
     void OnCardClicked(ShopCardView card)
     {
         if (!IsOpen || card == null || card.Offer == null) return;
 
-        if (shop.TryBuy(card.Offer))
+        ShopOffer offer = card.Offer;
+
+        // 고르는 중에 같은 카드를 다시 누르면 취소, 다른 카드면 그 카드로 바꾼다
+        if (pending != null)
+        {
+            bool same = pending == offer;
+            CancelTargeting();
+            if (same) return;
+        }
+
+        if (!shop.CanBuy(offer, out string reason))
+        {
+            PlaySound(failSound);
+            ShowMessage(reason);
+            Refresh();
+            return;
+        }
+
+        if (offer.NeedsTarget)
+        {
+            targets.Clear();
+            offer.CollectTargets(shop.Context, targets);
+
+            // 달 수 있는 총이 하나뿐이고 그 부위가 비어 있으면 바로 산다
+            if (targets.Count == 1 && !offer.WouldReplace(targets[0]))
+            {
+                Buy(offer, targets[0]);
+                return;
+            }
+
+            BeginTargeting(offer);
+            return;
+        }
+
+        Buy(offer, null);
+    }
+
+    void Buy(ShopOffer offer, IWeapon target)
+    {
+        bool ok = target != null ? shop.TryBuy(offer, target) : shop.TryBuy(offer);
+
+        if (ok)
         {
             PlaySound(buySound);
-            ShowMessage($"{card.Offer.Title} 구매");
+            ShowMessage(target != null ? $"{target.Data.weaponName} — {offer.Title} 장착" : $"{offer.Title} 구매");
         }
         else
         {
-            shop.CanBuy(card.Offer, out string reason);
+            shop.CanBuy(offer, out string reason);
             PlaySound(failSound);
             ShowMessage(reason);
         }
@@ -248,9 +374,63 @@ public class MaintenanceUI : MonoBehaviour
         Refresh();
     }
 
+    // ───────── 대상 고르기 (부착물) ─────────
+
+    void BeginTargeting(ShopOffer offer)
+    {
+        pending = offer;
+
+        if (loadout != null) loadout.BeginTargeting(targets, offer.HighlightSlot);
+        if (promptRoot != null) promptRoot.SetActive(true);
+        SetPrompt(null);
+
+        Refresh();
+    }
+
+    void OnTargetPicked(IWeapon weapon)
+    {
+        if (pending == null || weapon == null) return;
+
+        ShopOffer offer = pending;
+        EndTargetingState();
+        Buy(offer, weapon);
+    }
+
+    void OnTargetHovered(IWeapon weapon)
+    {
+        if (pending == null) return;
+        SetPrompt(weapon != null ? pending.PreviewFor(shop.Context, weapon) : null);
+    }
+
+    void SetPrompt(string preview)
+    {
+        if (promptText == null || pending == null) return;
+
+        promptText.text = string.IsNullOrEmpty(preview)
+            ? $"<b>{pending.Title}</b> — 오른쪽 내 장비에서 장착할 총을 고르세요 (우클릭 · 취소)"
+            : preview;
+    }
+
+    /// <summary>고르기를 그만둔다 — 돈은 그대로다.</summary>
+    public void CancelTargeting()
+    {
+        if (pending == null) return;
+        EndTargetingState();
+        Refresh();
+    }
+
+    void EndTargetingState()
+    {
+        pending = null;
+        targets.Clear();
+        if (loadout != null) loadout.EndTargeting();
+        if (promptRoot != null) promptRoot.SetActive(false);
+    }
+
     void OnReroll()
     {
         if (!IsOpen) return;
+        CancelTargeting();
 
         if (shop.TryReroll())
         {
@@ -276,6 +456,10 @@ public class MaintenanceUI : MonoBehaviour
 
     void Update()
     {
+        // 고르는 중 우클릭 = 취소
+        if (pending != null && Mouse.current != null && Mouse.current.rightButton.wasPressedThisFrame)
+            CancelTargeting();
+
         if (messageLeft > 0f)
         {
             messageLeft -= Time.unscaledDeltaTime;
@@ -300,6 +484,7 @@ public class MaintenanceUI : MonoBehaviour
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         // 씬이 바뀌면 창을 닫는다 (정비 → 다음 스테이지)
+        EndTargetingState();
         if (window != null) window.SetActive(false);
         UpdateHud(scene);
     }

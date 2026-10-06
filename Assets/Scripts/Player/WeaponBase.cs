@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -23,6 +24,11 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
     private WeaponModifier accumulated = WeaponModifier.Identity;
     private float cooldown;
     private int level = 1;
+
+    // 부착물 (커스터마이징-구현계획.md 4장). 업그레이드 누적분(accumulated)과 따로 든다 —
+    // 누적분은 빼기가 안 되어 교체를 못 한다. 달린 것들의 합은 attachmentModifier 에 다시 합성해 둔다.
+    private readonly Dictionary<AttachmentSlot, AttachmentData> attachments = new Dictionary<AttachmentSlot, AttachmentData>();
+    private WeaponModifier attachmentModifier = WeaponModifier.Identity;
 
     // 탄창 (12번 문서). 탄창 크기 0 인 무기(근접·서브유닛)는 이 값들을 쓰지 않는다.
     private int ammo;
@@ -59,9 +65,10 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
     /// </summary>
     protected float CooldownRemaining => cooldown;
 
-    /// <summary>누적 업그레이드 + 레벨 보너스.</summary>
+    /// <summary>누적 업그레이드 + 부착물 + 레벨 보너스. 셋은 곱해서 함께 적용된다.</summary>
     protected WeaponModifier TotalModifier =>
-        WeaponModifier.Combine(accumulated, data.perLevelBonus.Scaled(level - 1));
+        WeaponModifier.Combine(WeaponModifier.Combine(accumulated, attachmentModifier),
+                               data.perLevelBonus.Scaled(level - 1));
 
     public WeaponRuntimeStats Stats => data.Compose(TotalModifier);
 
@@ -255,6 +262,82 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
         int max = data != null ? Mathf.Max(1, data.maxLevel) : 1;
         level = Mathf.Clamp(newLevel, 1, max);
         OnStatsChanged();
+    }
+
+    // ───────── 부착물 ─────────
+
+    /// <summary>그 부위에 달린 부착물. 없으면 null.</summary>
+    public AttachmentData GetAttachment(AttachmentSlot slot)
+    {
+        return attachments.TryGetValue(slot, out AttachmentData a) ? a : null;
+    }
+
+    /// <summary>이 무기에 달 수 있는가 (계열 · 전용 무기). 드론 · 근접은 1단계 부착물이 없다.</summary>
+    public bool CanAttach(AttachmentData attachment)
+    {
+        return attachment != null && data != null && attachment.Fits(data);
+    }
+
+    /// <summary>
+    /// 부착물을 단다. 같은 부위에 있던 것은 빠지고 replaced 로 돌려준다 (교체).
+    /// 탄창이 커지면 늘어난 만큼 탄을 채우고, 작아지면 탄창 크기로 자른다.
+    /// </summary>
+    public bool TryAttach(AttachmentData attachment, out AttachmentData replaced)
+    {
+        replaced = null;
+        if (!CanAttach(attachment)) return false;
+
+        attachments.TryGetValue(attachment.slot, out replaced);
+        if (replaced == attachment) return false;   // 이미 같은 것이 달려 있다
+
+        int oldMagazine = MagazineSize;
+
+        attachments[attachment.slot] = attachment;
+        RebuildAttachmentModifier();
+
+        int newMagazine = MagazineSize;
+        if (newMagazine > 0)
+        {
+            if (newMagazine > oldMagazine && !IsReloading)
+                ammo += newMagazine - oldMagazine;
+
+            ammo = Mathf.Clamp(ammo, 0, newMagazine);
+        }
+
+        OnStatsChanged();
+        RaiseAmmoChanged();
+        return true;
+    }
+
+    /// <summary>이 부착물을 달았다면의 스탯 — 정비 창의 교체 미리보기용. 실제로는 아무것도 바꾸지 않는다.</summary>
+    public WeaponRuntimeStats PreviewWith(AttachmentData attachment)
+    {
+        if (data == null) return default;
+        if (!CanAttach(attachment)) return Stats;
+
+        WeaponModifier sum = WeaponModifier.Identity;
+
+        foreach (var pair in attachments)
+        {
+            if (pair.Key == attachment.slot || pair.Value == null) continue;
+            sum = WeaponModifier.Combine(sum, pair.Value.Resolve(data));
+        }
+
+        sum = WeaponModifier.Combine(sum, attachment.Resolve(data));
+
+        WeaponModifier total = WeaponModifier.Combine(WeaponModifier.Combine(accumulated, sum),
+                                                      data.perLevelBonus.Scaled(level - 1));
+        return data.Compose(total);
+    }
+
+    void RebuildAttachmentModifier()
+    {
+        WeaponModifier sum = WeaponModifier.Identity;
+
+        foreach (AttachmentData a in attachments.Values)
+            if (a != null) sum = WeaponModifier.Combine(sum, a.Resolve(data));
+
+        attachmentModifier = sum;
     }
 
     public virtual void SetActive(bool active)

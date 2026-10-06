@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2053801b010909f488af8899e8b93e8a, type: 3}
+  m_Name: AT_QuickMag
+  m_EditorClassIdentifier: Assembly-CSharp::AttachmentData
+  displayName: "\uBE60\uB978 \uD0C4\uCC3D"
+  description: "\uAC00\uBCBC\uC6B4 \uD0C4\uCC3D \u2014 \uBE68\uB9AC \uAC08\uC544
+    \uB07C\uC6B4\uB2E4"
+  icon: {fileID: 21300000, guid: f17a2b763d179a04ca63dc34ffe717d4, type: 3}
+  slot: 3
+  tier: 1
+  families: 7
+  onlyFor: []
+  modifier:
+    damageAdd: 0
+    damageMul: 1
+    fireIntervalMul: 1
+    critChanceAdd: 0
+    critMultiplierAdd: 0
+    projectileSpeedAdd: 0
+    projectileCountAdd: 0
+    pierceAdd: 0
+    magazineAdd: 0
+    reloadTimeMul: 0.65
+    rangeAdd: 0
+    subUnitAdd: 0
+  magazinePercent: -0.2
+  basePrice: 18

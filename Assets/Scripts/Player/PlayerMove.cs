@@ -174,6 +174,81 @@ public class PlayerMove : MonoBehaviour
     private float rollBufferedAt = -999f;
     private Vector3 rollDir;
 
+    // ─────────────────────────────────────────────
+    // 외부 대시 · 행동 잠금 (서브 능력 — 커스터마이징-구현계획.md 9-2)
+    // ─────────────────────────────────────────────
+    private bool isDashing;
+    private Vector3 dashDir;
+    private float dashSpeed;
+    private float dashLeft;
+
+    // 그랩 · 방패처럼 동작 중인 능력이 구르기를 막는다
+    private readonly HashSet<object> actionLocks = new HashSet<object>();
+
+    /// <summary>외부에서 건 대시 중인지 (그랩이 보스에게 끌려갈 때 등).</summary>
+    public bool IsDashing => isDashing;
+
+    /// <summary>
+    /// 정해진 방향 · 거리를 duration 초 동안 미끄러지듯 이동한다. 구르기의 이동과 같은 방식(속도 지정)이고 모션은 없다.
+    /// invulnerable 초 동안 무적. 구르기 · 사망 · 다른 대시 중이면 false.
+    /// </summary>
+    public bool TryDash(Vector3 direction, float distance, float duration, float invulnerable)
+    {
+        if (isDead || isRolling || isDashing || rb == null) return false;
+
+        direction.y = 0f;
+        if (direction.sqrMagnitude < 0.0001f || distance <= 0.01f) return false;
+
+        dashDir = direction.normalized;
+        dashLeft = Mathf.Max(0.02f, duration);
+        dashSpeed = distance / dashLeft;
+        isDashing = true;
+
+        rb.MoveRotation(Quaternion.LookRotation(dashDir));
+
+        if (stats != null && invulnerable > 0f)
+            stats.SetInvulnerable(invulnerable);
+
+        return true;
+    }
+
+    /// <summary>진행 중인 대시를 멈춘다.</summary>
+    public void StopDash()
+    {
+        if (!isDashing) return;
+
+        isDashing = false;
+        if (rb != null)
+        {
+            Vector3 v = rb.linearVelocity;
+            v.x = 0f;
+            v.z = 0f;
+            rb.linearVelocity = v;
+        }
+    }
+
+    /// <summary>능력이 동작하는 동안 구르기를 막는다. 같은 owner 로 켜고 끈다.</summary>
+    public void SetActionLock(object owner, bool locked)
+    {
+        if (owner == null) return;
+        if (locked) actionLocks.Add(owner);
+        else actionLocks.Remove(owner);
+    }
+
+    void TickDash()
+    {
+        float dt = Time.fixedDeltaTime;
+        float step = Mathf.Min(dt, dashLeft);
+
+        Vector3 v = rb.linearVelocity;
+        v.x = dashDir.x * dashSpeed;
+        v.z = dashDir.z * dashSpeed;
+        rb.linearVelocity = v;   // y 는 그대로 — 중력 유지
+
+        dashLeft -= step;
+        if (dashLeft <= 0f) StopDash();
+    }
+
     /// <summary>구르는 중인지. AutoAttack이 발사를 멈추는 데 사용한다.</summary>
     public bool IsRolling => isRolling;
 
@@ -346,6 +421,13 @@ public class PlayerMove : MonoBehaviour
 
         TickStamina(Time.fixedDeltaTime);
         TickFootstep();
+
+        // ── 서브 능력이 건 대시 중에는 일반 이동/회전을 건너뛴다 ──
+        if (isDashing)
+        {
+            TickDash();
+            return;
+        }
 
         // ── 구르는 중에는 일반 이동/회전을 전부 건너뛴다 ──
         if (isRolling)
@@ -627,7 +709,8 @@ public class PlayerMove : MonoBehaviour
 
     bool CanRoll()
     {
-        if (isDead || isRolling) return false;
+        if (isDead || isRolling || isDashing) return false;
+        if (actionLocks.Count > 0) return false;   // 서브 능력 동작 중
         if (rollCdTimer > 0f) return false;
         if (rollNeedsGround && !currentGround) return false;
         return true;
@@ -784,6 +867,8 @@ public class PlayerMove : MonoBehaviour
         isRolling = false;
         rollElapsed = 0f;
         rollBufferedAt = -999f;
+        isDashing = false;
+        actionLocks.Clear();
 
         if (stats != null)
             stats.ClearInvulnerable();

@@ -46,6 +46,10 @@ public class CharacterData : ScriptableObject
     [Tooltip("HUD 회피 아이콘. 비우면 HUD 에 원래 있던 구르기 아이콘을 쓴다")]
     public Sprite dodgeIcon;
 
+    [Header("Sub Ability")]
+    [Tooltip("서브 능력 칸 수 (E · F). 검사 2, 사수 0 — 커스터마이징-구현계획.md 5-1")]
+    [Range(0, 2)] public int subAbilitySlots;
+
     [Header("Weapons")]
     [Tooltip("로비에서 고를 수 있는 시작 무기. 첫 번째가 기본값이다")]
     public WeaponData[] startWeapons;

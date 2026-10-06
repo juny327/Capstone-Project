@@ -28,6 +28,10 @@ public class ShopCardView : MonoBehaviour
     [SerializeField] Color upgradeColor = new Color(0.98f, 0.80f, 0.35f);
     [SerializeField] Color attachmentColor = new Color(0.62f, 0.72f, 1f);
     [SerializeField] Color consumableColor = new Color(0.55f, 0.95f, 0.55f);
+    [SerializeField] Color subAbilityColor = new Color(1f, 0.62f, 0.30f);
+
+    [Tooltip("부착물은 등급 색(초록 · 노랑 · 빨강) 테두리를 쓴다")]
+    [SerializeField] bool attachmentTierColor = true;
 
     [SerializeField] Color affordableColor = Color.white;
     [SerializeField] Color unaffordableColor = new Color(1f, 0.45f, 0.4f);
@@ -46,7 +50,9 @@ public class ShopCardView : MonoBehaviour
         Offer = offer;
         gameObject.SetActive(true);
 
-        Color kindColor = ColorOf(offer.Kind);
+        Color kindColor = attachmentTierColor && offer is AttachmentOffer part
+            ? AttachmentData.TierColor(part.Attachment.tier)
+            : ColorOf(offer.Kind);
         bool unavailable = !canBuy && !offer.Sold;
         if (frame != null) frame.color = unavailable ? Color.Lerp(kindColor, Color.black, 0.45f) : kindColor;
 
@@ -93,6 +99,13 @@ public class ShopCardView : MonoBehaviour
         gameObject.SetActive(false);
     }
 
+    /// <summary>대상 고르기 중인 카드 표시 — 테두리를 밝게.</summary>
+    public void SetSelected(bool selected)
+    {
+        if (frame == null || Offer == null) return;
+        if (selected) frame.color = Color.white;
+    }
+
     Color ColorOf(ShopOfferKind kind)
     {
         switch (kind)
@@ -100,6 +113,7 @@ public class ShopCardView : MonoBehaviour
             case ShopOfferKind.Upgrade: return upgradeColor;
             case ShopOfferKind.Attachment: return attachmentColor;
             case ShopOfferKind.Consumable: return consumableColor;
+            case ShopOfferKind.SubAbility: return subAbilityColor;
             default: return weaponColor;
         }
     }

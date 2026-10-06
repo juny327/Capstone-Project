@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>상점이 열려 있는 동안의 정보 — 공급원 · 상품이 함께 쓴다.</summary>
@@ -17,8 +18,9 @@ public enum ShopOfferKind
 {
     Weapon,       // 새 무기
     Upgrade,      // 보유 무기 강화
-    Attachment,   // 부품 (나중)
+    Attachment,   // 총기 부착물
     Consumable,   // 회복 등 (나중)
+    SubAbility,   // 검사 서브 능력
 }
 
 /// <summary>
@@ -51,4 +53,24 @@ public abstract class ShopOffer
 
     /// <summary>실제 적용. 실패하면 false — 크레딧을 쓰지 않는다.</summary>
     public abstract bool Apply(ShopContext ctx);
+
+    // ───────── 대상 고르기 (부착물 — 커스터마이징-구현계획.md 7-2) ─────────
+
+    /// <summary>산 뒤에 대상(총)을 골라야 하는 상품인가. 정비 창이 "장착할 총을 고르세요" 모드로 들어간다.</summary>
+    public virtual bool NeedsTarget => false;
+
+    /// <summary>고른 대상. 화면이 정한 뒤 ShopService.TryBuy(offer, target) 로 산다.</summary>
+    public IWeapon Target { get; set; }
+
+    /// <summary>지금 고를 수 있는 대상 목록.</summary>
+    public virtual void CollectTargets(ShopContext ctx, List<IWeapon> into) { }
+
+    /// <summary>이 대상에 적용하면 이전 것이 빠지는가 (교체) — 그러면 바로 사지 않고 미리보기를 보여 준다.</summary>
+    public virtual bool WouldReplace(IWeapon target) => false;
+
+    /// <summary>이 대상에 적용했을 때 바뀌는 것 한 줄 ("교체: 빠른 탄창 → 확장 탄창 · 탄창 24 → 45").</summary>
+    public virtual string PreviewFor(ShopContext ctx, IWeapon target) => null;
+
+    /// <summary>내 장비 판에서 깜빡일 부착물 부위. 없으면 −1.</summary>
+    public virtual int HighlightSlot => -1;
 }
