@@ -55,6 +55,14 @@ public static class CustomizationSetup
     const string Picto = "Assets/Space_Exploration_GUI_Kit/Picto_Icons/White/";
     const string Icons = "Assets/Space_Exploration_GUI_Kit/Icons/";
 
+    // 사수 부착물 2 ~ 4단계 (커스터마이징-구현계획.md 4-3 ~ 4-5)
+    const string EffectDir = AttachmentDir + "/Effects";
+    const string FxDir = "Assets/Prefabs/Attachment";
+    const string RewardDir = "Assets/Scripts/Stage/Rewards";
+    const string RewardPoolPath = RewardDir + "/StageRewardPool.asset";
+    const string Sfx = "Assets/Kenney/SciFiSounds/";
+    const string Impact = "Assets/Kenney/ImpactSounds/";
+
     static readonly Color Ink = new Color(0.035f, 0.055f, 0.08f, 0.97f);
     static readonly Color Accent = new Color(0.50f, 0.88f, 0.81f);
     static readonly Color Muted = new Color(0.62f, 0.68f, 0.74f);
@@ -69,10 +77,25 @@ public static class CustomizationSetup
         public WeaponFamily Families;
         public Action<AttachmentData> Effect;
         public int Price;
+
+        // 2 ~ 4단계
+        public string[] OnlyFor;          // 전용 무기 (WD_ 에셋 이름)
+        public int MinLevel = 1;          // 전용 개조 = 3
+        public string Behavior;           // 동작 에셋 (AE_*)
+        public string Ability;            // 하부 E 능력 프리팹 (AB_*)
+        public Color Tint;                // 탄 색 (a = 0 이면 없음)
+        public string Note;               // 수치로 못 쓰는 효과 한 줄
+        public int CountSet;              // 탄 수 맞추기 (슬러그 = 1)
+        public bool Reward;               // 스테이지 보상 카드로도 낸다
     }
 
     const WeaponFamily Guns = WeaponFamily.Ballistic;
     const WeaponFamily AllRanged = WeaponFamily.Ballistic | WeaponFamily.Chain | WeaponFamily.Charge;
+
+    static readonly Color Fire = new Color(1f, 0.55f, 0.15f, 1f);
+    static readonly Color Shock = new Color(0.4f, 0.75f, 1f, 1f);
+    static readonly Color Blast = new Color(1f, 0.42f, 0.25f, 1f);
+    static readonly Color Rail = new Color(0.5f, 0.95f, 1f, 1f);
 
     static readonly PartSpec[] Parts =
     {
@@ -103,7 +126,89 @@ public static class CustomizationSetup
         new PartSpec { Asset = "AT_ChainAmplifier", Name = "연쇄 증폭기", Description = "전격이 한 번 더 퍼진다", Icon = Picto + "bolt-128.png",
             Slot = AttachmentSlot.Ammo, Tier = AttachmentTier.Balanced, Families = WeaponFamily.Chain, Price = 18,
             Effect = a => { a.modifier.pierceAdd = 1; a.modifier.damageMul = 0.90f; } },
+
+        // ── 2단계 — 퍼짐 · 보이는 신호 (4-3) ──
+        new PartSpec { Asset = "AT_LaserSight", Name = "레이저 조준기", Description = "총구에서 붉은 조준선 — 탄이 모인다", Icon = Icons + "scope-128.png",
+            Slot = AttachmentSlot.Optic, Tier = AttachmentTier.Basic, Families = Guns, Price = 12, Behavior = "AE_LaserSight", Reward = true,
+            Effect = a => { a.modifier.spreadMul = 0.70f; a.modifier.critChanceAdd = 0.05f; } },
+        new PartSpec { Asset = "AT_Compensator", Name = "보정기", Description = "반동을 눌러 탄이 모이고 조금 빨라진다", Icon = Picto + "settings-128.png",
+            Slot = AttachmentSlot.Muzzle, Tier = AttachmentTier.Basic, Families = Guns, Price = 12,
+            Effect = a => { a.modifier.spreadMul = 0.70f; a.modifier.fireIntervalMul = 0.952f; } },
+        new PartSpec { Asset = "AT_Choke", Name = "초크", Description = "산탄을 좁게 모은다", Icon = Picto + "shrink-128.png",
+            Slot = AttachmentSlot.Muzzle, Tier = AttachmentTier.Basic, Families = Guns, OnlyFor = new[] { "WD_Shotgun" }, Price = 12,
+            Effect = a => { a.modifier.spreadMul = 0.55f; } },
+        // 계획은 샷건 · 기관단총이었지만 기관단총(1발)에 +2발은 공격력 ×2.5 라 샷건 전용으로 좁혔다
+        new PartSpec { Asset = "AT_Diffuser", Name = "확산기", Description = "산탄을 더 넓게, 더 많이", Icon = Picto + "share-128.png",
+            Slot = AttachmentSlot.Muzzle, Tier = AttachmentTier.Balanced, Families = Guns, OnlyFor = new[] { "WD_Shotgun" }, Price = 18,
+            Effect = a => { a.modifier.projectileCountAdd = 2; a.modifier.spreadMul = 1.30f; a.modifier.damageMul = 0.85f; } },
+
+        // ── 3단계 — 하부 E 능력 · 탄 명중 효과 (4-4) ──
+        new PartSpec { Asset = "AT_GrenadeLauncher", Name = "유탄 발사기", Description = "E — 커서 쪽으로 유탄, 떨어진 자리에서 폭발", Icon = Picto + "rocket-128.png",
+            Slot = AttachmentSlot.Underbarrel, Tier = AttachmentTier.Balanced, Families = AllRanged, Price = 22, Ability = "AB_GrenadeLauncher",
+            Note = "E: 유탄 · 반경 2.5m · 피해 = 총 공격력 ×5 · 6초", Effect = a => { } },
+        new PartSpec { Asset = "AT_Bayonet", Name = "총검 돌격", Description = "E — 짧게 돌진하며 찌르고 밀친다 · 돌진 중 무적", Icon = Picto + "sword-128.png",
+            Slot = AttachmentSlot.Underbarrel, Tier = AttachmentTier.Balanced, Families = AllRanged, Price = 22, Ability = "AB_BayonetCharge",
+            Note = "E: 3m 돌진 · 피해 = 총 공격력 ×4 · 밀치기 · 5초", Effect = a => { } },
+        new PartSpec { Asset = "AT_ShockEmitter", Name = "충격 방출기", Description = "E — 주변의 적을 밀어내고 경직시킨다", Icon = Picto + "wifi-128.png",
+            Slot = AttachmentSlot.Underbarrel, Tier = AttachmentTier.Basic, Families = AllRanged, Price = 15, Ability = "AB_ShockEmitter",
+            Note = "E: 주변 3m 밀치기 · 경직 1초 · 8초", Effect = a => { } },
+        new PartSpec { Asset = "AT_Incendiary", Name = "소이탄", Description = "맞은 적이 잠깐 탄다", Icon = Picto + "flame-128.png",
+            Slot = AttachmentSlot.Ammo, Tier = AttachmentTier.Balanced, Families = Guns | WeaponFamily.Charge, Price = 18, Behavior = "AE_Incendiary",
+            Tint = Fire, Note = "화상 3초 (초당 피해의 25%)", Reward = true, Effect = a => { a.modifier.damageMul = 0.90f; } },
+        new PartSpec { Asset = "AT_ShockRound", Name = "전격탄", Description = "맞으면 가까운 적에게 전기가 튄다", Icon = Picto + "sparkles-128.png",
+            Slot = AttachmentSlot.Ammo, Tier = AttachmentTier.Balanced, Families = Guns, Price = 18, Behavior = "AE_ShockRound",
+            Tint = Shock, Note = "25% 확률로 옆 적에 전격 (피해 50%)", Effect = a => { a.modifier.damageMul = 0.90f; } },
+        new PartSpec { Asset = "AT_Ricochet", Name = "튕김탄", Description = "맞은 적에서 가까운 적에게 한 번 튕긴다", Icon = Picto + "redo-128.png",
+            Slot = AttachmentSlot.Ammo, Tier = AttachmentTier.Balanced, Families = Guns, Price = 18, Behavior = "AE_Ricochet",
+            Note = "가까운 적에게 한 번 튕김", Effect = a => { a.modifier.damageMul = 0.85f; } },
+        new PartSpec { Asset = "AT_Explosive", Name = "폭발탄", Description = "명중 지점에서 작게 터진다", Icon = Picto + "caution-128.png",
+            Slot = AttachmentSlot.Ammo, Tier = AttachmentTier.Overclock, Families = Guns, Price = 24, Behavior = "AE_Explosive",
+            Tint = Blast, Note = "반경 1.5m 폭발 (피해 40%)", Effect = a => { a.modifier.fireIntervalMul = 1.25f; } },
+
+        // ── 4단계 — 무기 전용 개조 (4-5) · 무기마다 개조 칸 하나 · 무기 레벨 3 이상 ──
+        new PartSpec { Asset = "MOD_Rifle_Burst", Name = "3점사", Description = "한 번에 세 발 — 간격은 길어진다", Icon = Picto + "menu-128.png",
+            Slot = AttachmentSlot.Mod, Tier = AttachmentTier.Overclock, Families = Guns, OnlyFor = new[] { "WD_Rifle" }, MinLevel = 3, Price = 30,
+            Effect = a => { a.modifier.burstAdd = 2; a.modifier.fireIntervalMul = 2.2f; } },
+        new PartSpec { Asset = "MOD_Rifle_Marksman", Name = "지정사수", Description = "느리게, 세게, 꿰뚫는다", Icon = Picto + "zoom-in-128.png",
+            Slot = AttachmentSlot.Mod, Tier = AttachmentTier.Overclock, Families = Guns, OnlyFor = new[] { "WD_Rifle" }, MinLevel = 3, Price = 30,
+            Effect = a => { a.modifier.fireIntervalMul = 1f / 0.6f; a.modifier.damageMul = 1.8f; a.modifier.pierceAdd = 1; } },
+        new PartSpec { Asset = "MOD_SMG_DualMag", Name = "이중 탄창", Description = "탄창 두 배 — 장전은 느리다", Icon = Picto + "add-128.png",
+            Slot = AttachmentSlot.Mod, Tier = AttachmentTier.Overclock, Families = Guns, OnlyFor = new[] { "WD_SMG" }, MinLevel = 3, Price = 30,
+            Effect = a => { a.magazinePercent = 1f; a.modifier.reloadTimeMul = 1.6f; } },
+        new PartSpec { Asset = "MOD_SMG_Spray", Name = "난사", Description = "더 빠르게 — 더 넓게 퍼진다", Icon = Picto + "shuffle-arrow-128.png",
+            Slot = AttachmentSlot.Mod, Tier = AttachmentTier.Overclock, Families = Guns, OnlyFor = new[] { "WD_SMG" }, MinLevel = 3, Price = 30,
+            Effect = a => { a.modifier.fireIntervalMul = 0.74f; a.modifier.spreadMul = 2f; } },
+        new PartSpec { Asset = "MOD_Shotgun_Slug", Name = "슬러그", Description = "산탄 대신 무거운 한 발 — 꿰뚫는다", Icon = Picto + "stop-128.png",
+            Slot = AttachmentSlot.Mod, Tier = AttachmentTier.Overclock, Families = Guns, OnlyFor = new[] { "WD_Shotgun" }, MinLevel = 3, Price = 30,
+            CountSet = 1, Effect = a => { a.modifier.damageMul = 6f; a.modifier.pierceAdd = 2; a.modifier.spreadMul = 0.05f; } },
+        new PartSpec { Asset = "MOD_Shotgun_DragonBreath", Name = "용의 숨결", Description = "산탄이 불붙는다 — 사거리가 짧다", Icon = Picto + "sun-128.png",
+            Slot = AttachmentSlot.Mod, Tier = AttachmentTier.Overclock, Families = Guns, OnlyFor = new[] { "WD_Shotgun" }, MinLevel = 3, Price = 30,
+            Behavior = "AE_DragonBreath", Tint = new Color(1f, 0.4f, 0.1f, 1f), Note = "산탄마다 화상",
+            Effect = a => { a.modifier.lifeTimeMul = 0.6f; } },
+        new PartSpec { Asset = "MOD_Sniper_Railgun", Name = "레일건", Description = "모든 적을 꿰뚫는 초고속 탄 — 장전이 느리다", Icon = Picto + "commet-128.png",
+            Slot = AttachmentSlot.Mod, Tier = AttachmentTier.Overclock, Families = Guns, OnlyFor = new[] { "WD_Sniper" }, MinLevel = 3, Price = 30,
+            Tint = Rail,
+            Effect = a => { a.modifier.pierceAdd = 99; a.modifier.projectileSpeedAdd = 120f; a.modifier.reloadTimeMul = 1.3f; } },
+        new PartSpec { Asset = "MOD_Sniper_SemiAuto", Name = "반자동", Description = "두 배 빠르게 — 한 발은 약하다", Icon = Picto + "next-128.png",
+            Slot = AttachmentSlot.Mod, Tier = AttachmentTier.Overclock, Families = Guns, OnlyFor = new[] { "WD_Sniper" }, MinLevel = 3, Price = 30,
+            Effect = a => { a.modifier.fireIntervalMul = 0.5f; a.modifier.damageMul = 0.55f; } },
+        // 계획은 "연쇄마다 피해 −15%" — 연쇄 감쇠 값을 따로 두지 않으려고 전체 피해 −15% 로 바꿨다
+        new PartSpec { Asset = "MOD_Tesla_Overload", Name = "과부하 코일", Description = "전기가 두 번 더 퍼진다 — 줄기는 약해진다", Icon = Picto + "power-128.png",
+            Slot = AttachmentSlot.Mod, Tier = AttachmentTier.Overclock, Families = WeaponFamily.Chain, OnlyFor = new[] { "WD_TeslaRifle" }, MinLevel = 3, Price = 30,
+            Effect = a => { a.modifier.pierceAdd = 2; a.modifier.damageMul = 0.85f; } },
+        new PartSpec { Asset = "MOD_Tesla_Discharge", Name = "방전", Description = "장전을 시작할 때 주변에 전기를 터뜨린다", Icon = Picto + "solar-system-128.png",
+            Slot = AttachmentSlot.Mod, Tier = AttachmentTier.Overclock, Families = WeaponFamily.Chain, OnlyFor = new[] { "WD_TeslaRifle" }, MinLevel = 3, Price = 30,
+            Behavior = "AE_Discharge", Note = "장전 시작 시 주변 4m 전격 (공격력 ×2.5 · 경직)", Effect = a => { } },
+        new PartSpec { Asset = "MOD_Laser_Prism", Name = "분광 프리즘", Description = "빔이 세 갈래로 — 갈래마다 절반", Icon = Picto + "diamond-128.png",
+            Slot = AttachmentSlot.Mod, Tier = AttachmentTier.Overclock, Families = WeaponFamily.Charge, OnlyFor = new[] { "WD_ChargeLaser" }, MinLevel = 3, Price = 30,
+            Effect = a => { a.modifier.projectileCountAdd = 2; a.modifier.damageMul = 0.5f; } },
+        new PartSpec { Asset = "MOD_Laser_Overcharge", Name = "과충전", Description = "더 오래 모아 훨씬 세게", Icon = Picto + "star-128.png",
+            Slot = AttachmentSlot.Mod, Tier = AttachmentTier.Overclock, Families = WeaponFamily.Charge, OnlyFor = new[] { "WD_ChargeLaser" }, MinLevel = 3, Price = 30,
+            Effect = a => { a.modifier.fireIntervalMul = 1.5f; a.modifier.damageMul = 2.2f; } },
     };
+
+    // 이미 있던 1단계 부착물 중 보상 카드로도 낼 것
+    static readonly string[] ExtraRewards = { "AT_VerticalGrip", "AT_ExtendedMag" };
 
     // ── 0단계 — 레벨당 효과 (레벨당 약 +15%, 전격 +0.5 · 충전 +3 · 샷건 +1발과 같은 비율) ──
     static readonly (string asset, float damageAdd)[] LevelBonuses =
@@ -140,7 +245,7 @@ public static class CustomizationSetup
             return false;
         }
 
-        foreach (string dir in new[] { AttachmentDir, SubAbilityDir, PrefabDir, IconDir, ShopDir, SettingsDir, UiDir })
+        foreach (string dir in new[] { AttachmentDir, EffectDir, SubAbilityDir, PrefabDir, FxDir, IconDir, ShopDir, SettingsDir, UiDir })
             Directory.CreateDirectory(dir);
 
         bool ok = true;
@@ -148,9 +253,19 @@ public static class CustomizationSetup
         FillLevelBonuses();
         SetupFuturaModels();
 
-        AttachmentData[] attachments = BuildAttachments(reset);
+        // 사수 부착물 2 ~ 4단계 — 연출 재질 · 동작 에셋 · 하부 E 능력 프리팹
+        var flash = AssetDatabase.LoadAssetAtPath<GameObject>(ParryFlashPath);
+        ParryFlash sparks = flash != null ? flash.GetComponent<ParryFlash>() : null;
+        Material fxMat = AdditiveMaterial($"{FxDir}/FxLine.mat", WireTexture($"{FxDir}/FxLine.png"), Color.white, false);
+        Dictionary<string, AttachmentEffect> behaviors = BuildBehaviors(fxMat, reset);
+        Dictionary<string, SubAbility> gunAbilities = BuildGunAbilities(fxMat, sparks, reset);
+
+        var createdParts = new List<AttachmentData>();
+        AttachmentData[] attachments = BuildAttachments(reset, behaviors, gunAbilities, createdParts);
         SubAbilityData[] abilities = BuildSubAbilities(reset);
-        ok &= BuildShopSources(attachments, abilities);
+        ok &= BuildShopSources(attachments, abilities, createdParts);
+        BuildAttachmentRewards(attachments);
+        BuildSubAbilityRewards(abilities);
         BuildKeyBindings();
         SetupSwordsman();
 
@@ -248,7 +363,8 @@ public static class CustomizationSetup
 
     // ═══════════ 부착물 ═══════════
 
-    static AttachmentData[] BuildAttachments(bool reset)
+    static AttachmentData[] BuildAttachments(bool reset, Dictionary<string, AttachmentEffect> behaviors,
+        Dictionary<string, SubAbility> gunAbilities, List<AttachmentData> createdParts)
     {
         var result = new List<AttachmentData>();
 
@@ -264,12 +380,26 @@ public static class CustomizationSetup
                 data.slot = spec.Slot;
                 data.tier = spec.Tier;
                 data.families = spec.Families;
-                data.onlyFor = new WeaponData[0];
+                data.onlyFor = (spec.OnlyFor ?? new string[0])
+                    .Select(n => AssetDatabase.LoadAssetAtPath<WeaponData>($"{WeaponDataDir}/{n}.asset"))
+                    .Where(w => w != null).ToArray();
                 data.modifier = WeaponModifier.Identity;
                 data.magazinePercent = 0f;
+                data.projectileCountSet = spec.CountSet;
+                data.minWeaponLevel = Mathf.Max(1, spec.MinLevel);
+                data.tint = spec.Tint;
+                data.note = spec.Note;
                 spec.Effect(data);
                 data.basePrice = spec.Price;
             }
+
+            if (created) createdParts.Add(data);
+
+            // 동작 · 능력 연결은 비어 있으면 채운다 (값을 고친 에셋도 연결이 끊겨 있으면 이어 준다)
+            if (!string.IsNullOrEmpty(spec.Behavior) && (data.effect == null || reset) && behaviors.TryGetValue(spec.Behavior, out AttachmentEffect behavior))
+                data.effect = behavior;
+            if (!string.IsNullOrEmpty(spec.Ability) && (data.ability == null || reset) && gunAbilities.TryGetValue(spec.Ability, out SubAbility ability))
+                data.ability = ability;
 
             if (data.icon == null || reset) data.icon = ResolveIcon(spec.Icon, spec.Asset);
 
@@ -278,6 +408,188 @@ public static class CustomizationSetup
         }
 
         return result.ToArray();
+    }
+
+    // ═══════════ 부착물 동작 (2 ~ 4단계) ═══════════
+
+    static Dictionary<string, AttachmentEffect> BuildBehaviors(Material fxMat, bool reset)
+    {
+        var result = new Dictionary<string, AttachmentEffect>();
+
+        T Make<T>(string key, Action<T> setup) where T : AttachmentEffect
+        {
+            T asset = LoadOrCreate<T>($"{EffectDir}/{key}.asset", out bool created);
+            if (created || reset) setup(asset);
+            EditorUtility.SetDirty(asset);
+            result[key] = asset;
+            return asset;
+        }
+
+        Make<LaserSightEffect>("AE_LaserSight", e => { e.material = fxMat; e.color = new Color(1f, 0.15f, 0.12f, 0.9f); e.width = 0.05f; e.maxLength = 14f; });
+        Make<BurnOnHitEffect>("AE_Incendiary", e => { e.duration = 3f; e.dpsRatio = 0.25f; e.chance = 1f; });
+        Make<BurnOnHitEffect>("AE_DragonBreath", e => { e.duration = 2f; e.dpsRatio = 0.35f; e.chance = 1f; });
+        Make<BounceOnHitEffect>("AE_Ricochet", e => { e.material = fxMat; e.range = 6f; e.damageRatio = 1f; });
+
+        Make<ArcOnHitEffect>("AE_ShockRound", e =>
+        {
+            e.material = fxMat; e.chance = 0.25f; e.damageRatio = 0.5f; e.range = 4.5f;
+            var so = new SerializedObject(e);
+            SetSound(so.FindProperty("sound"), 0.25f, new Vector2(1.3f, 1.5f), Clips(Sfx + "laserSmall_", 5));
+            so.ApplyModifiedPropertiesWithoutUndo();
+        });
+        Make<ExplodeOnHitEffect>("AE_Explosive", e =>
+        {
+            e.material = fxMat; e.radius = 1.5f; e.damageRatio = 0.4f;
+            var so = new SerializedObject(e);
+            SetSound(so.FindProperty("sound"), 0.35f, new Vector2(1.1f, 1.3f), Clips(Sfx + "explosionCrunch_", 5));
+            so.ApplyModifiedPropertiesWithoutUndo();
+        });
+        Make<ReloadDischargeEffect>("AE_Discharge", e =>
+        {
+            e.material = fxMat; e.radius = 4f; e.damageRatio = 2.5f; e.stun = 0.5f;
+            var so = new SerializedObject(e);
+            SetSound(so.FindProperty("sound"), 0.55f, new Vector2(0.8f, 0.9f), Clips(Sfx + "laserLarge_", 5));
+            so.ApplyModifiedPropertiesWithoutUndo();
+        });
+
+        // 재질은 고친 값과 무관한 연결이라 비어 있으면 늘 채운다
+        foreach (AttachmentEffect e in result.Values)
+        {
+            var so = new SerializedObject(e);
+            SerializedProperty mat = so.FindProperty("material");
+            if (mat != null && mat.objectReferenceValue == null) { mat.objectReferenceValue = fxMat; so.ApplyModifiedPropertiesWithoutUndo(); }
+        }
+
+        return result;
+    }
+
+    // ═══════════ 사수 하부 E 능력 (3단계) ═══════════
+
+    static Dictionary<string, SubAbility> BuildGunAbilities(Material fxMat, ParryFlash sparks, bool reset)
+    {
+        var result = new Dictionary<string, SubAbility>();
+
+        Material shellMat = UnlitMaterial($"{FxDir}/Shell.mat", new Color(1f, 0.7f, 0.25f));
+        Material bladeMat = UnlitMaterial($"{FxDir}/Blade.mat", new Color(0.75f, 0.95f, 1f));
+
+        result["AB_GrenadeLauncher"] = BuildAbilityPrefab<GrenadeLauncherAbility>("AB_GrenadeLauncher", reset, (root, ability, so) =>
+        {
+            Transform shell = Primitive(PrimitiveType.Sphere, "Shell", root.transform, new Vector3(0.24f, 0.24f, 0.24f), shellMat);
+            shell.gameObject.SetActive(false);
+            so.FindProperty("shell").objectReferenceValue = shell;
+            so.FindProperty("fxMaterial").objectReferenceValue = fxMat;
+            so.FindProperty("sparkPrefab").objectReferenceValue = sparks;
+            SetSound(so.FindProperty("fireSound"), 0.5f, new Vector2(1.1f, 1.25f), Clips(Sfx + "thrusterFire_", 5));
+            SetSound(so.FindProperty("blastSound"), 0.75f, new Vector2(0.9f, 1.05f), Clips(Sfx + "explosionCrunch_", 5));
+        });
+
+        result["AB_BayonetCharge"] = BuildAbilityPrefab<BayonetChargeAbility>("AB_BayonetCharge", reset, (root, ability, so) =>
+        {
+            Transform blade = Primitive(PrimitiveType.Cube, "Blade", root.transform, new Vector3(0.05f, 0.05f, 0.9f), bladeMat);
+            blade.gameObject.SetActive(false);
+            so.FindProperty("blade").objectReferenceValue = blade;
+            so.FindProperty("sparkPrefab").objectReferenceValue = sparks;
+            SetSound(so.FindProperty("dashSound"), 0.5f, new Vector2(1.2f, 1.35f), Clips(Sfx + "thrusterFire_", 5));
+            SetSound(so.FindProperty("hitSound"), 0.65f, new Vector2(0.95f, 1.1f), Clips(Impact + "impactPunch_heavy_", 3));
+        });
+
+        result["AB_ShockEmitter"] = BuildAbilityPrefab<ShockEmitterAbility>("AB_ShockEmitter", reset, (root, ability, so) =>
+        {
+            so.FindProperty("fxMaterial").objectReferenceValue = fxMat;
+            SetSound(so.FindProperty("sound"), 0.6f, new Vector2(0.75f, 0.85f), Clips(Sfx + "forceField_", 5));
+        });
+
+        return result;
+    }
+
+    static T BuildAbilityPrefab<T>(string name, bool reset, Action<GameObject, T, SerializedObject> setup) where T : SubAbility
+    {
+        string path = $"{FxDir}/{name}.prefab";
+        var existing = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+        if (existing != null && !reset) return existing.GetComponent<T>();
+
+        var root = new GameObject(name);
+        try
+        {
+            T ability = root.AddComponent<T>();
+            var so = new SerializedObject(ability);
+            setup(root, ability, so);
+            so.ApplyModifiedPropertiesWithoutUndo();
+            PrefabUtility.SaveAsPrefabAsset(root, path);
+        }
+        finally
+        {
+            Object.DestroyImmediate(root);
+        }
+
+        Debug.Log($"{Tag} 하부 E 능력 프리팹: {path}");
+        return AssetDatabase.LoadAssetAtPath<GameObject>(path).GetComponent<T>();
+    }
+
+    static Transform Primitive(PrimitiveType type, string name, Transform parent, Vector3 scale, Material material)
+    {
+        GameObject go = GameObject.CreatePrimitive(type);
+        go.name = name;
+        Object.DestroyImmediate(go.GetComponent<Collider>());
+        go.transform.SetParent(parent, false);
+        go.transform.localScale = scale;
+
+        var renderer = go.GetComponent<MeshRenderer>();
+        renderer.sharedMaterial = material;
+        renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        renderer.receiveShadows = false;
+        return go.transform;
+    }
+
+    /// <summary>빛을 받지 않는 단색 재질 (유탄 · 총검 날) — 탑다운에서 어두워지지 않게.</summary>
+    static Material UnlitMaterial(string path, Color color)
+    {
+        Shader shader = Shader.Find("Universal Render Pipeline/Unlit");
+        var material = AssetDatabase.LoadAssetAtPath<Material>(path);
+        if (material == null)
+        {
+            material = new Material(shader);
+            AssetDatabase.CreateAsset(material, path);
+        }
+
+        if (shader != null) material.shader = shader;
+        material.SetColor("_BaseColor", color);
+        EditorUtility.SetDirty(material);
+        return material;
+    }
+
+    // ═══════════ 스테이지 보상 카드 — 부착물 (2단계) ═══════════
+
+    static void BuildAttachmentRewards(AttachmentData[] attachments)
+    {
+        var pool = AssetDatabase.LoadAssetAtPath<StageRewardPool>(RewardPoolPath);
+        if (pool == null) { Debug.LogWarning($"{Tag} {RewardPoolPath} 가 없어 부착물 보상을 넣지 않았습니다."); return; }
+
+        var names = new HashSet<string>(Parts.Where(p => p.Reward).Select(p => p.Asset).Concat(ExtraRewards));
+        int added = 0;
+
+        foreach (AttachmentData a in attachments)
+        {
+            if (a == null || !names.Contains(a.name)) continue;
+
+            string path = $"{RewardDir}/RW_{a.name}.asset";
+            AttachmentReward reward = LoadOrCreate<AttachmentReward>(path, out bool created);
+            if (reward.attachment == null) reward.attachment = a;
+            EditorUtility.SetDirty(reward);
+
+            // 처음 만들 때만 풀에 넣는다 — 손으로 뺀 것은 다시 넣지 않는다
+            if (created && !pool.rewards.Contains(reward))
+            {
+                pool.rewards.Add(reward);
+                added++;
+            }
+        }
+
+        if (added > 0)
+        {
+            EditorUtility.SetDirty(pool);
+            Debug.Log($"{Tag} 보상 풀: 부착물 {added}개 추가 (전체 {pool.rewards.Count}개)");
+        }
     }
 
     // ═══════════ 서브 능력 ═══════════
@@ -292,6 +604,7 @@ public static class CustomizationSetup
 
         GrappleAbility grapple = BuildGrapplePrefab($"{PrefabDir}/SA_Grapple.prefab", wireMat, sparks, reset);
         ShieldAbility shield = BuildShieldPrefab($"{PrefabDir}/SA_Shield.prefab", faceMat, sparks, reset);
+        shield = EnsureShieldDisc($"{PrefabDir}/SA_Shield.prefab", faceMat) ?? shield;
 
         SubAbilityData g = LoadOrCreate<SubAbilityData>($"{SubAbilityDir}/SA_Grapple.asset", out bool newG);
         if (newG || reset)
@@ -301,7 +614,18 @@ public static class CustomizationSetup
             g.maxLevel = 3;
             g.basePrice = 25;
             g.levelPrices = new[] { 15, 22 };
-            g.levelNotes = new[] { "맞혔을 때 쿨타임 −1초 (7 → 6초)", "맞혔을 때 쿨타임 −1초 더 (6 → 5초)" };
+        }
+        // 레벨업 변형 (6단계) — 비어 있으면 채운다. 예전 레벨 문구(쿨타임 −1초)는 변형으로 바뀌었다
+        if (reset || g.variants == null || g.variants.Length == 0)
+        {
+            g.variants = new[]
+            {
+                new SubAbilityVariant { name = "작살", description = "와이어 방향 30° 안의 적을 최대 2명 더 함께 끌어온다" },
+                new SubAbilityVariant { name = "충격 와이어", description = "끌려온 적 경직 +1초 · 와이어 피해 ×2" },
+                new SubAbilityVariant { name = "넘기기", description = "끌어온 적을 내 뒤 3m 로 넘긴다" },
+                new SubAbilityVariant { name = "추격", description = "일반 적에게도 내가 끌려가 도착하면 앞을 벤다 (공격력 ×1.5 · 경직 1초)" },
+            };
+            g.levelNotes = new[] { "변형 — 작살 / 충격 와이어", "변형 — 넘기기 / 추격" };
         }
         if (g.prefab == null || reset) g.prefab = grapple;
         if (g.icon == null || reset) g.icon = ResolveIcon("render:" + FistModel, "SA_Grapple") ?? LoadSprite(Picto + "link-128.png");
@@ -315,7 +639,17 @@ public static class CustomizationSetup
             s.maxLevel = 3;
             s.basePrice = 25;
             s.levelPrices = new[] { 15, 22 };
-            s.levelNotes = new[] { "방패 내구도 +20 (50 → 70)", "방패 내구도 +20 더 (70 → 90)" };
+        }
+        if (reset || s.variants == null || s.variants.Length == 0)
+        {
+            s.variants = new[]
+            {
+                new SubAbilityVariant { name = "반사판", description = "들고 있는 동안 정면으로 날아온 몬스터 탄을 되돌려 보낸다" },
+                new SubAbilityVariant { name = "강화 방벽", description = "내구도 50 → 90 · 회복 ×1.5" },
+                new SubAbilityVariant { name = "방패 돌진", description = "떼면 5m 돌진하며 부딪힌 적을 모두 밀친다 · 돌진 중 무적" },
+                new SubAbilityVariant { name = "방패 던지기", description = "떼면 방패를 던져 적을 꿰뚫고 돌아온다" },
+            };
+            s.levelNotes = new[] { "변형 — 반사판 / 강화 방벽", "변형 — 방패 돌진 / 방패 던지기" };
         }
         if (s.prefab == null || reset) s.prefab = shield;
         if (s.icon == null || reset) s.icon = ResolveIcon("render:" + ShieldModel, "SA_Shield") ?? LoadSprite(Picto + "shield-128.png");
@@ -420,13 +754,90 @@ public static class CustomizationSetup
         return AssetDatabase.LoadAssetAtPath<GameObject>(path).GetComponent<ShieldAbility>();
     }
 
+    /// <summary>
+    /// 방패 던지기(Lv3 B 변형)용 원반 — 바닥과 나란한 납작한 에너지 원반. 이미 만든 방패 프리팹에도 없으면 더한다
+    /// (프리팹을 다시 만들면 손으로 고친 수치가 사라지므로 열어서 자식만 붙인다).
+    /// </summary>
+    static ShieldAbility EnsureShieldDisc(string path, Material faceMat)
+    {
+        if (AssetDatabase.LoadAssetAtPath<GameObject>(path) == null) return null;
+
+        GameObject root = PrefabUtility.LoadPrefabContents(path);
+        try
+        {
+            var ability = root.GetComponent<ShieldAbility>();
+            if (ability == null) return null;
+
+            var so = new SerializedObject(ability);
+            SerializedProperty discProp = so.FindProperty("disc");
+            if (discProp.objectReferenceValue != null) return null;
+
+            Transform disc = Primitive(PrimitiveType.Cylinder, "Disc", root.transform, new Vector3(1.1f, 0.025f, 1.1f), faceMat);
+            disc.gameObject.SetActive(false);
+            discProp.objectReferenceValue = disc;
+            so.ApplyModifiedPropertiesWithoutUndo();
+
+            PrefabUtility.SaveAsPrefabAsset(root, path);
+            Debug.Log($"{Tag} 방패 던지기 원반을 {path} 에 더했습니다.");
+        }
+        finally
+        {
+            PrefabUtility.UnloadPrefabContents(root);
+        }
+
+        return AssetDatabase.LoadAssetAtPath<GameObject>(path).GetComponent<ShieldAbility>();
+    }
+
+    // ═══════════ 스테이지 보상 카드 — 서브 능력 (새 능력만) ═══════════
+
+    static void BuildSubAbilityRewards(SubAbilityData[] abilities)
+    {
+        var pool = AssetDatabase.LoadAssetAtPath<StageRewardPool>(RewardPoolPath);
+        if (pool == null) return;
+
+        int added = 0;
+        foreach (SubAbilityData a in abilities)
+        {
+            if (a == null) continue;
+
+            SubAbilityReward reward = LoadOrCreate<SubAbilityReward>($"{RewardDir}/RW_{a.name}.asset", out bool created);
+            if (reward.ability == null) reward.ability = a;
+            EditorUtility.SetDirty(reward);
+
+            if (created && !pool.rewards.Contains(reward))
+            {
+                pool.rewards.Add(reward);
+                added++;
+            }
+        }
+
+        if (added > 0)
+        {
+            EditorUtility.SetDirty(pool);
+            Debug.Log($"{Tag} 보상 풀: 서브 능력 {added}개 추가 (전체 {pool.rewards.Count}개)");
+        }
+    }
+
     // ═══════════ 상점 공급원 ═══════════
 
-    static bool BuildShopSources(AttachmentData[] attachments, SubAbilityData[] abilities)
+    static bool BuildShopSources(AttachmentData[] attachments, SubAbilityData[] abilities, List<AttachmentData> createdParts)
     {
         AttachmentSource partSource = LoadOrCreate<AttachmentSource>(AttachmentSourcePath, out bool newPart);
         if (newPart) partSource.slots = 3;
-        if (partSource.attachments == null || partSource.attachments.Length == 0) partSource.attachments = attachments;
+        if (partSource.attachments == null || partSource.attachments.Length == 0)
+        {
+            partSource.attachments = attachments;
+        }
+        else
+        {
+            // 이번에 새로 만든 부착물만 판매 목록에 더한다 — 손으로 뺀 것은 다시 넣지 않는다
+            var list = partSource.attachments.Where(a => a != null).ToList();
+            int before = list.Count;
+            foreach (AttachmentData a in createdParts)
+                if (!list.Contains(a)) list.Add(a);
+            partSource.attachments = list.ToArray();
+            if (list.Count > before) Debug.Log($"{Tag} 판매 부착물 {list.Count - before}개 추가 (전체 {list.Count}개)");
+        }
         EditorUtility.SetDirty(partSource);
 
         SubAbilitySource abilitySource = LoadOrCreate<SubAbilitySource>(SubAbilitySourcePath, out bool newAbility);
@@ -571,7 +982,7 @@ public static class CustomizationSetup
             Object.DestroyImmediate(root);
         }
 
-        Debug.Log($"{Tag} 장비 HUD: {HudPrefabPath} (오른쪽 아래 장비 판 5줄 · 왼쪽 아래 액션 아이콘 2)");
+        Debug.Log($"{Tag} 장비 HUD: {HudPrefabPath} (오른쪽 아래 장비 판 {AttachmentData.SlotCount}줄 · 왼쪽 아래 액션 아이콘 2)");
     }
 
     static AbilityIconView MakeActionIcon(Transform parent, string name, Vector2 position)

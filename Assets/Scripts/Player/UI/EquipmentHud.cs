@@ -200,11 +200,13 @@ public class EquipmentHud : MonoBehaviour
         KeyBindings keys = KeyBindings.Current;
         bool abilityMode = abilities != null && abilities.SlotCount > 0;
 
-        // 액션 아이콘 — 서브 능력 칸
+        // 액션 아이콘 — 검사는 서브 능력 칸, 사수는 지금 든 총의 하부 능력(E)
+        SubAbility gunAbility = !abilityMode && weapons.ActiveWeapon != null ? weapons.ActiveWeapon.Ability : null;
+
         for (int i = 0; actions != null && i < actions.Length; i++)
         {
             if (actions[i] == null) continue;
-            SubAbility a = abilityMode ? abilities.Get(i) : null;
+            SubAbility a = abilityMode ? abilities.Get(i) : (i == 0 ? gunAbility : null);
             if (a != null) actions[i].Show(a, KeyBindings.Label(keys.AbilityKey(i)));
             else actions[i].Hide();
         }

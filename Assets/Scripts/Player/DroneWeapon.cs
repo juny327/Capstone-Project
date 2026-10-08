@@ -124,8 +124,10 @@ public class DroneWeapon : WeaponBase
         units.Clear();
     }
 
-    void OnDestroy()
+    protected override void OnDestroy()
     {
+        base.OnDestroy();
+
         for (int i = 0; i < units.Count; i++)
             if (units[i] != null) Destroy(units[i].gameObject);
 

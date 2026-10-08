@@ -52,6 +52,9 @@ public interface IWeapon
     /// <summary>이 부착물을 달았다면의 스탯 (미리보기 — 아무것도 바꾸지 않는다).</summary>
     WeaponRuntimeStats PreviewWith(AttachmentData attachment);
 
+    /// <summary>하부 부착물의 E 능력 (사수). 없으면 null.</summary>
+    SubAbility Ability { get; }
+
     /// <summary>
     /// 스왑으로 손에 들렸는지 여부. 서브유닛은 항상 true 로 유지된다.
     /// 비활성 무기는 모델이 숨겨지고 발사되지 않는다.

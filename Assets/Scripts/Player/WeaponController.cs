@@ -95,6 +95,9 @@ public class WeaponController : MonoBehaviour
     // 패링 모션 동안 손 무기 발사를 멈춘다
     private float suppressFireUntil;
 
+    // 서브 능력 칸 (검사). 있으면 E 는 그쪽이 쓴다
+    private SubAbilitySlot abilitySlot;
+
     // 상체 레이어 인덱스 (없으면 -1). 총은 ShootLayer, 근접 무기는 MeleeLayer 를 켠다
     private int shootLayer = -1;
     private int meleeLayer = -1;
@@ -444,6 +447,9 @@ public class WeaponController : MonoBehaviour
 
         if (starter != null)
             Acquire(starter);
+
+        // CharacterLoadout(실행 순서 −100)가 Awake 에서 붙인다 — 여기서는 이미 있다
+        abilitySlot = GetComponent<SubAbilitySlot>();
         IsInitialized = true;
     }
 
@@ -455,6 +461,9 @@ public class WeaponController : MonoBehaviour
 
         for (int i = 0; i < subUnits.Count; i++)
             subUnits[i].SetActive(false);
+
+        for (int i = 0; i < held.Count; i++)
+            if (held[i].Ability != null) held[i].Ability.Cancel();
     }
 
     void Update()
@@ -463,6 +472,7 @@ public class WeaponController : MonoBehaviour
 
         HandleSwapInput();
         HandleReloadInput();
+        HandleAbilityInput();
 
         float dt = Time.deltaTime;
         WeaponFireContext ctx = new WeaponFireContext(detector, transform);
@@ -524,6 +534,37 @@ public class WeaponController : MonoBehaviour
         if (!Keyboard.current[reloadKey].wasPressedThisFrame) return;
 
         ReloadActiveWeapon();
+    }
+
+    /// <summary>
+    /// 사수의 E — 지금 든 총의 하부 부착물 능력 (커스터마이징-구현계획.md 4-4 · 6장).
+    /// 서브 능력 칸이 있는 캐릭터(검사)는 SubAbilitySlot 이 E 를 쓴다. 시간이 멈춘 동안(카드 · 정비 · 설정창)은 받지 않는다.
+    /// </summary>
+    void HandleAbilityInput()
+    {
+        if (Time.timeScale < 0.01f) return;
+        if (abilitySlot != null && abilitySlot.SlotCount > 0) return;
+
+        SubAbility ability = activeHeldIndex >= 0 && activeHeldIndex < held.Count ? held[activeHeldIndex].Ability : null;
+        if (ability == null) return;
+
+        UnityEngine.InputSystem.Key key = KeyBindings.Current.ability1;
+
+        if (KeyBindings.Pressed(key)) ability.OnPressed();
+        else if (KeyBindings.Held(key)) ability.OnHeld(Time.deltaTime);
+
+        if (KeyBindings.Released(key) || (ability.IsHolding && !KeyBindings.Held(key)))
+            ability.OnReleased();
+    }
+
+    /// <summary>지금 든 총의 E 능력을 쓴다 (입력 없이 — 검증 · 다른 시스템용).</summary>
+    public bool UseActiveAbility()
+    {
+        SubAbility ability = activeHeldIndex >= 0 && activeHeldIndex < held.Count ? held[activeHeldIndex].Ability : null;
+        if (ability == null || isDead) return false;
+
+        ability.OnPressed();
+        return true;
     }
 
     /// <summary>손에 든 무기를 장전한다. 다른 시스템(UI 버튼 등)에서도 부를 수 있다.</summary>

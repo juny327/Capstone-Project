@@ -21,10 +21,17 @@ public class ProjectileWeapon : WeaponBase
     private bool hasReloadSpeedParam;
     private bool animChecked;
 
+    // 점사 (전용 개조 "3점사") — 첫 발은 OnFire 에서, 나머지는 짧은 간격으로 OnTick 에서 쏜다. 탄약은 한 번만 쓴다
+    private const float BurstGap = 0.07f;
+    private int burstRemaining;
+    private float burstTimer;
+
     protected override bool AutoReload => Config == null || Config.autoReload;
 
     protected override void OnReloadStarted(float duration)
     {
+        burstRemaining = 0;
+
         if (!animChecked) CacheAnimator();
         if (ownerAnim == null || !hasReloadParam) return;
 
@@ -76,14 +83,51 @@ public class ProjectileWeapon : WeaponBase
             return;
         }
 
-        SpawnEffect(cfg.muzzleFlashPrefab, Muzzle);
-        SpawnEffect(cfg.casingPrefab, casingPoint);
-
         // 기본은 캐릭터가 바라보는 방향(= 마우스 방향)으로 쏜다. 기존 소총(Gun)이 muzzle.forward 로 쏘던 것과 같다.
         // NearestTarget 이면 감지 범위 안 최근접 적을 자동 조준한다 (사거리 제한 없음)
         Vector3 baseDir = cfg.aimMode == WeaponAimMode.NearestTarget
             ? ResolveFireDirection(in context, float.PositiveInfinity, out _)
             : context.AimDirection;
+
+        SpawnVolley(cfg, in stats, baseDir);
+
+        // 점사 — 남은 발은 짧은 간격으로 이어서 (그사이 돌아보면 그쪽으로 나간다)
+        burstRemaining = Mathf.Max(0, stats.BurstCount - 1);
+        burstTimer = BurstGap;
+    }
+
+    protected override void OnTick(float deltaTime)
+    {
+        if (burstRemaining <= 0) return;
+
+        if (!IsActive || IsReloading || Config == null || Config.projectilePrefab == null || PoolManager.Instance == null)
+        {
+            burstRemaining = 0;
+            return;
+        }
+
+        burstTimer -= deltaTime;
+        if (burstTimer > 0f) return;
+
+        burstTimer += BurstGap;
+        burstRemaining--;
+
+        Vector3 dir = Owner != null ? Owner.transform.forward : transform.forward;
+        dir.y = 0f;
+        if (dir.sqrMagnitude < 0.0001f) return;
+
+        WeaponRuntimeStats stats = Stats;
+        SpawnVolley(Config, in stats, dir.normalized);
+        PlayVolleySound();
+    }
+
+    /// <summary>한 번에 나가는 탄들 (산탄이면 여러 발). 총구 섬광 · 탄피도 여기서.</summary>
+    void SpawnVolley(ProjectileWeaponData cfg, in WeaponRuntimeStats stats, Vector3 baseDir)
+    {
+        SpawnEffect(cfg.muzzleFlashPrefab, Muzzle);
+        SpawnEffect(cfg.casingPrefab, casingPoint);
+
+        Color tint = AmmoTint;
 
         for (int i = 0; i < stats.ProjectileCount; i++)
         {
@@ -105,7 +149,22 @@ public class ProjectileWeapon : WeaponBase
                 ApplyCritical(in stats, isCritical),
                 stats.ProjectileLifeTime,
                 isCritical,
-                stats.PierceCount));
+                stats.PierceCount,
+                source: this,
+                tint: tint));
         }
+    }
+
+    /// <summary>점사의 이어지는 발 소리 — 첫 발 소리는 WeaponBase.Fire 가 낸다.</summary>
+    void PlayVolleySound()
+    {
+        if (data == null) return;
+        PlaySound(data.PickFireSound(), data.fireVolume * 0.8f, Random.Range(1.0f, 1.08f));
+    }
+
+    public override void SetActive(bool active)
+    {
+        base.SetActive(active);
+        if (!active) burstRemaining = 0;
     }
 }

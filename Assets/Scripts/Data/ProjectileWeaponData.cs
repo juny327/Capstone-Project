@@ -52,10 +52,11 @@ public class ProjectileWeaponData : WeaponData
         WeaponModifier m = modifier.Sanitized();
 
         s.ProjectileSpeed = Mathf.Max(0.1f, projectileSpeed + m.projectileSpeedAdd);
-        s.ProjectileLifeTime = projectileLifeTime;
-        s.SpreadAngle = Mathf.Max(0f, spreadAngle);
+        s.ProjectileLifeTime = Mathf.Max(0.05f, projectileLifeTime * m.lifeTimeMul);
+        s.SpreadAngle = Mathf.Max(0f, spreadAngle * m.spreadMul);
         s.ProjectileCount = Mathf.Max(1, projectileCount + m.projectileCountAdd);
         s.PierceCount = Mathf.Max(0, pierceCount + m.pierceAdd);
+        s.BurstCount = Mathf.Max(1, 1 + m.burstAdd);
 
         // 0 은 "무제한" 이라는 뜻이므로 업그레이드가 붙어도 0 을 유지한다
         s.MagazineSize = magazineSize <= 0 ? 0 : Mathf.Max(1, magazineSize + m.magazineAdd);

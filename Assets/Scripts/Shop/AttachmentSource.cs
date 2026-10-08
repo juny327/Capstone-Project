@@ -125,9 +125,16 @@ public class AttachmentOffer : ShopOffer
         AppendChange(sb, "치명타", a.CritChance * 100f, b.CritChance * 100f, "0", "%");
         AppendChange(sb, "치명 배율", a.CritMultiplier, b.CritMultiplier, "0.##");
         AppendChange(sb, "탄속", a.ProjectileSpeed, b.ProjectileSpeed, "0.#");
-        // 전격 소총은 관통 증분이 연쇄 수(MaxTargets)로 들어간다
+        AppendChange(sb, target.Data is ChargeBeamWeaponData ? "빔" : "탄 수", a.ProjectileCount, b.ProjectileCount, "0");
+        AppendChange(sb, "점사", Mathf.Max(1, a.BurstCount), Mathf.Max(1, b.BurstCount), "0");
+        AppendChange(sb, "퍼짐", a.SpreadAngle, b.SpreadAngle, "0.#", "°");
+        // 사거리 = 탄속 × 비행 시간 — 탄속만 바뀐 경우까지 띄우면 시끄럽다. 비행 시간이 바뀔 때만
+        if (Mathf.Abs(a.ProjectileLifeTime - b.ProjectileLifeTime) > 0.001f)
+            AppendChange(sb, "사거리", a.ProjectileSpeed * a.ProjectileLifeTime, b.ProjectileSpeed * b.ProjectileLifeTime, "0.#", "m");
+        // 전격 소총은 관통 증분이 연쇄 수(MaxTargets)로 들어간다 · 레일건처럼 아주 크면 "무제한"
         if (chain) AppendChange(sb, "연쇄", a.MaxTargets, b.MaxTargets, "0");
-        else AppendChange(sb, "관통", a.PierceCount, b.PierceCount, "0");
+        else if (b.PierceCount >= 50 && a.PierceCount < 50) sb.Append(" · 관통 무제한");
+        else if (b.PierceCount < 50) AppendChange(sb, "관통", a.PierceCount, b.PierceCount, "0");
         AppendChange(sb, "탄창", a.MagazineSize, b.MagazineSize, "0");
         AppendChange(sb, "장전", a.ReloadTime, b.ReloadTime, "0.0", "초");
 

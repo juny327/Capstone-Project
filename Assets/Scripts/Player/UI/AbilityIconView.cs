@@ -28,7 +28,7 @@ public class AbilityIconView : MonoBehaviour
 
         if (icon != null)
         {
-            icon.sprite = value.Data != null ? value.Data.icon : null;
+            icon.sprite = value.Icon;
             icon.enabled = icon.sprite != null;
         }
 

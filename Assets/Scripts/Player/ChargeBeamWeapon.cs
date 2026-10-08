@@ -22,11 +22,14 @@ public class ChargeBeamWeapon : WeaponBase
     private readonly RaycastHit[] hits = new RaycastHit[32];
     private readonly HashSet<Transform> struck = new HashSet<Transform>();
 
-    private LineRenderer beam;      // 발사된 빔
+    private readonly List<LineRenderer> beams = new List<LineRenderer>();   // 발사된 빔 (분광 프리즘이면 여러 갈래)
     private LineRenderer charge;    // 총구에 모이는 빛
     private Material runtimeMaterial;
 
     private float beamHideAt = -1f;
+
+    /// <summary>분광 프리즘 — 갈래 사이 각도(도).</summary>
+    private const float PrismAngle = 14f;
 
     /// <summary>
     /// 사거리 안에 적이 있을 때만 쏜다.
@@ -58,8 +61,19 @@ public class ChargeBeamWeapon : WeaponBase
         Vector3 origin = Muzzle.position;
         Vector3 dir = context.AimDirection;
 
-        ApplyBeamDamage(cfg, in stats, origin, dir);
-        ShowBeam(cfg, origin, origin + dir * stats.Range);
+        // 갈래가 여럿이면(분광 프리즘) 부채꼴로 나눈다. 갈래마다 따로 판정한다 — 바로 앞의 적은 여러 갈래에 맞는다
+        int count = Mathf.Max(1, stats.ProjectileCount);
+        for (int i = 0; i < count; i++)
+        {
+            float angle = count > 1 ? -PrismAngle * (count - 1) * 0.5f + PrismAngle * i : 0f;
+            Vector3 d = Quaternion.Euler(0f, angle, 0f) * dir;
+
+            ApplyBeamDamage(cfg, in stats, origin, d);
+            ShowBeam(cfg, i, origin, origin + d * stats.Range);
+        }
+
+        for (int i = count; i < beams.Count; i++)
+            if (beams[i] != null) beams[i].enabled = false;
 
         SpawnFx(cfg.muzzleFlashPrefab, origin, Quaternion.LookRotation(dir));
 
@@ -153,15 +167,29 @@ public class ChargeBeamWeapon : WeaponBase
             if (point == Vector3.zero) point = col.ClosestPoint(origin);
 
             bool isCritical = RollCritical(in stats);
+            float dealt = ApplyCritical(in stats, isCritical);
 
             target.TakeDamage(new DamageInfo
             {
-                damage = ApplyCritical(in stats, isCritical),
+                damage = dealt,
                 isCritical = isCritical,
                 hitPoint = point,
                 hitDirection = dir,
                 cameraShake = cfg.cameraShake,
             });
+
+            if (HasHitEffects)
+            {
+                NotifyHit(new WeaponHit
+                {
+                    Target = root,
+                    Damageable = target,
+                    Point = point,
+                    Direction = dir,
+                    Damage = dealt,
+                    IsCritical = isCritical,
+                });
+            }
 
             SpawnFx(cfg.hitEffectPrefab, point, Quaternion.LookRotation(-dir));
 
@@ -178,8 +206,11 @@ public class ChargeBeamWeapon : WeaponBase
         if (cfg == null) return;
 
         // 빔은 잠깐 보여 주고 끈다. 판정은 이미 발사 순간에 끝났다.
-        if (beam != null && beam.enabled && Time.time >= beamHideAt)
-            beam.enabled = false;
+        if (Time.time >= beamHideAt)
+        {
+            for (int i = 0; i < beams.Count; i++)
+                if (beams[i] != null && beams[i].enabled) beams[i].enabled = false;
+        }
 
         UpdateChargeVisual(cfg);
     }
@@ -229,9 +260,9 @@ public class ChargeBeamWeapon : WeaponBase
         charge.endColor = c;
     }
 
-    void ShowBeam(ChargeBeamWeaponData cfg, Vector3 from, Vector3 to)
+    void ShowBeam(ChargeBeamWeaponData cfg, int index, Vector3 from, Vector3 to)
     {
-        EnsureBeam(cfg);
+        LineRenderer beam = EnsureBeam(cfg, index);
 
         if (beam == null) return;
 
@@ -251,11 +282,12 @@ public class ChargeBeamWeapon : WeaponBase
 
     // ───────── 연출 준비 ─────────
 
-    void EnsureBeam(ChargeBeamWeaponData cfg)
+    LineRenderer EnsureBeam(ChargeBeamWeaponData cfg, int index)
     {
-        if (beam != null) return;
+        while (beams.Count <= index)
+            beams.Add(CreateLine(beams.Count == 0 ? "Beam" : $"Beam{beams.Count + 1}", cfg));
 
-        beam = CreateLine("Beam", cfg);
+        return beams[index];
     }
 
     void EnsureCharge(ChargeBeamWeaponData cfg)
@@ -322,7 +354,8 @@ public class ChargeBeamWeapon : WeaponBase
         // SetActive 가 자식을 전부 끄지만, 다시 들었을 때 빔이 남아 있으면 안 된다.
         if (active) return;
 
-        if (beam != null) beam.enabled = false;
+        for (int i = 0; i < beams.Count; i++)
+            if (beams[i] != null) beams[i].enabled = false;
         if (charge != null) charge.enabled = false;
 
         // 손에 없는 무기가 계속 충전음을 내면 안 된다
@@ -335,8 +368,10 @@ public class ChargeBeamWeapon : WeaponBase
         StopChargeSound();
     }
 
-    void OnDestroy()
+    protected override void OnDestroy()
     {
+        base.OnDestroy();
+
         if (runtimeMaterial != null)
             Destroy(runtimeMaterial);
     }

@@ -202,15 +202,30 @@ public class ChainBeamWeapon : WeaponBase
         // 치명타는 조준해서 맞힌 첫 적에게만 판정한다.
         // 퍼지는 전기까지 치명타를 띄우면 한 발에 숫자가 여러 번 터져 읽히지 않는다.
         bool isCritical = isFirst && RollCritical(in stats);
+        float dealt = isCritical ? ApplyCritical(in stats, true) : damage;
 
         damageable.TakeDamage(new DamageInfo
         {
-            damage = isCritical ? ApplyCritical(in stats, true) : damage,
+            damage = dealt,
             isCritical = isCritical,
             hitPoint = point,
             hitDirection = dir,
             cameraShake = isFirst ? cfg.cameraShake : 0f,
         });
+
+        // 부착물 명중 효과는 조준해서 맞힌 첫 적에게만 — 퍼진 전기마다 터지면 연쇄가 연쇄를 부른다
+        if (isFirst && HasHitEffects)
+        {
+            NotifyHit(new WeaponHit
+            {
+                Target = target,
+                Damageable = damageable,
+                Point = point,
+                Direction = dir,
+                Damage = dealt,
+                IsCritical = isCritical,
+            });
+        }
 
         SpawnFx(cfg.hitEffectPrefab, point, Quaternion.identity);
 
@@ -359,8 +374,10 @@ public class ChainBeamWeapon : WeaponBase
         visible = false;
     }
 
-    void OnDestroy()
+    protected override void OnDestroy()
     {
+        base.OnDestroy();
+
         if (runtimeMaterial != null)
             Destroy(runtimeMaterial);
     }

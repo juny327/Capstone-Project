@@ -28,6 +28,39 @@ public static class EnemyShove
         return runner.StartCoroutine(PullRoutine(enemy, agent, anchor, stopDistance, Mathf.Max(0.01f, duration)));
     }
 
+    /// <summary>
+    /// 정한 자리(point)까지 duration 초 동안 곧게 옮긴다 — 그랩 변형 "넘기기"(내 뒤로).
+    /// 내비메시 위에서만 움직이므로 벽에 막히면 거기서 멈춘다.
+    /// </summary>
+    public static Coroutine MoveTo(MonoBehaviour runner, Enemy enemy, Vector3 point, float duration)
+    {
+        if (runner == null || !CanMove(enemy, out NavMeshAgent agent)) return null;
+
+        return runner.StartCoroutine(MoveRoutine(enemy, agent, point, Mathf.Max(0.01f, duration)));
+    }
+
+    static IEnumerator MoveRoutine(Enemy enemy, NavMeshAgent agent, Vector3 point, float duration)
+    {
+        Vector3 delta = point - enemy.transform.position;
+        delta.y = 0f;
+        float distance = delta.magnitude;
+        if (distance < 0.05f) yield break;
+
+        Vector3 dir = delta / distance;
+        float speed = distance / duration;
+        float moved = 0f;
+
+        while (moved < distance)
+        {
+            if (!StillValid(enemy, agent)) yield break;
+
+            float step = Mathf.Min(speed * Time.deltaTime, distance - moved);
+            agent.Move(dir * step);
+            moved += step;
+            yield return null;
+        }
+    }
+
     static bool CanMove(Enemy enemy, out NavMeshAgent agent)
     {
         agent = null;

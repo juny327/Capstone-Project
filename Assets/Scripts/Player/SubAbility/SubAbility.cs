@@ -12,6 +12,14 @@ public abstract class SubAbility : MonoBehaviour
     public SubAbilityData Data { get; private set; }
     public int Level { get; private set; } = 1;
 
+    /// <summary>사수의 하부 부착물에서 온 E 능력이면 그 부착물 (유탄 발사기 등). 검사 서브 능력이면 null.</summary>
+    public AttachmentData Source { get; private set; }
+
+    /// <summary>HUD 그림 — 부착물에서 왔으면 부착물 그림.</summary>
+    public Sprite Icon => Source != null ? Source.icon : Data != null ? Data.icon : null;
+
+    public string DisplayName => Source != null ? Source.displayName : Data != null ? Data.displayName : name;
+
     protected GameObject Owner { get; private set; }
     protected PlayerMove Move { get; private set; }
     protected PlayerStats Stats { get; private set; }
@@ -46,12 +54,61 @@ public abstract class SubAbility : MonoBehaviour
         SetLevel(level);
     }
 
+    /// <summary>
+    /// 사수 하부 부착물의 E 능력으로 단다 (커스터마이징-구현계획.md 4-4). 무기마다 하나씩 생겨 쿨타임을 따로 든다.
+    /// 입력은 WeaponController 가 지금 든 총의 능력에만 넘긴다.
+    /// </summary>
+    public void EquipAttachment(GameObject owner, AttachmentData source)
+    {
+        Source = source;
+        Equip(owner, null, 1);
+    }
+
     public void SetLevel(int level)
     {
         int max = Data != null ? Mathf.Max(1, Data.maxLevel) : 3;
         Level = Mathf.Clamp(level, 1, max);
         OnLevelChanged();
     }
+
+    // ───────── 레벨업 변형 (트라이포드 — Lv2 · Lv3 에서 A / B 중 하나) ─────────
+
+    // [레벨] = 고른 쪽 (0 = A · 1 = B · −1 = 없음). 0 · 1 칸은 쓰지 않는다
+    readonly int[] picks = { -1, -1, -1, -1 };
+
+    /// <summary>한 단계 올리며 그 레벨의 변형을 고른다 (choice −1 = 변형 없이).</summary>
+    public void LevelUp(int choice)
+    {
+        int before = Level;
+        SetLevel(Level + 1);
+        if (Level > before && Level < picks.Length) picks[Level] = choice;
+        OnVariantsChanged();
+    }
+
+    /// <summary>그 레벨에서 고른 쪽 — 0 = A · 1 = B · −1 = 고르지 않음.</summary>
+    public int Pick(int level) => level >= 0 && level < picks.Length ? picks[level] : -1;
+
+    /// <summary>그 레벨의 그 변형을 골랐는가 (예: Has(2, 0) = Lv2 A).</summary>
+    public bool Has(int level, int choice) => Pick(level) == choice;
+
+    /// <summary>고른 변형 이름들 — "작살 · 추격". 없으면 빈 문자열.</summary>
+    public string VariantSummary
+    {
+        get
+        {
+            if (Data == null) return string.Empty;
+            var names = new List<string>();
+            for (int lv = 2; lv < picks.Length; lv++)
+            {
+                SubAbilityVariant v = picks[lv] >= 0 ? Data.Variant(lv, picks[lv]) : null;
+                if (v != null) names.Add(v.name);
+            }
+            return string.Join(" · ", names);
+        }
+    }
+
+    /// <summary>변형이 바뀌었을 때 (수치 다시 계산).</summary>
+    protected virtual void OnVariantsChanged() { }
 
     protected virtual void OnLevelChanged() { }
 
@@ -84,6 +141,26 @@ public abstract class SubAbility : MonoBehaviour
     {
         IWeapon w = Weapons != null ? Weapons.ActiveWeapon : null;
         return w != null ? w.Stats.Damage : fallback;
+    }
+
+    /// <summary>
+    /// 정면(= 커서 방향)으로 커서까지의 거리 — 최소 minDistance · 최대 maxDistance.
+    /// 방향은 플레이어가 보는 쪽 그대로 두고 거리만 커서에 맞춘다 (유탄이 커서 근처에 떨어진다). 마우스가 없으면 최대 거리.
+    /// </summary>
+    protected float CursorDistance(float minDistance, float maxDistance)
+    {
+        Camera cam = Camera.main;
+        var mouse = UnityEngine.InputSystem.Mouse.current;
+        if (Owner == null || cam == null || mouse == null) return maxDistance;
+
+        Vector3 origin = Owner.transform.position;
+        Ray ray = cam.ScreenPointToRay(mouse.position.ReadValue());
+        if (!new Plane(Vector3.up, origin).Raycast(ray, out float enter)) return maxDistance;
+
+        Vector3 flat = ray.GetPoint(enter) - origin;
+        flat.y = 0f;
+        float along = Vector3.Dot(flat, Forward);
+        return Mathf.Clamp(along, minDistance, maxDistance);
     }
 
     protected static void PlaySound(GameSoundSet.Entry entry)

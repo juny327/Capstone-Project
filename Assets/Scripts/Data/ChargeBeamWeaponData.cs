@@ -69,7 +69,9 @@ public class ChargeBeamWeaponData : WeaponData
 
         // 빔은 무조건 관통한다. 관통 업그레이드는 이 무기에서 의미가 없다.
         s.PierceCount = int.MaxValue;
-        s.ProjectileCount = 1;
+
+        // 투사체 수 증분은 빔 갈래 수로 쓴다 (전용 개조 "분광 프리즘" = +2 → 세 갈래)
+        s.ProjectileCount = Mathf.Max(1, 1 + m.projectileCountAdd);
 
         // 0 은 "무제한" 이라는 뜻이므로 업그레이드가 붙어도 0 을 유지한다
         s.MagazineSize = magazineSize <= 0 ? 0 : Mathf.Max(1, magazineSize + m.magazineAdd);

@@ -62,7 +62,10 @@ public class EquipmentRowView : MonoBehaviour
 
         SetPicture(value.Data.icon, abilityColor);
         if (title != null) { title.text = $"{value.Data.displayName}  Lv{value.Level}"; title.color = Color.white; }
-        SetDetail(value.Data.description, showDetail);
+
+        // 고른 변형이 있으면 그것을 상세에 — "작살 · 추격"
+        string variants = value.VariantSummary;
+        SetDetail(string.IsNullOrEmpty(variants) ? value.Data.description : $"변형: {variants}", showDetail);
         SetGauge(value.Gauge);
     }
 

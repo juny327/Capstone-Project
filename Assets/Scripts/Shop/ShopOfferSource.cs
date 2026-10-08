@@ -14,4 +14,26 @@ public abstract class ShopOfferSource : ScriptableObject
 
     /// <summary>지금 팔 수 있는 후보를 모두 넣는다. ShopService 가 섞어서 slots 만큼 고른다.</summary>
     public abstract void Collect(ShopContext ctx, List<ShopOffer> into);
+
+    /// <summary>
+    /// 후보 중 진열할 것을 고른다. 기본은 섞어서 slots 만큼.
+    /// 함께 나와야 하는 카드가 있으면(서브 능력 변형 A / B) 공급원이 다시 정의한다.
+    /// </summary>
+    public virtual void Stock(List<ShopOffer> candidates, List<ShopOffer> into)
+    {
+        Shuffle(candidates);
+
+        int count = Mathf.Min(slots, candidates.Count);
+        for (int i = 0; i < count; i++)
+            into.Add(candidates[i]);
+    }
+
+    protected static void Shuffle<T>(List<T> list)
+    {
+        for (int i = list.Count - 1; i > 0; i--)
+        {
+            int j = Random.Range(0, i + 1);
+            (list[i], list[j]) = (list[j], list[i]);
+        }
+    }
 }

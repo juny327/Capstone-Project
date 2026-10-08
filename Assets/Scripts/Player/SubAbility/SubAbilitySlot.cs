@@ -83,15 +83,18 @@ public class SubAbilitySlot : MonoBehaviour
         return HasFreeSlot;
     }
 
-    /// <summary>능력을 얻는다 — 가진 능력이면 레벨업, 없으면 빈 칸(E → F)에 장착.</summary>
-    public bool Acquire(SubAbilityData data)
+    /// <summary>
+    /// 능력을 얻는다 — 가진 능력이면 레벨업(variant = 그 레벨에서 고른 변형 0 · 1, −1 이면 변형 없이),
+    /// 없으면 빈 칸(E → F)에 장착.
+    /// </summary>
+    public bool Acquire(SubAbilityData data, int variant = -1)
     {
         if (!CanAcquire(data)) return false;
 
         int i = IndexOf(data);
         if (i >= 0)
         {
-            equipped[i].SetLevel(equipped[i].Level + 1);
+            equipped[i].LevelUp(variant);
             OnChanged?.Invoke();
             return true;
         }

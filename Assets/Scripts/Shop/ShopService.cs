@@ -111,23 +111,10 @@ public class ShopService
 
                 candidates.Clear();
                 source.Collect(Context, candidates);
-                Shuffle(candidates);
-
-                int count = Mathf.Min(source.slots, candidates.Count);
-                for (int i = 0; i < count; i++)
-                    offers.Add(candidates[i]);
+                source.Stock(candidates, offers);   // 기본은 섞어서 slots 만큼 — 공급원이 바꿀 수 있다
             }
         }
 
         OnChanged?.Invoke();
-    }
-
-    static void Shuffle(List<ShopOffer> list)
-    {
-        for (int i = list.Count - 1; i > 0; i--)
-        {
-            int j = UnityEngine.Random.Range(0, i + 1);
-            (list[i], list[j]) = (list[j], list[i]);
-        }
     }
 }

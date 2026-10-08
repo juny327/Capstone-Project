@@ -15,6 +15,17 @@ public class Bullet : MonoBehaviour, IPoolable
 
     int pierceRemaining;
 
+    // 쏜 무기 — 맞혔을 때 그 무기의 부착물 명중 효과(화상 · 전격 · 튕김 · 폭발)를 부른다. 풀로 돌아갈 때 지운다
+    WeaponBase source;
+    Color tint;
+
+    // 빠른 탄(레일건 탄속 180)은 물리 한 단계에 3m 넘게 날아가 트리거를 건너뛴다 — 지난 위치부터 훑어 잡는다
+    const float SweepSpeed = 40f;
+    Vector3 lastPosition;
+    float sweepRadius = 0.15f;
+    bool returned;
+    readonly RaycastHit[] sweepHits = new RaycastHit[16];
+
     // 같은 적의 자식 콜라이더에 여러 번 맞는 것을 막는다.
     // ⚠ OnDespawn 에서 반드시 비워야 한다. 안 비우면 풀에서 재사용된 총알이
     //    이전에 맞힌 적을 못 맞히는 버그가 된다.
@@ -41,6 +52,11 @@ public class Bullet : MonoBehaviour, IPoolable
             meshRenderer = GetComponentInChildren<Renderer>();
 
         mpb = new MaterialPropertyBlock();
+
+        Collider col = GetComponent<Collider>();
+        if (col is SphereCollider sphere) sweepRadius = sphere.radius * transform.lossyScale.x;
+        else if (col is CapsuleCollider capsule) sweepRadius = capsule.radius * transform.lossyScale.x;
+        sweepRadius = Mathf.Clamp(sweepRadius, 0.05f, 0.5f);
     }
 
     public void OnSpawn()
@@ -53,6 +69,9 @@ public class Bullet : MonoBehaviour, IPoolable
         rb.linearVelocity = Vector3.zero;
         alreadyHit.Clear();       // ★ 반드시
         pierceRemaining = 0;
+        source = null;
+        tint = default;
+        returned = true;
         CancelInvoke();
     }
 
@@ -63,6 +82,10 @@ public class Bullet : MonoBehaviour, IPoolable
         damage = info.Damage;
         isCritical = info.IsCritical;
         pierceRemaining = Mathf.Max(0, info.PierceCount);
+        source = info.Source;
+        tint = info.Tint;
+        lastPosition = transform.position;
+        returned = false;
 
         alreadyHit.Clear();
 
@@ -90,7 +113,42 @@ public class Bullet : MonoBehaviour, IPoolable
             0));
     }
 
+    void FixedUpdate()
+    {
+        if (returned || speed < SweepSpeed) return;
+
+        Vector3 now = transform.position;
+        Vector3 path = now - lastPosition;
+        float distance = path.magnitude;
+
+        if (distance > 0.01f)
+        {
+            int count = Physics.SphereCastNonAlloc(lastPosition, sweepRadius, path / distance, sweepHits, distance,
+                ~0, QueryTriggerInteraction.Collide);
+
+            // 가까운 것부터 — 관통이 다하면 거기서 멈춰야 한다
+            System.Array.Sort(sweepHits, 0, count, HitDistanceComparer.Instance);
+
+            for (int i = 0; i < count && !returned; i++)
+                if (sweepHits[i].collider != null) HandleHit(sweepHits[i].collider);
+        }
+
+        lastPosition = now;
+    }
+
+    sealed class HitDistanceComparer : IComparer<RaycastHit>
+    {
+        public static readonly HitDistanceComparer Instance = new HitDistanceComparer();
+        public int Compare(RaycastHit a, RaycastHit b) => a.distance.CompareTo(b.distance);
+    }
+
     void OnTriggerEnter(Collider other)
+    {
+        if (returned) return;
+        HandleHit(other);
+    }
+
+    void HandleHit(Collider other)
     {
         if (!other.CompareTag("Enemy") && !other.CompareTag("Boss"))
             return;
@@ -126,6 +184,20 @@ public class Bullet : MonoBehaviour, IPoolable
             // 착탄 후 파생 효과(전격 연쇄 · 파열 · 폭발)가 끼어드는 자리.
             // 여기 한 곳만 열어 두면 무기마다 Bullet 을 복사하지 않아도 된다.
             OnHit(root, transform.position, damage);
+
+            // 쏜 무기의 부착물 명중 효과 (소이탄 · 전격탄 · 튕김탄 · 폭발탄)
+            if (source != null && source.HasHitEffects)
+            {
+                source.NotifyHit(new WeaponHit
+                {
+                    Target = root,
+                    Damageable = d,
+                    Point = transform.position,
+                    Direction = transform.forward,
+                    Damage = damage,
+                    IsCritical = isCritical,
+                });
+            }
         }
 
         // 관통이 남아 있으면 계속 날아간다
@@ -189,6 +261,11 @@ public class Bullet : MonoBehaviour, IPoolable
             // 🔥 크리티컬 = 빨간색 (확실하게)
             color = Color.red;
         }
+        else if (tint.a > 0.01f)
+        {
+            // 부착물 탄 색 (소이탄 주황 · 전격탄 파랑 · 레일건 하늘)
+            color = tint;
+        }
         else
         {
             float t = Mathf.InverseLerp(5f, 50f, damage);
@@ -207,6 +284,7 @@ public class Bullet : MonoBehaviour, IPoolable
 
     void ReturnToPool()
     {
+        returned = true;
         poolable.ReturnToPool();
     }
 }

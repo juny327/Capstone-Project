@@ -30,6 +30,12 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
     private readonly Dictionary<AttachmentSlot, AttachmentData> attachments = new Dictionary<AttachmentSlot, AttachmentData>();
     private WeaponModifier attachmentModifier = WeaponModifier.Identity;
 
+    // 부착물의 동작 (조준선 · 명중 효과 · 장전 방전) — 부위마다 하나. 하부 능력형 부착물의 E 능력은 따로 든다
+    private readonly Dictionary<AttachmentSlot, AttachmentRuntime> runtimes = new Dictionary<AttachmentSlot, AttachmentRuntime>();
+    private readonly List<AttachmentRuntime> runtimeList = new List<AttachmentRuntime>();
+    private SubAbility ability;
+    private AttachmentSlot abilitySlot;
+
     // 탄창 (12번 문서). 탄창 크기 0 인 무기(근접·서브유닛)는 이 값들을 쓰지 않는다.
     private int ammo;
     private float reloadRemaining;
@@ -70,9 +76,27 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
         WeaponModifier.Combine(WeaponModifier.Combine(accumulated, attachmentModifier),
                                data.perLevelBonus.Scaled(level - 1));
 
-    public WeaponRuntimeStats Stats => data.Compose(TotalModifier);
+    public WeaponRuntimeStats Stats => WithOverrides(data.Compose(TotalModifier), projectileCountOverride);
+
+    // 탄 수를 정하는 부착물 (슬러그 = 1). 증분이 아니라 마지막에 덮어쓴다 — 0 이면 없음
+    private int projectileCountOverride;
+
+    static WeaponRuntimeStats WithOverrides(WeaponRuntimeStats s, int countOverride)
+    {
+        if (countOverride > 0) s.ProjectileCount = countOverride;
+        return s;
+    }
 
     protected Transform Muzzle => muzzle != null ? muzzle : transform;
+
+    /// <summary>총구 — 부착물 연출(조준선)이 쓴다.</summary>
+    public Transform MuzzlePoint => Muzzle;
+
+    /// <summary>이 무기를 든 컨트롤러 (플레이어 루트).</summary>
+    public WeaponController Controller => Owner;
+
+    /// <summary>하부 부착물의 E 능력 (유탄 · 총검 돌격 · 충격 방출). 없으면 null.</summary>
+    public SubAbility Ability => ability;
 
     /// <summary>WeaponController 가 장착 직후 호출한다.</summary>
     public virtual void Initialize(WeaponData weaponData, WeaponController owner)
@@ -124,6 +148,9 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
         }
 
         OnTick(deltaTime);
+
+        for (int i = 0; i < runtimeList.Count; i++)
+            runtimeList[i].Tick(deltaTime);
     }
 
     public void Fire(in WeaponFireContext context)
@@ -164,6 +191,9 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
 
         OnReloadStarted(stats.ReloadTime);
         RaiseAmmoChanged();
+
+        for (int i = 0; i < runtimeList.Count; i++)
+            runtimeList[i].OnReloadStarted();
     }
 
     /// <summary>탄이 떨어졌고 자동 장전을 쓰는 무기면 장전을 시작한다.</summary>
@@ -272,10 +302,10 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
         return attachments.TryGetValue(slot, out AttachmentData a) ? a : null;
     }
 
-    /// <summary>이 무기에 달 수 있는가 (계열 · 전용 무기). 드론 · 근접은 1단계 부착물이 없다.</summary>
+    /// <summary>이 무기에 달 수 있는가 (계열 · 전용 무기 · 무기 레벨). 드론 · 근접은 부착물이 없다.</summary>
     public bool CanAttach(AttachmentData attachment)
     {
-        return attachment != null && data != null && attachment.Fits(data);
+        return attachment != null && data != null && attachment.Fits(data) && level >= attachment.minWeaponLevel;
     }
 
     /// <summary>
@@ -294,6 +324,7 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
 
         attachments[attachment.slot] = attachment;
         RebuildAttachmentModifier();
+        RebuildRuntime(attachment.slot, attachment);
 
         int newMagazine = MagazineSize;
         if (newMagazine > 0)
@@ -316,28 +347,122 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
         if (!CanAttach(attachment)) return Stats;
 
         WeaponModifier sum = WeaponModifier.Identity;
+        int countOverride = attachment.projectileCountSet;
 
         foreach (var pair in attachments)
         {
             if (pair.Key == attachment.slot || pair.Value == null) continue;
             sum = WeaponModifier.Combine(sum, pair.Value.Resolve(data));
+            countOverride = Mathf.Max(countOverride, pair.Value.projectileCountSet);
         }
 
         sum = WeaponModifier.Combine(sum, attachment.Resolve(data));
 
         WeaponModifier total = WeaponModifier.Combine(WeaponModifier.Combine(accumulated, sum),
                                                       data.perLevelBonus.Scaled(level - 1));
-        return data.Compose(total);
+        return WithOverrides(data.Compose(total), countOverride);
     }
 
     void RebuildAttachmentModifier()
     {
         WeaponModifier sum = WeaponModifier.Identity;
+        int countOverride = 0;
 
         foreach (AttachmentData a in attachments.Values)
-            if (a != null) sum = WeaponModifier.Combine(sum, a.Resolve(data));
+        {
+            if (a == null) continue;
+            sum = WeaponModifier.Combine(sum, a.Resolve(data));
+            countOverride = Mathf.Max(countOverride, a.projectileCountSet);
+        }
 
         attachmentModifier = sum;
+        projectileCountOverride = countOverride;
+    }
+
+    /// <summary>그 부위의 동작 · E 능력을 새 부착물 것으로 바꾼다 (이전 것은 치운다).</summary>
+    void RebuildRuntime(AttachmentSlot slot, AttachmentData attachment)
+    {
+        if (runtimes.TryGetValue(slot, out AttachmentRuntime old))
+        {
+            old.Dispose();
+            runtimes.Remove(slot);
+            runtimeList.Remove(old);
+        }
+
+        if (ability != null && abilitySlot == slot)
+        {
+            ability.Cancel();
+            Destroy(ability.gameObject);
+            ability = null;
+        }
+
+        if (attachment == null) return;
+
+        if (attachment.effect != null)
+        {
+            AttachmentRuntime runtime = attachment.effect.CreateRuntime();
+            if (runtime != null)
+            {
+                runtime.Bind(this, attachment);
+                runtime.OnActiveChanged(IsActive);
+                runtimes[slot] = runtime;
+                runtimeList.Add(runtime);
+            }
+        }
+
+        if (attachment.ability != null && Owner != null)
+        {
+            // 플레이어 아래에 둔다 — 무기 아래에 두면 무기를 바꿔 들 때 같이 꺼져 쿨타임이 멈춘다
+            Transform holder = Owner.transform.Find("WeaponAbilities");
+            if (holder == null)
+            {
+                holder = new GameObject("WeaponAbilities").transform;
+                holder.SetParent(Owner.transform, false);
+            }
+
+            ability = Instantiate(attachment.ability, holder);
+            ability.name = $"{attachment.ability.name} ({data.weaponName})";
+            ability.EquipAttachment(Owner.gameObject, attachment);
+            abilitySlot = slot;
+        }
+    }
+
+    /// <summary>
+    /// 탄 · 빔이 적을 맞혔다 — 부착물 명중 효과(화상 · 전격 · 튕김 · 폭발)를 부른다.
+    /// 효과가 주는 추가 피해는 이것을 다시 부르지 않는다.
+    /// </summary>
+    public void NotifyHit(in WeaponHit hit)
+    {
+        for (int i = 0; i < runtimeList.Count; i++)
+            runtimeList[i].OnHit(in hit);
+    }
+
+    /// <summary>명중 효과가 있는가 — 탄이 알림을 보낼지 고르는 데 쓴다.</summary>
+    public bool HasHitEffects => runtimeList.Count > 0;
+
+    /// <summary>탄 색 — 탄 부위 · 전용 개조 부착물의 색. 없으면 투명.</summary>
+    public Color AmmoTint
+    {
+        get
+        {
+            AttachmentData mod = GetAttachment(AttachmentSlot.Mod);
+            if (mod != null && mod.HasTint) return mod.tint;
+
+            AttachmentData ammoPart = GetAttachment(AttachmentSlot.Ammo);
+            return ammoPart != null && ammoPart.HasTint ? ammoPart.tint : new Color(1f, 1f, 1f, 0f);
+        }
+    }
+
+    protected virtual void OnDestroy()
+    {
+        for (int i = 0; i < runtimeList.Count; i++)
+            runtimeList[i].Dispose();
+
+        runtimeList.Clear();
+        runtimes.Clear();
+
+        if (ability != null) Destroy(ability.gameObject);
+        ability = null;
     }
 
     public virtual void SetActive(bool active)
@@ -355,6 +480,12 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
         var renderers = GetComponents<Renderer>();
         for (int i = 0; i < renderers.Length; i++)
             renderers[i].enabled = active;
+
+        for (int i = 0; i < runtimeList.Count; i++)
+            runtimeList[i].OnActiveChanged(active);
+
+        // 손에서 빠지면 그 총의 E 능력도 멈춘다 (돌진 · 날아가는 유탄은 끝까지 간다 — 능력이 정한다)
+        if (!active && ability != null) ability.Cancel();
 
         if (active)
         {

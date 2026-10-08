@@ -28,9 +28,18 @@ MonoBehaviour:
     projectileSpeedAdd: 0
     projectileCountAdd: 0
     pierceAdd: 0
+    spreadMul: 1
+    lifeTimeMul: 1
+    burstAdd: 0
     magazineAdd: 0
     reloadTimeMul: 0.8
     rangeAdd: 0
     subUnitAdd: 0
   magazinePercent: 0
+  projectileCountSet: 0
+  effect: {fileID: 0}
+  ability: {fileID: 0}
+  tint: {r: 1, g: 1, b: 1, a: 0}
+  note: 
+  minWeaponLevel: 1
   basePrice: 12
