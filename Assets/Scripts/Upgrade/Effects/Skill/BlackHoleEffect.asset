@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d8c916acef6a9714785936adebb2823a, type: 3}
+  m_Name: BlackHoleEffect
+  m_EditorClassIdentifier: Assembly-CSharp::BlackHoleEffect
+  blackHolePrefab: {fileID: 8006868825615935993, guid: 48399e95aef27d443acb3336c499be70, type: 3}
+  fireInterval: 12
+  duration: 4
+  targetRange: 12
+  pullRadius: 5
+  pullSpeed: 6
+  damage: 1
+  damageInterval: 0.5
+  explosionDamage: 10
+  explosionRadius: 4
