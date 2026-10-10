@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 84bc2621c547cb84c86833668e594c86, type: 3}
+  m_Name: BlackHoleUpgrade
+  m_EditorClassIdentifier: Assembly-CSharp::UpgradeData
+  upgradeName: BlackHole
+  description: "\uBE14\uB799\uD640"
+  icon: {fileID: 21300000, guid: da88b1ff266954f44abd6d1472bd9323, type: 3}
+  costExp: 10
+  effect: {fileID: 11400000, guid: 64de3f4ec3c316c41ad9868c01649109, type: 2}
