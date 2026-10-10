@@ -119,6 +119,10 @@ public class Bullet : MonoBehaviour, IPoolable
 
             d.TakeDamage(info);
 
+            // Drain: 플레이어의 직접 총알 공격으로 적을 처치했을 때만 회복
+            if (d is Enemy enemy && enemy.state == EnemyState.Dead)
+                DrainSkill.Active?.OnKill();
+
             // 프레임 끝에 한 번만 난다 — 관통이면 같은 프레임에 여러 번 들어온다
             if (SoundManager.Instance != null)
                 SoundManager.Instance.ReportHit(isCritical);
