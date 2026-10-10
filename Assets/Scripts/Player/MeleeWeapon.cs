@@ -42,20 +42,20 @@ public class MeleeWeapon : WeaponBase
 
     [Header("Vertical Slash")]
     [Tooltip("내려찍기가 나올 확률. 0 이면 항상 기본 공격")]
-    [Range(0f, 1f)] [SerializeField] private float verticalChance = 0.5f;
+    [Range(0f, 1f)][SerializeField] private float verticalChance = 0.5f;
 
     [Tooltip("내려찍기 판정 각도(정면 기준 좌우 합산). 기본 공격은 무기 데이터의 arcAngle 을 쓴다")]
-    [Range(10f, 360f)] [SerializeField] private float verticalArcAngle = 60f;
+    [Range(10f, 360f)][SerializeField] private float verticalArcAngle = 60f;
 
     [Tooltip("내려찍기 시작부터 판정까지(초). 기본 공격은 무기 데이터의 hitDelay. CharacterSetup 이 모션에 맞춰 넣는다")]
-    [Min(0f)] [SerializeField] private float verticalHitDelay = 0.3f;
+    [Min(0f)][SerializeField] private float verticalHitDelay = 0.3f;
 
     [Header("Ground")]
     [Tooltip("칼끝 위치(무기 루트 = 쥔 손 기준). CharacterSetup 이 모델에서 재서 넣는다. 0 이면 바닥 보정을 하지 않는다")]
     [SerializeField] private Vector3 bladeTip;
 
     [Tooltip("칼끝을 발 높이 + 이 값 아래로 내리지 않는다")]
-    [Min(0f)] [SerializeField] private float tipMinHeight = 0.05f;
+    [Min(0f)][SerializeField] private float tipMinHeight = 0.05f;
 
     [Header("Two Hands")]
     [Tooltip("양손 모션에서 왼손이 쥘 수 있는 자루 구간(무기 루트 = 오른손 기준). 검 · 대검은 오른손 아래 손잡이, 창은 오른손 앞 자루. " +
@@ -71,7 +71,7 @@ public class MeleeWeapon : WeaponBase
     [SerializeField] private Vector3 guardAxis;
 
     [Tooltip("방어 자세에서 왼손이 받칠 자리 — 쥔 점에서 무기 방향으로 이만큼(m). 대검은 칼날 등, 창은 창대")]
-    [Min(0f)] [SerializeField] private float guardLeftAlong = 0.8f;
+    [Min(0f)][SerializeField] private float guardLeftAlong = 0.8f;
 
     // 같은 모션이 이만큼 연달아 나오면 다음은 반대로 바꾼다. 순수 무작위는 한쪽이 길게 이어질 때가 있다
     private const int MaxSameVariantInRow = 2;
@@ -315,6 +315,10 @@ public class MeleeWeapon : WeaponBase
                 hitDirection = dir,
                 cameraShake = cfg.cameraShake,   // 근접은 흔들어야 타격감이 난다
             });
+
+            // Drain: 직접 근접 공격으로 적을 처치했을 때만 고정 HP 회복
+            if (target is Enemy enemy && enemy.state == EnemyState.Dead)
+                DrainSkill.Active?.OnKill();
 
             // 최대 5명을 한 번에 때린다. SoundManager 가 프레임 끝에 한 번만 낸다.
             if (SoundManager.Instance != null)

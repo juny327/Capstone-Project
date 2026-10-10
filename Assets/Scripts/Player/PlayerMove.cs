@@ -284,6 +284,18 @@ public class PlayerMove : MonoBehaviour
 
     void OnEnable()
     {
+        // Awake가 정상적으로 초기화되지 않은 경우를 대비
+        if (playerInput == null)
+        {
+            playerInput = new PlayerInput();
+        }
+
+        if (playerInput == null)
+        {
+            Debug.LogError("[PlayerMove] PlayerInput 초기화에 실패했습니다.", this);
+            return;
+        }
+
         playerInput.Player.Move.performed += OnMove;
         playerInput.Player.Move.canceled += OnMove;
         playerInput.Player.Jump.performed += OnJump;
@@ -291,7 +303,10 @@ public class PlayerMove : MonoBehaviour
         playerInput.Player.Sprint.canceled += OnSprint;
         playerInput.Player.Roll.performed += OnRoll;
 
-        detector.OnEnemyEnter += OnEnemyEntered;
+        // EnemyDetector가 인스펙터에 연결되지 않은 경우에도 플레이어 입력은 정상 동작
+        if (detector != null)
+            detector.OnEnemyEnter += OnEnemyEntered;
+
         GameEvents.OnCameraReady += SetCamera;
         GameEvents.OnPlayerDeadStart += StopPlayer;
 
@@ -300,6 +315,9 @@ public class PlayerMove : MonoBehaviour
 
     void OnDisable()
     {
+        if (playerInput == null)
+            return;
+
         playerInput.Player.Move.performed -= OnMove;
         playerInput.Player.Move.canceled -= OnMove;
         playerInput.Player.Jump.performed -= OnJump;
@@ -307,7 +325,9 @@ public class PlayerMove : MonoBehaviour
         playerInput.Player.Sprint.canceled -= OnSprint;
         playerInput.Player.Roll.performed -= OnRoll;
 
-        detector.OnEnemyEnter -= OnEnemyEntered;
+        if (detector != null)
+            detector.OnEnemyEnter -= OnEnemyEntered;
+
         GameEvents.OnCameraReady -= SetCamera;
         GameEvents.OnPlayerDeadStart -= StopPlayer;
 
