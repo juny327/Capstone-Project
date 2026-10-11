@@ -10,6 +10,18 @@ public class GameAppManager : MonoBehaviour
     public GameObject Player { get; private set; }
     public PlayerStats PlayerStats { get; private set; }
 
+    /// <summary>
+    /// 로비에서 고른 주 무기. 씬을 넘어 플레이어 생성 시점까지 살아 있어야 하므로 여기에 둔다.
+    /// 비어 있으면 WeaponController 가 프리팹의 starterWeapon 으로 떨어진다
+    /// (에디터에서 Stage 씬을 직접 Play 하는 경우).
+    /// </summary>
+    public WeaponData SelectedWeapon { get; private set; }
+
+    public void SelectWeapon(WeaponData data)
+    {
+        SelectedWeapon = data;
+    }
+
     Vector3 spawnPosition = new Vector3(0, 1, 0);
 
     void Awake()

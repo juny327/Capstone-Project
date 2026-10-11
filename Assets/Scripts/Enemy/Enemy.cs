@@ -17,6 +17,9 @@ public class Enemy : MonoBehaviour, IDamageable, IPoolable
     [Header("Data")]
     public EnemyData data;
 
+    [Tooltip("이 적을 처치했을 때 스테이지 처치 목표에 포함할지 여부")]
+    public bool countsTowardKillGoal = true;
+
     [Header("Components")]
     public EnemyBrain brain;
     public EnemyMovement movement;
@@ -42,6 +45,15 @@ public class Enemy : MonoBehaviour, IDamageable, IPoolable
         animator = GetComponent<Animator>();
         ui = GetComponent<EnemyUI>();
         hitFlash = GetComponent<HitFlashController>();
+        ApplyImportedEnemyVisualScale();
+    }
+
+    // The imported low-poly clips contain a scale curve on Bip01 that resets
+    // the rig to 1 during playback. Re-apply the import scale after Animator
+    // evaluation so attack/idle animations cannot make A/B huge again.
+    void LateUpdate()
+    {
+        ApplyImportedEnemyVisualScale();
     }
 
     public void Initialize(Transform target, EnemyManager manager)
@@ -53,7 +65,7 @@ public class Enemy : MonoBehaviour, IDamageable, IPoolable
 
         brain.Initialize(this);
         movement.Initialize(this);
-        attack.Initialize(this);
+        attack?.Initialize(this);
 
         // Spawn position and component references are now ready.
         var agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
@@ -69,6 +81,69 @@ public class Enemy : MonoBehaviour, IDamageable, IPoolable
     public void OnSpawn()
     {
         currentHp = data.maxHp;
+        ApplyImportedEnemyVisualScale();
+    }
+
+    // The low-poly A/B rigs contain Mesh_Body and weapon meshes as siblings
+    // of Bip01. Normalize them at runtime as well so pooled instances cannot
+    // retain an old root scale or an unscaled imported visual.
+    void ApplyImportedEnemyVisualScale()
+    {
+        if (!name.StartsWith("MonsterA", StringComparison.Ordinal) &&
+            !name.StartsWith("MonsterB", StringComparison.Ordinal))
+            return;
+
+        // Put the reduction on the root. The imported clips animate Bip01's
+        // local scale back to 1, so reducing only child meshes is not stable.
+        const float importedRootScale = 0.1f;
+        transform.localScale = Vector3.one * importedRootScale;
+
+        var capsule = GetComponent<CapsuleCollider>();
+        if (capsule != null)
+        {
+            // Keep the collider's world size unchanged after shrinking the
+            // root transform. These are the original prefab values x10.
+            capsule.radius = name.StartsWith("MonsterA", StringComparison.Ordinal)
+                ? 3.6779785f : 3.9538574f;
+            capsule.height = name.StartsWith("MonsterA", StringComparison.Ordinal)
+                ? 15.819435f : 16.207235f;
+            capsule.center = name.StartsWith("MonsterA", StringComparison.Ordinal)
+                ? new Vector3(-0.030517578f, 7.8513927f, 0f)
+                : new Vector3(-0.040283203f, 7.8875935f, 0f);
+        }
+
+        // The world-space health bar is a child of the scaled root. Move it
+        // back above the character and compensate its scale so it remains
+        // visible after the root is reduced.
+        var canvas = transform.Find("Canvas") as RectTransform;
+        if (canvas != null)
+        {
+            canvas.localScale = Vector3.one * 0.04f;
+            canvas.anchoredPosition = new Vector2(canvas.anchoredPosition.x, 17f);
+        }
+
+        foreach (Transform child in transform)
+        {
+            if (child.name == "Canvas") continue;
+
+            if (child.name.StartsWith("Effect_Att", StringComparison.Ordinal))
+            {
+                if (child.localPosition.magnitude > 2f)
+                    child.localPosition *= 0.1f;
+                child.localScale = Vector3.one * 0.2f;
+                continue;
+            }
+
+            if (child.name == "Bip01" || child.name.StartsWith("Mesh_", StringComparison.Ordinal) ||
+                child.GetComponentInChildren<Renderer>(true) != null)
+            {
+                if (child.localPosition.magnitude > 2f)
+                    child.localPosition *= 0.1f;
+                // The root carries the visual reduction; keep the rig at its
+                // authored scale so animation curves remain valid.
+                child.localScale = Vector3.one;
+            }
+        }
     }
 
     public void OnDespawn()
@@ -131,6 +206,8 @@ public class Enemy : MonoBehaviour, IDamageable, IPoolable
     void Die()
     {
         ChangeState(EnemyState.Dead);
+
+        GetComponent<MonsterFController>()?.ClearEffects();
 
         movement.Stop();      
 

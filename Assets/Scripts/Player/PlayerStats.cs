@@ -4,16 +4,39 @@ using UnityEngine;
 
 public class PlayerStats : MonoBehaviour, IDamageable
 {
+    [Header("Level")]
     public int level = 1;
     public int currentExp = 0;
+    public int expToNextLevel = 10;
+    public float expGrowthRate = 1.3f;
 
     public int maxHp = 100;
     public int currentHp;
     public GameObject deathParticle;
 
-    public event Action<int,int> OnHpChanged;
+    public event Action<int, int> OnHpChanged;
     public event Action<int> OnExpChanged;
     private Animator anim;
+
+    // 사망 가드 - 사망 후 추가 피격으로 Die()가 반복 호출되는 것을 막는다
+    bool isDead;
+    public bool IsDead => isDead;
+
+    // 무적 프레임 - 구르기 등에서 SetInvulnerable()로 요청한다
+    float invulnerableUntil;
+    public bool IsInvulnerable => Time.time < invulnerableUntil;
+
+    /// <summary>duration초 동안 무적. 이미 더 긴 무적이 걸려 있으면 그쪽을 유지한다.</summary>
+    public void SetInvulnerable(float duration)
+    {
+        invulnerableUntil = Mathf.Max(invulnerableUntil, Time.time + duration);
+    }
+
+    /// <summary>구르기 중단 등으로 무적을 즉시 해제할 때.</summary>
+    public void ClearInvulnerable()
+    {
+        invulnerableUntil = 0f;
+    }
 
     void Awake()
     {
@@ -23,7 +46,23 @@ public class PlayerStats : MonoBehaviour, IDamageable
 
     public void AddExp(int amount)
     {
+        if (amount <= 0)
+            return;
+
         currentExp += amount;
+
+        while (currentExp >= expToNextLevel)
+        {
+            currentExp -= expToNextLevel;
+            level++;
+
+            expToNextLevel = Mathf.Max(
+                1,
+                Mathf.CeilToInt(expToNextLevel * expGrowthRate)
+            );
+
+            GameEvents.OnPlayerLevelUp?.Invoke(level);
+        }
 
         OnExpChanged?.Invoke(currentExp);
     }
@@ -40,7 +79,7 @@ public class PlayerStats : MonoBehaviour, IDamageable
 
     public void AddHP(int amount)
     {
-        if(amount + currentHp > maxHp)
+        if (amount + currentHp > maxHp)
         {
             currentHp = maxHp;
         }
@@ -60,6 +99,9 @@ public class PlayerStats : MonoBehaviour, IDamageable
 
     public void TakeDamage(DamageInfo info)
     {
+        if (isDead) return;           // 사망 후 중복 처리 차단
+        if (IsInvulnerable) return;   // 구르기 무적 등
+
         currentHp -= (int)info.damage;
 
         if (currentHp < 0)
@@ -80,6 +122,9 @@ public class PlayerStats : MonoBehaviour, IDamageable
 
     void Die()
     {
+        isDead = true;
+        invulnerableUntil = 0f;
+
         // 죽음 시작 이벤트
         GameEvents.OnPlayerDeadStart?.Invoke();
 
@@ -119,6 +164,9 @@ public class PlayerStats : MonoBehaviour, IDamageable
     }
     public void ResetState()
     {
+        isDead = false;
+        invulnerableUntil = 0f;
+
         anim.SetLayerWeight(1, 1f);
 
         anim.Rebind();

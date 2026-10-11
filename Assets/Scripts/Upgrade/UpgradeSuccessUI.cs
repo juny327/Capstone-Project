@@ -5,6 +5,7 @@ public class UpgradeSuccessUI : MonoBehaviour
 {
     public GameObject panel;
     public TextMeshProUGUI text;
+    public bool showPopup = false;
 
     void OnEnable()
     {
@@ -18,6 +19,12 @@ public class UpgradeSuccessUI : MonoBehaviour
 
     void Open(UpgradeData data)
     {
+        if (!showPopup)
+        {
+            panel.SetActive(false);
+            return;
+        }
+
         panel.SetActive(true);
         text.text = data.upgradeName + " Upgrade Success!";
     }

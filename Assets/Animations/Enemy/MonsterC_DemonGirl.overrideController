@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!221 &22100000
+AnimatorOverrideController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: MonsterC_DemonGirl
+  m_Controller: {fileID: 9100000, guid: 95ff09107180673439bc2450e6bc9d90, type: 2}
+  m_Clips:
+  - m_OriginalClip: {fileID: 7400000, guid: 5adb0366072ac9248b67a365e16eb1f0, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 34a0ae1027a081043869e1a81e0db1c5, type: 3}
+  - m_OriginalClip: {fileID: 7400000, guid: 0c6574655d539ed4e875878040094480, type: 2}
+    m_OverrideClip: {fileID: 0}
+  - m_OriginalClip: {fileID: 7400000, guid: 82d7f9ba2bef38b4c8a48dc77726ec3d, type: 2}
+    m_OverrideClip: {fileID: 0}
+  - m_OriginalClip: {fileID: 7400000, guid: 2a650000c8f50d64dad87fe53d2a3f2a, type: 2}
+    m_OverrideClip: {fileID: 0}
+  - m_OriginalClip: {fileID: 7400000, guid: 84454d71c6b58fc44be8045e76ff360a, type: 2}
+    m_OverrideClip: {fileID: 0}
+  - m_OriginalClip: {fileID: 7400000, guid: e6cc46ebaab772641bcb1c2dbac4b60d, type: 2}
+    m_OverrideClip: {fileID: 0}

@@ -4,16 +4,25 @@ using System.Collections;
 public class EnemyBrain : MonoBehaviour
 {
     private Enemy enemy;
+    private MonsterFController monsterF;
 
     private static readonly WaitForSeconds hitDelay = new WaitForSeconds(1f);
 
     public void Initialize(Enemy enemy)
     {
         this.enemy = enemy;
+        monsterF = GetComponent<MonsterFController>();
+        monsterF?.Initialize(enemy);
     }
 
     public void Tick()
     {
+        if (monsterF != null)
+        {
+            monsterF.Tick();
+            return;
+        }
+
         switch (enemy.state)
         {
             case EnemyState.Idle:
