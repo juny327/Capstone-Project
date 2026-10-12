@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c04426dd9bc25e14fa0d47adad019bdb, type: 3}
+  m_Name: AE_EVO_FlameCone
+  m_EditorClassIdentifier: Assembly-CSharp::FlameConeEffect
+  range: 6
+  angle: 50
+  tickDamageMul: 1
+  burnRatio: 2
+  burnDuration: 3
+  spreadRadius: 2
+  flameMaterial: {fileID: 2100000, guid: 33a2a99623dd15b4b8211abbc423cfd8, type: 2}
+  lineMaterial: {fileID: 2100000, guid: b6310812509a3ab46bf4e098541a27ab, type: 2}
+  color: {r: 1, g: 0.38, b: 0.1, a: 1}
+  particlesPerTick: 18

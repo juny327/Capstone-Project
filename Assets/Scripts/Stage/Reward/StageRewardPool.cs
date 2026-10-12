@@ -13,6 +13,9 @@ public class StageRewardPool : ScriptableObject
     [Tooltip("여기에 넣은 것 중에서 뽑는다. 종류가 섞여도 된다")]
     public List<StageReward> rewards = new List<StageReward>();
 
+    /// <summary>먼저 넣는 보상(진화 카드)의 최대 장수. 카드가 이보다 적으면 한 장은 무작위로 남긴다.</summary>
+    public const int MaxGuaranteed = 2;
+
     // 뽑을 때마다 리스트를 새로 만들지 않도록 재사용한다
     private readonly List<StageReward> offerable = new List<StageReward>();
 
@@ -42,7 +45,23 @@ public class StageRewardPool : ScriptableObject
 
         count = Mathf.Min(count, offerable.Count);
 
-        for (int i = 0; i < count; i++)
+        // 반드시 나와야 하는 보상(진화)을 먼저 — 카드가 여러 장이면 적어도 한 장은 무작위로 남긴다
+        int guaranteedLimit = Mathf.Min(MaxGuaranteed, count > 1 ? count - 1 : count);
+        for (int i = offerable.Count - 1; i >= 0 && buffer.Count < guaranteedLimit; i--)
+        {
+            if (!offerable[i].Guaranteed) continue;
+
+            buffer.Add(offerable[i]);
+            offerable.RemoveAt(i);
+        }
+
+        // 남은 진화 카드가 무작위 칸을 또 차지하지 않게 뺀다 (다음 보상 때 다시 나온다)
+        for (int i = offerable.Count - 1; i >= 0; i--)
+            if (offerable[i].Guaranteed) offerable.RemoveAt(i);
+
+        count = Mathf.Min(count, buffer.Count + offerable.Count);
+
+        while (buffer.Count < count)
         {
             int index = Random.Range(0, offerable.Count);
 

@@ -19,13 +19,13 @@ using Object = UnityEngine.Object;
 public static class TestRoomSetup
 {
     public const string ScenePath = "Assets/Scenes/TestRoom.unity";
-    const string AssetDir = "Assets/Prefabs/TestRoom";
-    const string FontPath = "Assets/Font/RiaSans-Bold SDF.asset";
+    internal const string AssetDir = "Assets/Prefabs/TestRoom";
+    internal const string FontPath = "Assets/Font/RiaSans-Bold SDF.asset";
     static readonly string[] WeaponNames =
         { "WD_Rifle", "WD_SMG", "WD_Sniper", "WD_Sword", "WD_Shotgun", "WD_TeslaRifle", "WD_ChargeLaser" };
     static readonly Color Ink = new Color(0.035f, 0.055f, 0.08f, 0.94f);
     static readonly Color Accent = new Color(0.50f, 0.88f, 0.81f);
-    static Material labelMaterial;
+    internal static Material labelMaterial;
 
     [MenuItem("Tools/Test Room/테스트 룸 구성")]
     public static void Build()
@@ -97,14 +97,16 @@ public static class TestRoomSetup
         GameObject ground = Cube("Ground", floor, new Vector3(0, -0.2f, 0), new Vector3(120, 0.4f, 100), floorMaterial, true);
         ground.layer = LayerMask.NameToLayer("Ground");
         ground.tag = "Ground";
-        for (int x = -18; x <= 18; x += 2)
-            Cube("GridX_" + x, floor, new Vector3(x, 0.007f, 0), new Vector3(0.018f, 0.01f, 26), marks);
-        for (int z = -12; z <= 12; z += 2)
-            Cube("GridZ_" + z, floor, new Vector3(0, 0.008f, z), new Vector3(36, 0.01f, 0.018f), marks);
+        // 자리 값은 TestRoomLayout (2026-10-12 넓힘) — 넓은 배치는 Tools/Test Room/넓은 배치 적용 이 지금 장면에 그대로 옮긴다
+        Vector2 half = TestRoomLayout.HalfSize;
+        for (float x = -half.x; x <= half.x + 0.01f; x += TestRoomLayout.GridStep)
+            Cube("GridX_" + x, floor, new Vector3(x, 0.007f, 0), new Vector3(0.018f, 0.01f, half.y * 2f), marks);
+        for (float z = -half.y; z <= half.y + 0.01f; z += TestRoomLayout.GridStep)
+            Cube("GridZ_" + z, floor, new Vector3(0, 0.008f, z), new Vector3(half.x * 2f, 0.01f, 0.018f), marks);
 
         TestRoomManager manager = new GameObject("TestRoomManager").AddComponent<TestRoomManager>();
-        Transform spawn = Point("PlayerSpawn", manager.transform, new Vector3(-10, 0.2f, 0));
-        Transform dummySpawn = Point("DummySpawn", manager.transform, new Vector3(14, 0, 0));
+        Transform spawn = Point("PlayerSpawn", manager.transform, TestRoomLayout.PlayerSpawn);
+        Transform dummySpawn = Point("DummySpawn", manager.transform, TestRoomLayout.DummySpawn);
         dummySpawn.rotation = Quaternion.Euler(0, -90, 0);
         Transform rack = new GameObject("WeaponRack").transform;
         GameObject pickupPrefab = MakePickupPrefab(font, pad);
@@ -113,7 +115,7 @@ public static class TestRoomSetup
             GameObject pickup = (GameObject)PrefabUtility.InstantiatePrefab(pickupPrefab, roomScene);
             pickup.name = "Pickup_" + weapons[i].name;
             pickup.transform.SetParent(rack, false);
-            pickup.transform.position = new Vector3(-14, 0, 9 - i * 3);
+            pickup.transform.position = new Vector3(TestRoomLayout.RackX, 0, TestRoomLayout.RackZ(weapons[i].name, i));
             SetObject(pickup.GetComponent<TestWeaponPickup>(), "weapon", weapons[i]);
             TMP_Text label = pickup.transform.Find("Label/Name").GetComponent<TMP_Text>();
             label.text = weapons[i].weaponName;
@@ -133,11 +135,12 @@ public static class TestRoomSetup
         list.arraySize = weapons.Length;
         for (int i = 0; i < weapons.Length; i++) list.GetArrayElementAtIndex(i).objectReferenceValue = weapons[i];
         managerSo.ApplyModifiedPropertiesWithoutUndo();
-        Cube("TargetBase", floor, new Vector3(14, 0.015f, 0), new Vector3(1.4f, 0.02f, 1.4f), target);
-        foreach (int distance in new[] { 3, 6, 10, 14, 18 })
+        float dummyX = TestRoomLayout.DummySpawn.x;
+        Cube("TargetBase", floor, new Vector3(dummyX, 0.015f, 0), new Vector3(1.4f, 0.02f, 1.4f), target);
+        foreach (int distance in TestRoomLayout.Distances)
         {
-            Cube("Distance_" + distance, floor, new Vector3(14 - distance, 0.017f, 0), new Vector3(0.06f, 0.02f, 3), marks);
-            WorldLabel(distance + "m", floor, new Vector3(14 - distance, 0.1f, -2), font, 0.012f);
+            Cube("Distance_" + distance, floor, new Vector3(dummyX - distance, 0.017f, 0), new Vector3(0.06f, 0.02f, 3), marks);
+            WorldLabel(distance + "m", floor, new Vector3(dummyX - distance, 0.1f, -2), font, 0.012f);
         }
 
         Canvas canvas = MakeHUD(sourceHud, sourceCanvas, manager, font);
@@ -298,10 +301,10 @@ public static class TestRoomSetup
                     throw new InvalidOperationException("Missing script on " + child.name);
     }
 
-    static IEnumerable<T> InScene<T>(Scene scene) where T : Component =>
+    internal static IEnumerable<T> InScene<T>(Scene scene) where T : Component =>
         scene.GetRootGameObjects().SelectMany(r => r.GetComponentsInChildren<T>(true));
 
-    static void EnsureFolder(string path)
+    internal static void EnsureFolder(string path)
     {
         if (AssetDatabase.IsValidFolder(path)) return;
         int slash = path.LastIndexOf('/');
@@ -310,7 +313,7 @@ public static class TestRoomSetup
         AssetDatabase.CreateFolder(parent, path.Substring(slash + 1));
     }
 
-    static Material MaterialAsset(string name, Color color, bool emissive)
+    internal static Material MaterialAsset(string name, Color color, bool emissive)
     {
         string path = AssetDir + "/" + name + ".mat";
         Material material = AssetDatabase.LoadAssetAtPath<Material>(path);
@@ -330,7 +333,7 @@ public static class TestRoomSetup
         return material;
     }
 
-    static Material MakeLabelMaterial(TMP_FontAsset font)
+    internal static Material MakeLabelMaterial(TMP_FontAsset font)
     {
         const string path = AssetDir + "/TestRoomText.mat";
         Material material = AssetDatabase.LoadAssetAtPath<Material>(path);
@@ -349,7 +352,7 @@ public static class TestRoomSetup
         return material;
     }
 
-    static GameObject Cube(string name, Transform parent, Vector3 position, Vector3 scale, Material material, bool solid = false)
+    internal static GameObject Cube(string name, Transform parent, Vector3 position, Vector3 scale, Material material, bool solid = false)
     {
         GameObject go = GameObject.CreatePrimitive(PrimitiveType.Cube);
         go.name = name;
@@ -373,7 +376,7 @@ public static class TestRoomSetup
         return point;
     }
 
-    static RectTransform WorldCanvas(string name, Transform parent, Vector3 position, float scale)
+    internal static RectTransform WorldCanvas(string name, Transform parent, Vector3 position, float scale)
     {
         RectTransform rect = new GameObject(name, typeof(RectTransform), typeof(Canvas), typeof(TestRoomBillboard)).GetComponent<RectTransform>();
         rect.SetParent(parent, false);
@@ -385,14 +388,14 @@ public static class TestRoomSetup
         return rect;
     }
 
-    static void WorldLabel(string text, Transform parent, Vector3 position, TMP_FontAsset font, float scale)
+    internal static void WorldLabel(string text, Transform parent, Vector3 position, TMP_FontAsset font, float scale)
     {
         RectTransform board = WorldCanvas("Label_" + text.Replace('\n', '_'), parent, position, scale);
         var label = Label("Text", board, font, text, 32, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(240, 100), new Vector2(0.5f, 0.5f));
         label.alignment = TextAlignmentOptions.Center;
     }
 
-    static RectTransform Rect(string name, Transform parent, Vector2 anchor, Vector2 position, Vector2 size, Vector2 pivot)
+    internal static RectTransform Rect(string name, Transform parent, Vector2 anchor, Vector2 position, Vector2 size, Vector2 pivot)
     {
         var rect = new GameObject(name, typeof(RectTransform)).GetComponent<RectTransform>();
         rect.gameObject.layer = 5;
@@ -404,7 +407,7 @@ public static class TestRoomSetup
         return rect;
     }
 
-    static TextMeshProUGUI Label(string name, Transform parent, TMP_FontAsset font, string text, float size,
+    internal static TextMeshProUGUI Label(string name, Transform parent, TMP_FontAsset font, string text, float size,
         Vector2 anchor, Vector2 position, Vector2 dimensions, Vector2 pivot)
     {
         var label = Rect(name, parent, anchor, position, dimensions, pivot).gameObject.AddComponent<TextMeshProUGUI>();
@@ -437,7 +440,7 @@ public static class TestRoomSetup
         return button;
     }
 
-    static void SetObject(Object target, string property, Object value)
+    internal static void SetObject(Object target, string property, Object value)
     {
         var so = new SerializedObject(target);
         so.FindProperty(property).objectReferenceValue = value;

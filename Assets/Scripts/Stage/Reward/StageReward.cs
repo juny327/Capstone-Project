@@ -54,4 +54,10 @@ public abstract class StageReward : ScriptableObject
 
     /// <summary>실제로 보상을 적용한다.</summary>
     public abstract void Apply(GameObject player);
+
+    /// <summary>
+    /// 줄 수 있으면 무작위 뽑기보다 먼저 넣는다 (진화 카드 — 상위무기-계획.md 3-2).
+    /// 먼저 넣는 카드는 최대 <see cref="StageRewardPool.MaxGuaranteed"/> 장 — 나머지 칸은 평소처럼 무작위.
+    /// </summary>
+    public virtual bool Guaranteed => false;
 }

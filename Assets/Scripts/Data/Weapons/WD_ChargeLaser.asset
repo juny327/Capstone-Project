@@ -22,7 +22,7 @@ MonoBehaviour:
   damage: 18
   critChance: 0.15
   critMultiplier: 2.5
-  maxLevel: 5
+  maxLevel: 3
   perLevelBonus:
     damageAdd: 3
     damageMul: 1

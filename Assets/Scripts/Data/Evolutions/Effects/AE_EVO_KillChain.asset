@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a486293b6bf816845acd0538d66d6488, type: 3}
+  m_Name: AE_EVO_KillChain
+  m_EditorClassIdentifier: Assembly-CSharp::KillChainExplosionEffect
+  radius: 2
+  damageRatio: 1.2
+  chainFalloff: 0.85
+  maxDepth: 3
+  implodeTime: 0.15
+  chainDelay: 0.08
+  maxPerFrame: 8
+  material: {fileID: 2100000, guid: b6310812509a3ab46bf4e098541a27ab, type: 2}
+  color: {r: 1, g: 0.16, b: 0.24, a: 1}
+  explosionPrefab: {fileID: 5162910912013668194, guid: cf82839c411151342a7b2337bda9fb34, type: 3}
+  explosionScale: 1.3
+  cameraShake: 0.25
+  sound:
+    clips:
+    - {fileID: 8300000, guid: a9898a19fd926c0478e7b7bffafb4eec, type: 3}
+    - {fileID: 8300000, guid: 47b317d583f4e8b4098e828807ab98c2, type: 3}
+    - {fileID: 8300000, guid: 81e3ad067244c3b46a3f385c3cb8d8f5, type: 3}
+    volume: 0.45
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0.06

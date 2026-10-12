@@ -96,14 +96,17 @@ public class AttachmentData : ScriptableObject
         return WeaponFamily.None;
     }
 
-    /// <summary>이 무기에 달 수 있는가 (계열 · 전용 무기).</summary>
+    /// <summary>
+    /// 이 무기에 달 수 있는가 (계열 · 전용 무기).
+    /// 상위 무기는 원래 무기 기준으로 본다 — 소총 전용 부품은 처형자에도 달린다.
+    /// </summary>
     public bool Fits(WeaponData weapon)
     {
         WeaponFamily family = FamilyOf(weapon);
         if (family == WeaponFamily.None) return false;
 
         if (onlyFor != null && onlyFor.Length > 0)
-            return Array.IndexOf(onlyFor, weapon) >= 0;
+            return Array.IndexOf(onlyFor, weapon) >= 0 || Array.IndexOf(onlyFor, weapon.Root) >= 0;
 
         return (families & family) != 0;
     }

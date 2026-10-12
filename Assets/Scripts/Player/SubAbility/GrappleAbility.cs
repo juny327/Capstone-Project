@@ -181,7 +181,12 @@ public class GrappleAbility : SubAbility
             case State.Pull:
                 pullTimer -= Time.deltaTime;
                 if (IsAlive(pulled)) headPos = pulled.transform.position + Vector3.up * 1f;
-                if (pullTimer <= 0f || !IsAlive(pulled)) Finish(cooldownOnHit);
+                if (pullTimer <= 0f || !IsAlive(pulled))
+                {
+                    // 작은 조합 "방패 받기" — 방패를 든 채 끌어왔으면 방패에 부딪힌다
+                    if (pullTimer <= 0f && IsAlive(pulled)) SynergyEffects.ShieldCatch(Owner, pulled, WeaponDamage(fallbackDamage));
+                    Finish(cooldownOnHit);
+                }
                 break;
 
             case State.Dash:
@@ -416,7 +421,7 @@ public class GrappleAbility : SubAbility
         pulled = null;
         chaseTarget = null;
         pullRoutine = null;
-        cooldown = cooldownTotal = Mathf.Max(0f, cooldownSeconds);
+        cooldown = cooldownTotal = PracticeRules.Cooldown(Mathf.Max(0f, cooldownSeconds));
 
         ShowWire(false);
         if (Move != null) Move.SetActionLock(this, false);

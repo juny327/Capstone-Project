@@ -29,6 +29,8 @@ public class ShopCardView : MonoBehaviour
     [SerializeField] Color attachmentColor = new Color(0.62f, 0.72f, 1f);
     [SerializeField] Color consumableColor = new Color(0.55f, 0.95f, 0.55f);
     [SerializeField] Color subAbilityColor = new Color(1f, 0.62f, 0.30f);
+    [Tooltip("진화 카드 — 백금 (부착물 등급 노랑과 헷갈리지 않게 흰 쪽으로)")]
+    [SerializeField] Color evolutionColor = new Color(1f, 0.95f, 0.82f);
 
     [Tooltip("부착물은 등급 색(초록 · 노랑 · 빨강) 테두리를 쓴다")]
     [SerializeField] bool attachmentTierColor = true;
@@ -114,6 +116,7 @@ public class ShopCardView : MonoBehaviour
             case ShopOfferKind.Attachment: return attachmentColor;
             case ShopOfferKind.Consumable: return consumableColor;
             case ShopOfferKind.SubAbility: return subAbilityColor;
+            case ShopOfferKind.Evolution: return evolutionColor;
             default: return weaponColor;
         }
     }

@@ -1,0 +1,71 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0fedd2a6f982e0e4b8c3250923d0f859, type: 3}
+  m_Name: WD_EVO_DragonRoar
+  m_EditorClassIdentifier: Assembly-CSharp::ProjectileWeaponData
+  weaponName: "\uC6A9\uC758 \uD3EC\uD6A8"
+  description: "\uC0B0\uD0C4 \uB300\uC2E0 \uD654\uC5FC \uBC29\uC0AC \u2014 \uC815\uBA74
+    \uBD80\uCC44\uAF34\uC744 \uD0DC\uC6B0\uACE0, \uBD88\uD0C0\uB2E4 \uC8FD\uC740
+    \uC801\uC740 \uBD88\uC744 \uC62E\uAE34\uB2E4"
+  icon: {fileID: 21300000, guid: 4e16ee5079dd31443b5dbb7b0962e78c, type: 3}
+  weaponPrefab: {fileID: 904226512922559315, guid: 819f972d11519a5418ecc0314cdb8a70, type: 3}
+  socket: 0
+  fireInterval: 0.1
+  damage: 1.4
+  critChance: 0.05
+  critMultiplier: 2
+  maxLevel: 3
+  perLevelBonus:
+    damageAdd: 0
+    damageMul: 1
+    fireIntervalMul: 1
+    critChanceAdd: 0
+    critMultiplierAdd: 0
+    projectileSpeedAdd: 0
+    projectileCountAdd: 1
+    pierceAdd: 0
+    spreadMul: 1
+    lifeTimeMul: 1
+    burstAdd: 0
+    magazineAdd: 0
+    reloadTimeMul: 1
+    rangeAdd: 0
+    subUnitAdd: 0
+  requiresTarget: 1
+  evolvedFrom: {fileID: 11400000, guid: 425b47f8befe4f34485ff97821ad886a, type: 2}
+  innateEffects:
+  - {fileID: 11400000, guid: dfbda97073e19f245b0d28809e77bddc, type: 2}
+  themeColor: {r: 1, g: 0.38, b: 0.1, a: 1}
+  fireSounds:
+  - {fileID: 8300000, guid: 295ace8a650602646bac8cc336a8a22b, type: 3}
+  - {fileID: 8300000, guid: f7666f9019963cf4eb9a05fd84dab79e, type: 3}
+  - {fileID: 8300000, guid: 6b08bdf79d4f6b8419fc637681304f21, type: 3}
+  fireVolume: 0.22
+  firePitchRange: {x: 0.96, y: 1.04}
+  reloadStartSound: {fileID: 8300000, guid: 3a53496cd83eb9f40be9483501eddeac, type: 3}
+  reloadEndSound: {fileID: 8300000, guid: a01efaa59bca5a244baf035fdc624c32, type: 3}
+  reloadVolume: 0.8
+  aimMode: 0
+  projectilePrefab: {fileID: 5875018044698817663, guid: 47d42afc0830c50448915274e6d3e535, type: 3}
+  projectileSpeed: 18
+  projectileLifeTime: 0.35
+  projectileCount: 8
+  spreadAngle: 28
+  pierceCount: 0
+  spawnProjectiles: 0
+  homingTurnRate: 0
+  homingRange: 14
+  magazineSize: 40
+  reloadTime: 2.4
+  autoReload: 1
+  muzzleFlashPrefab: {fileID: 2916273817513264348, guid: 95044fb3908b36c46bc62060360f7ba6, type: 3}
+  casingPrefab: {fileID: 8464276986609709168, guid: 4aa9530848b0025449ef44e32d3f9a41, type: 3}

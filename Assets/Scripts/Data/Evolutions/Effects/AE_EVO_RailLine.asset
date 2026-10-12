@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d396e73b0dd730468d5fa2c679f4e76, type: 3}
+  m_Name: AE_EVO_RailLine
+  m_EditorClassIdentifier: Assembly-CSharp::RailLineEffect
+  length: 32
+  hitRadius: 0.6
+  damageMul: 1
+  delay: 0.4
+  blastRadius: 1.2
+  blastRatio: 0.5
+  ringSpacing: 2.5
+  sweepTime: 0.25
+  material: {fileID: 2100000, guid: b6310812509a3ab46bf4e098541a27ab, type: 2}
+  color: {r: 0.65, g: 0.85, b: 1, a: 1}
+  beamWidth: 1.1
+  beamTime: 0.3
+  cameraShake: 0.4
+  blastSound:
+    clips:
+    - {fileID: 8300000, guid: a9898a19fd926c0478e7b7bffafb4eec, type: 3}
+    - {fileID: 8300000, guid: 81e3ad067244c3b46a3f385c3cb8d8f5, type: 3}
+    volume: 0.55
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0.05

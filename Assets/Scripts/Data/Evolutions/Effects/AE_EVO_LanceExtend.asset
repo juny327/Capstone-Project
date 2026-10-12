@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 42721cf1afd3dc94e8736929f3618cdf, type: 3}
+  m_Name: AE_EVO_LanceExtend
+  m_EditorClassIdentifier: Assembly-CSharp::LanceExtendEffect
+  extend: 10
+  hitRadius: 0.7
+  damageMul: 1.2
+  pullFarthest: 1
+  pullTo: 1.6
+  pullTime: 0.3
+  pullStun: 0.5
+  material: {fileID: 2100000, guid: b6310812509a3ab46bf4e098541a27ab, type: 2}
+  color: {r: 0.3, g: 0.95, b: 1, a: 1}
+  width: 0.45
+  sound:
+    clips:
+    - {fileID: 8300000, guid: 223b9552b3817ad41ae1a0282ad5f546, type: 3}
+    volume: 0.45
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0.05

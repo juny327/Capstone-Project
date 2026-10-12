@@ -224,7 +224,7 @@ public static class TestRoomValidation
         for (int i = 1; i < data.Length; i++)
         {
             TestWeaponPickup pickup = pickups.First(p => p.Weapon == data[i]);
-            PositionPlayer(room, new Vector3(-10, 0.05f, pickup.transform.position.z));
+            PositionPlayer(room, new Vector3(pickup.transform.position.x + 4f, 0.05f, pickup.transform.position.z));
             wait = Wait(0.12); while (wait.MoveNext()) yield return null;
             IWeapon[] old = room.Controller.HeldWeapons.ToArray();
             int oldIndex = room.Controller.ActiveIndex;
@@ -278,7 +278,8 @@ public static class TestRoomValidation
             ClearBullets();
             room.Controller.SelectHeldWeapon(data[i]);
             IWeapon weapon = room.Controller.ActiveWeapon;
-            PositionPlayer(room, new Vector3(data[i] is MeleeWeaponData ? 11.6f : 10, 0.05f, 0));   // 근접은 사거리 안으로
+            float dummyX = room.Dummy.transform.position.x;
+            PositionPlayer(room, new Vector3(dummyX - (data[i] is MeleeWeaponData ? 2.4f : 4f), 0.05f, 0));   // 근접은 사거리 안으로
             wait = Wait(0.3); while (wait.MoveNext()) yield return null;
             wait = AimAtDummy(room); while (wait.MoveNext()) yield return null;
             Check(room.Detector.HasTarget, data[i].name + " detects the skeleton");
@@ -338,7 +339,7 @@ public static class TestRoomValidation
         // Normal controller Update must also fire automatically after entering detection range.
         room.Player.GetComponent<PlayerMove>().enabled = false;
         room.Player.GetComponent<Rigidbody>().isKinematic = true;
-        PositionPlayer(room, new Vector3(10, 0.05f, 0));
+        PositionPlayer(room, new Vector3(room.Dummy.transform.position.x - 4f, 0.05f, 0));
         wait = AimAtDummy(room); while (wait.MoveNext()) yield return null;
         wait = Wait(1); while (wait.MoveNext()) yield return null;
         Check(room.Dummy.Stats.HitCount > 0, "normal automatic attack works against the independent dummy");

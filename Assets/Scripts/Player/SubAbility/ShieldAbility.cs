@@ -128,7 +128,7 @@ public class ShieldAbility : SubAbility, IDamageFilter
     float Regen => regenPerSecond * (Bulwark ? bulwarkRegenMultiplier : 1f);
 
     public override float CooldownRemaining => broken ? Mathf.Max(0f, regenWait) : Mathf.Max(0f, bashCd);
-    public override float CooldownTotal => broken ? brokenDelay : (bashCdTotal > 0f ? bashCdTotal : bashCooldown);
+    public override float CooldownTotal => broken ? PracticeRules.Cooldown(brokenDelay) : (bashCdTotal > 0f ? bashCdTotal : PracticeRules.Cooldown(bashCooldown));
     public override bool IsBusy => raised || charging;
     public override bool IsHolding => raised;
     public override float Gauge => MaxDurability > 0f ? Mathf.Clamp01(current / MaxDurability) : 0f;
@@ -195,9 +195,31 @@ public class ShieldAbility : SubAbility, IDamageFilter
 
         holdTime += deltaTime;
 
-        // 들고 있는 동안 공격이 멈춘다 (쿨다운은 그대로 흐른다)
+        // 들고 있는 동안 공격이 멈춘다 (쿨다운은 그대로 흐른다).
+        // 상위 무기 팔랑크스는 반대로 방패를 든 채 더 빨리 찌른다
+        MeleeWeaponData phalanx = PhalanxData(out WeaponBase held);
+        if (phalanx != null)
+        {
+            held.FireRateBoost = phalanx.shieldingAttackSpeed;
+            boosted = held;
+            return;
+        }
+
         if (Weapons != null) Weapons.SuppressFiring(0.15f);
     }
+
+    // 팔랑크스로 빨라진 무기 — 방패를 내리면 되돌린다
+    WeaponBase boosted;
+
+    /// <summary>든 무기가 "방패를 든 채 공격"하는 상위 무기(팔랑크스)면 그 데이터.</summary>
+    MeleeWeaponData PhalanxData(out WeaponBase held)
+    {
+        held = Weapons != null ? Weapons.ActiveWeapon as WeaponBase : null;
+        return held != null && held.Data is MeleeWeaponData melee && melee.attackWhileShielding ? melee : null;
+    }
+
+    /// <summary>방패로 막은 피해 (성채 대검이 모아 둔다).</summary>
+    public event System.Action<float> OnAbsorbed;
 
     public override void OnReleased()
     {
@@ -206,6 +228,14 @@ public class ShieldAbility : SubAbility, IDamageFilter
         bool act = holdTime >= bashMinHold && bashCd <= 0f;
         Lower();
         if (!act) return;
+
+        // 팔랑크스 — 떼는 순간의 동작은 상위 무기가 정한다 (방패 Lv3 변형보다 우선)
+        MeleeWeaponData phalanx = PhalanxData(out _);
+        if (phalanx != null)
+        {
+            StartCharge(phalanx.shieldReleaseChargeDistance, phalanx.shieldReleaseChargeDamageMul);
+            return;
+        }
 
         if (Charge) StartCharge();
         else if (Throw) ThrowDisc();
@@ -245,6 +275,7 @@ public class ShieldAbility : SubAbility, IDamageFilter
 
         current -= Mathf.Max(0f, info.damage);
         hitFlash = 0.12f;
+        OnAbsorbed?.Invoke(Mathf.Max(0f, info.damage));
 
         Vector3 at = Owner.transform.position + from.normalized * faceRadius + Vector3.up * 1.1f;
         Spark(at, from.normalized);
@@ -257,6 +288,12 @@ public class ShieldAbility : SubAbility, IDamageFilter
     void Lower()
     {
         raised = false;
+
+        if (boosted != null)
+        {
+            boosted.FireRateBoost = 1f;
+            boosted = null;
+        }
 
         if (Move != null)
         {
@@ -275,14 +312,14 @@ public class ShieldAbility : SubAbility, IDamageFilter
     {
         current = 0f;
         broken = true;
-        regenWait = brokenDelay;
+        regenWait = PracticeRules.Cooldown(brokenDelay);
         Lower();
         PlaySound(breakSound);
     }
 
     void StartCooldown(float seconds)
     {
-        bashCd = bashCdTotal = seconds;
+        bashCd = bashCdTotal = PracticeRules.Cooldown(seconds);
     }
 
     void Bash()
@@ -322,9 +359,16 @@ public class ShieldAbility : SubAbility, IDamageFilter
 
     // ───────── Lv3 A — 방패 돌진 ─────────
 
-    void StartCharge()
+    // 이번 돌진의 피해 배율 (팔랑크스는 무기 공격력 × 3)
+    float chargeDamage;
+
+    void StartCharge() => StartCharge(chargeDistance, chargeDamageRatio);
+
+    void StartCharge(float distance, float damageRatio)
     {
-        if (Move == null || !Move.TryDash(Forward, chargeDistance, chargeDuration, chargeInvulnerable))
+        chargeDamage = damageRatio;
+        float duration = chargeDuration * Mathf.Max(0.2f, distance / Mathf.Max(0.1f, chargeDistance));
+        if (Move == null || !Move.TryDash(Forward, distance, duration, chargeInvulnerable))
         {
             Bash();   // 대시를 못 하면(구르는 중 등) 그냥 밀친다
             return;
@@ -347,7 +391,7 @@ public class ShieldAbility : SubAbility, IDamageFilter
         Vector3 center = Owner.transform.position + Forward * 0.8f;
         CombatFx.FindEnemiesAlong(chargeSweepFrom, center, chargeRadius, targets);
         chargeSweepFrom = center;
-        float damage = WeaponDamage(6f) * chargeDamageRatio;
+        float damage = WeaponDamage(6f) * chargeDamage;
 
         foreach (Transform t in targets)
         {

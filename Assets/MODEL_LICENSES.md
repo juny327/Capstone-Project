@@ -11,7 +11,7 @@
 
 | 폴더 | 팩 | 출처 | 라이선스 | 표기 의무 | 받은 날 |
 |---|---|---|---|---|---|
-| `FuturaWeapons` | Futura Weapon Pack (10종 84개 중 5개 사용) | [moisturizedfish.itch.io](https://moisturizedfish.itch.io/futura-weapon-pack) | ⚠ **정식 문구 없음** — 아래 참고 | 권장 | 2026-09-14 · 09-26 · 10-04 |
+| `FuturaWeapons` | Futura Weapon Pack (10종 84개 중 11개 사용) | [moisturizedfish.itch.io](https://moisturizedfish.itch.io/futura-weapon-pack) | ⚠ **정식 문구 없음** — 아래 참고 | 권장 | 2026-09-14 · 09-26 · 10-04 · 10-11 |
 | `KayKit/Character Animations 1.1` | KayKit Character Animations 1.1 — Free (근접 모션 FBX 1개, 22개 중 8구간 사용) | [kaylousberg.itch.io](https://kaylousberg.itch.io/kaykit-character-animations) | **CC0 1.0** (폴더의 `License.txt`) | 없음 (권장) | 2026-09-26 |
 
 **Futura Weapon Pack** — 무료 팩이고, 페이지에 라이선스 문구가 없다.
@@ -25,6 +25,12 @@
 | `Models/Halberd_Blue.fbx` | `Futura Weapons/Halberd/blue.fbx` | 창 (`W_Spear`) |
 | `Models/Fist_A_Blue.fbx` | `Futura Weapons/Fists/Style A/blue.fbx` | 그랩 훅 갈고리 머리 · 그림 (`SA_Grapple`) — 2026-10-04 |
 | `Models/Shield_A_BlueWhite.fbx` | `Futura Weapons/Shield/Style A/blue-white.fbx` | 에너지 방패 그림 (`SA_Shield`) — 2026-10-04 |
+| `Models/Sword_B_Blue.fbx` | `Futura Weapons/Sword/Style B/blue.fbx` | 상위 무기 거울칼날 (`W_EVO_MirrorEdge`) — 2026-10-08 |
+| `Models/Sword_B_Purple.fbx` | `Futura Weapons/Sword/Style B/purple.fbx` | 상위 무기 중력 대검 (`W_EVO_GravityCleaver`) — 2026-10-08 |
+| `Models/Sword_B_Green.fbx` | `Futura Weapons/Sword/Style B/green.fbx` | 상위 무기 사슬검 (`W_EVO_ChainBlade`) — 2026-10-11 |
+| `Models/Sword_B_Yellow.fbx` | `Futura Weapons/Sword/Style B/yellow.fbx` | 상위 무기 성채 대검 (`W_EVO_BastionCleaver`) — 2026-10-11 |
+| `Models/Staff_Blue.fbx` | `Futura Weapons/Staff/blue.fbx` | 상위 무기 천공창 (`W_EVO_PiercingLance`) — 2026-10-11 |
+| `Models/Halberd_Red.fbx` | `Futura Weapons/Halberd/red.fbx` | 상위 무기 팔랑크스 (`W_EVO_Phalanx`) — 2026-10-11 |
 
 **KayKit Character Animations** — 공공 영역 기증(CC0)이라 표기 의무는 없다 (제작자는 "Kay Lousberg, www.kaylousberg.com" 표기를 권함).
 `Animations/fbx/Rig_Medium/Rig_Medium_CombatMelee.fbx` 에 근접 모션 22개가 들어 있고, `CharacterSetup` 이 세 구간만

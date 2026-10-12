@@ -18,6 +18,9 @@ public class DroneWeapon : WeaponBase
 
     private readonly List<DroneUnit> units = new List<DroneUnit>();
 
+    /// <summary>지금 도는 드론들 (위성 방벽이 몸통으로 탄을 막고 적을 들이받는다).</summary>
+    public IReadOnlyList<DroneUnit> Units => units;
+
     // 드론을 번갈아 쏘게 해서 발사가 한 기에 몰리지 않게 한다
     private int nextUnit;
 
@@ -106,7 +109,7 @@ public class DroneWeapon : WeaponBase
 
         // 궤도를 균등 분배한다
         for (int i = 0; i < units.Count; i++)
-            units[i].Configure(Owner != null ? Owner.transform : transform.root, cfg, i, units.Count);
+            units[i].Configure(Owner != null ? Owner.transform : transform.root, cfg, i, units.Count, this);
     }
 
     public override void SetActive(bool active)

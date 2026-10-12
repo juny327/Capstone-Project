@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 774e8839cb40ed44f82f525be90550ac, type: 3}
+  m_Name: EVO_SwarmCarbine
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponEvolutionData
+  from: {fileID: 11400000, guid: e61cedaa53406ed4f8ea56c742ecc880, type: 2}
+  requiredLevel: 0
+  requiredAttachment: {fileID: 11400000, guid: 10680c10fc961b446b9348b9116f296b, type: 2}
+  requiredSubAbility: {fileID: 0}
+  requiredAbilityLevel: 1
+  requiredAnyGunAttachment: {fileID: 0}
+  result: {fileID: 11400000, guid: 98756b4cbdd49c944a13770cd2ba3554, type: 2}
+  title: "\uC2A4\uC6DC \uCE74\uBE48"
+  flavor: "\uC810\uC0AC \uC138 \uBC1C\uC774 \uC720\uB3C4 \uBBF8\uC0AC\uC77C \u2014
+    \uBC1C\uB9C8\uB2E4 \uB2E4\uB978 \uC801\uC744 \uCAD3\uC544\uAC00 \uC791\uC740
+    \uD3ED\uBC1C"
+  color: {r: 1, g: 0.55, b: 0.15, a: 1}
+  sound: {fileID: 8300000, guid: f595650ca3f17154e8de61ccc64e6a00, type: 3}
+  soundVolume: 0.9
+  shopPrice: 0

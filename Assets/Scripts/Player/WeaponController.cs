@@ -127,6 +127,10 @@ public class WeaponController : MonoBehaviour
 
     public bool Has(WeaponData data) => Find(data) != null;
 
+    /// <summary>
+    /// 그 무기를 찾는다. 진화한 무기는 원래 무기로도 찾힌다 — 보상 · 정비 창이 소총을 "이미 가진 무기"로 보게
+    /// (처형자를 든 사수에게 소총을 새로 팔지 않는다).
+    /// </summary>
     public IWeapon Find(WeaponData data)
     {
         if (data == null) return null;
@@ -137,7 +141,61 @@ public class WeaponController : MonoBehaviour
         for (int i = 0; i < subUnits.Count; i++)
             if (subUnits[i].Data == data) return subUnits[i];
 
+        for (int i = 0; i < held.Count; i++)
+            if (held[i].Data != null && held[i].Data.IsEvolved && held[i].Data.Root == data) return held[i];
+
+        for (int i = 0; i < subUnits.Count; i++)
+            if (subUnits[i].Data != null && subUnits[i].Data.IsEvolved && subUnits[i].Data.Root == data) return subUnits[i];
+
         return null;
+    }
+
+    /// <summary>무기가 상위 무기로 바뀌었을 때 (진화 연출 · 테스트). 새 무기와 진화 데이터를 넘긴다.</summary>
+    public event System.Action<IWeapon, WeaponEvolutionData> OnEvolved;
+
+    /// <summary>
+    /// 상위 무기로 바꾼다 (상위무기-계획.md 10-3). 조건은 부르는 쪽(EvolutionService)이 본다.
+    ///   · 같은 칸에서 바뀐다 — 손에 들고 있었으면 바로 든다
+    ///   · 레벨 · 부착물(잠긴 개조 포함) · 하부 능력(쿨타임 그대로) · 범용 강화를 넘겨받는다
+    /// </summary>
+    public bool Evolve(WeaponEvolutionData evolution)
+    {
+        if (evolution == null || evolution.from == null || evolution.result == null) return false;
+        if (isDead) return false;
+
+        WeaponBase previous = null;
+        List<WeaponBase> list = null;
+        int index = -1;
+
+        for (int i = 0; i < held.Count && previous == null; i++)
+            if (held[i].Data == evolution.from) { previous = held[i]; list = held; index = i; }
+
+        for (int i = 0; i < subUnits.Count && previous == null; i++)
+            if (subUnits[i].Data == evolution.from) { previous = subUnits[i]; list = subUnits; index = i; }
+
+        if (previous == null) return false;
+
+        WeaponBase next = SpawnWeapon(evolution.result);
+        if (next == null) return false;
+
+        next.InheritFrom(previous);   // 범용 강화 누적분도 원래 무기 것을 그대로 받는다
+
+        bool wasActive = list == held && index == activeHeldIndex;
+
+        previous.SetActive(false);              // 장전 · 휘두르기 · 충전 소리 · 빔을 끊는다
+        previous.gameObject.SetActive(false);
+        list[index] = next;
+        Destroy(previous.gameObject);
+
+        next.SetActive(list == subUnits || wasActive);
+
+        ApplyUpperBodyLayers();
+        RaiseLegacyStats();
+        GameEvents.OnWeaponsChanged?.Invoke();
+        if (wasActive) GameEvents.OnWeaponSwapped?.Invoke(ActiveWeapon);
+        OnAttachmentsChanged?.Invoke();
+        OnEvolved?.Invoke(next, evolution);
+        return true;
     }
 
     /// <summary>
@@ -263,6 +321,14 @@ public class WeaponController : MonoBehaviour
             return HeldWeaponSelectionResult.Swapped;
         }
 
+        // 연습용 선택: 진화한 무기를 가진 채 원래 무기를 고르면 그 칸을 원래 무기로 되돌린다 (원래 · 상위 비교 시험)
+        for (int i = 0; i < held.Count; i++)
+        {
+            WeaponData owned = held[i].Data;
+            if (owned == null || !owned.IsEvolved || owned.Root != data) continue;
+            return ReplaceHeldAt(i, data) ? HeldWeaponSelectionResult.Replaced : HeldWeaponSelectionResult.Invalid;
+        }
+
         if (HasFreeHeldSlot)
         {
             if (Acquire(data) != WeaponAcquireResult.Equipped) return HeldWeaponSelectionResult.Invalid;
@@ -271,23 +337,37 @@ public class WeaponController : MonoBehaviour
         }
 
         if (activeHeldIndex < 0 || activeHeldIndex >= held.Count) return HeldWeaponSelectionResult.Invalid;
+        return ReplaceHeldAt(activeHeldIndex, data) ? HeldWeaponSelectionResult.Replaced : HeldWeaponSelectionResult.Invalid;
+    }
+
+    /// <summary>그 칸의 무기를 새 무기(레벨 1 · 부착물 없음)로 바꾸고 손에 든다. 실패하면 이전 무기를 그대로 둔다.</summary>
+    bool ReplaceHeldAt(int index, WeaponData data)
+    {
         // Validate and create first: failure must preserve the previous loadout.
         WeaponBase replacement = SpawnWeapon(data);
-        if (replacement == null) return HeldWeaponSelectionResult.Invalid;
+        if (replacement == null) return false;
         replacement.ApplyModifier(globalModifier);
-        WeaponBase previous = held[activeHeldIndex];
+        WeaponBase previous = held[index];
         previous.SetActive(false); // cancels reload, pending melee hits, charge audio and beams
         previous.gameObject.SetActive(false);
-        held[activeHeldIndex] = replacement;
-        replacement.SetActive(true);
+        held[index] = replacement;
+        replacement.SetActive(false);
         Destroy(previous.gameObject);
 
+        if (index != activeHeldIndex)
+        {
+            SwapTo(index);
+            GameEvents.OnWeaponsChanged?.Invoke();
+            return true;
+        }
+
         // SwapTo returns early for the same index, so complete this replacement explicitly.
+        replacement.SetActive(true);
         ApplyUpperBodyLayers();
         RaiseLegacyStats();
         GameEvents.OnWeaponsChanged?.Invoke();
         GameEvents.OnWeaponSwapped?.Invoke(ActiveWeapon);
-        return HeldWeaponSelectionResult.Replaced;
+        return true;
     }
 
     public static bool IsValidHeldWeapon(WeaponData data)

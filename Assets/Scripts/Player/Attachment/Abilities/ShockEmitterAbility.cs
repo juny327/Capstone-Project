@@ -24,7 +24,7 @@ public class ShockEmitterAbility : SubAbility
     readonly List<Transform> targets = new List<Transform>();
 
     public override float CooldownRemaining => Mathf.Max(0f, cooldown);
-    public override float CooldownTotal => cooldownSeconds;
+    public override float CooldownTotal => PracticeRules.Cooldown(cooldownSeconds);
 
     /// <summary>마지막에 밀어낸 적 수 (검증용).</summary>
     public int LastHitCount { get; private set; }
@@ -49,7 +49,10 @@ public class ShockEmitterAbility : SubAbility
         }
 
         LastHitCount = targets.Count;
-        cooldown = cooldownSeconds;
+        cooldown = PracticeRules.Cooldown(cooldownSeconds);
+
+        // 작은 조합 — 같은 총에 전격탄이면 밀쳐낸 적에게 전격, 소이탄이면 화상
+        SynergyEffects.ShockWave(SourceWeapon, center, targets, damage, stun);
 
         FxLine.Ring(fxMaterial, center, 0.4f, radius, waveColor, 0.3f, 0.4f);
         FxLine.Ring(fxMaterial, center, 0.2f, radius * 0.7f, new Color(0.85f, 0.97f, 1f, 0.9f), 0.45f, 0.25f);

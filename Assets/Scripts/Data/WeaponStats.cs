@@ -207,11 +207,15 @@ public readonly struct ProjectileSpawnInfo
     /// <summary>탄 색 (소이탄 주황 · 전격탄 파랑). a = 0 이면 기본 색.</summary>
     public readonly Color Tint;
 
+    /// <summary>HomingTarget 쪽으로 꺾는 속도 (도/초). 0 이면 곧게 날아간다 (스웜 카빈).</summary>
+    public readonly float HomingTurnRate;
+
     public ProjectileSpawnInfo(
         float speed, float damage, float lifeTime,
         bool isCritical, int pierceCount, Transform homingTarget = null,
-        WeaponBase source = null, Color tint = default)
+        WeaponBase source = null, Color tint = default, float homingTurnRate = 0f)
     {
+        HomingTurnRate = homingTurnRate;
         Speed = speed;
         Damage = damage;
         LifeTime = lifeTime;

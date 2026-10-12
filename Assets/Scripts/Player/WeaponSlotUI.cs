@@ -133,9 +133,24 @@ public class WeaponSlotUI : MonoBehaviour
             Fill(slot,
                 sprite,
                 sprite != null ? string.Empty : weapon.Data.weaponName,
-                weapon.Level > 1 ? $"Lv.{weapon.Level}" : string.Empty,
+                LevelLabel(weapon),
                 isActive);
         }
+    }
+
+    /// <summary>
+    /// 칸 아래 글자 — 상위 무기는 ★, 지금 진화할 수 있으면 "진화!", 아니면 레벨 (상위무기-계획.md 3-5).
+    /// </summary>
+    string LevelLabel(IWeapon weapon)
+    {
+        if (weapon.Data.IsEvolved) return "★";
+
+        EvolutionCatalog catalog = EvolutionCatalog.Instance;
+        if (catalog != null && controller != null &&
+            catalog.ReadyFor(weapon, controller, controller.GetComponent<SubAbilitySlot>()) != null)
+            return "진화!";
+
+        return weapon.Level > 1 ? $"Lv.{weapon.Level}" : string.Empty;
     }
 
     void Fill(Slot slot, Sprite sprite, string label, string level, bool isActive)

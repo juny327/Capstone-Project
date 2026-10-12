@@ -135,7 +135,7 @@ public class ParryController : MonoBehaviour
     public float CooldownRemaining => Mathf.Max(0f, cooldownTimer);
 
     /// <summary>HUD 비율 계산용.</summary>
-    public float CooldownTotal => cooldown;
+    public float CooldownTotal => PracticeRules.Cooldown(cooldown);
 
     /// <summary>판정 창이 열려 있거나 패링 모션 중인지.</summary>
     public bool IsParrying => windowOpen || motionTimer > 0f;
@@ -188,7 +188,7 @@ public class ParryController : MonoBehaviour
         if (isDead || !enabled) return false;
         if (cooldownTimer > 0f || IsParrying) return false;
 
-        cooldownTimer = cooldown;
+        cooldownTimer = PracticeRules.Cooldown(cooldown);
         windowTimer = window;
         windowOpen = true;
         motionTimer = motionDuration;
@@ -450,7 +450,10 @@ public class ParryController : MonoBehaviour
         Vector3 incoming = projectile.transform.forward;   // 투사체는 진행 방향을 바라본다
         Vector3 outgoing = ReflectOffBlade(incoming, position - origin, bladeNormal, out Vector3 along);
 
-        if (!DeflectedProjectile.Launch(projectile, outgoing, deflectSpeedMultiplier, deflectSpeed, DeflectDamage(), deflectLifeTime))
+        // 작은 조합 "거울 패링" — 방패 반사판을 골랐으면 되돌린 탄이 더 세다
+        float damage = SynergyEffects.MirrorParry(gameObject, position, DeflectDamage());
+
+        if (!DeflectedProjectile.Launch(projectile, outgoing, deflectSpeedMultiplier, deflectSpeed, damage, deflectLifeTime))
             return false;
 
         if (EnsureFlash())

@@ -749,6 +749,186 @@ public static class CharacterSetup
         return data;
     }
 
+    // ── 상위 무기 모델 (상위무기-계획.md 14-3) ─────────────────────
+    /// <summary>
+    /// 원래 근접 무기 프리팹(W_Sword · W_Greatsword …)을 복제해 다른 모델을 같은 손 자세로 얹는다 — EvolutionSetup 이 부른다.
+    /// 컴포넌트 설정(MeleeWeapon 의 모션 · 세로베기 시점)은 원래 프리팹 것을 물려받고, 칼끝 · 왼손 자루 구간만 새 모델에서 다시 잰다.
+    ///
+    ///  · 모델의 가장 긴 축이 날 방향, 원점(가드)에서 더 긴 쪽이 칼날이다 (Futura 검은 원점이 가드)
+    ///  · 쥐는 점은 가드 뒤(손잡이 쪽) 정점들의 중심
+    ///  · thickness — 날 방향에 수직인 두께 배율 (가는 검 B 를 대검으로 쓸 때 1.6 정도)
+    /// 이미 있으면 GUID 를 지키려고 그 프리팹에 다시 얹는다.
+    /// </summary>
+    public static GameObject BuildMeleeVariant(string basePrefab, string newPrefab, string modelPath, float thickness, Material material)
+    {
+        MeleeSpec spec = System.Array.Find(Specs, s => s.Prefab == basePrefab);
+        var modelAsset = AssetDatabase.LoadAssetAtPath<GameObject>(modelPath);
+        string sourcePath = $"{WeaponPrefabDir}/{basePrefab}.prefab";
+        string path = $"{WeaponPrefabDir}/{newPrefab}.prefab";
+
+        if (spec == null || modelAsset == null || AssetDatabase.LoadMainAssetAtPath(sourcePath) == null)
+        {
+            Debug.LogError($"{Tag} 상위 무기 {newPrefab}: 사양 · 모델({modelPath}) · 원래 프리팹({sourcePath}) 중 없는 것이 있습니다.");
+            return null;
+        }
+
+        if (!TryGetHandFrame(out Vector3 bladeS, out Vector3 faceS, out Vector3 gripS)) return null;
+
+        if (AssetDatabase.LoadMainAssetAtPath(path) == null && !AssetDatabase.CopyAsset(sourcePath, path))
+        {
+            Debug.LogError($"{Tag} {sourcePath} 를 {path} 로 복제하지 못했습니다.");
+            return null;
+        }
+
+        GameObject root = PrefabUtility.LoadPrefabContents(path);
+        try
+        {
+            root.name = newPrefab;
+
+            MeleeWeapon melee = root.GetComponent<MeleeWeapon>();
+            Transform model = root.transform.Find("Model");
+            if (melee == null || model == null)
+            {
+                Debug.LogError($"{Tag} {path} 에 MeleeWeapon 또는 Model 이 없습니다.");
+                return null;
+            }
+
+            for (int i = model.childCount - 1; i >= 0; i--)
+                Object.DestroyImmediate(model.GetChild(i).gameObject);
+
+            model.localPosition = Vector3.zero;
+            model.localRotation = Quaternion.identity;
+            model.localScale = Vector3.one;
+
+            // Model(손 방향) → Shape(두께 · 길이, 날 = +Z 기준) → Pivot(모델 축 → +Z) → 모델
+            var shape = new GameObject("Shape").transform;
+            shape.SetParent(model, false);
+            var pivot = new GameObject("Pivot").transform;
+            pivot.SetParent(shape, false);
+
+            var inst = (GameObject)PrefabUtility.InstantiatePrefab(modelAsset, root.scene);
+            inst.transform.SetParent(pivot, false);
+
+            if (material != null)
+                foreach (Renderer r in inst.GetComponentsInChildren<Renderer>(true))
+                {
+                    var mats = new Material[r.sharedMaterials.Length];
+                    for (int i = 0; i < mats.Length; i++) mats[i] = material;
+                    r.sharedMaterials = mats;
+                }
+
+            // 1) 기준 자세 — 가장 긴 축 = 날, 가장 얇은 축 = 넓은 면의 법선
+            List<Vector3> local = CollectVertices(inst, pivot);
+            Bounds b = BoundsOf(local);
+            Vector3 axis = LongestAxis(b.size);
+            Vector3 thin = ShortestAxis(b.size);
+
+            if (spec.IsPolearm)
+            {
+                // 창 · 지팡이는 원점이 자루 가운데라 원점 기준으로 앞뒤를 못 가린다 — 더 넓은 끝이 머리
+                if (HeadIsBehind(local, b.center, axis)) axis = -axis;
+            }
+            else
+            {
+                float ahead = 0f, behind = 0f;
+                foreach (Vector3 v in local)
+                {
+                    float d = Vector3.Dot(v, axis);
+                    ahead = Mathf.Max(ahead, d);
+                    behind = Mathf.Max(behind, -d);
+                }
+                if (behind > ahead) axis = -axis;
+            }
+
+            pivot.localRotation = Quaternion.Inverse(Quaternion.LookRotation(axis, thin));
+
+            // 2) 길이 · 두께
+            float length = BoundsOf(CollectVertices(inst, shape)).size.z;
+            float s = spec.Length / Mathf.Max(length, 0.0001f);
+            shape.localScale = new Vector3(s * thickness, s * thickness, s);
+
+            // 3) 쥐는 방향
+            model.localRotation = Quaternion.LookRotation(bladeS, faceS);
+
+            // 4) 쥐는 점 — 검: 가드(모델 원점) 뒤쪽 정점들의 중심 / 창: 자루 가운데에서 길이 × GripFromCenter (원래 창과 같다)
+            Vector3 tipDir = bladeS.normalized;
+            Vector3 gripNow;
+            if (spec.IsPolearm)
+            {
+                List<Vector3> all = CollectVertices(inst, root.transform);
+                Bounds whole = BoundsOf(all);
+                float min = float.MaxValue, max = float.MinValue;
+                foreach (Vector3 v in all)
+                {
+                    float d = Vector3.Dot(v - whole.center, tipDir);
+                    min = Mathf.Min(min, d);
+                    max = Mathf.Max(max, d);
+                }
+                gripNow = whole.center + tipDir * ((min + max) * 0.5f + (max - min) * spec.GripFromCenter);
+            }
+            else
+            {
+                Vector3 guard = root.transform.InverseTransformPoint(inst.transform.position);
+                var handle = new List<Vector3>();
+                foreach (Vector3 v in CollectVertices(inst, root.transform))
+                    if (Vector3.Dot(v - guard, tipDir) < 0f) handle.Add(v);
+
+                gripNow = handle.Count > 0 ? BoundsOf(handle).center : guard;
+            }
+            model.localPosition = gripS - gripNow;
+
+            // 5) 칼끝 · 왼손 자루 구간
+            List<Vector3> verts = CollectVertices(inst, root.transform);
+            Vector3 tip = Vector3.zero;
+            foreach (Vector3 v in verts)
+                if (v.sqrMagnitude > tip.sqrMagnitude) tip = v;
+
+            LeftGripSpan(spec, verts, tip.normalized, out Vector3 leftNear, out Vector3 leftFar, out float butt);
+
+            var so = new SerializedObject(melee);
+            so.FindProperty("bladeTip").vector3Value = tip;
+            so.FindProperty("leftGripNear").vector3Value = leftNear;
+            so.FindProperty("leftGripFar").vector3Value = leftFar;
+            so.ApplyModifiedPropertiesWithoutUndo();
+
+            PrefabUtility.SaveAsPrefabAsset(root, path);
+            Debug.Log($"{Tag} 상위 무기 {newPrefab}: 모델 {Path.GetFileName(modelPath)} · 길이 {spec.Length}m · 두께 ×{thickness} · 손에서 칼끝 {tip.magnitude:F2}m · 손잡이 끝 {butt:F2}m");
+        }
+        finally
+        {
+            PrefabUtility.UnloadPrefabContents(root);
+        }
+
+        return AssetDatabase.LoadAssetAtPath<GameObject>(path);
+    }
+
+    /// <summary>
+    /// 긴 축(axis)의 두 끝 중 뒤(-) 끝이 더 넓은가 — 창 · 지팡이는 머리(날 · 결정) 쪽이 넓다.
+    /// 끝에서 길이 25% 안 정점들이 축에서 얼마나 떨어져 있는지(가장 먼 것)를 비교한다.
+    /// </summary>
+    static bool HeadIsBehind(List<Vector3> verts, Vector3 center, Vector3 axis)
+    {
+        float min = float.MaxValue, max = float.MinValue;
+        foreach (Vector3 v in verts)
+        {
+            float d = Vector3.Dot(v - center, axis);
+            min = Mathf.Min(min, d);
+            max = Mathf.Max(max, d);
+        }
+
+        float band = (max - min) * 0.25f;
+        float front = 0f, back = 0f;
+        foreach (Vector3 v in verts)
+        {
+            float d = Vector3.Dot(v - center, axis);
+            float width = Vector3.ProjectOnPlane(v - center, axis).magnitude;
+            if (d > max - band) front = Mathf.Max(front, width);
+            else if (d < min + band) back = Mathf.Max(back, width);
+        }
+
+        return back > front;
+    }
+
     // ── 4) 애니메이터 ────────────────────────────────────────────
     // MeleeLayer(WeaponAssetSetup 9번이 만든 상체 레이어)에 모션을 더한다.
     //  · MeleeStyle(Int) 0 = 한손검, 1 = 대검, 2 = 창 — MeleeWeapon 이 손에 들 때 넣는다
@@ -2046,13 +2226,8 @@ public static class CharacterSetup
     // ═══════════════════════════════════════════════════════════
     // 픽업을 원거리(위) · 근거리(아래)로 묶는다. TestRoomManager.weapons 순서는 바꾸지 않는다 —
     // TestRoomValidation 이 인덱스(0 = 소총, 4 = 샷건)로 확인하기 때문이다. 새 무기는 끝에 붙인다.
-    static readonly (string weapon, float z)[] RackLayout =
-    {
-        ("WD_Rifle", 10.5f), ("WD_SMG", 7.9f), ("WD_Sniper", 5.3f),
-        ("WD_Shotgun", 2.7f), ("WD_TeslaRifle", 0.1f), ("WD_ChargeLaser", -2.5f),
-        // ── 간격을 벌려 근거리 묶음 ──
-        ("WD_Sword", -6.2f), ("WD_Greatsword", -8.8f), ("WD_Spear", -11.4f),
-    };
+    // 자리 값은 TestRoomLayout 한 곳 (2026-10-12 — 간격 2.6 → 4.5m)
+    static (string weapon, float z)[] RackLayout => TestRoomLayout.Rack;
 
     static bool SetupTestRoom()
     {
@@ -2144,7 +2319,7 @@ public static class CharacterSetup
             var weapon = AssetDatabase.LoadAssetAtPath<WeaponData>($"{WeaponDataDir}/{name}.asset");
             if (weapon == null || !byWeapon.TryGetValue(weapon, out TestWeaponPickup pickup)) continue;
 
-            pickup.transform.position = new Vector3(rackPos.x, rackPos.y, z);
+            pickup.transform.position = new Vector3(TestRoomLayout.RackX, rackPos.y, z);
 
             if (PrefabUtility.IsPartOfPrefabInstance(pickup.gameObject))
                 PrefabUtility.RecordPrefabInstancePropertyModifications(pickup.transform);

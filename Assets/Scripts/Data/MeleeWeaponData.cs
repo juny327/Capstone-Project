@@ -32,6 +32,19 @@ public class MeleeWeaponData : WeaponData
     [Header("Effects")]
     public GameObject slashEffectPrefab;
 
+    [Header("Shield Combo (상위 무기 — 팔랑크스)")]
+    [Tooltip("에너지 방패를 든 채로도 공격한다 (보통은 멈춘다)")]
+    public bool attackWhileShielding;
+
+    [Tooltip("방패를 든 동안 연사 배율")]
+    [Min(1f)] public float shieldingAttackSpeed = 2.5f;
+
+    [Tooltip("방패를 떼면 이 거리를 돌격하며 찌른다 (방패 Lv3 변형보다 우선)")]
+    [Min(0f)] public float shieldReleaseChargeDistance = 6f;
+
+    [Tooltip("돌격 피해 = 무기 공격력 × 이 값")]
+    [Min(0f)] public float shieldReleaseChargeDamageMul = 3f;
+
     public override WeaponKind Kind => WeaponKind.Melee;
 
     public override WeaponRuntimeStats Compose(in WeaponModifier modifier)

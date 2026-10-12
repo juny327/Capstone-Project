@@ -39,14 +39,29 @@ public static class WeaponIconRender
     };
 
     [MenuItem("Tools/HUD Layout/무기 아이콘을 실제 모델로 굽기")]
-    public static void Render()
+    public static void Render() => RenderList(Weapons);
+
+    /// <summary>지정한 무기만 굽는다 (상위 무기 — EvolutionSetup). 모델은 weaponPrefab (드론은 dronePrefab) 에서 찍는다.</summary>
+    public static void RenderOnly(params string[] weaponNames)
+    {
+        var list = new (string, string)[weaponNames.Length];
+        for (int i = 0; i < weaponNames.Length; i++)
+        {
+            // 드론은 보이는 모델이 유닛 프리팹에 있다 (WD_Drone 과 같다)
+            var data = AssetDatabase.LoadAssetAtPath<WeaponData>($"{WeaponDir}/{weaponNames[i]}.asset");
+            list[i] = (weaponNames[i], data is DroneWeaponData ? "dronePrefab" : "weaponPrefab");
+        }
+        RenderList(list);
+    }
+
+    static void RenderList((string weapon, string prefabField)[] list)
     {
         EnsureFolder();
 
         int made = 0;
         int skipped = 0;
 
-        foreach ((string weaponName, string prefabField) in Weapons)
+        foreach ((string weaponName, string prefabField) in list)
         {
             WeaponData data = AssetDatabase.LoadAssetAtPath<WeaponData>($"{WeaponDir}/{weaponName}.asset");
 

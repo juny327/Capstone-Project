@@ -30,6 +30,14 @@ public class ProjectileWeaponData : WeaponData
     [Tooltip("관통 가능한 적 수. 0이면 첫 적에게 맞고 사라진다")]
     [Min(0)] public int pierceCount = 0;
 
+    [Tooltip("끄면 탄을 만들지 않는다 — 쏘는 알림 · 탄약 · 소리만 남고, 공격은 상위 무기 고유 동작이 맡는다 (용의 포효 화염 방사)")]
+    public bool spawnProjectiles = true;
+
+    [Header("Homing (상위 무기 — 스웜 카빈)")]
+    [Tooltip("0 이면 곧게. 0 보다 크면 탄마다 다른 적을 골라 이 속도(도/초)로 꺾어 따라간다")]
+    [Min(0f)] public float homingTurnRate = 0f;
+    [Min(1f)] public float homingRange = 14f;
+
     [Header("Ammo")]
     [Tooltip("탄창 크기. 0 이면 무제한이라 장전하지 않는다")]
     [Min(0)] public int magazineSize = 30;

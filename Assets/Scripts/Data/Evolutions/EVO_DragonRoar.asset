@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 774e8839cb40ed44f82f525be90550ac, type: 3}
+  m_Name: EVO_DragonRoar
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponEvolutionData
+  from: {fileID: 11400000, guid: 425b47f8befe4f34485ff97821ad886a, type: 2}
+  requiredLevel: 0
+  requiredAttachment: {fileID: 11400000, guid: 45bab0e30ad9c984f849f8fe8c83656d, type: 2}
+  requiredSubAbility: {fileID: 0}
+  requiredAbilityLevel: 1
+  requiredAnyGunAttachment: {fileID: 0}
+  result: {fileID: 11400000, guid: 8bbcbb6f32e2a744b83ad1f7a1ede115, type: 2}
+  title: "\uC6A9\uC758 \uD3EC\uD6A8"
+  flavor: "\uC0B0\uD0C4 \uB300\uC2E0 \uD654\uC5FC \uBC29\uC0AC \u2014 \uC815\uBA74\uC744
+    \uD0DC\uC6B0\uACE0, \uBD88\uD0C0\uB2E4 \uC8FD\uC740 \uC801\uC740 \uBD88\uC744
+    \uC62E\uAE34\uB2E4"
+  color: {r: 1, g: 0.38, b: 0.1, a: 1}
+  sound: {fileID: 8300000, guid: f595650ca3f17154e8de61ccc64e6a00, type: 3}
+  soundVolume: 0.9
+  shopPrice: 0

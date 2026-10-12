@@ -39,6 +39,7 @@ MonoBehaviour:
   rerollStepPerStage: 1
   rerollStepPerUse: 2
   sources:
+  - {fileID: 11400000, guid: dcf98c87664b23e4fa178aa3397792b9, type: 2}
   - {fileID: 11400000, guid: a4761d26afa023b49a55a0fb5fbb18d6, type: 2}
   - {fileID: 11400000, guid: 2d79c38c76ee5664a8a8d9a46c6e7694, type: 2}
   - {fileID: 11400000, guid: 01de4fe9756b48c4085fc1f8484954c8, type: 2}

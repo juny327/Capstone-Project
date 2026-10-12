@@ -28,6 +28,26 @@ public class ChargeBeamWeapon : WeaponBase
 
     private float beamHideAt = -1f;
 
+    // 이번 갈래의 피해 배율 — 사방 빔(프리즘 노바)에서 조준한 첫 갈래만 세게
+    private float damageScale = 1f;
+
+    // 충전 중 바닥에 그리는 갈래 예고선
+    private readonly List<LineRenderer> telegraphs = new List<LineRenderer>();
+
+    // 상위 무기 "프리즘 노바" — 한 발이 분산 → 수렴 → 방사로 이어진다 (PrismBurstSettings)
+    private PrismNovaBurst burst;
+
+    // 상위 무기 "태양창" — 모으는 동안 사거리가 늘어나는 한 방 (SunLanceSettings)
+    private SunLanceBurst sun;
+
+    protected override bool IsBusy => (burst != null && burst.Running) || (sun != null && sun.Running);
+
+    /// <summary>태양창 한 발이 진행 중인가 (시험 · HUD).</summary>
+    public SunLanceBurst SunLance => sun;
+
+    /// <summary>프리즘 노바 한 발이 진행 중인가 (시험 · HUD).</summary>
+    public PrismNovaBurst Burst => burst;
+
     /// <summary>분광 프리즘 — 갈래 사이 각도(도).</summary>
     private const float PrismAngle = 14f;
 
@@ -58,19 +78,36 @@ public class ChargeBeamWeapon : WeaponBase
         // 모으던 소리를 끊는다 — 쏘는 순간 멎어야 "다 모아서 쐈다" 로 들린다
         StopChargeSound();
 
+        if (cfg.prismBurst != null && cfg.prismBurst.enabled)
+        {
+            BeginPrismBurst(cfg, in stats);
+            return;
+        }
+
+        if (cfg.sunLance != null && cfg.sunLance.enabled)
+        {
+            BeginSunLance(cfg);
+            return;
+        }
+
         Vector3 origin = Muzzle.position;
         Vector3 dir = context.AimDirection;
 
-        // 갈래가 여럿이면(분광 프리즘) 부채꼴로 나눈다. 갈래마다 따로 판정한다 — 바로 앞의 적은 여러 갈래에 맞는다
+        // 갈래가 여럿이면(분광 프리즘) 부채꼴로 나눈다. 갈래마다 따로 판정한다 — 바로 앞의 적은 여러 갈래에 맞는다.
+        // 사방 빔(상위 무기 "프리즘 노바")이면 첫 갈래를 조준 방향에 두고 360° 를 고르게 나눈다
         int count = Mathf.Max(1, stats.ProjectileCount);
         for (int i = 0; i < count; i++)
         {
-            float angle = count > 1 ? -PrismAngle * (count - 1) * 0.5f + PrismAngle * i : 0f;
+            float angle = BeamAngle(cfg, i, count);
             Vector3 d = Quaternion.Euler(0f, angle, 0f) * dir;
 
+            damageScale = cfg.beamsAllAround && i == 0 ? cfg.primaryBeamDamageMul : 1f;
             ApplyBeamDamage(cfg, in stats, origin, d);
-            ShowBeam(cfg, i, origin, origin + d * stats.Range);
+            ShowBeam(cfg, i, origin, origin + d * stats.Range, BeamColor(cfg, i, count));
         }
+
+        damageScale = 1f;
+        HideTelegraphs();
 
         for (int i = count; i < beams.Count; i++)
             if (beams[i] != null) beams[i].enabled = false;
@@ -80,6 +117,87 @@ public class ChargeBeamWeapon : WeaponBase
         // 다음 발을 위한 충전이 곧바로 시작된다.
         // 적이 있을 때만 쏘므로, 이 소리도 전투 중에만 난다.
         StartChargeSound(cfg, stats.FireInterval);
+    }
+
+    // ───────── 프리즘 노바 ─────────
+
+    void BeginPrismBurst(ChargeBeamWeaponData cfg, in WeaponRuntimeStats stats)
+    {
+        if (charge != null) charge.enabled = false;
+        HideTelegraphs();
+
+        if (burst == null) burst = gameObject.AddComponent<PrismNovaBurst>();
+
+        Transform ownerRoot = Owner != null ? Owner.transform : transform;
+        burst.Begin(this, cfg.prismBurst, Muzzle, ownerRoot, stats.Range, OnPrismBurstFinished);
+        SpawnFx(cfg.muzzleFlashPrefab, Muzzle.position, Quaternion.LookRotation(ownerRoot.forward));
+    }
+
+    void BeginSunLance(ChargeBeamWeaponData cfg)
+    {
+        if (charge != null) charge.enabled = false;
+        HideTelegraphs();
+
+        if (sun == null) sun = gameObject.AddComponent<SunLanceBurst>();
+
+        Transform ownerRoot = Owner != null ? Owner.transform : transform;
+        sun.Begin(this, cfg.sunLance, Muzzle, ownerRoot, OnPrismBurstFinished);
+    }
+
+    // 한 발이 끝나면 충전을 처음부터 — 빔을 쏘는 동안 흐른 쿨다운으로 곧바로 다음 발이 나가지 않게
+    void OnPrismBurstFinished()
+    {
+        float interval = Stats.FireInterval;
+        RestartCooldown(interval);
+        if (IsActive && Config != null) StartChargeSound(Config, interval);
+    }
+
+    /// <summary>프리즘 노바 한 번 맞힐 피해 — 무기 공격력 × mul, 치명타 판정 포함.</summary>
+    public float RollPrismDamage(float mul, out bool critical)
+    {
+        WeaponRuntimeStats stats = Stats;
+        critical = RollCritical(in stats);
+        return ApplyCritical(in stats, critical) * mul;
+    }
+
+    /// <summary>프리즘 노바 피해 주기 — 명중 알림(처치 판정 포함)까지 다른 탄 · 빔과 같은 규칙.</summary>
+    public void DealPrismDamage(Transform target, float damage, bool critical, Vector3 point, Vector3 direction)
+    {
+        if (target == null || damage <= 0f) return;
+
+        bool wasAlive = CombatFx.IsAlive(target);
+        CombatFx.Damage(target, damage, point, direction, critical);
+
+        if (HasHitEffects)
+        {
+            NotifyHit(new WeaponHit
+            {
+                Target = target,
+                Damageable = target.GetComponent<IDamageable>(),
+                Point = point,
+                Direction = direction,
+                Damage = damage,
+                IsCritical = critical,
+                Killed = wasAlive && !CombatFx.IsAlive(target),
+            });
+        }
+    }
+
+    static float BeamAngle(ChargeBeamWeaponData cfg, int index, int count)
+    {
+        if (count <= 1) return 0f;
+        if (cfg.beamsAllAround) return 360f / count * index;
+        return -PrismAngle * (count - 1) * 0.5f + PrismAngle * index;
+    }
+
+    /// <summary>갈래 색 — 무지개면 갈래마다 색상환을 고르게 나눈다.</summary>
+    static Color BeamColor(ChargeBeamWeaponData cfg, int index, int count)
+    {
+        if (!cfg.rainbowBeams || count <= 1) return cfg.beamColor;
+
+        Color c = Color.HSVToRGB(index / (float)count, 0.7f, 1f);
+        c.a = cfg.beamColor.a;
+        return c;
     }
 
     // ───────── 충전 소리 ─────────
@@ -167,7 +285,8 @@ public class ChargeBeamWeapon : WeaponBase
             if (point == Vector3.zero) point = col.ClosestPoint(origin);
 
             bool isCritical = RollCritical(in stats);
-            float dealt = ApplyCritical(in stats, isCritical);
+            float dealt = ApplyCritical(in stats, isCritical) * damageScale;
+            bool wasAlive = HasHitEffects && CombatFx.IsAlive(root);
 
             target.TakeDamage(new DamageInfo
             {
@@ -188,6 +307,7 @@ public class ChargeBeamWeapon : WeaponBase
                     Direction = dir,
                     Damage = dealt,
                     IsCritical = isCritical,
+                    Killed = wasAlive && !CombatFx.IsAlive(root),
                 });
             }
 
@@ -211,6 +331,19 @@ public class ChargeBeamWeapon : WeaponBase
             for (int i = 0; i < beams.Count; i++)
                 if (beams[i] != null && beams[i].enabled) beams[i].enabled = false;
         }
+        else if (cfg.beamFadeOut)
+        {
+            // 가늘어지며 사라진다 (프리즘 노바) — 앞 40% 는 굵게 두고 나머지 동안 줄인다
+            float left = Mathf.Clamp01((beamHideAt - Time.time) / Mathf.Max(0.01f, cfg.beamDuration));
+            float width = cfg.beamWidth * Mathf.Clamp01(left / 0.6f);
+
+            for (int i = 0; i < beams.Count; i++)
+            {
+                if (beams[i] == null || !beams[i].enabled) continue;
+                beams[i].startWidth = width;
+                beams[i].endWidth = width * 0.6f;
+            }
+        }
 
         UpdateChargeVisual(cfg);
     }
@@ -222,9 +355,10 @@ public class ChargeBeamWeapon : WeaponBase
     /// </summary>
     void UpdateChargeVisual(ChargeBeamWeaponData cfg)
     {
-        if (!IsActive || IsReloading)
+        if (!IsActive || IsReloading || IsBusy)
         {
             if (charge != null) charge.enabled = false;
+            HideTelegraphs();
             return;
         }
 
@@ -258,9 +392,58 @@ public class ChargeBeamWeapon : WeaponBase
         c.a = progress;
         charge.startColor = c;
         charge.endColor = c;
+
+        if (cfg.telegraphBeams) UpdateTelegraphs(cfg, origin, forward, progress);
     }
 
-    void ShowBeam(ChargeBeamWeaponData cfg, int index, Vector3 from, Vector3 to)
+    /// <summary>
+    /// 충전이 절반을 넘으면 바닥에 갈래 방향으로 가는 예고선을 그린다 — 어디로 나갈지 미리 보인다 (프리즘 노바).
+    /// 방향은 총구가 보는 쪽 기준이라 커서를 돌리면 같이 돈다.
+    /// </summary>
+    void UpdateTelegraphs(ChargeBeamWeaponData cfg, Vector3 origin, Vector3 forward, float progress)
+    {
+        forward.y = 0f;
+        if (forward.sqrMagnitude < 0.0001f) forward = transform.forward;
+        forward.Normalize();
+
+        float alpha = Mathf.InverseLerp(0.5f, 1f, progress);
+        int count = alpha > 0f ? Mathf.Max(1, Stats.ProjectileCount) : 0;
+
+        while (telegraphs.Count < count)
+            telegraphs.Add(CreateLine($"Telegraph{telegraphs.Count + 1}", cfg));
+
+        Vector3 from = new Vector3(origin.x, Owner != null ? Owner.transform.position.y + 0.08f : origin.y, origin.z);
+        float length = Mathf.Min(Stats.Range, 9f);
+
+        for (int i = 0; i < telegraphs.Count; i++)
+        {
+            LineRenderer t = telegraphs[i];
+            if (t == null) continue;
+
+            t.enabled = i < count;
+            if (!t.enabled) continue;
+
+            Vector3 d = Quaternion.Euler(0f, BeamAngle(cfg, i, count), 0f) * forward;
+            t.SetPosition(0, from);
+            t.SetPosition(1, from + d * length);
+            t.startWidth = 0.05f;
+            t.endWidth = 0.02f;
+
+            Color tc = BeamColor(cfg, i, count);
+            tc.a = alpha * 0.45f;
+            t.startColor = tc;
+            tc.a = 0f;
+            t.endColor = tc;
+        }
+    }
+
+    void HideTelegraphs()
+    {
+        for (int i = 0; i < telegraphs.Count; i++)
+            if (telegraphs[i] != null) telegraphs[i].enabled = false;
+    }
+
+    void ShowBeam(ChargeBeamWeaponData cfg, int index, Vector3 from, Vector3 to, Color color)
     {
         LineRenderer beam = EnsureBeam(cfg, index);
 
@@ -270,8 +453,8 @@ public class ChargeBeamWeapon : WeaponBase
         beam.SetPosition(1, to);
         beam.startWidth = cfg.beamWidth;
         beam.endWidth = cfg.beamWidth * 0.6f;
-        beam.startColor = cfg.beamColor;
-        beam.endColor = cfg.beamColor;
+        beam.startColor = color;
+        beam.endColor = color;
         beam.enabled = true;
 
         beamHideAt = Time.time + cfg.beamDuration;
@@ -357,6 +540,9 @@ public class ChargeBeamWeapon : WeaponBase
         for (int i = 0; i < beams.Count; i++)
             if (beams[i] != null) beams[i].enabled = false;
         if (charge != null) charge.enabled = false;
+        HideTelegraphs();
+        if (burst != null) burst.Cancel();
+        if (sun != null) sun.Cancel();
 
         // 손에 없는 무기가 계속 충전음을 내면 안 된다
         StopChargeSound();

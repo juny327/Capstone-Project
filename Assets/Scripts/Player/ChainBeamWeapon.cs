@@ -21,7 +21,14 @@ public class ChainBeamWeapon : WeaponBase
 
     // 할당 없이 재사용하는 버퍼
     private readonly RaycastHit[] beamHits = new RaycastHit[16];
-    private readonly Collider[] nearby = new Collider[32];
+    private readonly Collider[] nearby = new Collider[64];
+
+    // 다음 연쇄 대상을 찾는 구(반경 4.5m 이상)는 바닥 타일 충돌체(Ground)에 닿는다 — 버퍼가 바닥으로 차지 않게 뺀다
+    private static int ChainMask(LayerMask layers)
+    {
+        int ground = LayerMask.NameToLayer("Ground");
+        return ground >= 0 ? layers & ~(1 << ground) : layers;
+    }
     private readonly HashSet<Transform> struck = new HashSet<Transform>();
 
     // 줄기 하나당 LineRenderer 하나. 본 줄기 1 + 연쇄 N 개를 미리 만들어 돌려 쓴다.
@@ -155,7 +162,7 @@ public class ChainBeamWeapon : WeaponBase
     Transform FindNext(ChainBeamWeaponData cfg, Vector3 from)
     {
         int count = Physics.OverlapSphereNonAlloc(
-            from, cfg.chainRange, nearby, cfg.hitLayers, QueryTriggerInteraction.Collide);
+            from, cfg.chainRange, nearby, ChainMask(cfg.hitLayers), QueryTriggerInteraction.Collide);
 
         Transform best = null;
         float bestSqr = float.MaxValue;
@@ -203,6 +210,8 @@ public class ChainBeamWeapon : WeaponBase
         // 퍼지는 전기까지 치명타를 띄우면 한 발에 숫자가 여러 번 터져 읽히지 않는다.
         bool isCritical = isFirst && RollCritical(in stats);
         float dealt = isCritical ? ApplyCritical(in stats, true) : damage;
+        bool notify = (isFirst || cfg.notifyEveryChain) && HasHitEffects;
+        bool wasAlive = notify && CombatFx.IsAlive(target);
 
         damageable.TakeDamage(new DamageInfo
         {
@@ -214,7 +223,7 @@ public class ChainBeamWeapon : WeaponBase
         });
 
         // 부착물 명중 효과는 조준해서 맞힌 첫 적에게만 — 퍼진 전기마다 터지면 연쇄가 연쇄를 부른다
-        if (isFirst && HasHitEffects)
+        if (notify)
         {
             NotifyHit(new WeaponHit
             {
@@ -224,6 +233,7 @@ public class ChainBeamWeapon : WeaponBase
                 Direction = dir,
                 Damage = dealt,
                 IsCritical = isCritical,
+                Killed = wasAlive && !CombatFx.IsAlive(target),
             });
         }
 

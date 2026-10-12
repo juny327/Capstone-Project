@@ -48,6 +48,34 @@ public class ChargeBeamWeaponData : WeaponData
     [Tooltip("충전이 끝났을 때 총구에 맺히는 빛의 크기")]
     [Min(0.01f)] public float chargeWidth = 0.3f;
 
+    // 상위 무기 "프리즘 노바" (상위무기-계획.md 4장 · 14-5). 보통 충전 레이저는 기본값 그대로 둔다
+    [Header("Evolved Beam (상위 무기)")]
+    [Tooltip("기본 갈래 수(1)에 더한다 — 개조 '분광 프리즘'(+2)과 합쳐진다. 프리즘 노바 = 5 → 8갈래")]
+    [Min(0)] public int extraBeams = 0;
+
+    [Tooltip("갈래를 사방으로 고르게 나눈다 (첫 갈래 = 조준 방향). 끄면 부채꼴")]
+    public bool beamsAllAround;
+
+    [Tooltip("사방 빔에서 조준한 첫 갈래의 피해 배율")]
+    [Min(0f)] public float primaryBeamDamageMul = 1f;
+
+    [Tooltip("갈래마다 무지개 색")]
+    public bool rainbowBeams;
+
+    [Tooltip("빔이 가늘어지며 사라진다")]
+    public bool beamFadeOut;
+
+    [Tooltip("충전 중 바닥에 갈래 방향 예고선")]
+    public bool telegraphBeams;
+
+    [Header("Prism Burst (프리즘 노바)")]
+    [Tooltip("켜면 한 발이 '빛 분산 → 수렴 → 지속 방사' 한 주기가 된다 (탄 1발). 끄면 보통 충전 레이저")]
+    public PrismBurstSettings prismBurst = new PrismBurstSettings();
+
+    [Header("Sun Lance (태양창)")]
+    [Tooltip("켜면 한 발이 '모으기(사거리가 늘어난다) → 굵은 기둥 한 방' 이 된다. 끄면 보통 충전 레이저")]
+    public SunLanceSettings sunLance = new SunLanceSettings();
+
     [Header("Charge Sound")]
     [Tooltip("힘을 모으는 동안 나는 소리. 발사하는 순간 끊긴다")]
     public AudioClip chargeSound;
@@ -71,7 +99,7 @@ public class ChargeBeamWeaponData : WeaponData
         s.PierceCount = int.MaxValue;
 
         // 투사체 수 증분은 빔 갈래 수로 쓴다 (전용 개조 "분광 프리즘" = +2 → 세 갈래)
-        s.ProjectileCount = Mathf.Max(1, 1 + m.projectileCountAdd);
+        s.ProjectileCount = Mathf.Max(1, 1 + extraBeams + m.projectileCountAdd);
 
         // 0 은 "무제한" 이라는 뜻이므로 업그레이드가 붙어도 0 을 유지한다
         s.MagazineSize = magazineSize <= 0 ? 0 : Mathf.Max(1, magazineSize + m.magazineAdd);

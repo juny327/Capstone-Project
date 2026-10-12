@@ -521,6 +521,14 @@ public class PlayerMove : MonoBehaviour
     {
         if (isDead) return;
 
+        // 테스트 룸 연습 규칙 — 스태미나 무한
+        if (PracticeRules.InfiniteStamina)
+        {
+            stamina = maxStamina;
+            exhausted = false;
+            return;
+        }
+
         if (IsSprinting)
         {
             stamina -= sprintDrainPerSecond * deltaTime;
@@ -723,7 +731,7 @@ public class PlayerMove : MonoBehaviour
         rollElapsed = 0f;
         rollStartPos = transform.position;
         rollCodeDistance = 0f;
-        rollCdTimer = rollDuration + rollCooldown; // 구르기가 끝난 뒤부터 쿨다운 시작
+        rollCdTimer = rollDuration + PracticeRules.Cooldown(rollCooldown); // 구르기가 끝난 뒤부터 쿨다운 시작 (테스트 룸은 짧게)
 
         // 구르는 방향을 바라보도록 고정 (구르기 클립이 정면 구르기 하나이므로)
         if (rollDir.sqrMagnitude > 0.001f)

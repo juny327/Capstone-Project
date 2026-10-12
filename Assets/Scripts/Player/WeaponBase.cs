@@ -47,7 +47,22 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
     public int Level => level;
 
     /// <summary>쿨다운이 끝나고, 장전 중이 아니며, 탄약이 남아 있어야 쏠 수 있다.</summary>
-    public bool CanFire => cooldown <= 0f && IsActive && !IsReloading && HasAmmo;
+    public bool CanFire => cooldown <= 0f && IsActive && !IsReloading && HasAmmo && !IsBusy;
+
+    /// <summary>
+    /// 한 발이 여러 단계로 이어지는 동안(프리즘 노바: 분산 → 수렴 → 방사) — 다음 발 · 장전을 받지 않는다.
+    /// 보통 무기는 항상 false.
+    /// </summary>
+    protected virtual bool IsBusy => false;
+
+    /// <summary>
+    /// 연사 배율 (1 = 그대로, 3 = 세 배 빠르게). 상위 무기 동작이 실행 중에 바꾼다 —
+    /// 회전 기관포(쏠수록 빨라짐) · 팔랑크스(방패를 든 동안 빠른 찌르기). 스탯이 아니라 다음 발 간격에만 쓴다.
+    /// </summary>
+    public float FireRateBoost { get; set; } = 1f;
+
+    /// <summary>다음 발까지 남은 시간을 다시 건다 — 여러 단계짜리 발이 끝난 뒤 충전을 처음부터 시작할 때.</summary>
+    protected void RestartCooldown(float seconds) => cooldown = Mathf.Max(0f, seconds);
 
     public bool IsActive { get; private set; } = true;
 
@@ -123,6 +138,26 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
         // 탄창을 가득 채운 상태로 시작한다
         ammo = Stats.MagazineSize;
         reloadRemaining = 0f;
+
+        BuildInnateRuntimes();
+    }
+
+    /// <summary>상위 무기의 고유 동작 (WeaponData.innateEffects) — 부착물 동작과 같은 목록에서 돈다. 부위가 없어 교체되지 않는다.</summary>
+    void BuildInnateRuntimes()
+    {
+        if (data == null || data.innateEffects == null) return;
+
+        foreach (AttachmentEffect effect in data.innateEffects)
+        {
+            if (effect == null) continue;
+
+            AttachmentRuntime runtime = effect.CreateRuntime();
+            if (runtime == null) continue;
+
+            runtime.Bind(this, null);
+            runtime.OnActiveChanged(IsActive);
+            runtimeList.Add(runtime);
+        }
     }
 
     public void Tick(float deltaTime)
@@ -159,7 +194,19 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
 
         OnFire(in stats, in context);
 
-        cooldown = stats.FireInterval;
+        // 연사 가속(회전 기관포 · 팔랑크스)이 걸려 있으면 다음 발까지 그만큼 짧다
+        cooldown = stats.FireInterval / Mathf.Max(0.1f, FireRateBoost);
+
+        // 근접은 판정 순간(휘두른 뒤 hitDelay)에 스스로 알린다
+        if (!ReportsAttackItself && runtimeList.Count > 0)
+        {
+            NotifyAttack(new WeaponAttack
+            {
+                Origin = Muzzle.position,
+                Direction = context.AimDirection,
+                Range = stats.Range,
+            });
+        }
 
         PlayFireSound();
 
@@ -181,7 +228,7 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
         WeaponRuntimeStats stats = Stats;
 
         if (stats.MagazineSize <= 0) return;   // 탄창을 쓰지 않는 무기
-        if (IsReloading) return;
+        if (IsReloading || IsBusy) return;
         if (ammo >= stats.MagazineSize) return;
         if (!IsActive) return;
 
@@ -199,7 +246,7 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
     /// <summary>탄이 떨어졌고 자동 장전을 쓰는 무기면 장전을 시작한다.</summary>
     public void TryAutoReload()
     {
-        if (IsReloading || HasAmmo) return;
+        if (IsReloading || HasAmmo || IsBusy) return;
         if (!AutoReload) return;
 
         StartReload();
@@ -302,10 +349,63 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
         return attachments.TryGetValue(slot, out AttachmentData a) ? a : null;
     }
 
-    /// <summary>이 무기에 달 수 있는가 (계열 · 전용 무기 · 무기 레벨). 드론 · 근접은 부착물이 없다.</summary>
+    /// <summary>이 무기에 달 수 있는가 (계열 · 전용 무기 · 무기 레벨 · 잠긴 부위). 드론 · 근접은 부착물이 없다.</summary>
     public bool CanAttach(AttachmentData attachment)
     {
-        return attachment != null && data != null && attachment.Fits(data) && level >= attachment.minWeaponLevel;
+        return attachment != null && data != null && attachment.Fits(data) && level >= attachment.minWeaponLevel
+               && !IsSlotLocked(attachment.slot);
+    }
+
+    /// <summary>
+    /// 바꿀 수 없는 부위인가 — 상위 무기의 개조 칸 (상위무기-계획.md 3-3).
+    /// 개조는 상위 무기가 이어받는다. 바꾸게 두면 수치가 두 번 들어가거나 다른 갈래 개조가 붙는 꼬임이 생긴다.
+    /// </summary>
+    public bool IsSlotLocked(AttachmentSlot slot) => slot == AttachmentSlot.Mod && data != null && data.IsEvolved;
+
+    /// <summary>
+    /// 진화할 때 원래 무기의 부착물 · 레벨 · 하부 능력을 그대로 넘겨받는다 (WeaponController.Evolve).
+    /// 잠긴 개조 칸도 여기서는 옮긴다. 하부 능력은 오브젝트째 옮겨 쿨타임이 이어진다.
+    /// </summary>
+    public void InheritFrom(WeaponBase previous)
+    {
+        if (previous == null) return;
+
+        // 레벨업 카드 · 무기 전용 강화로 쌓인 증분 (전역 강화가 이미 들어 있다)
+        accumulated = previous.accumulated;
+        SetLevel(previous.level);
+
+        foreach (var pair in previous.attachments)
+        {
+            if (pair.Value == null) continue;
+            attachments[pair.Key] = pair.Value;
+        }
+
+        RebuildAttachmentModifier();
+
+        foreach (var pair in attachments)
+        {
+            if (pair.Value == null || pair.Value.effect == null) continue;
+
+            AttachmentRuntime runtime = pair.Value.effect.CreateRuntime();
+            if (runtime == null) continue;
+
+            runtime.Bind(this, pair.Value);
+            runtime.OnActiveChanged(IsActive);
+            runtimes[pair.Key] = runtime;
+            runtimeList.Add(runtime);
+        }
+
+        if (previous.ability != null)
+        {
+            ability = previous.ability;
+            abilitySlot = previous.abilitySlot;
+            ability.name = $"{ability.name.Split(' ')[0]} ({data.weaponName})";
+            previous.ability = null;   // 원래 무기가 지워질 때 같이 지우지 않게
+        }
+
+        ammo = Stats.MagazineSize;
+        reloadRemaining = 0f;
+        OnStatsChanged();
     }
 
     /// <summary>
@@ -435,16 +535,40 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
     {
         for (int i = 0; i < runtimeList.Count; i++)
             runtimeList[i].OnHit(in hit);
+
+        if (!hit.Killed) return;
+
+        for (int i = 0; i < runtimeList.Count; i++)
+            runtimeList[i].OnKill(in hit);
     }
+
+    /// <summary>탄이 아무것도 못 맞히고(또는 관통을 남긴 채) 사거리 끝에서 사라졌다 — 공성포의 끝 폭발.</summary>
+    public void NotifyProjectileExpired(Vector3 position, Vector3 direction)
+    {
+        for (int i = 0; i < runtimeList.Count; i++)
+            runtimeList[i].OnProjectileExpired(position, direction);
+    }
+
+    /// <summary>쏘거나 휘둘렀다 — 상위 무기 동작(검기 · 중력장)이 받는다.</summary>
+    public void NotifyAttack(in WeaponAttack attack)
+    {
+        for (int i = 0; i < runtimeList.Count; i++)
+            runtimeList[i].OnAttack(in attack);
+    }
+
+    /// <summary>공격 알림을 무기가 직접 보내는가 — 근접은 판정 순간에 보낸다. 아니면 Fire 가 쏘는 순간 보낸다.</summary>
+    protected virtual bool ReportsAttackItself => false;
 
     /// <summary>명중 효과가 있는가 — 탄이 알림을 보낼지 고르는 데 쓴다.</summary>
     public bool HasHitEffects => runtimeList.Count > 0;
 
-    /// <summary>탄 색 — 탄 부위 · 전용 개조 부착물의 색. 없으면 투명.</summary>
+    /// <summary>탄 색 — 상위 무기 테마 색, 탄 부위 · 전용 개조 부착물의 색. 없으면 투명.</summary>
     public Color AmmoTint
     {
         get
         {
+            if (data != null && data.IsEvolved && data.HasThemeColor) return data.themeColor;
+
             AttachmentData mod = GetAttachment(AttachmentSlot.Mod);
             if (mod != null && mod.HasTint) return mod.tint;
 

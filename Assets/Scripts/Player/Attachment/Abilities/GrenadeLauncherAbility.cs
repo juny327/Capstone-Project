@@ -37,7 +37,7 @@ public class GrenadeLauncherAbility : SubAbility
     readonly List<Transform> targets = new List<Transform>();
 
     public override float CooldownRemaining => Mathf.Max(0f, cooldown);
-    public override float CooldownTotal => cooldownSeconds;
+    public override float CooldownTotal => PracticeRules.Cooldown(cooldownSeconds);
 
     /// <summary>마지막 폭발에 맞은 적 수 (검증용).</summary>
     public int LastHitCount { get; private set; }
@@ -63,7 +63,7 @@ public class GrenadeLauncherAbility : SubAbility
         damage = Mathf.Max(minDamage, WeaponDamage(minDamage) * damageRatio);
         progress = 0f;
         flying = true;
-        cooldown = cooldownSeconds;
+        cooldown = PracticeRules.Cooldown(cooldownSeconds);
 
         if (shell != null)
         {
@@ -108,6 +108,9 @@ public class GrenadeLauncherAbility : SubAbility
         }
 
         LastHitCount = targets.Count;
+
+        // 작은 조합 — 같은 총에 소이탄이면 불바다, 전격탄이면 긴 경직
+        SynergyEffects.GrenadeImpact(SourceWeapon, to, targets, Mathf.Max(minDamage / Mathf.Max(1f, damageRatio), WeaponDamage(minDamage)));
 
         FxLine.Ring(fxMaterial, to, radius * 0.2f, radius, blastColor, 0.4f, 0.45f);
         FxLine.Ring(fxMaterial, to, radius * 0.1f, radius * 0.6f, new Color(1f, 0.9f, 0.6f, 0.9f), 0.6f, 0.25f);

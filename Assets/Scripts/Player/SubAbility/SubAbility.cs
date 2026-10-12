@@ -136,6 +136,21 @@ public abstract class SubAbility : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 이 E 능력을 주는 총 (사수 하부 부착물) — 작은 조합은 "같은 총"의 탄을 본다 (상위무기-계획.md 7장).
+    /// 검사 서브 능력이면 null.
+    /// </summary>
+    protected IWeapon SourceWeapon
+    {
+        get
+        {
+            if (Source == null || Weapons == null) return null;
+            foreach (IWeapon w in Weapons.HeldWeapons)
+                if (w != null && w.Ability == this) return w;
+            return null;
+        }
+    }
+
     /// <summary>들고 있는 무기의 공격력 — 능력 피해의 기준.</summary>
     protected float WeaponDamage(float fallback)
     {

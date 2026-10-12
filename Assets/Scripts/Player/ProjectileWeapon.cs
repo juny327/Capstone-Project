@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -89,6 +90,12 @@ public class ProjectileWeapon : WeaponBase
             ? ResolveFireDirection(in context, float.PositiveInfinity, out _)
             : context.AimDirection;
 
+        if (!cfg.spawnProjectiles)
+        {
+            SpawnEffect(cfg.muzzleFlashPrefab, Muzzle);
+            return;
+        }
+
         SpawnVolley(cfg, in stats, baseDir);
 
         // 점사 — 남은 발은 짧은 간격으로 이어서 (그사이 돌아보면 그쪽으로 나간다)
@@ -150,9 +157,26 @@ public class ProjectileWeapon : WeaponBase
                 stats.ProjectileLifeTime,
                 isCritical,
                 stats.PierceCount,
+                homingTarget: cfg.homingTurnRate > 0f ? NextHomingTarget(cfg) : null,
                 source: this,
-                tint: tint));
+                tint: tint,
+                homingTurnRate: cfg.homingTurnRate));
         }
+    }
+
+    // 유도탄 목표 — 가까운 적부터 돌려 가며 고른다 (점사 세 발이 서로 다른 적을 쫓게)
+    readonly List<Transform> homingCandidates = new List<Transform>();
+    int homingCursor;
+
+    Transform NextHomingTarget(ProjectileWeaponData cfg)
+    {
+        Vector3 origin = Owner != null ? Owner.transform.position : transform.position;
+        CombatFx.FindEnemies(origin, cfg.homingRange, homingCandidates);
+        if (homingCandidates.Count == 0) return null;
+
+        homingCandidates.Sort((a, b) => (a.position - origin).sqrMagnitude.CompareTo((b.position - origin).sqrMagnitude));
+        int pick = Mathf.Min(homingCandidates.Count, 4);
+        return homingCandidates[homingCursor++ % pick];
     }
 
     /// <summary>점사의 이어지는 발 소리 — 첫 발 소리는 WeaponBase.Fire 가 낸다.</summary>

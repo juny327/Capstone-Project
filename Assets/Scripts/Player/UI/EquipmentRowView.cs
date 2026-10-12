@@ -71,6 +71,23 @@ public class EquipmentRowView : MonoBehaviour
 
     public void Hide() => gameObject.SetActive(false);
 
+    /// <summary>
+    /// 켜진 작은 조합 표시 (상위무기-계획.md 7장) — 이름 뒤에 짧게 "조합", 상세(Z)면 효과 줄 앞에 "네이팜 유탄: 착탄 자리 …".
+    /// 줄 폭이 좁아 이름을 붙이면 두 줄로 넘친다. ShowAttachment · ShowAbility 다음에 부른다.
+    /// </summary>
+    public void AddTag(string name, string description, Color color, bool showDetail)
+    {
+        if (title == null || string.IsNullOrEmpty(name)) return;
+
+        string hex = ColorUtility.ToHtmlStringRGB(color);
+        if (!title.text.Contains("조합</color>")) title.text += $"  <size=72%><color=#{hex}>조합</color></size>";
+
+        if (!showDetail || detail == null) return;
+        string line = $"<color=#{hex}>{name}</color>: {description}";
+        bool had = detail.gameObject.activeSelf && !string.IsNullOrEmpty(detail.text);
+        SetDetail(had ? $"{line}  ·  {detail.text}" : line, true);
+    }
+
     /// <summary>얻었을 때 잠깐 반짝인다.</summary>
     public void Pulse(float seconds = 0.6f) => flashLeft = seconds;
 

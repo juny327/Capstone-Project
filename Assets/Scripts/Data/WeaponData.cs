@@ -64,13 +64,40 @@ public abstract class WeaponData : ScriptableObject
     [Min(1f)] public float critMultiplier = 2f;
 
     [Header("Growth")]
-    [Min(1)] public int maxLevel = 5;
+    [Min(1)] public int maxLevel = 3;
     [Tooltip("레벨이 1 오를 때마다 누적되는 증분")]
     public WeaponModifier perLevelBonus = WeaponModifier.Identity;
 
     [Header("Rules")]
     [Tooltip("감지 범위에 적이 있어야만 발동한다. 오라/장판형은 끈다")]
     public bool requiresTarget = true;
+
+    // 상위 무기 (상위무기-계획.md 10장). 원래 무기와 같은 종류의 데이터로 만들고 아래 칸만 더 채운다
+    [Header("Evolution (상위 무기)")]
+    [Tooltip("상위 무기면 원래 무기. 비우면 보통 무기다 — 전용 부착물 판정 · '이미 가진 무기' 판단 · 조합표에 쓴다")]
+    public WeaponData evolvedFrom;
+
+    [Tooltip("처음부터 붙어 있는 동작 (처치 폭발 · 중력장 · 검기 …). 부착물 동작과 같은 통로로 돈다")]
+    public AttachmentEffect[] innateEffects;
+
+    [Tooltip("상위 무기 테마 색 — 탄 색 · 발밑 고리 · 연출. 투명이면 쓰지 않는다")]
+    public Color themeColor = new Color(1f, 1f, 1f, 0f);
+
+    /// <summary>상위 무기인가.</summary>
+    public bool IsEvolved => evolvedFrom != null;
+
+    /// <summary>진화 사슬의 맨 처음 무기 (보통 무기는 자기 자신).</summary>
+    public WeaponData Root
+    {
+        get
+        {
+            WeaponData d = this;
+            for (int guard = 0; d.evolvedFrom != null && guard < 4; guard++) d = d.evolvedFrom;
+            return d;
+        }
+    }
+
+    public bool HasThemeColor => themeColor.a > 0.01f;
 
     // 소리를 데이터에 두는 이유: 무기를 추가할 때 `.asset` 하나로 끝나는 규칙을
     // 소리까지 포함해 지키기 위해서다. 코드를 고치지 않아도 새 무기가 소리를 낸다.

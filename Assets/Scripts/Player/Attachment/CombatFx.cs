@@ -8,7 +8,23 @@ using UnityEngine;
 /// </summary>
 public static class CombatFx
 {
-    static readonly Collider[] overlaps = new Collider[64];
+    // 맵 바닥이 타일마다 충돌체(Ground 레이어)라 반경이 크면 수십 개가 걸린다 — 바닥은 빼고, 버퍼도 넉넉히.
+    // (64칸에 바닥 타일이 먼저 차면 적이 목록에서 빠졌다 — 2026-10-11 작은 조합 시험에서 발견)
+    static readonly Collider[] overlaps = new Collider[256];
+    static int queryMask;
+
+    static int QueryMask
+    {
+        get
+        {
+            if (queryMask == 0)
+            {
+                int ground = LayerMask.NameToLayer("Ground");
+                queryMask = ground >= 0 ? ~(1 << ground) : ~0;
+            }
+            return queryMask;
+        }
+    }
     static readonly HashSet<Transform> seen = new HashSet<Transform>();
 
     // BossHealth 에는 "죽었나" 가 없다. 죽은 보스에 계속 피해를 넣으면 사망 상태가 다시 시작된다 — 신호로 기억한다
@@ -29,7 +45,7 @@ public static class CombatFx
     static int OverlapColumn(Vector3 center, float radius)
     {
         return Physics.OverlapCapsuleNonAlloc(center - Vector3.up * 0.3f, center + Vector3.up * 1.8f, radius,
-            overlaps, ~0, QueryTriggerInteraction.Collide);
+            overlaps, QueryMask, QueryTriggerInteraction.Collide);
     }
 
     /// <summary>center 반경 안의 살아 있는 적 루트들 (높이 약 2m 기둥). exclude 는 뺀다.</summary>
@@ -78,7 +94,7 @@ public static class CombatFx
     public static Transform FindNearest(Vector3 from, float radius, Transform exclude = null)
     {
         seen.Clear();
-        int count = Physics.OverlapSphereNonAlloc(from, radius, overlaps, ~0, QueryTriggerInteraction.Collide);
+        int count = Physics.OverlapSphereNonAlloc(from, radius, overlaps, QueryMask, QueryTriggerInteraction.Collide);
 
         Transform best = null;
         float bestSqr = float.MaxValue;

@@ -247,10 +247,10 @@ public class MaintenanceUI : MonoBehaviour
 
     // ───────── 진열 ─────────
 
-    /// <summary>위 줄(무기)인지 — 새 무기 · 강화. 나머지(부착물 · 서브 능력 · 회복)는 아래 장비 줄.</summary>
+    /// <summary>위 줄(무기)인지 — 새 무기 · 강화 · 진화. 나머지(부착물 · 서브 능력 · 회복)는 아래 장비 줄.</summary>
     static int RowOf(ShopOffer offer)
     {
-        return offer.Kind == ShopOfferKind.Weapon || offer.Kind == ShopOfferKind.Upgrade ? 0 : 1;
+        return offer.Kind == ShopOfferKind.Weapon || offer.Kind == ShopOfferKind.Upgrade || offer.Kind == ShopOfferKind.Evolution ? 0 : 1;
     }
 
     void Refresh()

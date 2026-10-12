@@ -40,7 +40,7 @@ public class BayonetChargeAbility : SubAbility
     readonly List<Transform> targets = new List<Transform>();
 
     public override float CooldownRemaining => Mathf.Max(0f, cooldown);
-    public override float CooldownTotal => cooldownSeconds;
+    public override float CooldownTotal => PracticeRules.Cooldown(cooldownSeconds);
     public override bool IsBusy => charging;
 
     /// <summary>마지막 돌진에 맞은 적 수 (검증용).</summary>
@@ -63,7 +63,7 @@ public class BayonetChargeAbility : SubAbility
         struck.Clear();
         sweepFrom = Owner.transform.position + Forward * hitForward;
         damage = Mathf.Max(minDamage, WeaponDamage(minDamage) * damageRatio);
-        cooldown = cooldownSeconds;
+        cooldown = PracticeRules.Cooldown(cooldownSeconds);
 
         Move.SetActionLock(this, true);
         if (Weapons != null) Weapons.SuppressFiring(dashDuration + 0.1f);
@@ -86,7 +86,14 @@ public class BayonetChargeAbility : SubAbility
         if (!charging) return;
 
         Sweep();
-        if (Move == null || !Move.IsDashing) Finish();
+        if (Move == null || !Move.IsDashing)
+        {
+            // 작은 조합 — 같은 총에 폭발탄이면 돌진 끝에서 터진다 (끊긴 돌진은 터지지 않는다)
+            if (Owner != null)
+                SynergyEffects.ChargeEnd(this, SourceWeapon, Owner.transform.position + Forward * (hitForward + 0.6f),
+                    Mathf.Max(minDamage / Mathf.Max(1f, damageRatio), WeaponDamage(minDamage)));
+            Finish();
+        }
     }
 
     void LateUpdate()

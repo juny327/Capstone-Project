@@ -41,6 +41,10 @@ public class ChainBeamWeaponData : WeaponData
     [Tooltip("적의 발밑이 아니라 몸통 높이에 맞도록 올린다")]
     public float hitHeight = 0.8f;
 
+    [Header("Evolved (상위 무기 — 폭풍 코일)")]
+    [Tooltip("연쇄된 적마다 명중 알림을 보낸다 (낙뢰). 보통 전격 소총은 꺼 둔다 — 조준한 첫 적만")]
+    public bool notifyEveryChain;
+
     [Header("Ammo")]
     [Tooltip("탄창 크기. 0 이면 무제한이라 장전하지 않는다")]
     [Min(0)] public int magazineSize = 20;

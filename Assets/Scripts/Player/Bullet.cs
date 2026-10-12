@@ -19,6 +19,10 @@ public class Bullet : MonoBehaviour, IPoolable
     WeaponBase source;
     Color tint;
 
+    // 유도 (스웜 카빈) — 목표가 사라지면 곧게 간다
+    Transform homingTarget;
+    float homingTurnRate;
+
     // 빠른 탄(레일건 탄속 180)은 물리 한 단계에 3m 넘게 날아가 트리거를 건너뛴다 — 지난 위치부터 훑어 잡는다
     const float SweepSpeed = 40f;
     Vector3 lastPosition;
@@ -71,6 +75,8 @@ public class Bullet : MonoBehaviour, IPoolable
         pierceRemaining = 0;
         source = null;
         tint = default;
+        homingTarget = null;
+        homingTurnRate = 0f;
         returned = true;
         CancelInvoke();
     }
@@ -84,6 +90,8 @@ public class Bullet : MonoBehaviour, IPoolable
         pierceRemaining = Mathf.Max(0, info.PierceCount);
         source = info.Source;
         tint = info.Tint;
+        homingTarget = info.HomingTarget;
+        homingTurnRate = info.HomingTurnRate;
         lastPosition = transform.position;
         returned = false;
 
@@ -94,7 +102,15 @@ public class Bullet : MonoBehaviour, IPoolable
         ApplyDamageVisual();
 
         CancelInvoke();
-        Invoke(nameof(ReturnToPool), info.LifeTime > 0f ? info.LifeTime : lifeTime);
+        Invoke(nameof(Expire), info.LifeTime > 0f ? info.LifeTime : lifeTime);
+    }
+
+    /// <summary>사거리 끝 — 쏜 무기에 알리고 풀로 돌아간다 (공성포의 끝 폭발).</summary>
+    void Expire()
+    {
+        if (!returned && source != null && source.HasHitEffects)
+            source.NotifyProjectileExpired(transform.position, transform.forward);
+        ReturnToPool();
     }
 
     /// <summary>
@@ -115,6 +131,7 @@ public class Bullet : MonoBehaviour, IPoolable
 
     void FixedUpdate()
     {
+        if (!returned && homingTurnRate > 0f) Steer();
         if (returned || speed < SweepSpeed) return;
 
         Vector3 now = transform.position;
@@ -134,6 +151,33 @@ public class Bullet : MonoBehaviour, IPoolable
         }
 
         lastPosition = now;
+    }
+
+    /// <summary>목표 쪽으로 조금씩 꺾는다 (수평으로만). 목표가 죽었거나 꺼졌으면 그대로 간다.</summary>
+    void Steer()
+    {
+        if (homingTarget == null || !homingTarget.gameObject.activeInHierarchy || !CombatFx.IsAlive(homingTarget))
+        {
+            homingTarget = null;
+            homingTurnRate = 0f;
+            return;
+        }
+
+        Vector3 to = CombatFx.Body(homingTarget) - transform.position;
+        to.y = 0f;
+        if (to.sqrMagnitude < 0.0001f) return;
+
+        // 가까울수록 세게 꺾는다 — 회전 반경(속도 ÷ 각속도, 17m/s · 360°/s 면 약 2.7m)보다 가까워지면 표적 둘레를 맴돌기만 한다
+        float dist = to.magnitude;
+        float rate = homingTurnRate * (1f + 4f * Mathf.Clamp01(1f - dist / 3.5f));
+
+        Vector3 forward = transform.forward;
+        forward.y = 0f;
+        Vector3 turned = dist < 1f
+            ? to / dist
+            : Vector3.RotateTowards(forward.normalized, to / dist, rate * Mathf.Deg2Rad * Time.fixedDeltaTime, 0f);
+        transform.rotation = Quaternion.LookRotation(turned);
+        rb.linearVelocity = turned * speed;
     }
 
     sealed class HitDistanceComparer : IComparer<RaycastHit>
@@ -167,6 +211,8 @@ public class Bullet : MonoBehaviour, IPoolable
 
         if (d != null)
         {
+            bool wasAlive = source != null && source.HasHitEffects && CombatFx.IsAlive(root);
+
             DamageInfo info = new DamageInfo
             {
                 damage = damage,
@@ -196,6 +242,7 @@ public class Bullet : MonoBehaviour, IPoolable
                     Direction = transform.forward,
                     Damage = damage,
                     IsCritical = isCritical,
+                    Killed = wasAlive && !CombatFx.IsAlive(root),
                 });
             }
         }

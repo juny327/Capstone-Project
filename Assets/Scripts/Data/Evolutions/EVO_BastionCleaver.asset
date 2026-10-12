@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 774e8839cb40ed44f82f525be90550ac, type: 3}
+  m_Name: EVO_BastionCleaver
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponEvolutionData
+  from: {fileID: 11400000, guid: 46bb3f2e7db4bdb488a708673ed6b1f3, type: 2}
+  requiredLevel: 0
+  requiredAttachment: {fileID: 0}
+  requiredSubAbility: {fileID: 11400000, guid: 093e1ab18a43da348af0e7924630fd40, type: 2}
+  requiredAbilityLevel: 1
+  requiredAnyGunAttachment: {fileID: 0}
+  result: {fileID: 11400000, guid: a9ca4746ccfe6de44b06deed3c87d7fb, type: 2}
+  title: "\uC131\uCC44 \uB300\uAC80"
+  flavor: "\uB0B4\uB824\uCC0D\uAE30\uAC00 360\xB0 \uCDA9\uACA9\uD30C \u2014 \uBC29\uD328\uB85C
+    \uB9C9\uC740 \uD53C\uD574\uB97C \uBAA8\uC544 \uB354\uD55C\uB2E4"
+  color: {r: 1, g: 0.85, b: 0.25, a: 1}
+  sound: {fileID: 8300000, guid: f595650ca3f17154e8de61ccc64e6a00, type: 3}
+  soundVolume: 0.9
+  shopPrice: 0

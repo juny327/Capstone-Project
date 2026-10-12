@@ -76,6 +76,30 @@ public class FxLine : MonoBehaviour
         fx.DrawRing(startRadius);
     }
 
+    /// <summary>
+    /// 바닥과 나란한 호 (사슬검의 채찍 궤적). center 둘레 반경 radius 에서 forward 기준 ±halfAngle(도).
+    /// 고리처럼 퍼지지 않고 그 자리에서 흐려진다.
+    /// </summary>
+    public static void Arc(Material material, Vector3 center, Vector3 forward, float radius, float halfAngle, Color color, float width, float duration)
+    {
+        FxLine fx = Get(material);
+        if (fx == null) return;
+
+        fx.Begin(Mode.Bolt, color, width, duration);   // 모양만 정하고 움직이지 않는 선 — Bolt 와 같은 처리
+
+        forward.y = 0f;
+        if (forward.sqrMagnitude < 0.0001f) forward = Vector3.forward;
+        float baseYaw = Mathf.Atan2(forward.x, forward.z) * Mathf.Rad2Deg;
+
+        const int segments = 20;
+        fx.line.positionCount = segments + 1;
+        for (int i = 0; i <= segments; i++)
+        {
+            float yaw = (baseYaw - halfAngle + 2f * halfAngle * i / segments) * Mathf.Deg2Rad;
+            fx.line.SetPosition(i, center + new Vector3(Mathf.Sin(yaw), 0f, Mathf.Cos(yaw)) * radius);
+        }
+    }
+
     static FxLine Get(Material material)
     {
         if (material == null) return null;

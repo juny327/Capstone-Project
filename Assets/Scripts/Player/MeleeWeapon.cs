@@ -251,15 +251,20 @@ public class MeleeWeapon : WeaponBase
         bool vertical = variant == SwingVariant.Vertical;
 
         float delay = vertical ? verticalHitDelay : (cfg != null ? cfg.hitDelay : 0f);
+
+        // 연사 가속(팔랑크스 — 방패를 든 채 ×2.5)이 걸리면 판정도 그만큼 당긴다.
+        // 그대로 두면 다음 휘두르기(간격 ÷ 배율)가 판정 전에 이 스윙을 버려 한 번도 맞지 않는다
+        delay /= Mathf.Max(1f, FireRateBoost);
+
         if (delay > 0f)
             yield return new WaitForSeconds(delay);
 
-        ApplyHits(in stats, ownerRoot, vertical ? verticalArcAngle : stats.ArcAngle);
+        ApplyHits(in stats, ownerRoot, vertical ? verticalArcAngle : stats.ArcAngle, vertical);
 
         swingRoutine = null;
     }
 
-    void ApplyHits(in WeaponRuntimeStats stats, Transform ownerRoot, float arcAngle)
+    void ApplyHits(in WeaponRuntimeStats stats, Transform ownerRoot, float arcAngle, bool vertical)
     {
         MeleeWeaponData cfg = Config;
         if (cfg == null || ownerRoot == null) return;
@@ -306,15 +311,33 @@ public class MeleeWeapon : WeaponBase
             if (Vector3.Angle(forward, dir) > halfArc) continue;   // 부채꼴 밖
 
             bool isCritical = RollCritical(in stats);
+            float dealt = ApplyCritical(in stats, isCritical);
+            Vector3 point = col.ClosestPoint(origin);
+            bool wasAlive = HasHitEffects && CombatFx.IsAlive(root);
 
             target.TakeDamage(new DamageInfo
             {
-                damage = ApplyCritical(in stats, isCritical),
+                damage = dealt,
                 isCritical = isCritical,
-                hitPoint = col.ClosestPoint(origin),
+                hitPoint = point,
                 hitDirection = dir,
                 cameraShake = cfg.cameraShake,   // 근접은 흔들어야 타격감이 난다
             });
+
+            // 상위 무기 동작 (상위무기-계획.md 10-2). 보통 근접 무기는 동작이 없어 건너뛴다
+            if (HasHitEffects)
+            {
+                NotifyHit(new WeaponHit
+                {
+                    Target = root,
+                    Damageable = target,
+                    Point = point,
+                    Direction = dir,
+                    Damage = dealt,
+                    IsCritical = isCritical,
+                    Killed = wasAlive && !CombatFx.IsAlive(root),
+                });
+            }
 
             // 최대 5명을 한 번에 때린다. SoundManager 가 프레임 끝에 한 번만 낸다.
             if (SoundManager.Instance != null)
@@ -324,7 +347,21 @@ public class MeleeWeapon : WeaponBase
         }
 
         SpawnSlashEffect(cfg, origin, forward);
+
+        if (HasHitEffects)
+        {
+            NotifyAttack(new WeaponAttack
+            {
+                Origin = origin,
+                Direction = forward,
+                Vertical = vertical,
+                Range = stats.Range,
+            });
+        }
     }
+
+    // 판정 순간(hitDelay 뒤)에 직접 알린다 — 휘두르기 시작에 알리면 검기가 칼보다 먼저 나간다
+    protected override bool ReportsAttackItself => true;
 
     void SpawnSlashEffect(MeleeWeaponData cfg, Vector3 origin, Vector3 forward)
     {

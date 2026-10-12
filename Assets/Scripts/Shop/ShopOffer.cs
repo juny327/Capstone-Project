@@ -21,6 +21,7 @@ public enum ShopOfferKind
     Attachment,   // 총기 부착물
     Consumable,   // 회복 등 (나중)
     SubAbility,   // 검사 서브 능력
+    Evolution,    // 상위 무기 진화 (무기 줄)
 }
 
 /// <summary>

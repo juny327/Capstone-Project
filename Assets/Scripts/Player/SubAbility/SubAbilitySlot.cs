@@ -194,7 +194,14 @@ public class SubAbilitySlot : MonoBehaviour
     void CancelOthers(int keep)
     {
         for (int i = 0; i < slotCount; i++)
-            if (i != keep && equipped[i] != null && (equipped[i].IsBusy || equipped[i].IsHolding)) equipped[i].Cancel();
+        {
+            if (i == keep || equipped[i] == null || !(equipped[i].IsBusy || equipped[i].IsHolding)) continue;
+
+            // 작은 조합 "방패 받기" — 방패를 든 채 그랩을 쏠 수 있다 (상위무기-계획.md 7장)
+            if (SynergyEffects.KeepsTogether(gameObject, equipped[i], equipped[keep])) continue;
+
+            equipped[i].Cancel();
+        }
     }
 
     public void CancelAll()

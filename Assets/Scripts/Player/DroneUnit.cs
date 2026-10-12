@@ -27,10 +27,14 @@ public class DroneUnit : MonoBehaviour
     private Transform Muzzle => muzzle != null ? muzzle : transform;
 
     /// <summary>DroneWeapon 이 생성 직후 호출한다.</summary>
-    public void Configure(Transform ownerRoot, DroneWeaponData data, int index, int total)
+    // 쏜 무기 — 탄 명중 효과(상위 무기 폭격 편대의 폭발) · 탄 색. null 이면 예전처럼 효과 없이
+    WeaponBase sourceWeapon;
+
+    public void Configure(Transform ownerRoot, DroneWeaponData data, int index, int total, WeaponBase source = null)
     {
         owner = ownerRoot;
         config = data;
+        sourceWeapon = source;
 
         // 여러 대를 궤도상에 균등 배치
         angleOffset = total > 0 ? 360f / total * index : 0f;
@@ -127,7 +131,9 @@ public class DroneUnit : MonoBehaviour
             isCritical ? stats.Damage * stats.CritMultiplier : stats.Damage,
             stats.ProjectileLifeTime,
             isCritical,
-            stats.PierceCount));
+            stats.PierceCount,
+            source: sourceWeapon,
+            tint: sourceWeapon != null ? sourceWeapon.AmmoTint : default));
 
         return true;
     }
