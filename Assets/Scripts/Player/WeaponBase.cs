@@ -57,9 +57,12 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
 
     /// <summary>
     /// 연사 배율 (1 = 그대로, 3 = 세 배 빠르게). 상위 무기 동작이 실행 중에 바꾼다 —
-    /// 회전 기관포(쏠수록 빨라짐) · 팔랑크스(방패를 든 동안 빠른 찌르기). 스탯이 아니라 다음 발 간격에만 쓴다.
+    /// 회전 기관포(쏠수록 빨라짐) · 혈검(폭주 동안). 스탯이 아니라 다음 발 간격에만 쓴다.
     /// </summary>
     public float FireRateBoost { get; set; } = 1f;
+
+    /// <summary>사거리에 잠깐 더하는 값 (m) — 혈검 폭주 동안 휘두르기가 길어진다. 상위 무기 동작이 켜고 끈다.</summary>
+    public float RangeBonus { get; set; }
 
     /// <summary>다음 발까지 남은 시간을 다시 건다 — 여러 단계짜리 발이 끝난 뒤 충전을 처음부터 시작할 때.</summary>
     protected void RestartCooldown(float seconds) => cooldown = Mathf.Max(0f, seconds);
@@ -91,7 +94,15 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
         WeaponModifier.Combine(WeaponModifier.Combine(accumulated, attachmentModifier),
                                data.perLevelBonus.Scaled(level - 1));
 
-    public WeaponRuntimeStats Stats => WithOverrides(data.Compose(TotalModifier), projectileCountOverride);
+    public WeaponRuntimeStats Stats
+    {
+        get
+        {
+            WeaponRuntimeStats s = WithOverrides(data.Compose(TotalModifier), projectileCountOverride);
+            if (RangeBonus != 0f) s.Range = Mathf.Max(0.1f, s.Range + RangeBonus);
+            return s;
+        }
+    }
 
     // 탄 수를 정하는 부착물 (슬러그 = 1). 증분이 아니라 마지막에 덮어쓴다 — 0 이면 없음
     private int projectileCountOverride;
@@ -543,7 +554,7 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
     }
 
     /// <summary>
-    /// 직접 공격(탄 · 휘두르기 · 빔, 그리고 공격을 대신하는 상위 무기 공격 — 용의 포효 불길 · 궤도 레일 · 프리즘 · 태양창)이
+    /// 직접 공격(탄 · 휘두르기 · 빔, 그리고 공격을 대신하는 상위 무기 공격 — 용의 포효 불길 · 프리즘 · 태양창)이
     /// 맞힌 뒤 부른다. 쓰러뜨렸으면 true, 그것이 적이면 Drain 스킬(Skill/Drain — 직접 공격 처치 시 회복)에 알린다.
     /// wasAlive 는 맞히기 <b>전</b>에 잰다 — 죽는 동작 중인 적은 콜라이더가 남아 다시 맞는데, 그때 또 회복하지 않게.
     /// 명중 효과(폭발 · 번개 · 파편 · 화상)와 서브 능력 · 패링 반사는 Drain 이 말하는 '스킬 공격' 쪽이라 부르지 않는다.

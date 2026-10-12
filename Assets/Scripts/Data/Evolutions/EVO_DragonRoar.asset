@@ -14,10 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WeaponEvolutionData
   from: {fileID: 11400000, guid: 425b47f8befe4f34485ff97821ad886a, type: 2}
   requiredLevel: 0
-  requiredAttachment: {fileID: 11400000, guid: 45bab0e30ad9c984f849f8fe8c83656d, type: 2}
+  requiredAttachment: {fileID: 0}
   requiredSubAbility: {fileID: 0}
   requiredAbilityLevel: 1
   requiredAnyGunAttachment: {fileID: 0}
+  requiredSkill: {fileID: 11400000, guid: 7bf2963a07beb464faa35e10e90c7c89, type: 2}
   result: {fileID: 11400000, guid: 8bbcbb6f32e2a744b83ad1f7a1ede115, type: 2}
   title: "\uC6A9\uC758 \uD3EC\uD6A8"
   flavor: "\uC0B0\uD0C4 \uB300\uC2E0 \uD654\uC5FC \uBC29\uC0AC \u2014 \uC815\uBA74\uC744

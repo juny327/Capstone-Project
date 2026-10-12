@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
 /// <summary>A scene-owned session. Does not change or borrow GameAppManager.Player/SelectedWeapon.</summary>
@@ -107,6 +108,30 @@ public class TestRoomManager : MonoBehaviour
         pendingEvolution = evolution;
     }
 
+    [Tooltip("무리 표적 체력 튼튼 ↔ 한 방 키")]
+    [SerializeField] Key crowdToughnessKey = Key.H;
+
+    /// <summary>무리 체력을 튼튼 ↔ 한 방으로 바꾼다. 무리가 서 있으면 같은 모양으로 다시 세운다.</summary>
+    public void ToggleCrowdToughness()
+    {
+        if (!IsReady || Crowd == null) return;
+        Crowd.Tough = !Crowd.Tough;
+        if (Crowd.Active) SpawnCrowd(Crowd.Current);
+        else OnNotice?.Invoke(Crowd.Tough ? "무리 체력 — 튼튼 (거의 안 죽는다)" : "무리 체력 — 한 방 (처치로 터지는 효과 확인)");
+    }
+
+    void SpawnCrowd(TestRoomCrowd.Formation formation)
+    {
+        if (Crowd.Spawn(formation, formation == TestRoomCrowd.Formation.Cluster && crowdClusterPoint != null
+                     ? crowdClusterPoint.position : RingCenter(),
+                     Controller.ActiveWeapon != null ? Controller.ActiveWeapon.Stats.Damage : 10f))
+            OnNotice?.Invoke((formation == TestRoomCrowd.Formation.Cluster
+                ? "무리 표적 — 모여 있기 9" : "무리 표적 — 둘러싸기 8 (반경 4.5m)") +
+                (Crowd.Tough ? $" · 체력 {Crowd.Health:N0} 튼튼 (H — 한 방으로)" : $" · 체력 {Crowd.Health:0.#} 한 방 (H — 튼튼으로) · 죽으면 2초 뒤 다시 섭니다"));
+        else
+            OnNotice?.Invoke("무리 표적 프리팹이 연결되지 않았습니다 (Tools / Test Room / 상위 무기 구역 추가)");
+    }
+
     /// <summary>무리 표적 구역 — 같은 무리가 서 있으면 치우고, 아니면 세운다.</summary>
     public void QueueCrowd(TestRoomCrowd.Formation formation)
     {
@@ -134,15 +159,11 @@ public class TestRoomManager : MonoBehaviour
                 Crowd.Clear();
                 OnNotice?.Invoke("무리 표적을 치웠습니다");
             }
-            else if (Crowd.Spawn(pendingFormation, pendingFormation == TestRoomCrowd.Formation.Cluster && crowdClusterPoint != null
-                         ? crowdClusterPoint.position : RingCenter(),
-                         Controller.ActiveWeapon != null ? Controller.ActiveWeapon.Stats.Damage : 10f))
-                OnNotice?.Invoke((pendingFormation == TestRoomCrowd.Formation.Cluster
-                    ? "무리 표적 — 모여 있기 9 (오른쪽 아래)" : "무리 표적 — 둘러싸기 8 (반경 4.5m)") +
-                    $" · 체력 {Crowd.Health:0.#} (공격력 × 0.9) · 죽으면 2초 뒤 다시 섭니다");
-            else
-                OnNotice?.Invoke("무리 표적 프리팹이 연결되지 않았습니다 (Tools / Test Room / 상위 무기 구역 추가)");
+            else SpawnCrowd(pendingFormation);
         }
+
+        // H — 무리 체력 튼튼 ↔ 한 방 (서 있는 무리는 그 체력으로 다시 세운다)
+        if (Keyboard.current != null && Keyboard.current[crowdToughnessKey].wasPressedThisFrame) ToggleCrowdToughness();
         // A single mutation point after WeaponController.Update finishes iterating its lists.
         if (pendingSelection != null)
         {

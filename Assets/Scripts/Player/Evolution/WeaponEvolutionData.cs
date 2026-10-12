@@ -5,6 +5,7 @@ using UnityEngine;
 ///
 ///  · 사수 : 그 총의 개조(<see cref="requiredAttachment"/>)가 달려 있으면 — 개조 A · B 마다 다른 조합 에셋
 ///  · 검사 : 서브 능력(<see cref="requiredSubAbility"/>)을 가지고 있으면
+///  · 둘 다 : 팀원 스킬(<see cref="requiredSkill"/> — 레벨업 카드 흡혈 등)을 가지고 있으면 (2026-10-12 혈검부터)
 /// 조건 · 결과 · 문구는 전부 이 에셋에 있다. 진화를 늘릴 때는 에셋을 만들어 <see cref="EvolutionCatalog"/> 에 넣는다.
 /// </summary>
 [CreateAssetMenu(menuName = "Weapons/Evolution", fileName = "EVO_New")]
@@ -27,6 +28,9 @@ public class WeaponEvolutionData : ScriptableObject
 
     [Tooltip("가진 총 중 하나에 달려 있어야 하는 부착물 (드론 — 사수 폭격 편대의 유탄 발사기). 비우면 보지 않는다")]
     public AttachmentData requiredAnyGunAttachment;
+
+    [Tooltip("가지고 있어야 하는 팀원 스킬 — 레벨업 카드 (흡혈 등). 사수 · 검사 모두 받는다. 비우면 보지 않는다")]
+    public UpgradeData requiredSkill;
 
     [Header("결과")]
     [Tooltip("상위 무기 데이터 (evolvedFrom = 원래 무기)")]
@@ -65,9 +69,18 @@ public class WeaponEvolutionData : ScriptableObject
             if (requiredSubAbility != null)
                 text += requiredAbilityLevel > 1 ? $" + {requiredSubAbility.displayName} Lv{requiredAbilityLevel}" : $" + {requiredSubAbility.displayName}";
             if (requiredAnyGunAttachment != null) text += $" + 총에 {requiredAnyGunAttachment.displayName}";
+            if (requiredSkill != null) text += $" + {SkillPairs.NameOf(requiredSkill)}";
             return text;
         }
     }
+
+    /// <summary>짝 장비 이름 한 줄 (조합식 판 · 테스트 룸 · Tools). 짝이 없으면 빈 문자열.</summary>
+    public string PairName =>
+        requiredAttachment != null ? requiredAttachment.displayName
+        : requiredSubAbility != null ? requiredSubAbility.displayName
+        : requiredAnyGunAttachment != null ? "총에 " + requiredAnyGunAttachment.displayName
+        : requiredSkill != null ? SkillPairs.NameOf(requiredSkill)
+        : "";
 
     /// <summary>원래 무기를 (아직 진화하지 않은 채로) 가지고 있으면 그 무기.</summary>
     public IWeapon FindOwned(WeaponController weapons)
@@ -104,6 +117,14 @@ public class WeaponEvolutionData : ScriptableObject
             int index = abilities != null ? abilities.IndexOf(requiredSubAbility) : -1;
             SubAbility owned = index >= 0 ? abilities.Get(index) : null;
             if (owned == null || owned.Level < requiredAbilityLevel) return false;
+        }
+
+        if (requiredSkill != null)
+        {
+            GameObject player = weapons != null ? weapons.gameObject
+                              : abilities != null ? abilities.gameObject
+                              : weapon is WeaponBase wb && wb.Controller != null ? wb.Controller.gameObject : null;
+            if (!SkillPairs.Has(player, requiredSkill)) return false;
         }
 
         return true;

@@ -9,7 +9,7 @@ using UnityEngine.UI;
 /// 상위 무기 20종 구성 (상위무기-계획.md 10 · 11 · 14 · 16장).
 ///
 ///  · 1차 4종 (이 파일) — 처형자 (소총 + 지정사수) · 프리즘 노바 (충전 레이저 + 분광 프리즘)
-///                        거울칼날 (검 + 에너지 방패) · 중력 대검 (대검 + 그랩 훅)
+///                        거울칼날 (검 + 에너지 방패) · 중력 대검 (대검 + 블랙홀 — 팀원 스킬, 2026-10-13)
 ///  · 나머지 16종 — EvolutionSetupMore.cs (총 10 · 근접 4 · 드론 2)
 ///
 /// 만드는 것 — 발광 재질 · 소용돌이 텍스처 · 결정 메시, 상위 무기 프리팹(W_EVO_*) · 데이터(WD_EVO_*) · 고유 동작(AE_EVO_*),
@@ -27,6 +27,7 @@ public static partial class EvolutionSetup
     const string WeaponPrefabDir = "Assets/Prefabs/Weapons";
     const string AttachmentDir = "Assets/Scripts/Data/Attachments";
     const string SubAbilityDir = "Assets/Scripts/Data/SubAbilities";
+    const string SkillCardDir = "Assets/Scripts/Upgrade/Data";   // 팀원 레벨업 카드 (흡혈 등 — 스킬 짝)
     const string EvolutionDir = "Assets/Scripts/Data/Evolutions";
     const string EffectDir = EvolutionDir + "/Effects";
     const string FxDir = "Assets/Prefabs/Evolution";
@@ -161,7 +162,7 @@ public static partial class EvolutionSetup
             Recipe("EVO_MirrorEdge", reset, "WD_Sword", mirrorEdge, Cyan, clip,
                 "휘두를 때마다 적 탄을 되돌리고, 네 번째 휘두르기마다 초승달 검기 3개", ability: "SA_Shield"),
             Recipe("EVO_GravityCleaver", reset, "WD_Greatsword", cleaver, Violet, clip,
-                "내려찍은 자리에 중력장 — 주변 적을 빨아들인 뒤 붕괴 폭발", ability: "SA_Grapple"),
+                "내려찍은 자리에 중력장 — 주변 적을 빨아들인 뒤 붕괴 폭발", skill: "BlackHoleUpgrade"),   // 2026-10-13 그랩 훅 → 블랙홀 (중력 ↔ 블랙홀)
         };
         var icons = new List<string> { "WD_EVO_Executioner", "WD_EVO_PrismNova", "WD_EVO_MirrorEdge", "WD_EVO_GravityCleaver" };
 
@@ -645,7 +646,7 @@ public static partial class EvolutionSetup
     }
 
     static WeaponEvolutionData Recipe(string name, bool reset, string from, WeaponData result, Color color, AudioClip sound,
-        string flavor, string attachment = null, string ability = null, string anyGun = null)
+        string flavor, string attachment = null, string ability = null, string anyGun = null, string skill = null)
     {
         if (result == null) return null;
 
@@ -667,6 +668,7 @@ public static partial class EvolutionSetup
             recipe.requiredSubAbility = ability != null ? Load<SubAbilityData>($"{SubAbilityDir}/{ability}.asset") : null;
             recipe.requiredAbilityLevel = 1;
             recipe.requiredAnyGunAttachment = anyGun != null ? Load<AttachmentData>($"{AttachmentDir}/{anyGun}.asset") : null;
+            recipe.requiredSkill = skill != null ? Load<UpgradeData>($"{SkillCardDir}/{skill}.asset") : null;
             recipe.result = result;
             recipe.title = result.weaponName;
             recipe.flavor = flavor;
@@ -675,7 +677,7 @@ public static partial class EvolutionSetup
             recipe.shopPrice = 0;
 
             if (recipe.from == null || (attachment != null && recipe.requiredAttachment == null) || (ability != null && recipe.requiredSubAbility == null)
-                || (anyGun != null && recipe.requiredAnyGunAttachment == null))
+                || (anyGun != null && recipe.requiredAnyGunAttachment == null) || (skill != null && recipe.requiredSkill == null))
                 Debug.LogError($"{Tag} {name}: 원래 무기 · 짝 장비 중 찾지 못한 것이 있습니다.");
         }
 

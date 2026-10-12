@@ -97,9 +97,7 @@ public static class TestRoomEvolutionSetup
             go.transform.position = new Vector3(PickupStartX + PickupStepX * (i % PerRow), 0f, PickupTopZ - PickupRowStep * (i / PerRow));
 
             TestRoomSetup.SetObject(go.GetComponent<TestEvolutionPickup>(), "evolution", e);
-            string pair = e.requiredAttachment != null ? e.requiredAttachment.displayName
-                        : e.requiredSubAbility != null ? e.requiredSubAbility.displayName
-                        : e.requiredAnyGunAttachment != null ? "총에 " + e.requiredAnyGunAttachment.displayName : "";
+            string pair = e.PairName;
             FillLabel(go, e.Title, $"{e.from.weaponName} + {pair}", e.result.icon != null ? e.result.icon : e.from.icon);
         }
 

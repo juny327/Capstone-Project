@@ -61,7 +61,3 @@ MonoBehaviour:
     m_Bits: 129
   cameraShake: 0.25
   slashEffectPrefab: {fileID: 0}
-  attackWhileShielding: 0
-  shieldingAttackSpeed: 2.5
-  shieldReleaseChargeDistance: 6
-  shieldReleaseChargeDamageMul: 3

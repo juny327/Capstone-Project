@@ -293,9 +293,9 @@ public class ComboHud : MonoBehaviour
             if (has && level >= e.RequiredLevel && ready == null) ready = e;
 
             AttachmentData attachment = e.requiredAttachment != null ? e.requiredAttachment : e.requiredAnyGunAttachment;
-            Sprite pairSprite = e.requiredSubAbility != null ? e.requiredSubAbility.icon : attachment != null ? attachment.icon : null;
-            string pairName = e.requiredSubAbility != null ? e.requiredSubAbility.displayName
-                            : attachment != null ? (e.requiredAnyGunAttachment != null ? $"총에 {attachment.displayName}" : attachment.displayName) : "?";
+            Sprite pairSprite = e.requiredSubAbility != null ? e.requiredSubAbility.icon : attachment != null ? attachment.icon
+                              : e.requiredSkill != null ? e.requiredSkill.icon : null;
+            string pairName = !string.IsNullOrEmpty(e.PairName) ? e.PairName : "?";
 
             SetImage(row.pairIcon, pairSprite);
             if (row.pairName != null) row.pairName.text = pairName;
@@ -338,6 +338,7 @@ public class ComboHud : MonoBehaviour
         if (e.requiredSubAbility != null) return "서브 능력 · 정비 창";
         if (e.requiredAttachment != null) return $"{AttachmentData.SlotName(e.requiredAttachment.slot)} · 정비 창";
         if (e.requiredAnyGunAttachment != null) return "가진 총의 하부 · 정비 창";
+        if (e.requiredSkill != null) return "레벨업 카드";
         return "";
     }
 

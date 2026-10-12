@@ -196,30 +196,9 @@ public class ShieldAbility : SubAbility, IDamageFilter
         holdTime += deltaTime;
 
         // 들고 있는 동안 공격이 멈춘다 (쿨다운은 그대로 흐른다).
-        // 상위 무기 팔랑크스는 반대로 방패를 든 채 더 빨리 찌른다
-        MeleeWeaponData phalanx = PhalanxData(out WeaponBase held);
-        if (phalanx != null)
-        {
-            held.FireRateBoost = phalanx.shieldingAttackSpeed;
-            boosted = held;
-            return;
-        }
-
+        // (방패를 든 채 찌르던 팔랑크스 · 막은 피해를 모으던 성채 대검은 2026-10-12 보관)
         if (Weapons != null) Weapons.SuppressFiring(0.15f);
     }
-
-    // 팔랑크스로 빨라진 무기 — 방패를 내리면 되돌린다
-    WeaponBase boosted;
-
-    /// <summary>든 무기가 "방패를 든 채 공격"하는 상위 무기(팔랑크스)면 그 데이터.</summary>
-    MeleeWeaponData PhalanxData(out WeaponBase held)
-    {
-        held = Weapons != null ? Weapons.ActiveWeapon as WeaponBase : null;
-        return held != null && held.Data is MeleeWeaponData melee && melee.attackWhileShielding ? melee : null;
-    }
-
-    /// <summary>방패로 막은 피해 (성채 대검이 모아 둔다).</summary>
-    public event System.Action<float> OnAbsorbed;
 
     public override void OnReleased()
     {
@@ -228,14 +207,6 @@ public class ShieldAbility : SubAbility, IDamageFilter
         bool act = holdTime >= bashMinHold && bashCd <= 0f;
         Lower();
         if (!act) return;
-
-        // 팔랑크스 — 떼는 순간의 동작은 상위 무기가 정한다 (방패 Lv3 변형보다 우선)
-        MeleeWeaponData phalanx = PhalanxData(out _);
-        if (phalanx != null)
-        {
-            StartCharge(phalanx.shieldReleaseChargeDistance, phalanx.shieldReleaseChargeDamageMul);
-            return;
-        }
 
         if (Charge) StartCharge();
         else if (Throw) ThrowDisc();
@@ -275,7 +246,6 @@ public class ShieldAbility : SubAbility, IDamageFilter
 
         current -= Mathf.Max(0f, info.damage);
         hitFlash = 0.12f;
-        OnAbsorbed?.Invoke(Mathf.Max(0f, info.damage));
 
         Vector3 at = Owner.transform.position + from.normalized * faceRadius + Vector3.up * 1.1f;
         Spark(at, from.normalized);
@@ -288,12 +258,6 @@ public class ShieldAbility : SubAbility, IDamageFilter
     void Lower()
     {
         raised = false;
-
-        if (boosted != null)
-        {
-            boosted.FireRateBoost = 1f;
-            boosted = null;
-        }
 
         if (Move != null)
         {

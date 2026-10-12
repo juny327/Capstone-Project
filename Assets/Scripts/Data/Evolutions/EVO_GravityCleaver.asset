@@ -15,9 +15,10 @@ MonoBehaviour:
   from: {fileID: 11400000, guid: 46bb3f2e7db4bdb488a708673ed6b1f3, type: 2}
   requiredLevel: 0
   requiredAttachment: {fileID: 0}
-  requiredSubAbility: {fileID: 11400000, guid: 931fbc73911dfe9449a732935edfe98d, type: 2}
+  requiredSubAbility: {fileID: 0}
   requiredAbilityLevel: 1
   requiredAnyGunAttachment: {fileID: 0}
+  requiredSkill: {fileID: 11400000, guid: 788bb7444772b6c4ba21f33ec5b9bf6d, type: 2}
   result: {fileID: 11400000, guid: a1cd84c31a485514682df558dbb0e56b, type: 2}
   title: "\uC911\uB825 \uB300\uAC80"
   flavor: "\uB0B4\uB824\uCC0D\uC740 \uC790\uB9AC\uC5D0 \uC911\uB825\uC7A5 \u2014

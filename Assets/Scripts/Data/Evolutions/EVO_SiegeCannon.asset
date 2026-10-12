@@ -18,6 +18,7 @@ MonoBehaviour:
   requiredSubAbility: {fileID: 0}
   requiredAbilityLevel: 1
   requiredAnyGunAttachment: {fileID: 0}
+  requiredSkill: {fileID: 0}
   result: {fileID: 11400000, guid: 4f3fc67b84c04eb4590360b739c3ffbd, type: 2}
   title: "\uACF5\uC131\uD3EC"
   flavor: "\uAD00\uD1B5 \uBB34\uC81C\uD55C \uD3EC\uD0C4 \u2014 \uB9DE\uC740 \uC801\uB9C8\uB2E4

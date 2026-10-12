@@ -242,6 +242,7 @@ public class WeaponGrantWindow : EditorWindow
         if (e.requiredAttachment != null) return e.requiredAttachment.displayName;
         if (e.requiredSubAbility != null) return e.requiredSubAbility.displayName;
         if (e.requiredAnyGunAttachment != null) return "총에 " + e.requiredAnyGunAttachment.displayName;
+        if (e.requiredSkill != null) return SkillPairs.NameOf(e.requiredSkill) + " (레벨업 카드)";
         return "짝 없음";
     }
 

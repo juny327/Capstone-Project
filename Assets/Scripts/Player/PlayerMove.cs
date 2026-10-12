@@ -133,17 +133,27 @@ public class PlayerMove : MonoBehaviour
     // 구르기
     // ─────────────────────────────────────────────
     [Header("Roll")]
-    [Tooltip("한 번 구를 때 실제로 이동하는 거리(m). 커브 모양과 무관하게 이 값만큼 이동한다")]
-    [SerializeField] private float rollDistance = 4f;
+    [Tooltip("기준 이동 속도(rollReferenceSpeed)로 걸을 때 한 번에 구르는 거리(m). 더 빨리 움직이고 있으면(달리기 · 속도 업그레이드) " +
+             "그 비율만큼 멀리 · 빠르게 구른다 — 구르는 시간은 같다. 커브 모양과 무관하게 이 거리만큼 이동한다")]
+    [SerializeField] private float rollDistance = 6f;
 
-    [Tooltip("구르기 지속 시간(초). Roll 클립의 실제 길이와 맞출 것")]
-    [SerializeField] private float rollDuration = 1.5f;
+    [Tooltip("구르기 지속 시간(초) — 짧을수록 빠르게. Roll 클립은 이 시간에 맞춰 빨리 재생된다 (2026-10-13 0.55 → 0.75 — 너무 빨라 조금 느리게)")]
+    [SerializeField] private float rollDuration = 0.75f;
+
+    [Tooltip("이 이동 속도일 때 rollDistance 만큼 구른다 (플레이어 기본 이동 속도)")]
+    [SerializeField] private float rollReferenceSpeed = 3f;
+
+    [Tooltip("이동 속도를 따라 늘어나는 거리의 상한 배율 (달리기 ×1.6 이면 6 → 9.6m)")]
+    [SerializeField] private float rollMaxScale = 1.6f;
+
+    [Tooltip("애니메이터 Roll 상태가 맞춰진 재생 시간(초) — PlayerRollSetup.RollDuration. 구르기 동안 애니메이터 속도 = 이 값 ÷ rollDuration")]
+    [SerializeField] private float rollClipDuration = 1.5f;
 
     [Tooltip("구르기 종료 후 다시 구를 수 있을 때까지의 시간(초)")]
-    [SerializeField] private float rollCooldown = 2.5f;
+    [SerializeField] private float rollCooldown = 3.25f;   // 구르기 0.75초 + 3.25초 = 다시 쓰기까지 4초
 
     [Tooltip("구르기 시작부터 무적이 유지되는 시간(초). rollDuration과 같으면 구르는 내내 무적")]
-    [SerializeField] private float rollIFrame = 1.5f;
+    [SerializeField] private float rollIFrame = 0.75f;
 
     [Tooltip("시간에 따른 구르기 속도 배율. 가로축 0~1이 구르기 진행도")]
     [SerializeField]
@@ -167,6 +177,7 @@ public class PlayerMove : MonoBehaviour
 
     private Vector3 rollStartPos;
     private float rollCodeDistance;   // 코드가 의도한 누적 이동량
+    private float rollDistanceNow;    // 이번 구르기 거리 — 시작할 때 이동 속도로 정한다
 
     private bool isRolling;
     private float rollElapsed;
@@ -744,8 +755,20 @@ public class PlayerMove : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// 지금 이동 속도에 맞춘 구르기 거리 — 걷기 기준 rollDistance, 달리거나 빨라졌으면 그 비율만큼 (rollMaxScale 까지).
+    /// 둔화 · 정지 중이면 줄지만 절반 아래로는 줄지 않는다.
+    /// </summary>
+    public float RollDistanceNow()
+    {
+        float speed = CurrentSpeed * (IsSprinting ? sprintMultiplier : 1f);
+        float scale = rollReferenceSpeed > 0.01f ? Mathf.Clamp(speed / rollReferenceSpeed, 0.5f, Mathf.Max(0.5f, rollMaxScale)) : 1f;
+        return rollDistance * scale;
+    }
+
     void StartRoll()
     {
+        rollDistanceNow = RollDistanceNow();   // isRolling 을 켜기 전에 (달리기 판정이 구르기 중이면 꺼진다)
         rollDir = ResolveRollDirection();
         isRolling = true;
         rollElapsed = 0f;
@@ -760,7 +783,16 @@ public class PlayerMove : MonoBehaviour
         // 이동 애니메이션을 끄고 구르기 재생
         anim.SetBool(HashIsMove, false);
         if (hasRollParam)
-            anim.SetTrigger(HashRoll);
+        {
+            // 구르기 모션이 아직 끝나지 않았으면(프레임이 밀렸을 때) 트리거가 자기 자신으로는 넘어가지 못해 남았다가
+            // 나중에 한 번 더 구른다 — 그때는 처음부터 다시 튼다
+            if (anim.GetCurrentAnimatorStateInfo(0).shortNameHash == HashRoll) anim.Play(HashRoll, 0, 0f);
+            else anim.SetTrigger(HashRoll);
+        }
+
+        // Roll 클립은 rollClipDuration 에 맞춰져 있다 — 짧게 구르면 그만큼 빨리 재생 (끝나면 1 로)
+        if (rollDuration > 0.01f && rollClipDuration > 0.01f)
+            anim.speed = rollClipDuration / rollDuration;
 
         PlaySound(sounds != null ? sounds.roll : null);
 
@@ -790,7 +822,7 @@ public class PlayerMove : MonoBehaviour
         rollElapsed += Time.fixedDeltaTime;
 
         float t = Mathf.Clamp01(rollElapsed / rollDuration);
-        float speed = (rollDistance / rollDuration) * (rollCurve.Evaluate(t) / rollCurveAverage);
+        float speed = (rollDistanceNow / rollDuration) * (rollCurve.Evaluate(t) / rollCurveAverage);
 
         Vector3 v = rb.linearVelocity;
         v.x = rollDir.x * speed;
@@ -810,6 +842,11 @@ public class PlayerMove : MonoBehaviour
     {
         isRolling = false;
         rollElapsed = 0f;
+        if (anim != null)
+        {
+            anim.speed = 1f;
+            if (hasRollParam) anim.ResetTrigger(HashRoll);   // 남은 트리거로 다시 구르지 않게
+        }
 
         if (logRollDebug)
         {
@@ -819,7 +856,7 @@ public class PlayerMove : MonoBehaviour
             string rootMotion = (anim != null && anim.applyRootMotion) ? "ON" : "OFF";
 
             Debug.Log(
-                $"[Roll] 설정={rollDistance:F2}m | 코드가 민 거리={rollCodeDistance:F2}m | " +
+                $"[Roll] 설정={rollDistanceNow:F2}m (기준 {rollDistance:F1}m) | 코드가 민 거리={rollCodeDistance:F2}m | " +
                 $"실제 이동={d.magnitude:F2}m | curveKeys={rollCurve.length} " +
                 $"avg={rollCurveAverage:F3} | rootMotion={rootMotion}");
         }
@@ -844,6 +881,7 @@ public class PlayerMove : MonoBehaviour
         rollBufferedAt = -999f;
         rollDir = Vector3.zero;
         if (hasRollParam && anim != null) anim.ResetTrigger(HashRoll);
+        if (anim != null) anim.speed = 1f;
         SetUpperBodyLayers(true);
         rb.position = position;
         rb.linearVelocity = Vector3.zero;
@@ -891,9 +929,10 @@ public class PlayerMove : MonoBehaviour
     {
         isDead = true;
 
-        // 구르는 중이었다면 정리 (무적 잔존 / 상체 레이어 복구 방지)
+        // 구르는 중이었다면 정리 (무적 잔존 / 상체 레이어 복구 방지 / 빨라진 애니메이터 — 사망 모션이 빨리 돌지 않게)
         isRolling = false;
         rollElapsed = 0f;
+        if (anim != null) anim.speed = 1f;
         rollBufferedAt = -999f;
         isDashing = false;
         actionLocks.Clear();

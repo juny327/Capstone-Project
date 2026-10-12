@@ -122,6 +122,9 @@ public static class EvolutionService
             if (!attached) missing = "총의 " + evolution.requiredAnyGunAttachment.displayName;
         }
 
+        if (evolution.requiredSkill != null && !SkillPairs.Grant(player, evolution.requiredSkill))
+            missing = SkillPairs.NameOf(evolution.requiredSkill);
+
         bool ready = IsReady(player, evolution);
 
         if (!evolve)

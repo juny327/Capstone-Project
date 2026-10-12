@@ -8,15 +8,22 @@ using UnityEngine;
 ///  · 모여 있기 — 정한 자리에 3 × 3 (1.6m 간격) — 처형자 연쇄 · 붕괴 폭발 · 검기
 ///  · 둘러싸기 — 지금 플레이어 둘레 반경 4.5m 에 8 — 프리즘 노바 사방 빔 · 중력장
 /// 죽으면 respawnDelay 뒤 제자리에 다시 선다. 피해 · 처치 수를 따로 센다 (훈련용 해골 측정과 섞지 않는다).
-/// 체력은 세울 때 손에 든 무기 공격력 × healthPerDamage — 한 방에 쓰러져야 처치 연쇄 · 붕괴 폭발이 보인다.
+///
+/// 체력 (2026-10-13 사용자 요청 — "한 방에 죽어 상위 무기 부가 능력을 보기 어렵다"):
+///  · <b>튼튼</b> (기본) — 무기 공격력 × toughHealthPerDamage (최소 toughMinHealth). 거의 안 죽어 화상 · 경직 · 끌기 · 연쇄 줄기 · 회복을 오래 본다
+///  · <b>한 방</b> (H 키) — 무기 공격력 × healthPerDamage. 처치로 터지는 것(처형자 연쇄 · 불 옮김 · 혈검 혈기)을 볼 때
 /// </summary>
 public class TestRoomCrowd : MonoBehaviour
 {
     public enum Formation { Cluster, Ring }
 
-    [Tooltip("체력 = 손에 든 무기 공격력 × 이 값 (최소 minHealth)")]
+    [Tooltip("한 방 모드 — 체력 = 손에 든 무기 공격력 × 이 값 (최소 minHealth)")]
     [SerializeField] float healthPerDamage = 0.9f;
     [SerializeField] float minHealth = 3f;
+
+    [Tooltip("튼튼 모드 (기본) — 체력 = 손에 든 무기 공격력 × 이 값 (최소 toughMinHealth)")]
+    [SerializeField] float toughHealthPerDamage = 1000f;
+    [SerializeField] float toughMinHealth = 10000f;
     [SerializeField] float respawnDelay = 2f;
     [SerializeField] float clusterSpacing = 1.6f;
     [SerializeField] float ringRadius = 4.5f;
@@ -30,6 +37,9 @@ public class TestRoomCrowd : MonoBehaviour
     public bool Active => dummies.Count > 0;
     public Formation Current { get; private set; }
     public float Health { get; private set; }
+
+    /// <summary>튼튼(기본) / 한 방. 바꾸면 다음에 세울 때부터 — TestRoomManager 가 서 있는 무리를 다시 세운다.</summary>
+    public bool Tough { get; set; } = true;
     public IReadOnlyList<TestRoomCrowdDummy> Dummies => dummies;
 
     public void Configure(TestRoomCrowdDummy dummyPrefab) => prefab = dummyPrefab;
@@ -43,7 +53,8 @@ public class TestRoomCrowd : MonoBehaviour
 
         Clear();
         Current = formation;
-        Health = Mathf.Max(minHealth, weaponDamage * healthPerDamage);
+        Health = Tough ? Mathf.Max(toughMinHealth, weaponDamage * toughHealthPerDamage)
+                       : Mathf.Max(minHealth, weaponDamage * healthPerDamage);
 
         var points = new List<Vector3>();
         if (formation == Formation.Cluster)

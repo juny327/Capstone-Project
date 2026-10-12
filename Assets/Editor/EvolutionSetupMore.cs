@@ -18,6 +18,7 @@ public static partial class EvolutionSetup
     const string SwordBYellow = "Assets/FuturaWeapons/Models/Sword_B_Yellow.fbx";
     const string StaffBlue = "Assets/FuturaWeapons/Models/Staff_Blue.fbx";
     const string HalberdRed = "Assets/FuturaWeapons/Models/Halberd_Red.fbx";
+    const string SwordARed = "Assets/FuturaWeapons/Models/Sword_A_Red.fbx";   // 혈검 — 원래 검(A 주황)과 같은 모양의 붉은 검
 
     const string ElectricVfx = "Assets/GabrielAguiarProductions/FreeQuickEffectsVol1/Prefabs/vfx_Electricity_01.prefab";
     const string ImpactVfx = "Assets/GabrielAguiarProductions/FreeQuickEffectsVol1/Prefabs/vfx_Impact_01.prefab";
@@ -37,6 +38,7 @@ public static partial class EvolutionSetup
     static readonly Color Bastion = new Color(1f, 0.85f, 0.25f, 1f);
     static readonly Color Lance = new Color(0.3f, 0.95f, 1f, 1f);
     static readonly Color Phalanx = new Color(1f, 0.25f, 0.2f, 1f);
+    static readonly Color Blood = new Color(0.9f, 0.08f, 0.14f, 1f);
 
     /// <summary>총 상위 무기 부속 — 기본 도형으로 만든다 (상위무기-계획.md 14-3 표).</summary>
     [System.Flags]
@@ -44,8 +46,8 @@ public static partial class EvolutionSetup
     {
         None = 0,
         SpinBarrels = 1 << 0,   // 회전 기관포 — 다총열 (SpinUpEffect 가 돌린다)
-        Rails = 1 << 1,         // 궤도 레일캐논 — 위아래 레일
-        Coils = 1 << 2,         // 폭풍 코일 · 뇌운 — 총열 코일 고리
+        Rails = 1 << 1,         // 위아래 레일 (궤도 레일캐논 — 보관, 지금 쓰는 무기 없음)
+        Coils = 1 << 2,         // 뇌운 — 총열 코일 고리 (폭풍 코일은 보관)
         FocusRing = 1 << 3,     // 태양창 — 총구 앞 집광 고리
         BigMuzzle = 1 << 4,     // 공성포 — 큰 포구
         FuelTank = 1 << 5,      // 용의 포효 — 연료통 · 노즐
@@ -101,16 +103,7 @@ public static partial class EvolutionSetup
             });
         SetPrefab(minigun, tracer);
 
-        // 파편 폭풍 — 기관단총 + 난사
-        var fragment = Effect<FragmentOnHitEffect>("AE_EVO_Fragment", reset, e => { e.material = fxLine; e.color = Spark; });
-        var storm = EvolvedData<ProjectileWeaponData>("WD_SMG", "WD_EVO_FragmentStorm", reset,
-            GunVariant("W_SMG", "W_EVO_FragmentStorm", GunGlowMaterial("EVO_Glow_Spark", Spark, reset), Spark, false, null, null, reset),
-            fragment, Spark, d =>
-            {
-                d.weaponName = "파편 폭풍";
-                d.description = "명중할 때마다 파편 2개가 가까운 다른 적에게 튄다";
-                d.damage *= 1.15f;
-            });
+        // 파편 폭풍 (기관단총 + 난사) — 2026-10-12 보관 — 바탕화면 "캡스톤 사운드 집/상위무기 보관 2026-10-12" (계획은 상위무기-계획.md 16-11)
 
         // 공성포 — 샷건 + 슬러그
         var siegeShell = Effect<SiegeShellEffect>("AE_EVO_SiegeShell", reset, e =>
@@ -134,7 +127,7 @@ public static partial class EvolutionSetup
             });
         SetPrefab(siege, shell);
 
-        // 용의 포효 — 샷건 + 용의 숨결
+        // 용의 포효 — 샷건 + 파이어볼 (팀원 스킬 · 2026-10-13, 처음엔 용의 숨결 개조)
         var flameCone = Effect<FlameConeEffect>("AE_EVO_FlameCone", reset, e =>
         {
             e.flameMaterial = flame;
@@ -154,23 +147,7 @@ public static partial class EvolutionSetup
                 d.fireVolume = 0.22f;
             });
 
-        // 궤도 레일캐논 — 스나이퍼 + 레일건
-        var railLine = Effect<RailLineEffect>("AE_EVO_RailLine", reset, e =>
-        {
-            e.material = fxLine;
-            e.color = IceBlue;
-            e.blastSound = Sound(0.55f, 0.05f, $"{SciFi}/explosionCrunch_000.ogg", $"{SciFi}/explosionCrunch_002.ogg");
-        });
-        var rail = EvolvedData<ProjectileWeaponData>("WD_Sniper", "WD_EVO_OrbitalRail", reset,
-            GunVariant("W_Sniper", "W_EVO_OrbitalRail", GunGlowMaterial("EVO_Glow_IceBlue", IceBlue, reset), IceBlue, false, null, null, reset, GunPart.Rails),
-            railLine, IceBlue, d =>
-            {
-                d.weaponName = "궤도 레일캐논";
-                d.description = "화면 끝까지 닿는 굵은 빔 — 0.4초 뒤 빔 자리를 따라 폭발";
-                d.damage *= 1.2f;
-                d.spawnProjectiles = false;
-                d.fireSounds = Clips($"{SciFi}/laserLarge_000.ogg", $"{SciFi}/laserLarge_003.ogg");
-            });
+        // 궤도 레일캐논 (스나이퍼 + 레일건) — 2026-10-12 보관 — 바탕화면 "캡스톤 사운드 집/상위무기 보관 2026-10-12" (계획은 상위무기-계획.md 16-11)
 
         // 다중 표적 — 스나이퍼 + 반자동
         var markVolley = Effect<MarkVolleyEffect>("AE_EVO_MarkVolley", reset, e =>
@@ -188,27 +165,9 @@ public static partial class EvolutionSetup
                 d.damage *= 1.1f;
             });
 
-        // 폭풍 코일 — 전격 소총 + 과부하 코일
-        var lightning = Effect<LightningStrikeEffect>("AE_EVO_Lightning", reset, e =>
-        {
-            e.material = fxLine;
-            e.color = IceBlue;
-            e.impactPrefab = electric;
-            e.sound = Sound(0.45f, 0.06f, $"{SciFi}/laserLarge_001.ogg", $"{SciFi}/laserLarge_004.ogg");
-        });
-        var stormCoil = EvolvedData<ChainBeamWeaponData>("WD_TeslaRifle", "WD_EVO_StormCoil", reset,
-            GunVariant("W_TeslaRifle", "W_EVO_StormCoil", GunGlowMaterial("EVO_Glow_Storm", IceBlue, reset), IceBlue, false, null, null, reset, GunPart.Coils),
-            lightning, IceBlue, d =>
-            {
-                d.weaponName = "폭풍 코일";
-                d.description = "전격이 8명까지 이어지고, 이어질 때마다 20% 확률로 낙뢰";
-                d.chainCount += 4;
-                d.chainRange *= 1.5f;
-                d.notifyEveryChain = true;
-                d.beamWidth *= 1.6f;
-            });
+        // 폭풍 코일 (전격 소총 + 과부하 코일) — 2026-10-12 보관 — 바탕화면 "캡스톤 사운드 집/상위무기 보관 2026-10-12" (계획은 상위무기-계획.md 16-11)
 
-        // 뇌운 — 전격 소총 + 방전
+        // 뇌운 — 전격 소총 + 연쇄 번개 (팀원 스킬 · 2026-10-13, 처음엔 방전 개조)
         var thunder = Effect<ThunderCloudEffect>("AE_EVO_ThunderCloud", reset, e =>
         {
             e.material = fxLine;
@@ -241,38 +200,22 @@ public static partial class EvolutionSetup
 
         // ═══════ 검사 ═══════
 
-        var chainWhip = Effect<ChainWhipEffect>("AE_EVO_ChainWhip", reset, e =>
-        {
-            e.material = fxLine;
-            e.color = Jade;
-            e.pullSound = Sound(0.5f, 0f, $"{SciFi}/forceField_003.ogg");
-        });
-        var chainBlade = EvolvedData<MeleeWeaponData>("WD_Sword", "WD_EVO_ChainBlade", reset,
-            MeleeVariant("W_Sword", "W_EVO_ChainBlade", SwordBGreen, 1f, futuraGlow, Jade, fxLine, reset),
-            chainWhip, Jade, d =>
-            {
-                d.weaponName = "사슬검";
-                d.description = "휘두르기가 넓은 사슬 채찍 — 세 번째마다 먼 적 셋을 끌어온다";
-                d.damage *= 1.15f;
-                d.range = 6f;
-                d.arcAngle = 150f;
-                d.maxTargets = 10;
-            });
+        // 사슬검 (검 + 그랩 훅) · 성채 대검 (대검 + 에너지 방패) — 2026-10-12 보관 — 바탕화면 "캡스톤 사운드 집/상위무기 보관 2026-10-12" (계획은 상위무기-계획.md 16-11)
 
-        var bastionSlam = Effect<BastionSlamEffect>("AE_EVO_BastionSlam", reset, e =>
+        // 혈검 — 검 + 흡혈 (팀원 스킬 · 레벨업 카드 — 2026-10-12, 상위무기-계획.md 16-12)
+        var bloodFrenzy = Effect<BloodFrenzyEffect>("AE_EVO_BloodFrenzy", reset, e =>
         {
             e.material = fxLine;
-            e.color = Bastion;
-            e.impactPrefab = impact;
-            e.slamSound = Sound(0.75f, 0f, $"{SciFi}/lowFrequency_explosion_000.ogg");
+            e.color = Blood;
+            e.frenzySound = Sound(0.6f, 0f, $"{SciFi}/lowFrequency_explosion_001.ogg");
         });
-        var bastion = EvolvedData<MeleeWeaponData>("WD_Greatsword", "WD_EVO_BastionCleaver", reset,
-            MeleeVariant("W_Greatsword", "W_EVO_BastionCleaver", SwordBYellow, 1.7f, futuraGlow, Bastion, fxLine, reset),
-            bastionSlam, Bastion, d =>
+        var bloodBlade = EvolvedData<MeleeWeaponData>("WD_Sword", "WD_EVO_BloodBlade", reset,
+            MeleeVariant("W_Sword", "W_EVO_BloodBlade", SwordARed, 1f, futuraGlow, Blood, fxLine, reset),
+            bloodFrenzy, Blood, d =>
             {
-                d.weaponName = "성채 대검";
-                d.description = "내려찍기가 360° 충격파 — 방패로 막은 피해를 모아 더한다";
-                d.damage *= 1.2f;
+                d.weaponName = "혈검";
+                d.description = BloodBladeText;
+                d.damage *= 1.15f;
             });
 
         var lanceExtend = Effect<LanceExtendEffect>("AE_EVO_LanceExtend", reset, e =>
@@ -290,90 +233,40 @@ public static partial class EvolutionSetup
                 d.damage *= 1.2f;
             });
 
-        var phalanxFx = Effect<PhalanxEffect>("AE_EVO_Phalanx", reset, e => { e.material = fxLine; e.color = Phalanx; });
-        var phalanx = EvolvedData<MeleeWeaponData>("WD_Spear", "WD_EVO_Phalanx", reset,
-            MeleeVariant("W_Spear", "W_EVO_Phalanx", HalberdRed, 1f, futuraGlow, Phalanx, fxLine, reset),
-            phalanxFx, Phalanx, d =>
-            {
-                d.weaponName = "팔랑크스";
-                d.description = "방패를 든 채 2.5배 빠르게 찌른다 — 방패를 떼면 6m 돌격 찌르기";
-                d.damage *= 1.15f;
-                d.attackWhileShielding = true;
-                d.shieldingAttackSpeed = 2.5f;
-                d.shieldReleaseChargeDistance = 6f;
-                d.shieldReleaseChargeDamageMul = 3f;
-            });
+        // 팔랑크스 (창 + 에너지 방패) — 2026-10-12 보관 — 바탕화면 "캡스톤 사운드 집/상위무기 보관 2026-10-12" (계획은 상위무기-계획.md 16-11)
 
         // ═══════ 드론 ═══════
-
-        var bomberBlast = Effect<ExplodeOnHitEffect>("AE_EVO_BomberBlast", reset, e =>
-        {
-            e.radius = 1.5f;
-            e.damageRatio = 1f;
-            e.material = fxLine;
-            e.color = Orange;
-            e.sound = Sound(0.35f, 0.06f, $"{SciFi}/explosionCrunch_001.ogg", $"{SciFi}/explosionCrunch_003.ogg");
-        });
-        GameObject bomberUnit = DroneVariant("DroneUnit_EVO_Bomber", GunGlowMaterial("EVO_Glow_Bomber", Orange, reset), Orange, false, reset);
-        var bomber = EvolvedData<DroneWeaponData>("WD_Drone", "WD_EVO_BomberWing", reset, null, bomberBlast, Orange, d =>
-        {
-            d.weaponName = "폭격 편대";
-            d.description = "드론이 두 기 늘고 탄이 폭탄이 된다 — 맞힌 자리가 터진다";
-            d.droneCount += 2;
-            d.maxDroneCount = Mathf.Max(d.maxDroneCount, 6);
-            d.damage *= 1.3f;
-        });
-        SetDrone(bomber, bomberUnit);
-
-        var guard = Effect<SatelliteGuardEffect>("AE_EVO_SatelliteGuard", reset, e =>
-        {
-            e.material = fxLine;
-            e.color = Lance;
-            e.blockSound = Sound(0.5f, 0.05f, $"{SciFi}/impactMetal_002.ogg", $"{SciFi}/impactMetal_003.ogg");
-        });
-        GameObject guardUnit = DroneVariant("DroneUnit_EVO_Satellite", GunGlowMaterial("EVO_Glow_Satellite", Lance, reset), Lance, true, reset);
-        var satellite = EvolvedData<DroneWeaponData>("WD_Drone", "WD_EVO_SatelliteGuard", reset, null, guard, Lance, d =>
-        {
-            d.weaponName = "위성 방벽";
-            d.description = "드론이 가까이 돌며 적 탄을 막고, 부딪힌 적에게 피해";
-            d.droneCount += 1;
-            d.orbitRadius = 1.6f;
-            d.orbitSpeed = 150f;
-        });
-        SetDrone(satellite, guardUnit);
+        // 폭격 편대 (드론 + 유탄 발사기) · 위성 방벽 (드론 + 에너지 방패) — 2026-10-12 보관 — 바탕화면 "캡스톤 사운드 집/상위무기 보관 2026-10-12" (계획은 상위무기-계획.md 16-11)
+        //   되살릴 때 쓰는 드론 도우미(DroneVariant · SetDrone)는 아래에 남겨 둔다
 
         // ═══════ 조합 ═══════
 
+        // 2026-10-12 — 겹치거나 애매한 8종(파편 폭풍 · 궤도 레일캐논 · 폭풍 코일 · 사슬검 · 성채 대검 · 팔랑크스 · 폭격 편대 · 위성 방벽)은 보관
         recipes.AddRange(new[]
         {
             Recipe("EVO_SwarmCarbine", reset, "WD_Rifle", swarm, Orange, clip, "점사 세 발이 유도 미사일 — 발마다 다른 적을 쫓아가 작은 폭발", attachment: "MOD_Rifle_Burst"),
             Recipe("EVO_Minigun", reset, "WD_SMG", minigun, Amber, clip, "장전 없이 계속 쏜다 — 쏘는 동안 연사가 2초에 걸쳐 3배까지 오른다", attachment: "MOD_SMG_DualMag"),
-            Recipe("EVO_FragmentStorm", reset, "WD_SMG", storm, Spark, clip, "명중할 때마다 파편 2개가 가까운 다른 적에게 튄다", attachment: "MOD_SMG_Spray"),
             Recipe("EVO_SiegeCannon", reset, "WD_Shotgun", siege, Gold, clip, "관통 무제한 포탄 — 맞은 적마다 폭발, 사거리 끝에서 큰 폭발", attachment: "MOD_Shotgun_Slug"),
-            Recipe("EVO_DragonRoar", reset, "WD_Shotgun", dragon, Ember, clip, "산탄 대신 화염 방사 — 정면을 태우고, 불타다 죽은 적은 불을 옮긴다", attachment: "MOD_Shotgun_DragonBreath"),
-            Recipe("EVO_OrbitalRail", reset, "WD_Sniper", rail, IceBlue, clip, "화면 끝까지 닿는 굵은 빔 — 0.4초 뒤 빔 자리를 따라 폭발", attachment: "MOD_Sniper_Railgun"),
+            Recipe("EVO_DragonRoar", reset, "WD_Shotgun", dragon, Ember, clip, "산탄 대신 화염 방사 — 정면을 태우고, 불타다 죽은 적은 불을 옮긴다", skill: "FireBallUpgrade"),   // 2026-10-13 용의 숨결 → 파이어볼
             Recipe("EVO_MultiLock", reset, "WD_Sniper", multiLock, Scarlet, clip, "맞힌 적에게 표식 — 다섯 발마다 표식 있는 적 6명을 동시에 저격", attachment: "MOD_Sniper_SemiAuto"),
-            Recipe("EVO_StormCoil", reset, "WD_TeslaRifle", stormCoil, IceBlue, clip, "전격이 8명까지 이어지고, 이어질 때마다 20% 확률로 낙뢰", attachment: "MOD_Tesla_Overload"),
-            Recipe("EVO_Thundercloud", reset, "WD_TeslaRifle", thundercloud, Indigo, clip, "장전하는 동안 머리 위 먹구름이 주변 적에게 낙뢰를 쏟는다", attachment: "MOD_Tesla_Discharge"),
+            Recipe("EVO_Thundercloud", reset, "WD_TeslaRifle", thundercloud, Indigo, clip, "장전하는 동안 머리 위 먹구름이 주변 적에게 낙뢰를 쏟는다", skill: "ChainLightningUpgrade"),   // 2026-10-13 방전 → 연쇄 번개
             Recipe("EVO_SunLance", reset, "WD_ChargeLaser", sunLance, Solar, clip, SunLanceText, attachment: "MOD_Laser_Overcharge"),
-            Recipe("EVO_ChainBlade", reset, "WD_Sword", chainBlade, Jade, clip, "휘두르기가 넓은 사슬 채찍 — 세 번째마다 먼 적 셋을 끌어온다", ability: "SA_Grapple"),
-            Recipe("EVO_BastionCleaver", reset, "WD_Greatsword", bastion, Bastion, clip, "내려찍기가 360° 충격파 — 방패로 막은 피해를 모아 더한다", ability: "SA_Shield"),
             Recipe("EVO_PiercingLance", reset, "WD_Spear", piercing, Lance, clip, "찌르기 끝에서 빛의 창이 10m 더 뻗고, 가장 먼 적을 끌어온다", ability: "SA_Grapple"),
-            Recipe("EVO_Phalanx", reset, "WD_Spear", phalanx, Phalanx, clip, "방패를 든 채 2.5배 빠르게 찌른다 — 떼면 돌격 찌르기", ability: "SA_Shield"),
-            Recipe("EVO_BomberWing", reset, "WD_Drone", bomber, Orange, clip, "드론이 두 기 늘고 탄이 폭탄이 된다", anyGun: "AT_GrenadeLauncher"),
-            Recipe("EVO_SatelliteGuard", reset, "WD_Drone", satellite, Lance, clip, "드론이 가까이 돌며 적 탄을 막고, 부딪힌 적에게 피해", ability: "SA_Shield"),
+            Recipe("EVO_BloodBlade", reset, "WD_Sword", bloodBlade, Blood, clip, BloodBladeText, skill: "DrainUpgrade"),
         });
 
         icons.AddRange(new[]
         {
-            "WD_EVO_SwarmCarbine", "WD_EVO_Minigun", "WD_EVO_FragmentStorm", "WD_EVO_SiegeCannon", "WD_EVO_DragonRoar",
-            "WD_EVO_OrbitalRail", "WD_EVO_MultiLock", "WD_EVO_StormCoil", "WD_EVO_Thundercloud", "WD_EVO_SunLance",
-            "WD_EVO_ChainBlade", "WD_EVO_BastionCleaver", "WD_EVO_PiercingLance", "WD_EVO_Phalanx",
-            "WD_EVO_BomberWing", "WD_EVO_SatelliteGuard",
+            "WD_EVO_SwarmCarbine", "WD_EVO_Minigun", "WD_EVO_SiegeCannon", "WD_EVO_DragonRoar",
+            "WD_EVO_MultiLock", "WD_EVO_Thundercloud", "WD_EVO_SunLance",
+            "WD_EVO_PiercingLance", "WD_EVO_BloodBlade",
         });
     }
 
     // ═══════════ 태양창 ═══════════
+
+    /// <summary>혈검 카드 · 설명 (BloodFrenzyEffect 기본값 기준).</summary>
+    public const string BloodBladeText = "처치할 때마다 혈기가 쌓이고 (HP 가 가득이면 두 배) 가득 차면 6초 폭주 — 공격 속도 ×1.5 · 사거리 +1m · 맞힌 피해의 10% 회복";
 
     public const string SunLanceText = "모으는 동안 사거리가 10m → 32m 로 늘어나는 한 방 — 굵은 빛 기둥 + 화상";
 
