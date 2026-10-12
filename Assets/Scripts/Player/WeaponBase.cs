@@ -542,6 +542,20 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
             runtimeList[i].OnKill(in hit);
     }
 
+    /// <summary>
+    /// 직접 공격(탄 · 휘두르기 · 빔, 그리고 공격을 대신하는 상위 무기 공격 — 용의 포효 불길 · 궤도 레일 · 프리즘 · 태양창)이
+    /// 맞힌 뒤 부른다. 쓰러뜨렸으면 true, 그것이 적이면 Drain 스킬(Skill/Drain — 직접 공격 처치 시 회복)에 알린다.
+    /// wasAlive 는 맞히기 <b>전</b>에 잰다 — 죽는 동작 중인 적은 콜라이더가 남아 다시 맞는데, 그때 또 회복하지 않게.
+    /// 명중 효과(폭발 · 번개 · 파편 · 화상)와 서브 능력 · 패링 반사는 Drain 이 말하는 '스킬 공격' 쪽이라 부르지 않는다.
+    /// </summary>
+    public static bool CheckDirectKill(Transform root, bool wasAlive)
+    {
+        if (!wasAlive || CombatFx.IsAlive(root)) return false;
+
+        if (root != null && root.TryGetComponent(out Enemy _)) DrainSkill.Active?.OnKill();
+        return true;
+    }
+
     /// <summary>탄이 아무것도 못 맞히고(또는 관통을 남긴 채) 사거리 끝에서 사라졌다 — 공성포의 끝 폭발.</summary>
     public void NotifyProjectileExpired(Vector3 position, Vector3 direction)
     {

@@ -101,7 +101,16 @@ public class EnemyManager : MonoBehaviour
 
         foreach (var spawner in spawners)
         {
-            float dist = Vector3.Distance(player.position, spawner.transform.position);
+            if (spawner == null)
+                continue;
+
+            if (!spawner.isActiveAndEnabled)
+                continue;
+
+            float dist = Vector3.Distance(
+                player.position,
+                spawner.transform.position
+            );
 
             if (dist > minSpawnDistance && dist < maxSpawnDistance)
             {

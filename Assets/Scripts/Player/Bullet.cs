@@ -211,7 +211,7 @@ public class Bullet : MonoBehaviour, IPoolable
 
         if (d != null)
         {
-            bool wasAlive = source != null && source.HasHitEffects && CombatFx.IsAlive(root);
+            bool wasAlive = CombatFx.IsAlive(root);   // 맞기 전 — 처치 판정 (Drain · 부착물 처치 효과)
 
             DamageInfo info = new DamageInfo
             {
@@ -222,6 +222,9 @@ public class Bullet : MonoBehaviour, IPoolable
             };
 
             d.TakeDamage(info);
+
+            // Drain: 플레이어의 직접 총알 공격으로 적을 처치했을 때만 회복 (쓰러지는 중인 적을 다시 맞힌 것은 세지 않는다)
+            bool killed = WeaponBase.CheckDirectKill(root, wasAlive);
 
             // 프레임 끝에 한 번만 난다 — 관통이면 같은 프레임에 여러 번 들어온다
             if (SoundManager.Instance != null)
@@ -242,7 +245,7 @@ public class Bullet : MonoBehaviour, IPoolable
                     Direction = transform.forward,
                     Damage = damage,
                     IsCritical = isCritical,
-                    Killed = wasAlive && !CombatFx.IsAlive(root),
+                    Killed = killed,
                 });
             }
         }

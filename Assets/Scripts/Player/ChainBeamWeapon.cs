@@ -211,7 +211,7 @@ public class ChainBeamWeapon : WeaponBase
         bool isCritical = isFirst && RollCritical(in stats);
         float dealt = isCritical ? ApplyCritical(in stats, true) : damage;
         bool notify = (isFirst || cfg.notifyEveryChain) && HasHitEffects;
-        bool wasAlive = notify && CombatFx.IsAlive(target);
+        bool wasAlive = CombatFx.IsAlive(target);
 
         damageable.TakeDamage(new DamageInfo
         {
@@ -221,6 +221,9 @@ public class ChainBeamWeapon : WeaponBase
             hitDirection = dir,
             cameraShake = isFirst ? cfg.cameraShake : 0f,
         });
+
+        // 퍼진 전기도 전격 소총의 직접 공격 — 쓰러뜨리면 Drain
+        bool killed = CheckDirectKill(target, wasAlive);
 
         // 부착물 명중 효과는 조준해서 맞힌 첫 적에게만 — 퍼진 전기마다 터지면 연쇄가 연쇄를 부른다
         if (notify)
@@ -233,7 +236,7 @@ public class ChainBeamWeapon : WeaponBase
                 Direction = dir,
                 Damage = dealt,
                 IsCritical = isCritical,
-                Killed = wasAlive && !CombatFx.IsAlive(target),
+                Killed = killed,
             });
         }
 

@@ -167,6 +167,7 @@ public class ChargeBeamWeapon : WeaponBase
 
         bool wasAlive = CombatFx.IsAlive(target);
         CombatFx.Damage(target, damage, point, direction, critical);
+        bool killed = CheckDirectKill(target, wasAlive);   // 레이저를 대신하는 공격 — Drain
 
         if (HasHitEffects)
         {
@@ -178,7 +179,7 @@ public class ChargeBeamWeapon : WeaponBase
                 Direction = direction,
                 Damage = damage,
                 IsCritical = critical,
-                Killed = wasAlive && !CombatFx.IsAlive(target),
+                Killed = killed,
             });
         }
     }
@@ -286,7 +287,7 @@ public class ChargeBeamWeapon : WeaponBase
 
             bool isCritical = RollCritical(in stats);
             float dealt = ApplyCritical(in stats, isCritical) * damageScale;
-            bool wasAlive = HasHitEffects && CombatFx.IsAlive(root);
+            bool wasAlive = CombatFx.IsAlive(root);
 
             target.TakeDamage(new DamageInfo
             {
@@ -296,6 +297,8 @@ public class ChargeBeamWeapon : WeaponBase
                 hitDirection = dir,
                 cameraShake = cfg.cameraShake,
             });
+
+            bool killed = CheckDirectKill(root, wasAlive);   // Drain
 
             if (HasHitEffects)
             {
@@ -307,7 +310,7 @@ public class ChargeBeamWeapon : WeaponBase
                     Direction = dir,
                     Damage = dealt,
                     IsCritical = isCritical,
-                    Killed = wasAlive && !CombatFx.IsAlive(root),
+                    Killed = killed,
                 });
             }
 

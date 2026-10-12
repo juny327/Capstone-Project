@@ -70,7 +70,10 @@ public class FlameConeEffect : AttachmentEffect
                 Vector3 to = EvoStrikes.Flat(t.position - origin, dir);
                 if (Vector3.Angle(dir, to) > cfg.angle * 0.5f && (t.position - origin).sqrMagnitude > 1f) continue;
 
+                // 탄 대신 뿜는 불길이 직접 공격 — 쓰러뜨리면 Drain (남는 화상은 효과라 세지 않는다)
+                bool wasAlive = CombatFx.IsAlive(t);
                 CombatFx.Damage(t, damage, CombatFx.Body(t), to);
+                WeaponBase.CheckDirectKill(t, wasAlive);
                 BurnTicker.Apply(t, burnDps, cfg.burnDuration);
                 ignited[t] = until;
                 lastSeen[t] = t.position;

@@ -81,6 +81,7 @@ public class RailLineEffect : AttachmentEffect
                 Vector3 point = CombatFx.Body(t);
 
                 CombatFx.Damage(t, dealt, point, dir, crit);
+                bool killed = WeaponBase.CheckDirectKill(t, wasAlive);   // 탄 대신 쏘는 레일 — 직접 공격 (Drain)
                 BeamHits++;
 
                 Weapon.NotifyHit(new WeaponHit
@@ -91,7 +92,7 @@ public class RailLineEffect : AttachmentEffect
                     Direction = dir,
                     Damage = dealt,
                     IsCritical = crit,
-                    Killed = wasAlive && !CombatFx.IsAlive(t),
+                    Killed = killed,
                 });
             }
 
