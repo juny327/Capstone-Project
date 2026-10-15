@@ -33,6 +33,9 @@ public static class LobbySetup
     const string LobbyDir = "Assets/Prefabs/Lobby";
     const string PedestalPath = LobbyDir + "/LobbyPedestal.mat";
     const string RoundPath = "Assets/Sprites/UI/LobbyRound.png";
+    // 게임 제목 그림 (있으면 원래 "NoName" 글자 대신 쓴다 — 지우고 다시 돌리면 원래 글자로 돌아간다)
+    const string TitleSpritePath = "Assets/Sprites/UI/LobbyTitle.png";
+    const string TitleImageName = "TitleImage";
     const string SolidPath = "Assets/Sprites/UI/Solid.png";
 
     const string RootName = "LobbyScreen";
@@ -52,6 +55,8 @@ public static class LobbySetup
     const int RecipeRows = 3;
     const float StartButtonY = 1002f;                    // 게임 시작 버튼 가운데
     const float LogoScale = 0.4f;
+    const float TitleHeight = 96f;      // 제목 그림 높이 (위쪽 띠 112 안)
+    const float TitleMaxWidth = 700f;
     const float Frame = 3f;
 
     // ── 색 ──
@@ -550,11 +555,67 @@ public static class LobbySetup
 
         var rect = (RectTransform)group;
         rect.anchorMin = rect.anchorMax = new Vector2(0f, 1f);
+
+        Sprite titleSprite = EnsureTitleSprite();
+        Transform titleImage = group.Find(TitleImageName);
+
+        // 원래 글자 · 혜성은 지우지 않고 끄기만 한다 (제목 그림을 빼면 되살린다)
+        foreach (Transform child in group)
+            if (child.name != TitleImageName) child.gameObject.SetActive(titleSprite == null);
+
+        if (titleSprite != null)
+        {
+            // 제목 그림: 왼쪽 위 (32, 8) 에 높이 96, 비율 유지
+            float aspect = titleSprite.rect.width / titleSprite.rect.height;
+            float w = Mathf.Min(TitleMaxWidth, TitleHeight * aspect);
+            rect.pivot = new Vector2(0f, 1f);
+            rect.localScale = Vector3.one;
+            rect.sizeDelta = new Vector2(w, w / aspect);
+            rect.anchoredPosition = new Vector2(32f, -8f);
+
+            if (titleImage == null) titleImage = NewUI(TitleImageName, group).transform;
+            Image image = titleImage.GetComponent<Image>();
+            if (image == null) image = titleImage.gameObject.AddComponent<Image>();
+            Stretch((RectTransform)titleImage);
+            image.sprite = titleSprite;
+            image.preserveAspect = true;
+            image.raycastTarget = false;
+            titleImage.gameObject.SetActive(true);
+            EditorUtility.SetDirty(rect);
+            return;
+        }
+
+        if (titleImage != null) Object.DestroyImmediate(titleImage.gameObject);
+
+        // 원래 글자 상자 크기로 되돌린다 (제목 그림을 쓰던 크기가 남아 있을 수 있다)
+        TMP_Text originalTitle = group.GetComponentInChildren<TMP_Text>(true);
+        if (originalTitle != null) rect.sizeDelta = originalTitle.rectTransform.sizeDelta;
         rect.pivot = new Vector2(0.5f, 0.5f);
         rect.localScale = Vector3.one * LogoScale;
         // 글자는 상자 왼쪽에서 약 100px 안쪽부터, 혜성 꼭대기는 가운데에서 약 135px 위 — 보이는 왼쪽 위가 (36, 16) 에 오게
         rect.anchoredPosition = new Vector2(36f + (rect.sizeDelta.x * 0.5f - 100f) * LogoScale, -16f - 135f * LogoScale);
         EditorUtility.SetDirty(rect);
+    }
+
+    /// <summary>제목 그림이 있으면 스프라이트로 들여온다 (밉맵 없음 · 압축 없음). 없으면 null.</summary>
+    static Sprite EnsureTitleSprite()
+    {
+        if (!File.Exists(TitleSpritePath)) return null;
+
+        if (AssetImporter.GetAtPath(TitleSpritePath) is TextureImporter importer &&
+            (importer.textureType != TextureImporterType.Sprite || importer.mipmapEnabled || importer.textureCompression != TextureImporterCompression.Uncompressed))
+        {
+            importer.textureType = TextureImporterType.Sprite;
+            importer.spriteImportMode = SpriteImportMode.Single;
+            importer.alphaIsTransparency = true;
+            importer.mipmapEnabled = false;
+            importer.filterMode = FilterMode.Bilinear;
+            importer.maxTextureSize = 2048;
+            importer.textureCompression = TextureImporterCompression.Uncompressed;
+            importer.SaveAndReimport();
+        }
+
+        return AssetDatabase.LoadAssetAtPath<Sprite>(TitleSpritePath);
     }
 
     // 테스트 룸 버튼을 오른쪽 위, 설정 버튼(GameSettingsUI — 235 × 65, 오른쪽 위 32px) 왼쪽으로
