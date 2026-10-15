@@ -40,6 +40,12 @@ public class GameSettingsUI : MonoBehaviour
     /// <summary>창이 열려 있는지.</summary>
     public bool IsOpen => window != null && window.activeSelf;
 
+    /// <summary>씬을 넘어 살아 있는 설정 창. 아직 없으면 null.</summary>
+    public static GameSettingsUI Instance => instance;
+
+    /// <summary>로비의 "설정" 버튼 (로비 선택 화면이 테스트 룸 버튼을 그 옆에 맞춘다).</summary>
+    public RectTransform LobbyButtonRect => lobbyButton != null ? (RectTransform)lobbyButton.transform : null;
+
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     static void ResetStatics() => instance = null;
 

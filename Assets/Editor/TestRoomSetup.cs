@@ -272,10 +272,11 @@ public static class TestRoomSetup
         Transform old = canvas.transform.Find("TestRoomEntry");
         if (old != null) Object.DestroyImmediate(old.gameObject);
         TMP_FontAsset font = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(FontPath);
-        Button button = Button("TestRoomEntry", canvas.transform, font, "테스트 룸", new Vector2(-32, 32));
+        // 오른쪽 위, 설정 버튼(235 × 65, 오른쪽 위 32px) 왼쪽 — 로비 선택 화면(LobbySetup)과 같은 자리
+        Button button = Button("TestRoomEntry", canvas.transform, font, "테스트 룸", new Vector2(-32 - 235 - 16, -32));
         RectTransform rect = button.GetComponent<RectTransform>();
-        rect.anchorMin = rect.anchorMax = new Vector2(1, 0);
-        rect.pivot = new Vector2(1, 0);
+        rect.anchorMin = rect.anchorMax = new Vector2(1, 1);
+        rect.pivot = new Vector2(1, 1);
         rect.sizeDelta = new Vector2(235, 65);
         var entry = button.gameObject.AddComponent<TestRoomEntry>();
         UnityEventTools.AddPersistentListener(button.onClick, entry.Enter);

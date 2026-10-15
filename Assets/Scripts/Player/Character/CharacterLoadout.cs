@@ -22,6 +22,9 @@ public class CharacterLoadout : MonoBehaviour
     /// <summary>적용된 캐릭터. HUD 가 회피 아이콘을 고르는 데 쓴다.</summary>
     public CharacterData Data { get; private set; }
 
+    /// <summary>프리팹 기본 몸 머티리얼 (로비 미리보기가 캐릭터 색을 바꿀 때 쓴다).</summary>
+    public Material DefaultBodyMaterial => defaultBodyMaterial;
+
     void Awake()
     {
         Data = CharacterSelection.Current != null ? CharacterSelection.Current : fallback;
@@ -53,19 +56,24 @@ public class CharacterLoadout : MonoBehaviour
 
     void ApplyBodyMaterial()
     {
-        if (Data.bodyMaterial == null || defaultBodyMaterial == null) return;
-        if (Data.bodyMaterial == defaultBodyMaterial) return;
+        SwapBodyMaterial(gameObject, defaultBodyMaterial, Data.bodyMaterial);
+    }
 
-        foreach (SkinnedMeshRenderer r in GetComponentsInChildren<SkinnedMeshRenderer>(true))
+    /// <summary>몸(SkinnedMeshRenderer)의 from 머티리얼만 to 로 바꾼다 — 무기 등은 건드리지 않는다. 로비 미리보기도 쓴다.</summary>
+    public static void SwapBodyMaterial(GameObject root, Material from, Material to)
+    {
+        if (root == null || from == null || to == null || from == to) return;
+
+        foreach (SkinnedMeshRenderer r in root.GetComponentsInChildren<SkinnedMeshRenderer>(true))
         {
             Material[] mats = r.sharedMaterials;
             bool changed = false;
 
             for (int i = 0; i < mats.Length; i++)
             {
-                if (mats[i] != defaultBodyMaterial) continue;
+                if (mats[i] != from) continue;
 
-                mats[i] = Data.bodyMaterial;
+                mats[i] = to;
                 changed = true;
             }
 

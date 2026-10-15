@@ -153,9 +153,36 @@ public class MeleeTwoHandGrip : MonoBehaviour
         leftPoint = grip + axis * leftAlong;
     }
 
+    /// <summary>
+    /// 로비 미리보기용 — WeaponController 없이 소켓에 붙인 무기 모형의 자루 구간(소켓 로컬)을 직접 준다.
+    /// socket 이 null 이면 끈다. 방어 자세는 쓰지 않고 양손 쥐기만 한다.
+    /// </summary>
+    public void SetPreviewGrip(Transform socket, Vector3 near, Vector3 far)
+    {
+        previewSocket = socket;
+        previewNear = near;
+        previewFar = far;
+        haveGrip = false;
+    }
+
+    private Transform previewSocket;
+    private Vector3 previewNear, previewFar;
+
     void LateUpdate()
     {
-        MeleeWeapon melee = weapons != null ? weapons.ActiveWeapon as MeleeWeapon : null;
+        if (weapons == null)
+        {
+            if (previewSocket == null || !haveGoal) { haveGrip = false; return; }
+
+            Quaternion inv = Quaternion.Inverse(goalRot);
+            gripLocal = inv * (previewSocket.position - goalPos);
+            nearLocal = inv * (previewSocket.TransformPoint(previewNear) - goalPos);
+            farLocal = inv * (previewSocket.TransformPoint(previewFar) - goalPos);
+            haveGrip = true;
+            return;
+        }
+
+        MeleeWeapon melee = weapons.ActiveWeapon as MeleeWeapon;
 
         // 무기를 바꾼 첫 프레임은 예전 무기의 값이 남아 있으므로 건너뛴다
         if (melee != gripOwner)

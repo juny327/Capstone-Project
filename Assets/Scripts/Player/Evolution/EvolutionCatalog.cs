@@ -41,6 +41,15 @@ public class EvolutionCatalog : ScriptableObject
             if (e != null && e.from == weapon) into.Add(e);
     }
 
+    /// <summary>그 무기에서 시작하는 조합 중 그 캐릭터가 갖출 수 있는 것만 넣는다 (조합 안내 HUD · 로비).</summary>
+    public void CollectFor(WeaponData weapon, bool swordsman, List<WeaponEvolutionData> into)
+    {
+        if (evolutions == null || weapon == null) return;
+
+        foreach (WeaponEvolutionData e in evolutions)
+            if (e != null && e.from == weapon && e.AvailableTo(swordsman)) into.Add(e);
+    }
+
     /// <summary>그 무기로 지금 할 수 있는 진화. 없으면 null.</summary>
     public WeaponEvolutionData ReadyFor(IWeapon weapon, WeaponController weapons, SubAbilitySlot abilities)
     {

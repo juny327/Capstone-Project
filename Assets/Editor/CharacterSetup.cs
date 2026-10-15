@@ -27,7 +27,7 @@ using Object = UnityEngine.Object;
 ///  7) Player.prefab 에 CharacterLoadout · ParryController
 ///  8) 스테이지 보상에 대검 · 창 추가
 ///  9) 테스트 룸에 대검 · 창 픽업 추가 (원거리 · 근거리로 묶어 배치)
-/// 10) 로비 — 원거리 · 근거리 캐릭터 영역을 좌우로 떨어뜨려 배치
+/// 10) 로비 선택 화면 — LobbySetup 에 맡긴다 (왼쪽 원거리 무기 · 가운데 3D 캐릭터 · 오른쪽 근접 무기)
 ///
 /// 기존 스크립트(WeaponAssetSetup · LobySelectSetup · StageRewardSetup · TestRoomSetup)는 고치지 않는다 (설계 3장).
 /// ⚠ 그래서 그 도구들을 다시 실행하면 이 도구가 만든 것 일부가 덮어써진다 — 그때는 이 도구를 다시 실행한다.
@@ -75,9 +75,7 @@ public static class CharacterSetup
     const string RewardDir = "Assets/Scripts/Stage/Rewards";
     const string RewardPoolPath = RewardDir + "/StageRewardPool.asset";
 
-    const string LobbyScenePath = "Assets/Scenes/Loby.unity";
     const string TestRoomScenePath = "Assets/Scenes/TestRoom.unity";
-    const string FontPath = "Assets/Font/RiaSans-Bold SDF.asset";
 
     const string HandBoneName = "Hand_Right";
     const string SocketName = "WeaponSocket_R";
@@ -309,7 +307,7 @@ public static class CharacterSetup
     [MenuItem(Menu + "9. 테스트 룸에 대검 · 창 픽업 추가", false, 23)]
     static void MenuTestRoom() { if (EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) SetupTestRoom(); }
 
-    [MenuItem(Menu + "10. 로비 캐릭터 구분 배치", false, 24)]
+    [MenuItem(Menu + "10. 로비 선택 화면", false, 24)]
     static void MenuLobby() { if (EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) BuildLobby(); }
 
     [MenuItem(Menu + "전체 실행", true)]
@@ -317,7 +315,7 @@ public static class CharacterSetup
     [MenuItem(Menu + "6~7. 캐릭터 데이터 · 플레이어 프리팹", true)]
     [MenuItem(Menu + "8. 스테이지 보상에 대검 · 창 추가", true)]
     [MenuItem(Menu + "9. 테스트 룸에 대검 · 창 픽업 추가", true)]
-    [MenuItem(Menu + "10. 로비 캐릭터 구분 배치", true)]
+    [MenuItem(Menu + "10. 로비 선택 화면", true)]
     static bool ValidateEditMode() => !EditorApplication.isPlayingOrWillChangePlaymode;
 
     public static bool RunAll()
@@ -2335,242 +2333,9 @@ public static class CharacterSetup
     // ═══════════════════════════════════════════════════════════
     // 10. 로비
     // ═══════════════════════════════════════════════════════════
-    // 화면(1920×1080)을 좌우로 나눠 캐릭터 영역을 둔다. 두 영역 사이를 크게 벌리고 가운데 구분선을 넣어
-    // 원거리 · 근거리가 한눈에 갈리게 한다. 무기를 누르면 그 무기의 캐릭터가 함께 골라진다.
-    const string LobbyRootName = "CharacterSelect";
-    const string OldLobbyRootName = "WeaponSelect";   // LobySelectSetup 이 만든 예전 배치
-
-    const float PanelW = 650f;
-    const float PanelH = 300f;
-    const float PanelGap = 180f;          // 두 영역 사이 — 캐릭터 구분의 핵심
-    const float FrameWidth = 3f;
-    const float RootY = -40f;
-    const float ButtonW = 190f;
-    const float ButtonH = 72f;
-    const float ButtonStepX = 205f;
-    const float ButtonStepY = 86f;
-    const int ButtonsPerRow = 3;
-    const float DescriptionY = -235f;
-    const float StartButtonY = -335f;
-
-    static bool BuildLobby()
-    {
-        Scene scene = EditorSceneManager.OpenScene(LobbyScenePath, OpenSceneMode.Single);
-
-        // 씬을 연 뒤에 에셋을 읽는다
-        var gunner = AssetDatabase.LoadAssetAtPath<CharacterData>(GunnerPath);
-        var swordsman = AssetDatabase.LoadAssetAtPath<CharacterData>(SwordsmanPath);
-        var font = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(FontPath);
-
-        if (gunner == null || swordsman == null)
-        {
-            Debug.LogError($"{Tag} 캐릭터 데이터가 없습니다. 6번을 먼저 실행하세요.");
-            return false;
-        }
-
-        CharacterData[] characters = { gunner, swordsman };
-
-        LobyManager manager = Object.FindFirstObjectByType<LobyManager>();
-        Canvas canvas = Object.FindFirstObjectByType<Canvas>();
-
-        if (manager == null || canvas == null)
-        {
-            Debug.LogError($"{Tag} LobyManager 또는 Canvas 를 찾지 못했습니다.");
-            return false;
-        }
-
-        foreach (string old in new[] { OldLobbyRootName, LobbyRootName })
-        {
-            Transform t = canvas.transform.Find(old);
-            if (t != null) Object.DestroyImmediate(t.gameObject);
-        }
-
-        // 버튼 순서 = 사수 무기 → 검사 무기
-        var weapons = new List<WeaponData>();
-        var firstIndex = new int[characters.Length];
-
-        for (int c = 0; c < characters.Length; c++)
-        {
-            firstIndex[c] = weapons.Count;
-            weapons.AddRange(characters[c].startWeapons);
-        }
-
-        if (weapons.Any(w => w == null))
-        {
-            Debug.LogError($"{Tag} 캐릭터 시작 무기에 빈 칸이 있습니다.");
-            return false;
-        }
-
-        GameObject root = NewUI(LobbyRootName, canvas.transform);
-        SetRect(root.GetComponent<RectTransform>(), new Vector2(0f, RootY), new Vector2(PanelW * 2f + PanelGap, PanelH + 40f));
-
-        CharacterSelectUI selectUI = root.AddComponent<CharacterSelectUI>();
-
-        var buttons = new Button[weapons.Count];
-        var frames = new Image[characters.Length];
-        var backgrounds = new Image[characters.Length];
-        var titles = new TextMeshProUGUI[characters.Length];
-
-        float panelX = PanelW * 0.5f + PanelGap * 0.5f;
-
-        for (int c = 0; c < characters.Length; c++)
-        {
-            CharacterData ch = characters[c];
-            float x = c == 0 ? -panelX : panelX;
-
-            // ── 영역 ──
-            // 테두리는 배경 뒤의 조금 큰 이미지로 그린다. Outline 효과는 반투명 배경 뒤로 색이 비쳐 배경이 물든다
-            GameObject panel = NewUI($"Panel_{c}_{ch.name}", root.transform);
-            SetRect(panel.GetComponent<RectTransform>(), new Vector2(x, 0f), new Vector2(PanelW, PanelH));
-
-            GameObject frameGo = NewUI("Frame", panel.transform);
-            SetRect(frameGo.GetComponent<RectTransform>(), Vector2.zero, new Vector2(PanelW + FrameWidth * 2f, PanelH + FrameWidth * 2f));
-            Image frame = frameGo.AddComponent<Image>();
-            frame.color = ch.accentColor;
-            frame.raycastTarget = false;
-            frames[c] = frame;
-
-            GameObject bgGo = NewUI("Background", panel.transform);
-            Stretch(bgGo.GetComponent<RectTransform>());
-            Image bg = bgGo.AddComponent<Image>();
-            bg.color = new Color(0.03f, 0.045f, 0.06f, 0.9f);
-            bg.raycastTarget = false;
-            backgrounds[c] = bg;
-
-            // ── 제목 (누르면 이 캐릭터의 첫 무기) ──
-            GameObject titleGo = NewUI("Title", panel.transform);
-            SetRect(titleGo.GetComponent<RectTransform>(), new Vector2(0f, PanelH * 0.5f - 34f), new Vector2(PanelW - 40f, 52f));
-
-            Image titleHit = titleGo.AddComponent<Image>();
-            titleHit.color = new Color(1f, 1f, 1f, 0f);   // 누를 수 있게만 한다
-
-            Button titleButton = titleGo.AddComponent<Button>();
-            titleButton.targetGraphic = titleHit;
-            titleButton.transition = Selectable.Transition.None;
-            UnityEventTools.AddIntPersistentListener(titleButton.onClick, selectUI.SelectCharacter, c);
-
-            TextMeshProUGUI title = NewText("Label", titleGo.transform, font,
-                $"{(c == 0 ? "원거리" : "근거리")} 캐릭터 · {ch.displayName}", 36f, ch.accentColor);
-            Stretch(title.rectTransform);
-            titles[c] = title;
-
-            // ── 요약 ──
-            TextMeshProUGUI summary = NewText("Summary", panel.transform, font, ch.summary, 22f, new Color(1f, 1f, 1f, 0.75f));
-            SetRect(summary.rectTransform, new Vector2(0f, PanelH * 0.5f - 76f), new Vector2(PanelW - 40f, 30f));
-
-            // ── 무기 버튼 ──
-            int n = ch.startWeapons.Length;
-            int rows = Mathf.CeilToInt(n / (float)ButtonsPerRow);
-
-            // 버튼 구역(요약 아래 ~ 영역 아래)의 가운데에 줄들을 모은다 — 한 줄뿐인 검사도 가운데에 온다
-            float areaTop = PanelH * 0.5f - 100f;
-            float areaBottom = -PanelH * 0.5f + 20f;
-            float areaCenter = (areaTop + areaBottom) * 0.5f;
-            float firstRowY = areaCenter + ButtonStepY * (rows - 1) * 0.5f;
-
-            for (int k = 0; k < n; k++)
-            {
-                int row = k / ButtonsPerRow;
-                int col = k % ButtonsPerRow;
-                int inRow = Mathf.Min(ButtonsPerRow, n - row * ButtonsPerRow);
-                float startX = -(ButtonStepX * (inRow - 1)) * 0.5f;
-
-                int index = firstIndex[c] + k;
-                WeaponData weapon = weapons[index];
-
-                GameObject go = NewUI($"Weapon_{index}_{weapon.name}", panel.transform);
-                SetRect(go.GetComponent<RectTransform>(),
-                    new Vector2(startX + ButtonStepX * col, firstRowY - ButtonStepY * row),
-                    new Vector2(ButtonW, ButtonH));
-
-                Image image = go.AddComponent<Image>();
-                image.color = new Color(0.85f, 0.85f, 0.85f, 1f);
-
-                Button button = go.AddComponent<Button>();
-                button.targetGraphic = image;
-                UnityEventTools.AddIntPersistentListener(button.onClick, manager.SelectWeapon, index);
-
-                TextMeshProUGUI label = NewText("Label", go.transform, font, weapon.weaponName, 28f, Color.black);
-                Stretch(label.rectTransform);
-
-                buttons[index] = button;
-            }
-        }
-
-        // ── 가운데 구분선 ──
-        GameObject divider = NewUI("Divider", root.transform);
-        SetRect(divider.GetComponent<RectTransform>(), Vector2.zero, new Vector2(3f, PanelH - 40f));
-        Image line = divider.AddComponent<Image>();
-        line.color = new Color(1f, 1f, 1f, 0.22f);
-        line.raycastTarget = false;
-
-        // ── 설명 (LobyWeaponSelectUI 가 고른 무기의 이름 · 설명을 채운다) ──
-        TextMeshProUGUI description = NewText("Description", root.transform, font, string.Empty, 24f, Color.white);
-        SetRect(description.rectTransform, new Vector2(0f, DescriptionY - RootY), new Vector2(1200f, 70f));
-
-        // ── 무기 버튼 강조 (기존 컴포넌트 재사용) ──
-        LobyWeaponSelectUI weaponUI = root.AddComponent<LobyWeaponSelectUI>();
-        var wso = new SerializedObject(weaponUI);
-        wso.FindProperty("manager").objectReferenceValue = manager;
-        wso.FindProperty("descriptionText").objectReferenceValue = description;
-        SerializedProperty bprop = wso.FindProperty("buttons");
-        bprop.arraySize = buttons.Length;
-        for (int i = 0; i < buttons.Length; i++)
-            bprop.GetArrayElementAtIndex(i).objectReferenceValue = buttons[i];
-        wso.ApplyModifiedPropertiesWithoutUndo();
-
-        // ── 캐릭터 구분 ──
-        var cso = new SerializedObject(selectUI);
-        cso.FindProperty("manager").objectReferenceValue = manager;
-        SetArray(cso.FindProperty("characters"), characters);
-        SetArray(cso.FindProperty("weaponOrder"), weapons.ToArray());
-        SetArray(cso.FindProperty("panelFrames"), frames);
-        SetArray(cso.FindProperty("panelBackgrounds"), backgrounds);
-        SetArray(cso.FindProperty("titles"), titles);
-        SerializedProperty fprop = cso.FindProperty("firstWeaponIndex");
-        fprop.arraySize = firstIndex.Length;
-        for (int i = 0; i < firstIndex.Length; i++)
-            fprop.GetArrayElementAtIndex(i).intValue = firstIndex[i];
-        cso.ApplyModifiedPropertiesWithoutUndo();
-
-        // ── LobyManager 무기 목록 (0번 = 소총 → 기본 캐릭터 사수) ──
-        var mso = new SerializedObject(manager);
-        SetArray(mso.FindProperty("selectableWeapons"), weapons.ToArray());
-        mso.ApplyModifiedPropertiesWithoutUndo();
-
-        // ── 시작 버튼을 영역 아래로 내린다 ──
-        MoveStartButton(canvas, manager);
-
-        EditorUtility.SetDirty(manager);
-        EditorSceneManager.MarkSceneDirty(scene);
-        EditorSceneManager.SaveScene(scene);
-
-        Debug.Log($"{Tag} 로비: 사수 {gunner.startWeapons.Length}종 | (간격 {PanelGap}px) | 검사 {swordsman.startWeapons.Length}종, " +
-                  $"LobyManager.selectableWeapons {weapons.Count}종");
-        return true;
-    }
-
-    // 시작 버튼은 OnClick 이 LobyManager.StartGame 을 부르는 버튼이다
-    static void MoveStartButton(Canvas canvas, LobyManager manager)
-    {
-        foreach (Button b in canvas.GetComponentsInChildren<Button>(true))
-        {
-            int n = b.onClick.GetPersistentEventCount();
-
-            for (int i = 0; i < n; i++)
-            {
-                if (b.onClick.GetPersistentTarget(i) != manager) continue;
-                if (b.onClick.GetPersistentMethodName(i) != nameof(LobyManager.StartGame)) continue;
-
-                var rect = (RectTransform)b.transform;
-                rect.anchoredPosition = new Vector2(rect.anchoredPosition.x, StartButtonY);
-                EditorUtility.SetDirty(rect);
-                return;
-            }
-        }
-
-        Debug.LogWarning($"{Tag} 시작 버튼(LobyManager.StartGame)을 찾지 못해 위치를 그대로 둡니다.");
-    }
+    // 로비 선택 화면(왼쪽 원거리 무기 · 가운데 3D 캐릭터 · 오른쪽 근접 무기)은 LobbySetup 이 짓는다 (로비-선택화면-설계.md).
+    // 예전 배치(두 칸 무기 버튼 · "CharacterSelect")는 LobbySetup 이 지운다.
+    static bool BuildLobby() => LobbySetup.Build();
 
     // ═══════════════════════════════════════════════════════════
     // 헬퍼
@@ -2610,51 +2375,6 @@ public static class CharacterSetup
         if (sprite != null) return sprite;
 
         return AssetDatabase.LoadAllAssetsAtPath(path).OfType<Sprite>().FirstOrDefault();
-    }
-
-    static void SetArray<T>(SerializedProperty prop, T[] values) where T : Object
-    {
-        prop.arraySize = values.Length;
-        for (int i = 0; i < values.Length; i++)
-            prop.GetArrayElementAtIndex(i).objectReferenceValue = values[i];
-    }
-
-    static GameObject NewUI(string name, Transform parent)
-    {
-        var go = new GameObject(name, typeof(RectTransform));
-        go.transform.SetParent(parent, false);
-        return go;
-    }
-
-    static TextMeshProUGUI NewText(string name, Transform parent, TMP_FontAsset font, string text, float size, Color color)
-    {
-        GameObject go = NewUI(name, parent);
-        var tmp = go.AddComponent<TextMeshProUGUI>();
-        if (font != null) tmp.font = font;
-        tmp.text = text;
-        tmp.fontSize = size;
-        tmp.color = color;
-        tmp.alignment = TextAlignmentOptions.Center;
-        tmp.textWrappingMode = TextWrappingModes.NoWrap;
-        tmp.raycastTarget = false;
-        return tmp;
-    }
-
-    static void SetRect(RectTransform rect, Vector2 position, Vector2 size)
-    {
-        rect.anchorMin = new Vector2(0.5f, 0.5f);
-        rect.anchorMax = new Vector2(0.5f, 0.5f);
-        rect.pivot = new Vector2(0.5f, 0.5f);
-        rect.anchoredPosition = position;
-        rect.sizeDelta = size;
-    }
-
-    static void Stretch(RectTransform rect)
-    {
-        rect.anchorMin = Vector2.zero;
-        rect.anchorMax = Vector2.one;
-        rect.offsetMin = Vector2.zero;
-        rect.offsetMax = Vector2.zero;
     }
 
     static Vector3 LongestAxis(Vector3 size)

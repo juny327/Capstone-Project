@@ -220,12 +220,7 @@ public class ComboHud : MonoBehaviour
         EvolutionCatalog catalog = EvolutionCatalog.Instance;
         if (catalog == null || data == null) return 0;
 
-        catalog.CollectFrom(data, recipes);
-
-        bool swordsman = abilities != null && abilities.SlotCount > 0;
-        recipes.RemoveAll(e => e == null || e.result == null
-                               || (swordsman && (e.requiredAttachment != null || e.requiredAnyGunAttachment != null))
-                               || (!swordsman && e.requiredSubAbility != null));
+        catalog.CollectFor(data, abilities != null && abilities.SlotCount > 0, recipes);
         return recipes.Count;
     }
 
@@ -292,16 +287,13 @@ public class ComboHud : MonoBehaviour
             bool has = weapon != null && e.HasPair(weapon, abilities, weapons);
             if (has && level >= e.RequiredLevel && ready == null) ready = e;
 
-            AttachmentData attachment = e.requiredAttachment != null ? e.requiredAttachment : e.requiredAnyGunAttachment;
-            Sprite pairSprite = e.requiredSubAbility != null ? e.requiredSubAbility.icon : attachment != null ? attachment.icon
-                              : e.requiredSkill != null ? e.requiredSkill.icon : null;
             string pairName = !string.IsNullOrEmpty(e.PairName) ? e.PairName : "?";
 
-            SetImage(row.pairIcon, pairSprite);
+            SetImage(row.pairIcon, e.PairIcon);
             if (row.pairName != null) row.pairName.text = pairName;
             if (row.pairState != null)
             {
-                row.pairState.text = has ? "가짐" : PairWhere(e);
+                row.pairState.text = has ? "가짐" : e.PairWhere;
                 row.pairState.color = has ? ownedColor : missingColor;
             }
 
@@ -331,15 +323,6 @@ public class ComboHud : MonoBehaviour
         }
 
         return true;
-    }
-
-    static string PairWhere(WeaponEvolutionData e)
-    {
-        if (e.requiredSubAbility != null) return "서브 능력 · 정비 창";
-        if (e.requiredAttachment != null) return $"{AttachmentData.SlotName(e.requiredAttachment.slot)} · 정비 창";
-        if (e.requiredAnyGunAttachment != null) return "가진 총의 하부 · 정비 창";
-        if (e.requiredSkill != null) return "레벨업 카드";
-        return "";
     }
 
     static void SetImage(Image image, Sprite sprite)

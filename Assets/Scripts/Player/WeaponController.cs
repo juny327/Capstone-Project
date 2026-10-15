@@ -713,6 +713,20 @@ public class WeaponController : MonoBehaviour
         return weapon;
     }
 
+    /// <summary>그 소켓에 연결된 부착점. 지정되지 않았으면 null (로비 미리보기가 무기 모형을 붙일 때 쓴다).</summary>
+    public Transform FindSocket(WeaponSocket socket)
+    {
+        if (sockets == null) return null;
+
+        for (int i = 0; i < sockets.Length; i++)
+        {
+            if (sockets[i].socket == socket && sockets[i].point != null)
+                return sockets[i].point;
+        }
+
+        return null;
+    }
+
     Transform ResolveSocket(WeaponSocket socket)
     {
         if (sockets != null)

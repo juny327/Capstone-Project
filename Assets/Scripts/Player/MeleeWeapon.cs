@@ -442,6 +442,14 @@ public class MeleeWeapon : WeaponBase
         return true;
     }
 
+    /// <summary>왼손이 쥘 수 있는 자루 구간 (소켓 기준 로컬). 한 손 무기면 false. 로비 미리보기가 프리팹에서 읽는다.</summary>
+    public bool TryGetLeftGripLocal(out Vector3 near, out Vector3 far)
+    {
+        near = leftGripNear;
+        far = leftGripFar;
+        return leftGripNear.sqrMagnitude >= 0.0001f || leftGripFar.sqrMagnitude >= 0.0001f;
+    }
+
     public override void SetActive(bool active)
     {
         base.SetActive(active);

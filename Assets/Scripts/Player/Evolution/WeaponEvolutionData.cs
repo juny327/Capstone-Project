@@ -82,6 +82,40 @@ public class WeaponEvolutionData : ScriptableObject
         : requiredSkill != null ? SkillPairs.NameOf(requiredSkill)
         : "";
 
+    /// <summary>짝 장비 아이콘 (조합식 판 · 로비). 짝이 없으면 null.</summary>
+    public Sprite PairIcon
+    {
+        get
+        {
+            AttachmentData attachment = requiredAttachment != null ? requiredAttachment : requiredAnyGunAttachment;
+            return requiredSubAbility != null ? requiredSubAbility.icon
+                 : attachment != null ? attachment.icon
+                 : requiredSkill != null ? requiredSkill.icon
+                 : null;
+        }
+    }
+
+    /// <summary>짝 장비를 얻는 곳 한 줄 — "서브 능력 · 정비 창" · "개조 · 정비 창" · "레벨업 카드".</summary>
+    public string PairWhere
+    {
+        get
+        {
+            if (requiredSubAbility != null) return "서브 능력 · 정비 창";
+            if (requiredAttachment != null) return $"{AttachmentData.SlotName(requiredAttachment.slot)} · 정비 창";
+            if (requiredAnyGunAttachment != null) return "가진 총의 하부 · 정비 창";
+            if (requiredSkill != null) return "레벨업 카드";
+            return "";
+        }
+    }
+
+    /// <summary>그 캐릭터가 짝을 갖출 수 있는가 — 검사는 개조 · 총 부착물을, 사수는 서브 능력을 가질 수 없다.</summary>
+    public bool AvailableTo(bool swordsman)
+    {
+        if (result == null) return false;
+        if (swordsman) return requiredAttachment == null && requiredAnyGunAttachment == null;
+        return requiredSubAbility == null;
+    }
+
     /// <summary>원래 무기를 (아직 진화하지 않은 채로) 가지고 있으면 그 무기.</summary>
     public IWeapon FindOwned(WeaponController weapons)
     {
