@@ -29,13 +29,26 @@ MonoBehaviour:
   openSound:
     clips:
     - {fileID: 8300000, guid: 67ba844c78b6b7c4a97318cef5ee19d1, type: 3}
-    volume: 0.5
-    pitchRange: {x: 0.96, y: 1.04}
+    volume: 0.6
+    pitchRange: {x: 0.55, y: 0.62}
     minInterval: 0
   collapseSound:
     clips:
     - {fileID: 8300000, guid: 670987b1567025e45a709ee09df2bcb8, type: 3}
     - {fileID: 8300000, guid: 6f0fd072993ca754e8ff678030d36181, type: 3}
+    volume: 0.8
+    pitchRange: {x: 0.6, y: 0.7}
+    minInterval: 0
+  openRumbleSound:
+    clips:
+    - {fileID: 8300000, guid: 6f0fd072993ca754e8ff678030d36181, type: 3}
+    volume: 0.55
+    pitchRange: {x: 0.48, y: 0.55}
+    minInterval: 0
+  collapseBassSound:
+    clips:
+    - {fileID: 8300000, guid: 14a6c5ccd1168b34995102c178c41985, type: 3}
+    - {fileID: 8300000, guid: c3419d5eecf9f9e4c9bd484748832472, type: 3}
     volume: 0.7
-    pitchRange: {x: 0.96, y: 1.04}
+    pitchRange: {x: 0.55, y: 0.62}
     minInterval: 0

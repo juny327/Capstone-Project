@@ -41,6 +41,15 @@ public class MirrorEdgeEffect : AttachmentEffect
     public GameSoundSet.Entry deflectSound = new GameSoundSet.Entry();
     public GameSoundSet.Entry waveSound = new GameSoundSet.Entry();
 
+    [Tooltip("휘두를 때마다 — 금속 날이 스치는 \"슈잉\" (무기 원래 휘두르기 소리 위에 겹친다, 2026-10-13)")]
+    public GameSoundSet.Entry swingEdgeSound = new GameSoundSet.Entry();
+
+    [Tooltip("휘두를 때마다 — 마법 에너지 반짝임 (고음)")]
+    public GameSoundSet.Entry swingMagicSound = new GameSoundSet.Entry();
+
+    [Tooltip("탄을 되돌릴 때 함께 — 유리처럼 맑게 울리는 소리")]
+    public GameSoundSet.Entry deflectShimmerSound = new GameSoundSet.Entry();
+
     /// <summary>날린 검기 수 · 되돌린 탄 수 (테스트).</summary>
     public static int WavesLaunched { get; private set; }
     public static int Deflected { get; private set; }
@@ -71,6 +80,9 @@ public class MirrorEdgeEffect : AttachmentEffect
             forward.Normalize();
 
             DeflectProjectiles(attack.Origin, forward, attack.Range + cfg.deflectReachBonus);
+
+            CombatFx.PlaySound(cfg.swingEdgeSound);
+            CombatFx.PlaySound(cfg.swingMagicSound);
 
             swings++;
             if (swings % cfg.waveEvery != 0) return;
@@ -122,7 +134,11 @@ public class MirrorEdgeEffect : AttachmentEffect
                 FxLine.Ring(cfg.sparkMaterial, at, 0.1f, 0.7f, cfg.color, 0.1f, 0.15f);
             }
 
-            if (any) CombatFx.PlaySound(cfg.deflectSound);
+            if (any)
+            {
+                CombatFx.PlaySound(cfg.deflectSound);
+                CombatFx.PlaySound(cfg.deflectShimmerSound);
+            }
         }
     }
 }

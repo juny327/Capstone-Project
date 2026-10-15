@@ -45,6 +45,7 @@ public class GravityWell : MonoBehaviour
     IEnumerator Run()
     {
         CombatFx.PlaySound(cfg.openSound);
+        CombatFx.PlaySound(cfg.openRumbleSound);
 
         float t = 0f;
         float scan = 0f;
@@ -136,6 +137,7 @@ public class GravityWell : MonoBehaviour
         }
 
         CombatFx.PlaySound(cfg.collapseSound);
+        CombatFx.PlaySound(cfg.collapseBassSound);
         if (cfg.cameraShake > 0f && CameraShakeManager.Instance != null)
             CameraShakeManager.Instance.Shake(cfg.cameraShake);
     }

@@ -80,6 +80,30 @@ public class FxLine : MonoBehaviour
     /// 바닥과 나란한 호 (사슬검의 채찍 궤적). center 둘레 반경 radius 에서 forward 기준 ±halfAngle(도).
     /// 고리처럼 퍼지지 않고 그 자리에서 흐려진다.
     /// </summary>
+    /// <summary>
+    /// 비스듬한 호 — 칼로 사선으로 벤 자국 (혈검 혈풍 난무). Arc 와 같지만 forward 축을 중심으로 tilt(도)만큼 기울여
+    /// 한쪽 끝은 높고 한쪽 끝은 낮다. 그 자리에서 흐려진다.
+    /// </summary>
+    public static void SlashArc(Material material, Vector3 center, Vector3 forward, float radius, float halfAngle, float tilt, Color color, float width, float duration)
+    {
+        FxLine fx = Get(material);
+        if (fx == null) return;
+
+        fx.Begin(Mode.Bolt, color, width, duration);
+
+        forward.y = 0f;
+        if (forward.sqrMagnitude < 0.0001f) forward = Vector3.forward;
+        Quaternion basis = Quaternion.LookRotation(forward.normalized) * Quaternion.Euler(0f, 0f, tilt);
+
+        const int segments = 20;
+        fx.line.positionCount = segments + 1;
+        for (int i = 0; i <= segments; i++)
+        {
+            float yaw = (-halfAngle + 2f * halfAngle * i / segments) * Mathf.Deg2Rad;
+            fx.line.SetPosition(i, center + basis * (new Vector3(Mathf.Sin(yaw), 0f, Mathf.Cos(yaw)) * radius));
+        }
+    }
+
     public static void Arc(Material material, Vector3 center, Vector3 forward, float radius, float halfAngle, Color color, float width, float duration)
     {
         FxLine fx = Get(material);

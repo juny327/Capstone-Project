@@ -312,6 +312,8 @@ public class PrismNovaBurst : MonoBehaviour
         FxLine.Ring(cfg.lineMaterial, at, 0.1f, 1.4f, Color.white, 0.3f, 0.25f);
         FxLine.Ring(cfg.lineMaterial, at, 1.6f, 0.1f, Color.white, 0.15f, 0.2f);
         CombatFx.PlaySound(cfg.beamSound);
+        CombatFx.PlaySound(cfg.beamBassSound);
+        CombatFx.PlaySound(cfg.beamHumSound);
         if (cfg.cameraShake > 0f && CameraShakeManager.Instance != null) CameraShakeManager.Instance.Shake(cfg.cameraShake);
 
         phase = Phase.Sustain;

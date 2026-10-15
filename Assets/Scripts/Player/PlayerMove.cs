@@ -135,7 +135,7 @@ public class PlayerMove : MonoBehaviour
     [Header("Roll")]
     [Tooltip("기준 이동 속도(rollReferenceSpeed)로 걸을 때 한 번에 구르는 거리(m). 더 빨리 움직이고 있으면(달리기 · 속도 업그레이드) " +
              "그 비율만큼 멀리 · 빠르게 구른다 — 구르는 시간은 같다. 커브 모양과 무관하게 이 거리만큼 이동한다")]
-    [SerializeField] private float rollDistance = 6f;
+    [SerializeField] private float rollDistance = 4f;   // 2026-10-13 6 → 4 ("7m 쯤 나가 너무 멀다")
 
     [Tooltip("구르기 지속 시간(초) — 짧을수록 빠르게. Roll 클립은 이 시간에 맞춰 빨리 재생된다 (2026-10-13 0.55 → 0.75 — 너무 빨라 조금 느리게)")]
     [SerializeField] private float rollDuration = 0.75f;
@@ -143,8 +143,8 @@ public class PlayerMove : MonoBehaviour
     [Tooltip("이 이동 속도일 때 rollDistance 만큼 구른다 (플레이어 기본 이동 속도)")]
     [SerializeField] private float rollReferenceSpeed = 3f;
 
-    [Tooltip("이동 속도를 따라 늘어나는 거리의 상한 배율 (달리기 ×1.6 이면 6 → 9.6m)")]
-    [SerializeField] private float rollMaxScale = 1.6f;
+    [Tooltip("이동 속도를 따라 늘어나는 거리의 상한 배율 (달리기여도 4 → 5m 까지)")]
+    [SerializeField] private float rollMaxScale = 1.25f;
 
     [Tooltip("애니메이터 Roll 상태가 맞춰진 재생 시간(초) — PlayerRollSetup.RollDuration. 구르기 동안 애니메이터 속도 = 이 값 ÷ rollDuration")]
     [SerializeField] private float rollClipDuration = 1.5f;

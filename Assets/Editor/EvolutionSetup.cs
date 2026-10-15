@@ -101,8 +101,7 @@ public static partial class EvolutionSetup
             e.swirlMaterial = swirl;
             e.color = Violet;
             e.collapsePrefab = explosion;
-            e.openSound = Sound(0.5f, 0f, $"{SciFi}/forceField_002.ogg");
-            e.collapseSound = Sound(0.7f, 0f, $"{SciFi}/lowFrequency_explosion_000.ogg", $"{SciFi}/lowFrequency_explosion_001.ogg");
+            GravitySounds(e);
         });
 
         var mirror = Effect<MirrorEdgeEffect>("AE_EVO_MirrorEdge", reset, e =>
@@ -110,8 +109,7 @@ public static partial class EvolutionSetup
             e.waveMaterial = fxLine;
             e.sparkMaterial = fxLine;
             e.color = Cyan;
-            e.deflectSound = Sound(0.5f, 0.05f, $"{SciFi}/impactMetal_000.ogg", $"{SciFi}/impactMetal_001.ogg");
-            e.waveSound = Sound(0.45f, 0f, $"{SciFi}/laserRetro_002.ogg");
+            MirrorSounds(e);
         });
 
         // ── 프리팹 ──
@@ -198,6 +196,7 @@ public static partial class EvolutionSetup
             convergeSound = Sound(0.55f, 0f, $"{SciFi}/forceField_000.ogg"),
             beamSound = Sound(0.6f, 0f, $"{SciFi}/laserLarge_002.ogg"),
         };
+        PrismSounds(d.prismBurst);
 
         // 예전 방식(사방 8줄기) 옵션은 끈다 — 한 발 주기에서는 쓰지 않는다
         d.extraBeams = 0;
@@ -847,6 +846,76 @@ public static partial class EvolutionSetup
     }
 
     // ═══════════ 도움 ═══════════
+
+    /// <summary>피치를 정한 소리 — 낮게(0.5 ~ 0.7) 깔거나 높게(1.2 ~ 1.6) 반짝이게.</summary>
+    static GameSoundSet.Entry SoundP(float volume, float pitchMin, float pitchMax, float minInterval, params string[] paths)
+    {
+        GameSoundSet.Entry e = Sound(volume, minInterval, paths);
+        e.pitchRange = new Vector2(pitchMin, pitchMax);
+        return e;
+    }
+
+    // ═══════════ 소리 (2026-10-13 피드백 — 상위무기-계획.md 16-15) ═══════════
+
+    const string KImpact = "Assets/Kenney/ImpactSounds";
+    const string KUi = "Assets/Kenney/InterfaceSounds";
+    const string KRpg = "Assets/Kenney/RPGAudio";
+
+    /// <summary>거울칼날 — 검의 날카로움 + 마법 에너지.</summary>
+    static void MirrorSounds(MirrorEdgeEffect e)
+    {
+        e.swingEdgeSound = SoundP(0.4f, 1.05f, 1.2f, 0.05f, $"{KRpg}/drawKnife1.ogg", $"{KRpg}/drawKnife2.ogg", $"{KRpg}/drawKnife3.ogg");
+        e.swingMagicSound = SoundP(0.22f, 1.25f, 1.45f, 0.05f, $"{KUi}/glass_001.ogg", $"{KUi}/glass_004.ogg", $"{KUi}/maximize_004.ogg", $"{KUi}/maximize_005.ogg");
+        e.waveSound = SoundP(0.5f, 1.3f, 1.45f, 0f, $"{SciFi}/forceField_000.ogg", $"{SciFi}/forceField_004.ogg");
+        e.deflectSound = SoundP(0.5f, 1.45f, 1.6f, 0.05f, $"{KImpact}/impactBell_heavy_002.ogg", $"{KImpact}/impactBell_heavy_003.ogg");
+        e.deflectShimmerSound = SoundP(0.35f, 1f, 1.2f, 0.05f, $"{KImpact}/impactGlass_light_000.ogg", $"{KImpact}/impactGlass_light_002.ogg", $"{KImpact}/impactGlass_light_004.ogg");
+    }
+
+    /// <summary>중력 대검 — 더 낮게 (엘든링 중력 마법처럼 무겁게 빨아들였다 터진다).</summary>
+    static void GravitySounds(GravityWellEffect e)
+    {
+        e.openSound = SoundP(0.6f, 0.55f, 0.62f, 0f, $"{SciFi}/forceField_002.ogg");
+        e.openRumbleSound = SoundP(0.55f, 0.48f, 0.55f, 0f, $"{SciFi}/lowFrequency_explosion_001.ogg");
+        e.collapseSound = SoundP(0.8f, 0.6f, 0.7f, 0f, $"{SciFi}/lowFrequency_explosion_000.ogg", $"{SciFi}/lowFrequency_explosion_001.ogg");
+        e.collapseBassSound = SoundP(0.7f, 0.55f, 0.62f, 0f, $"{KImpact}/impactPunch_heavy_000.ogg", $"{KImpact}/impactPunch_heavy_004.ogg");
+    }
+
+    /// <summary>프리즘 노바 — 최종 빔이 켜질 때 저음 "두우우웅".</summary>
+    static void PrismSounds(PrismBurstSettings s)
+    {
+        if (s == null) return;
+        s.beamBassSound = SoundP(0.8f, 0.55f, 0.6f, 0f, $"{SciFi}/lowFrequency_explosion_000.ogg");
+        s.beamHumSound = SoundP(0.4f, 0.45f, 0.5f, 0f, $"{KImpact}/impactBell_heavy_000.ogg", $"{KImpact}/impactBell_heavy_001.ogg");
+    }
+
+    /// <summary>혈검 — 혈풍 베기 칼바람 · 피.</summary>
+    static void BloodSounds(BloodFrenzyEffect e)
+    {
+        e.slashSound = SoundP(0.35f, 0.85f, 1.05f, 0.04f, $"{KRpg}/knifeSlice.ogg", $"{KRpg}/knifeSlice2.ogg", $"{KRpg}/drawKnife3.ogg");
+        e.bloodSound = SoundP(0.22f, 1.2f, 1.4f, 0.12f, $"{SciFi}/slime_000.ogg");
+    }
+
+    /// <summary>
+    /// 이미 있는 상위 무기 에셋에 소리만 다시 넣는다 — 수치는 건드리지 않는다 ("만들기"는 있는 데이터를 덮어쓰지 않으므로 소리를 바꿨을 때 이것으로).
+    /// </summary>
+    [MenuItem("Tools/커스터마이징/상위 무기 소리 다시 넣기")]
+    public static void RefreshSoundsMenu() => RefreshSounds();
+    public static void RefreshSoundsBatch() => RefreshSounds();
+
+    static void RefreshSounds()
+    {
+        int n = 0;
+        var mirror = Load<MirrorEdgeEffect>($"{EffectDir}/AE_EVO_MirrorEdge.asset");
+        if (mirror != null) { MirrorSounds(mirror); EditorUtility.SetDirty(mirror); n++; }
+        var gravity = Load<GravityWellEffect>($"{EffectDir}/AE_EVO_GravityWell.asset");
+        if (gravity != null) { GravitySounds(gravity); EditorUtility.SetDirty(gravity); n++; }
+        var blood = Load<BloodFrenzyEffect>($"{EffectDir}/AE_EVO_BloodFrenzy.asset");
+        if (blood != null) { BloodSounds(blood); EditorUtility.SetDirty(blood); n++; }
+        var nova = Load<ChargeBeamWeaponData>($"{WeaponDataDir}/WD_EVO_PrismNova.asset");
+        if (nova != null && nova.prismBurst != null) { PrismSounds(nova.prismBurst); EditorUtility.SetDirty(nova); n++; }
+        AssetDatabase.SaveAssets();
+        Debug.Log($"{Tag} 소리 다시 넣기 — {n}개 (거울칼날 · 중력 대검 · 혈검 · 프리즘 노바)");
+    }
 
     static GameSoundSet.Entry Sound(float volume, float minInterval, params string[] paths)
     {

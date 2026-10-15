@@ -38,6 +38,12 @@ public class GravityWellEffect : AttachmentEffect
     public GameSoundSet.Entry openSound = new GameSoundSet.Entry();
     public GameSoundSet.Entry collapseSound = new GameSoundSet.Entry();
 
+    [Tooltip("열릴 때 함께 — 끌어당기는 동안 낮게 깔리는 울림 (엘든링 중력 마법처럼, 2026-10-13)")]
+    public GameSoundSet.Entry openRumbleSound = new GameSoundSet.Entry();
+
+    [Tooltip("붕괴할 때 함께 — 깊은 \"쿵\"")]
+    public GameSoundSet.Entry collapseBassSound = new GameSoundSet.Entry();
+
     /// <summary>만든 중력장 수 (테스트).</summary>
     public static int Spawned { get; private set; }
 

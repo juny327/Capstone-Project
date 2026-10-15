@@ -76,6 +76,12 @@ public class PrismBurstSettings
     public GameSoundSet.Entry convergeSound = new GameSoundSet.Entry();
     public GameSoundSet.Entry beamSound = new GameSoundSet.Entry();
 
+    [Tooltip("③ 방사가 켜질 때 함께 — 낮게 깔리는 \"두우우웅\" (2026-10-13 피드백). 피치를 낮추면 낮고 길어진다")]
+    public GameSoundSet.Entry beamBassSound = new GameSoundSet.Entry();
+
+    [Tooltip("③ 방사 동안 남는 낮은 울림 (종소리를 낮게 — 빔과 함께 사그라든다)")]
+    public GameSoundSet.Entry beamHumSound = new GameSoundSet.Entry();
+
     /// <summary>한 주기 길이 (분산 + 수렴 + 방사).</summary>
     public float CycleTime => scatterTime + convergeTime + sustainTime;
 }

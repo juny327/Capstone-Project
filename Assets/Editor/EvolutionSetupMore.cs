@@ -9,6 +9,7 @@ using UnityEngine;
 ///  · 사수 10 — 스웜 카빈 · 회전 기관포 · 파편 폭풍 · 공성포 · 용의 포효 · 궤도 레일캐논 · 다중 표적 · 폭풍 코일 · 뇌운 · 태양창
 ///  · 검사 4 — 사슬검 · 성채 대검 · 천공창 · 팔랑크스
 ///  · 드론 2 — 폭격 편대 · 위성 방벽
+///  → 2026-10-12 8종 · 2026-10-13 다중 표적 · 천공창 보관 (지금 만드는 것: 스웜 카빈 · 회전 기관포 · 공성포 · 용의 포효 · 뇌운 · 태양창 · 혈검)
 /// 규칙은 1차와 같다 — 이미 있는 데이터는 덮어쓰지 않고, "다시 만들기" 만 처음 값으로 되돌린다.
 /// 총 상위 무기는 원래 총에 발광 재질 + 부속(다총열 · 레일 · 코일 등 기본 도형)을 붙여 모양을 바꾼다.
 /// </summary>
@@ -52,7 +53,7 @@ public static partial class EvolutionSetup
         BigMuzzle = 1 << 4,     // 공성포 — 큰 포구
         FuelTank = 1 << 5,      // 용의 포효 — 연료통 · 노즐
         MissilePod = 1 << 6,    // 스웜 카빈 — 총열 아래 미사일 포드
-        Scope = 1 << 7,         // 다중 표적 — 큰 조준경
+        Scope = 1 << 7,         // 큰 조준경 (다중 표적 — 보관, 지금 쓰는 무기 없음)
     }
 
     static void BuildRemaining(bool reset, Material fxLine, GameObject explosion, Material futuraGlow, AudioClip clip,
@@ -149,21 +150,7 @@ public static partial class EvolutionSetup
 
         // 궤도 레일캐논 (스나이퍼 + 레일건) — 2026-10-12 보관 — 바탕화면 "캡스톤 사운드 집/상위무기 보관 2026-10-12" (계획은 상위무기-계획.md 16-11)
 
-        // 다중 표적 — 스나이퍼 + 반자동
-        var markVolley = Effect<MarkVolleyEffect>("AE_EVO_MarkVolley", reset, e =>
-        {
-            e.material = fxLine;
-            e.color = Scarlet;
-            e.volleySound = Sound(0.6f, 0f, $"{SciFi}/laserRetro_000.ogg");
-        });
-        var multiLock = EvolvedData<ProjectileWeaponData>("WD_Sniper", "WD_EVO_MultiLock", reset,
-            GunVariant("W_Sniper", "W_EVO_MultiLock", GunGlowMaterial("EVO_Glow_Scarlet", Scarlet, reset), Scarlet, false, null, null, reset, GunPart.Scope),
-            markVolley, Scarlet, d =>
-            {
-                d.weaponName = "다중 표적";
-                d.description = "맞힌 적에게 표식 — 다섯 발마다 표식 있는 적 6명을 동시에 저격 (치명타)";
-                d.damage *= 1.1f;
-            });
+        // 다중 표적 (스나이퍼 + 반자동) — 2026-10-13 보관 — 바탕화면 "캡스톤 사운드 집/상위무기 보관 2026-10-13" (사용자 피드백 "삭제", 계획은 상위무기-계획.md 16-15)
 
         // 폭풍 코일 (전격 소총 + 과부하 코일) — 2026-10-12 보관 — 바탕화면 "캡스톤 사운드 집/상위무기 보관 2026-10-12" (계획은 상위무기-계획.md 16-11)
 
@@ -208,6 +195,7 @@ public static partial class EvolutionSetup
             e.material = fxLine;
             e.color = Blood;
             e.frenzySound = Sound(0.6f, 0f, $"{SciFi}/lowFrequency_explosion_001.ogg");
+            BloodSounds(e);
         });
         var bloodBlade = EvolvedData<MeleeWeaponData>("WD_Sword", "WD_EVO_BloodBlade", reset,
             MeleeVariant("W_Sword", "W_EVO_BloodBlade", SwordARed, 1f, futuraGlow, Blood, fxLine, reset),
@@ -218,20 +206,7 @@ public static partial class EvolutionSetup
                 d.damage *= 1.15f;
             });
 
-        var lanceExtend = Effect<LanceExtendEffect>("AE_EVO_LanceExtend", reset, e =>
-        {
-            e.material = fxLine;
-            e.color = Lance;
-            e.sound = Sound(0.45f, 0.05f, $"{SciFi}/laserSmall_003.ogg");
-        });
-        var piercing = EvolvedData<MeleeWeaponData>("WD_Spear", "WD_EVO_PiercingLance", reset,
-            MeleeVariant("W_Spear", "W_EVO_PiercingLance", StaffBlue, 1f, futuraGlow, Lance, fxLine, reset),
-            lanceExtend, Lance, d =>
-            {
-                d.weaponName = "천공창";
-                d.description = "찌르기 끝에서 빛의 창이 10m 더 뻗고, 가장 먼 적을 끌어온다";
-                d.damage *= 1.2f;
-            });
+        // 천공창 (창 + 그랩 훅) — 2026-10-13 보관 — 바탕화면 "캡스톤 사운드 집/상위무기 보관 2026-10-13" (사용자 피드백 "삭제", 계획은 상위무기-계획.md 16-15)
 
         // 팔랑크스 (창 + 에너지 방패) — 2026-10-12 보관 — 바탕화면 "캡스톤 사운드 집/상위무기 보관 2026-10-12" (계획은 상위무기-계획.md 16-11)
 
@@ -242,24 +217,22 @@ public static partial class EvolutionSetup
         // ═══════ 조합 ═══════
 
         // 2026-10-12 — 겹치거나 애매한 8종(파편 폭풍 · 궤도 레일캐논 · 폭풍 코일 · 사슬검 · 성채 대검 · 팔랑크스 · 폭격 편대 · 위성 방벽)은 보관
+        // 2026-10-13 — 다중 표적 · 천공창도 보관 (사용자 피드백)
         recipes.AddRange(new[]
         {
             Recipe("EVO_SwarmCarbine", reset, "WD_Rifle", swarm, Orange, clip, "점사 세 발이 유도 미사일 — 발마다 다른 적을 쫓아가 작은 폭발", attachment: "MOD_Rifle_Burst"),
             Recipe("EVO_Minigun", reset, "WD_SMG", minigun, Amber, clip, "장전 없이 계속 쏜다 — 쏘는 동안 연사가 2초에 걸쳐 3배까지 오른다", attachment: "MOD_SMG_DualMag"),
             Recipe("EVO_SiegeCannon", reset, "WD_Shotgun", siege, Gold, clip, "관통 무제한 포탄 — 맞은 적마다 폭발, 사거리 끝에서 큰 폭발", attachment: "MOD_Shotgun_Slug"),
             Recipe("EVO_DragonRoar", reset, "WD_Shotgun", dragon, Ember, clip, "산탄 대신 화염 방사 — 정면을 태우고, 불타다 죽은 적은 불을 옮긴다", skill: "FireBallUpgrade"),   // 2026-10-13 용의 숨결 → 파이어볼
-            Recipe("EVO_MultiLock", reset, "WD_Sniper", multiLock, Scarlet, clip, "맞힌 적에게 표식 — 다섯 발마다 표식 있는 적 6명을 동시에 저격", attachment: "MOD_Sniper_SemiAuto"),
             Recipe("EVO_Thundercloud", reset, "WD_TeslaRifle", thundercloud, Indigo, clip, "장전하는 동안 머리 위 먹구름이 주변 적에게 낙뢰를 쏟는다", skill: "ChainLightningUpgrade"),   // 2026-10-13 방전 → 연쇄 번개
             Recipe("EVO_SunLance", reset, "WD_ChargeLaser", sunLance, Solar, clip, SunLanceText, attachment: "MOD_Laser_Overcharge"),
-            Recipe("EVO_PiercingLance", reset, "WD_Spear", piercing, Lance, clip, "찌르기 끝에서 빛의 창이 10m 더 뻗고, 가장 먼 적을 끌어온다", ability: "SA_Grapple"),
             Recipe("EVO_BloodBlade", reset, "WD_Sword", bloodBlade, Blood, clip, BloodBladeText, skill: "DrainUpgrade"),
         });
 
         icons.AddRange(new[]
         {
             "WD_EVO_SwarmCarbine", "WD_EVO_Minigun", "WD_EVO_SiegeCannon", "WD_EVO_DragonRoar",
-            "WD_EVO_MultiLock", "WD_EVO_Thundercloud", "WD_EVO_SunLance",
-            "WD_EVO_PiercingLance", "WD_EVO_BloodBlade",
+            "WD_EVO_Thundercloud", "WD_EVO_SunLance", "WD_EVO_BloodBlade",
         });
     }
 

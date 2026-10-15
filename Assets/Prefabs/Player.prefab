@@ -2755,10 +2755,10 @@ MonoBehaviour:
   idleRecoverPerSecond: 18
   recoverDelay: 0.5
   exhaustedRecoverRatio: 0.25
-  rollDistance: 6
+  rollDistance: 4
   rollDuration: 0.75
   rollReferenceSpeed: 3
-  rollMaxScale: 1.6
+  rollMaxScale: 1.25
   rollClipDuration: 1.5
   rollCooldown: 3.25
   rollIFrame: 0.75

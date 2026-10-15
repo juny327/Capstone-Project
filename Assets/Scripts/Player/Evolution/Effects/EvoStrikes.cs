@@ -73,6 +73,7 @@ public static class EvoStrikes
     }
 
     /// <summary>point 까지 duration 초에 끌어온다 — 적은 내비메시 위로(EnemyShove), 테스트 룸 무리 표적은 IPullable 로. 보스는 끌지 않는다.</summary>
+    // 지금 쓰는 곳 없음 — 보관한 천공창 · 사슬검이 쓰던 끌어오기. 되살릴 때를 위해 남긴다 (2026-10-13)
     public static bool PullTo(MonoBehaviour runner, Transform target, Vector3 point, float duration)
     {
         if (runner == null || target == null) return false;
