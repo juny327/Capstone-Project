@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e9f188fced24a347854d377fb9adfd4, type: 3}
+  m_Name: WD_Sword
+  m_EditorClassIdentifier: Assembly-CSharp::MeleeWeaponData
+  weaponName: "\uAC80"
+  description: "\uC804\uBC29 \uBD80\uCC44\uAF34 \uAD11\uC5ED \uBCA0\uAE30"
+  icon: {fileID: 21300000, guid: e9edf3a17d810e44cbaa436df8f381f1, type: 3}
+  weaponPrefab: {fileID: 5825881266557484979, guid: 9c5da29612edc2c4fbe7d00bb3457f60, type: 3}
+  socket: 0
+  fireInterval: 0.7
+  damage: 6
+  critChance: 0.1
+  critMultiplier: 2
+  maxLevel: 3
+  perLevelBonus:
+    damageAdd: 0.9
+    damageMul: 1
+    fireIntervalMul: 1
+    critChanceAdd: 0
+    critMultiplierAdd: 0
+    projectileSpeedAdd: 0
+    projectileCountAdd: 0
+    pierceAdd: 0
+    magazineAdd: 0
+    reloadTimeMul: 1
+    rangeAdd: 0
+    subUnitAdd: 0
+  requiresTarget: 1
+  fireSounds:
+  - {fileID: 8300000, guid: e3760d5047edad749ac1e25cd676ab46, type: 3}
+  - {fileID: 8300000, guid: 0c03edc4efa519a439adaf03a0af417a, type: 3}
+  fireVolume: 0.65
+  firePitchRange: {x: 0.96, y: 1.04}
+  reloadStartSound: {fileID: 0}
+  reloadEndSound: {fileID: 0}
+  reloadVolume: 0.8
+  range: 3
+  arcAngle: 120
+  maxTargets: 5
+  hitDelay: 0.23799998
+  hitLayers:
+    serializedVersion: 2
+    m_Bits: 129
+  cameraShake: 0.15
+  slashEffectPrefab: {fileID: 0}

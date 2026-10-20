@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 774e8839cb40ed44f82f525be90550ac, type: 3}
+  m_Name: EVO_BloodBlade
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponEvolutionData
+  from: {fileID: 11400000, guid: a5c5c099d896ba94a9b198ef0b9b8fc4, type: 2}
+  requiredLevel: 0
+  requiredAttachment: {fileID: 0}
+  requiredSubAbility: {fileID: 0}
+  requiredAbilityLevel: 1
+  requiredAnyGunAttachment: {fileID: 0}
+  requiredSkill: {fileID: 11400000, guid: 3513faf893f803848bb640b65d8d4951, type: 2}
+  result: {fileID: 11400000, guid: ee49a8cb372d7054c8b571215295c8e3, type: 2}
+  title: "\uD608\uAC80"
+  flavor: "\uCC98\uCE58\uD560 \uB54C\uB9C8\uB2E4 \uD608\uAE30\uAC00 \uC313\uC774\uACE0
+    (HP \uAC00 \uAC00\uB4DD\uC774\uBA74 \uB450 \uBC30) \uAC00\uB4DD \uCC28\uBA74
+    6\uCD08 \uD3ED\uC8FC \u2014 \uACF5\uACA9 \uC18D\uB3C4 \xD71.5 \xB7 \uC0AC\uAC70\uB9AC
+    +1m \xB7 \uB9DE\uD78C \uD53C\uD574\uC758 10% \uD68C\uBCF5"
+  color: {r: 0.9, g: 0.08, b: 0.14, a: 1}
+  sound: {fileID: 8300000, guid: f595650ca3f17154e8de61ccc64e6a00, type: 3}
+  soundVolume: 0.9
+  shopPrice: 0

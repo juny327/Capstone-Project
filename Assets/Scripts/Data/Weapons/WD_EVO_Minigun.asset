@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0fedd2a6f982e0e4b8c3250923d0f859, type: 3}
+  m_Name: WD_EVO_Minigun
+  m_EditorClassIdentifier: Assembly-CSharp::ProjectileWeaponData
+  weaponName: "\uD68C\uC804 \uAE30\uAD00\uD3EC"
+  description: "\uC7A5\uC804 \uC5C6\uC774 \uACC4\uC18D \uC3DC\uB2E4 \u2014 \uC3D8\uB294
+    \uB3D9\uC548 \uC5F0\uC0AC\uAC00 2\uCD08\uC5D0 \uAC78\uCCD0 3\uBC30\uAE4C\uC9C0
+    \uC624\uB978\uB2E4"
+  icon: {fileID: 21300000, guid: f592b963fbf8d1042a3b3718b69b4812, type: 3}
+  weaponPrefab: {fileID: 4085249434206812143, guid: 91753ff42608e80498c496e2773b302f, type: 3}
+  socket: 0
+  fireInterval: 0.12
+  damage: 1.463
+  critChance: 0.03
+  critMultiplier: 2
+  maxLevel: 3
+  perLevelBonus:
+    damageAdd: 0.2
+    damageMul: 1
+    fireIntervalMul: 1
+    critChanceAdd: 0
+    critMultiplierAdd: 0
+    projectileSpeedAdd: 0
+    projectileCountAdd: 0
+    pierceAdd: 0
+    spreadMul: 1
+    lifeTimeMul: 1
+    burstAdd: 0
+    magazineAdd: 0
+    reloadTimeMul: 1
+    rangeAdd: 0
+    subUnitAdd: 0
+  requiresTarget: 1
+  evolvedFrom: {fileID: 11400000, guid: 16be6279c8aab6d4798e7db59d161183, type: 2}
+  innateEffects:
+  - {fileID: 11400000, guid: d17eb8d3dc89cdd4cb7b0c337322e4c6, type: 2}
+  themeColor: {r: 1, g: 0.85, b: 0.2, a: 1}
+  fireSounds:
+  - {fileID: 8300000, guid: 39e709d10c7c7384185160ccd9940e19, type: 3}
+  fireVolume: 0.38
+  firePitchRange: {x: 0.96, y: 1.04}
+  reloadStartSound: {fileID: 8300000, guid: 0134019f5dd95c640a25be0da776e24f, type: 3}
+  reloadEndSound: {fileID: 8300000, guid: 72d73c3f83644ce4db326744eddb1211, type: 3}
+  reloadVolume: 0.8
+  aimMode: 0
+  projectilePrefab: {fileID: 5875018044698817663, guid: 614cb4c22e803054abee82ea23183a25, type: 3}
+  projectileSpeed: 25
+  projectileLifeTime: 2
+  projectileCount: 1
+  spreadAngle: 4
+  pierceCount: 0
+  spawnProjectiles: 1
+  homingTurnRate: 0
+  homingRange: 14
+  magazineSize: 0
+  reloadTime: 1.6
+  autoReload: 1
+  muzzleFlashPrefab: {fileID: 2916273817513264348, guid: 95044fb3908b36c46bc62060360f7ba6, type: 3}
+  casingPrefab: {fileID: 8464276986609709168, guid: 4aa9530848b0025449ef44e32d3f9a41, type: 3}

@@ -15,3 +15,5 @@ MonoBehaviour:
   stageIndex: 1
   killTarget: 15
   maxEnemyCount: 50
+  spawnInterval: 3
+  rangedProjectileSpeed: 6

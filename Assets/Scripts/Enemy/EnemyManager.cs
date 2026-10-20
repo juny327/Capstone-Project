@@ -12,6 +12,7 @@ public class EnemyManager : MonoBehaviour
     public Enemy[] enemyPrefabs;
     public Transform player;
     public float spawnInterval = 3f;
+    [Min(0.1f)] public float rangedProjectileSpeed = 3.5f;
     public int maxEnemyCount = 20;
 
     [Header("Spawn Distance")]
@@ -47,6 +48,7 @@ public class EnemyManager : MonoBehaviour
     {
         player = p;
     }
+
     void TickEnemies()
     {
         for (int i = 0; i < enemies.Count; i++)
@@ -58,7 +60,6 @@ public class EnemyManager : MonoBehaviour
     void UpdateSpawn()
     {
         if (player == null) return;
-
         if (spawners.Count == 0) return;
 
         spawnTimer += Time.deltaTime;
@@ -69,7 +70,13 @@ public class EnemyManager : MonoBehaviour
 
             if (enemies.Count < maxEnemyCount)
             {
-                SpawnEnemy();
+                int requestedSpawnCount = Random.Range(0, 100) < 75 ? 1 : 2;
+                int spawnCount = Mathf.Min(requestedSpawnCount, maxEnemyCount - enemies.Count);
+
+                for (int i = 0; i < spawnCount && enemies.Count < maxEnemyCount; i++)
+                {
+                    SpawnEnemy();
+                }
             }
         }
     }
@@ -79,14 +86,10 @@ public class EnemyManager : MonoBehaviour
         if (player == null) return;
 
         EnemySpawner spawner = FindValidSpawner();
-
-        if (spawner == null)
-            return;
+        if (spawner == null) return;
 
         Enemy prefab = GetWeightedRandomEnemy();
-
-        if (prefab == null)
-            return;
+        if (prefab == null) return;
 
         spawner.Spawn(prefab, player);
     }
@@ -98,7 +101,16 @@ public class EnemyManager : MonoBehaviour
 
         foreach (var spawner in spawners)
         {
-            float dist = Vector3.Distance(player.position, spawner.transform.position);
+            if (spawner == null)
+                continue;
+
+            if (!spawner.isActiveAndEnabled)
+                continue;
+
+            float dist = Vector3.Distance(
+                player.position,
+                spawner.transform.position
+            );
 
             if (dist > minSpawnDistance && dist < maxSpawnDistance)
             {
@@ -112,8 +124,7 @@ public class EnemyManager : MonoBehaviour
         return candidates[Random.Range(0, candidates.Count)];
     }
 
-
-    // Cumulative Weight Algorithm 
+    // Cumulative Weight Algorithm
     Enemy GetWeightedRandomEnemy()
     {
         int totalWeight = 0;
@@ -129,7 +140,6 @@ public class EnemyManager : MonoBehaviour
         foreach (var prefab in enemyPrefabs)
         {
             Enemy enemy = prefab.GetComponent<Enemy>();
-
             random -= enemy.data.spawnWeight;
 
             if (random < 0)
@@ -137,6 +147,32 @@ public class EnemyManager : MonoBehaviour
         }
 
         return enemyPrefabs[0];
+    }
+
+    public Enemy GetClosestEnemy(Vector3 from, float maxDistance)
+    {
+        Enemy closest = null;
+        float closestSqrDistance = maxDistance * maxDistance;
+
+        for (int i = 0; i < enemies.Count; i++)
+        {
+            Enemy enemy = enemies[i];
+
+            if (enemy == null ||
+                !enemy.gameObject.activeInHierarchy ||
+                enemy.state == EnemyState.Dead)
+                continue;
+
+            float sqrDistance = (enemy.transform.position - from).sqrMagnitude;
+
+            if (sqrDistance < closestSqrDistance)
+            {
+                closestSqrDistance = sqrDistance;
+                closest = enemy;
+            }
+        }
+
+        return closest;
     }
 
     public void RegisterSpawner(EnemySpawner spawner)
@@ -159,21 +195,6 @@ public class EnemyManager : MonoBehaviour
     void OnEnemyDeath(Enemy enemy)
     {
         enemies.Remove(enemy);
-        // EnemyEvent 발생
         GameEvents.OnEnemyKilled?.Invoke();
     }
-
-    // void OnDrawGizmosSelected()
-    // {
-    //     if (player == null)
-    //         return;
-
-    //     // 최소 거리 원 (빨간색)
-    //     Gizmos.color = Color.red;
-    //     Gizmos.DrawWireSphere(player.position, minSpawnDistance);
-
-    //     // 최대 거리 원 (초록색)
-    //     Gizmos.color = Color.green;
-    //     Gizmos.DrawWireSphere(player.position, maxSpawnDistance);
-    // }
 }

@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2053801b010909f488af8899e8b93e8a, type: 3}
+  m_Name: AT_Ricochet
+  m_EditorClassIdentifier: Assembly-CSharp::AttachmentData
+  displayName: "\uD295\uAE40\uD0C4"
+  description: "\uB9DE\uC740 \uC801\uC5D0\uC11C \uAC00\uAE4C\uC6B4 \uC801\uC5D0\uAC8C
+    \uD55C \uBC88 \uD295\uAE34\uB2E4"
+  icon: {fileID: 21300000, guid: 4db9803b07f17d04086337f1559f5c11, type: 3}
+  slot: 4
+  tier: 1
+  families: 1
+  onlyFor: []
+  modifier:
+    damageAdd: 0
+    damageMul: 0.85
+    fireIntervalMul: 1
+    critChanceAdd: 0
+    critMultiplierAdd: 0
+    projectileSpeedAdd: 0
+    projectileCountAdd: 0
+    pierceAdd: 0
+    spreadMul: 1
+    lifeTimeMul: 1
+    burstAdd: 0
+    magazineAdd: 0
+    reloadTimeMul: 1
+    rangeAdd: 0
+    subUnitAdd: 0
+  magazinePercent: 0
+  projectileCountSet: 0
+  effect: {fileID: 11400000, guid: df65afcb4d202854ba542793a7e74c3b, type: 2}
+  ability: {fileID: 0}
+  tint: {r: 0, g: 0, b: 0, a: 0}
+  note: "\uAC00\uAE4C\uC6B4 \uC801\uC5D0\uAC8C \uD55C \uBC88 \uD295\uAE40"
+  minWeaponLevel: 1
+  basePrice: 18

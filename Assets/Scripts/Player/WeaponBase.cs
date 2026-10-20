@@ -1,16 +1,738 @@
+using System.Collections.Generic;
 using UnityEngine;
 
-public class WeaponBase : MonoBehaviour
+/// <summary>
+/// 모든 무기의 공통 구현. 쿨다운, 스탯 합성, 크리티컬 판정, 이펙트 스폰을 담당한다.
+/// 파생 클래스는 OnFire 만 구현하면 된다.
+///
+/// ⚠ WeaponData(SO)는 절대 수정하지 않는다. 업그레이드 누적분은 accumulated 에만 쌓고,
+///    실제 사용값은 매번 data.Compose(TotalModifier) 로 만든다.
+///    SO 를 직접 고치면 에디터에서 에셋에 영구 기록되어 플레이마다 수치가 누적된다.
+/// </summary>
+public abstract class WeaponBase : MonoBehaviour, IWeapon
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    [Header("Data")]
+    [SerializeField] protected WeaponData data;
+
+    [Header("Transforms")]
+    [Tooltip("투사체·머즐플래시가 나오는 지점. 비우면 자기 Transform 을 쓴다")]
+    [SerializeField] protected Transform muzzle;
+
+    [Tooltip("탄피가 나오는 지점. 없으면 탄피를 생성하지 않는다")]
+    [SerializeField] protected Transform casingPoint;
+
+    private WeaponModifier accumulated = WeaponModifier.Identity;
+    private float cooldown;
+    private int level = 1;
+
+    // 부착물 (커스터마이징-구현계획.md 4장). 업그레이드 누적분(accumulated)과 따로 든다 —
+    // 누적분은 빼기가 안 되어 교체를 못 한다. 달린 것들의 합은 attachmentModifier 에 다시 합성해 둔다.
+    private readonly Dictionary<AttachmentSlot, AttachmentData> attachments = new Dictionary<AttachmentSlot, AttachmentData>();
+    private WeaponModifier attachmentModifier = WeaponModifier.Identity;
+
+    // 부착물의 동작 (조준선 · 명중 효과 · 장전 방전) — 부위마다 하나. 하부 능력형 부착물의 E 능력은 따로 든다
+    private readonly Dictionary<AttachmentSlot, AttachmentRuntime> runtimes = new Dictionary<AttachmentSlot, AttachmentRuntime>();
+    private readonly List<AttachmentRuntime> runtimeList = new List<AttachmentRuntime>();
+    private SubAbility ability;
+    private AttachmentSlot abilitySlot;
+
+    // 탄창 (12번 문서). 탄창 크기 0 인 무기(근접·서브유닛)는 이 값들을 쓰지 않는다.
+    private int ammo;
+    private float reloadRemaining;
+
+    /// <summary>이 무기를 소유한 컨트롤러. 플레이어 루트 참조용.</summary>
+    protected WeaponController Owner { get; private set; }
+
+    public WeaponData Data => data;
+    public int Level => level;
+
+    /// <summary>쿨다운이 끝나고, 장전 중이 아니며, 탄약이 남아 있어야 쏠 수 있다.</summary>
+    public bool CanFire => cooldown <= 0f && IsActive && !IsReloading && HasAmmo && !IsBusy;
+
+    /// <summary>
+    /// 한 발이 여러 단계로 이어지는 동안(프리즘 노바: 분산 → 수렴 → 방사) — 다음 발 · 장전을 받지 않는다.
+    /// 보통 무기는 항상 false.
+    /// </summary>
+    protected virtual bool IsBusy => false;
+
+    /// <summary>
+    /// 연사 배율 (1 = 그대로, 3 = 세 배 빠르게). 상위 무기 동작이 실행 중에 바꾼다 —
+    /// 회전 기관포(쏠수록 빨라짐) · 혈검(폭주 동안). 스탯이 아니라 다음 발 간격에만 쓴다.
+    /// </summary>
+    public float FireRateBoost { get; set; } = 1f;
+
+    /// <summary>사거리에 잠깐 더하는 값 (m) — 혈검 폭주 동안 휘두르기가 길어진다. 상위 무기 동작이 켜고 끈다.</summary>
+    public float RangeBonus { get; set; }
+
+    /// <summary>다음 발까지 남은 시간을 다시 건다 — 여러 단계짜리 발이 끝난 뒤 충전을 처음부터 시작할 때.</summary>
+    protected void RestartCooldown(float seconds) => cooldown = Mathf.Max(0f, seconds);
+
+    public bool IsActive { get; private set; } = true;
+
+    // ───────── 탄창 ─────────
+
+    /// <summary>탄창 크기. 0 이면 무제한이라 장전 자체를 하지 않는다.</summary>
+    public int MagazineSize => data != null ? Stats.MagazineSize : 0;
+
+    public int Ammo => ammo;
+
+    public bool IsReloading => reloadRemaining > 0f;
+
+    /// <summary>탄창을 쓰지 않는 무기이거나, 탄이 남아 있는가.</summary>
+    public bool HasAmmo => MagazineSize <= 0 || ammo > 0;
+
+    /// <summary>
+    /// 다음 발사까지 남은 시간(초). 0 이하면 쏠 수 있다.
+    ///
+    /// 충전형 무기가 "얼마나 모였는지"를 연출하는 데 쓴다 —
+    /// 발사 간격이 곧 충전 시간이므로 별도 상태를 들 필요가 없다.
+    /// </summary>
+    protected float CooldownRemaining => cooldown;
+
+    /// <summary>누적 업그레이드 + 부착물 + 레벨 보너스. 셋은 곱해서 함께 적용된다.</summary>
+    protected WeaponModifier TotalModifier =>
+        WeaponModifier.Combine(WeaponModifier.Combine(accumulated, attachmentModifier),
+                               data.perLevelBonus.Scaled(level - 1));
+
+    public WeaponRuntimeStats Stats
     {
-        
+        get
+        {
+            WeaponRuntimeStats s = WithOverrides(data.Compose(TotalModifier), projectileCountOverride);
+            if (RangeBonus != 0f) s.Range = Mathf.Max(0.1f, s.Range + RangeBonus);
+            return s;
+        }
     }
 
-    // Update is called once per frame
-    void Update()
+    // 탄 수를 정하는 부착물 (슬러그 = 1). 증분이 아니라 마지막에 덮어쓴다 — 0 이면 없음
+    private int projectileCountOverride;
+
+    static WeaponRuntimeStats WithOverrides(WeaponRuntimeStats s, int countOverride)
     {
-        
+        if (countOverride > 0) s.ProjectileCount = countOverride;
+        return s;
+    }
+
+    protected Transform Muzzle => muzzle != null ? muzzle : transform;
+
+    /// <summary>총구 — 부착물 연출(조준선)이 쓴다.</summary>
+    public Transform MuzzlePoint => Muzzle;
+
+    /// <summary>이 무기를 든 컨트롤러 (플레이어 루트).</summary>
+    public WeaponController Controller => Owner;
+
+    /// <summary>하부 부착물의 E 능력 (유탄 · 총검 돌격 · 충격 방출). 없으면 null.</summary>
+    public SubAbility Ability => ability;
+
+    /// <summary>WeaponController 가 장착 직후 호출한다.</summary>
+    public virtual void Initialize(WeaponData weaponData, WeaponController owner)
+    {
+        if (weaponData != null)
+            data = weaponData;
+
+        Owner = owner;
+
+        if (data == null)
+        {
+            Debug.LogError($"[{GetType().Name}] WeaponData 가 없습니다.", this);
+            enabled = false;
+            return;
+        }
+
+        // 서브유닛은 스왑과 무관하게 항상 동작한다
+        IsActive = data.IsAlwaysActive;
+        if (data.IsAlwaysActive)
+            SetActive(true);
+
+        cooldown = 0f;
+
+        // 탄창을 가득 채운 상태로 시작한다
+        ammo = Stats.MagazineSize;
+        reloadRemaining = 0f;
+
+        BuildInnateRuntimes();
+    }
+
+    /// <summary>상위 무기의 고유 동작 (WeaponData.innateEffects) — 부착물 동작과 같은 목록에서 돈다. 부위가 없어 교체되지 않는다.</summary>
+    void BuildInnateRuntimes()
+    {
+        if (data == null || data.innateEffects == null) return;
+
+        foreach (AttachmentEffect effect in data.innateEffects)
+        {
+            if (effect == null) continue;
+
+            AttachmentRuntime runtime = effect.CreateRuntime();
+            if (runtime == null) continue;
+
+            runtime.Bind(this, null);
+            runtime.OnActiveChanged(IsActive);
+            runtimeList.Add(runtime);
+        }
+    }
+
+    public void Tick(float deltaTime)
+    {
+        if (cooldown > 0f)
+            cooldown -= deltaTime;
+
+        if (reloadRemaining > 0f)
+        {
+            reloadRemaining -= deltaTime;
+
+            if (reloadRemaining <= 0f)
+            {
+                reloadRemaining = 0f;
+                ammo = Stats.MagazineSize;
+
+                PlaySound(data != null ? data.reloadEndSound : null,
+                    data != null ? data.reloadVolume : 1f);
+
+                OnReloadFinished();
+                RaiseAmmoChanged();
+            }
+        }
+
+        OnTick(deltaTime);
+
+        for (int i = 0; i < runtimeList.Count; i++)
+            runtimeList[i].Tick(deltaTime);
+    }
+
+    public void Fire(in WeaponFireContext context)
+    {
+        WeaponRuntimeStats stats = Stats;
+
+        OnFire(in stats, in context);
+
+        // 연사 가속(회전 기관포 · 팔랑크스)이 걸려 있으면 다음 발까지 그만큼 짧다
+        cooldown = stats.FireInterval / Mathf.Max(0.1f, FireRateBoost);
+
+        // 근접은 판정 순간(휘두른 뒤 hitDelay)에 스스로 알린다
+        if (!ReportsAttackItself && runtimeList.Count > 0)
+        {
+            NotifyAttack(new WeaponAttack
+            {
+                Origin = Muzzle.position,
+                Direction = context.AimDirection,
+                Range = stats.Range,
+            });
+        }
+
+        PlayFireSound();
+
+        // 산탄이어도 1회 발사는 탄약 1 소모다 (12번 R3).
+        // 탄 수만큼 깎으면 산탄 업그레이드가 곧 탄약 소모 증가가 되어 벌칙이 된다.
+        if (stats.MagazineSize > 0)
+        {
+            ammo = Mathf.Max(0, ammo - 1);
+            RaiseAmmoChanged();
+        }
+    }
+
+    /// <summary>
+    /// 장전을 시작한다. 탄창이 가득이거나 이미 장전 중이면 아무 일도 하지 않는다.
+    /// 탄이 남아 있어도 수동으로 장전할 수 있다 (12번 R1).
+    /// </summary>
+    public void StartReload()
+    {
+        WeaponRuntimeStats stats = Stats;
+
+        if (stats.MagazineSize <= 0) return;   // 탄창을 쓰지 않는 무기
+        if (IsReloading || IsBusy) return;
+        if (ammo >= stats.MagazineSize) return;
+        if (!IsActive) return;
+
+        reloadRemaining = stats.ReloadTime;
+
+        PlayReloadStartSound(stats.ReloadTime);
+
+        OnReloadStarted(stats.ReloadTime);
+        RaiseAmmoChanged();
+
+        for (int i = 0; i < runtimeList.Count; i++)
+            runtimeList[i].OnReloadStarted();
+    }
+
+    /// <summary>탄이 떨어졌고 자동 장전을 쓰는 무기면 장전을 시작한다.</summary>
+    public void TryAutoReload()
+    {
+        if (IsReloading || HasAmmo || IsBusy) return;
+        if (!AutoReload) return;
+
+        StartReload();
+    }
+
+    /// <summary>장전을 취소한다. 스왑·구르기·사망에서 부른다. 탄약은 그대로 둔다 (12번 R4).</summary>
+    public void CancelReload()
+    {
+        if (!IsReloading) return;
+
+        reloadRemaining = 0f;
+
+        OnReloadCanceled();
+        RaiseAmmoChanged();
+    }
+
+    /// <summary>자동 장전 여부. 투사체 무기가 데이터 값으로 재정의한다.</summary>
+    protected virtual bool AutoReload => true;
+
+    // ───────── 소리 ─────────
+
+    void PlayFireSound()
+    {
+        if (data == null) return;
+
+        AudioClip clip = data.PickFireSound();
+
+        if (clip == null) return;
+
+        float min = Mathf.Min(data.firePitchRange.x, data.firePitchRange.y);
+        float max = Mathf.Max(data.firePitchRange.x, data.firePitchRange.y);
+
+        if (min <= 0f) min = 1f;
+        if (max <= 0f) max = 1f;
+
+        PlaySound(clip, data.fireVolume, Random.Range(min, max));
+    }
+
+    /// <summary>
+    /// 장전 소리를 **장전 시간에 맞춰 배속 재생**한다.
+    ///
+    /// 장전 시간이 무기마다 다른데(소총 2.0 · 기관단총 1.8 · 스나이퍼 2.6초)
+    /// 클립 길이는 하나다. 애니메이션을 `ReloadSpeed` 로 맞춘 것과 같은 방식이다.
+    /// </summary>
+    void PlayReloadStartSound(float duration)
+    {
+        if (data == null || data.reloadStartSound == null) return;
+
+        float pitch = 1f;
+        float length = data.reloadStartSound.length;
+
+        // 너무 크게 늘이거나 줄이면 소리가 우스워진다
+        if (duration > 0.05f && length > 0.05f)
+            pitch = Mathf.Clamp(length / duration, 0.6f, 1.8f);
+
+        PlaySound(data.reloadStartSound, data.reloadVolume, pitch);
+    }
+
+    /// <summary>
+    /// 플레이어 무기 소리는 2D 로 낸다 — 탑다운 카메라라 거리 감쇠가 어색하다.
+    /// `SoundManager` 가 없으면 조용히 넘어간다 (씬 구성이 덜 된 경우).
+    /// </summary>
+    protected void PlaySound(AudioClip clip, float volume, float pitch = 1f)
+    {
+        if (clip == null || SoundManager.Instance == null) return;
+
+        SoundManager.Instance.PlayClip(clip, volume, pitch);
+    }
+
+    /// <summary>
+    /// 손에 든 무기의 탄약 변화를 HUD 에 알린다.
+    /// 서브유닛은 스왑 대상이 아니므로 발행하지 않는다 — 발행하면 HUD 숫자가 드론 것으로 덮인다.
+    /// </summary>
+    protected void RaiseAmmoChanged()
+    {
+        if (!IsActive) return;
+        if (data == null || data.IsAlwaysActive) return;
+
+        GameEvents.OnAmmoChanged?.Invoke(IsReloading ? 0 : ammo, MagazineSize);
+    }
+
+    public void ApplyModifier(in WeaponModifier modifier)
+    {
+        accumulated = WeaponModifier.Combine(accumulated, modifier);
+        OnStatsChanged();
+    }
+
+    public virtual void SetLevel(int newLevel)
+    {
+        int max = data != null ? Mathf.Max(1, data.maxLevel) : 1;
+        level = Mathf.Clamp(newLevel, 1, max);
+        OnStatsChanged();
+    }
+
+    // ───────── 부착물 ─────────
+
+    /// <summary>그 부위에 달린 부착물. 없으면 null.</summary>
+    public AttachmentData GetAttachment(AttachmentSlot slot)
+    {
+        return attachments.TryGetValue(slot, out AttachmentData a) ? a : null;
+    }
+
+    /// <summary>이 무기에 달 수 있는가 (계열 · 전용 무기 · 무기 레벨 · 잠긴 부위). 드론 · 근접은 부착물이 없다.</summary>
+    public bool CanAttach(AttachmentData attachment)
+    {
+        return attachment != null && data != null && attachment.Fits(data) && level >= attachment.minWeaponLevel
+               && !IsSlotLocked(attachment.slot);
+    }
+
+    /// <summary>
+    /// 바꿀 수 없는 부위인가 — 상위 무기의 개조 칸 (상위무기-계획.md 3-3).
+    /// 개조는 상위 무기가 이어받는다. 바꾸게 두면 수치가 두 번 들어가거나 다른 갈래 개조가 붙는 꼬임이 생긴다.
+    /// </summary>
+    public bool IsSlotLocked(AttachmentSlot slot) => slot == AttachmentSlot.Mod && data != null && data.IsEvolved;
+
+    /// <summary>
+    /// 진화할 때 원래 무기의 부착물 · 레벨 · 하부 능력을 그대로 넘겨받는다 (WeaponController.Evolve).
+    /// 잠긴 개조 칸도 여기서는 옮긴다. 하부 능력은 오브젝트째 옮겨 쿨타임이 이어진다.
+    /// </summary>
+    public void InheritFrom(WeaponBase previous)
+    {
+        if (previous == null) return;
+
+        // 레벨업 카드 · 무기 전용 강화로 쌓인 증분 (전역 강화가 이미 들어 있다)
+        accumulated = previous.accumulated;
+        SetLevel(previous.level);
+
+        foreach (var pair in previous.attachments)
+        {
+            if (pair.Value == null) continue;
+            attachments[pair.Key] = pair.Value;
+        }
+
+        RebuildAttachmentModifier();
+
+        foreach (var pair in attachments)
+        {
+            if (pair.Value == null || pair.Value.effect == null) continue;
+
+            AttachmentRuntime runtime = pair.Value.effect.CreateRuntime();
+            if (runtime == null) continue;
+
+            runtime.Bind(this, pair.Value);
+            runtime.OnActiveChanged(IsActive);
+            runtimes[pair.Key] = runtime;
+            runtimeList.Add(runtime);
+        }
+
+        if (previous.ability != null)
+        {
+            ability = previous.ability;
+            abilitySlot = previous.abilitySlot;
+            ability.name = $"{ability.name.Split(' ')[0]} ({data.weaponName})";
+            previous.ability = null;   // 원래 무기가 지워질 때 같이 지우지 않게
+        }
+
+        ammo = Stats.MagazineSize;
+        reloadRemaining = 0f;
+        OnStatsChanged();
+    }
+
+    /// <summary>
+    /// 부착물을 단다. 같은 부위에 있던 것은 빠지고 replaced 로 돌려준다 (교체).
+    /// 탄창이 커지면 늘어난 만큼 탄을 채우고, 작아지면 탄창 크기로 자른다.
+    /// </summary>
+    public bool TryAttach(AttachmentData attachment, out AttachmentData replaced)
+    {
+        replaced = null;
+        if (!CanAttach(attachment)) return false;
+
+        attachments.TryGetValue(attachment.slot, out replaced);
+        if (replaced == attachment) return false;   // 이미 같은 것이 달려 있다
+
+        int oldMagazine = MagazineSize;
+
+        attachments[attachment.slot] = attachment;
+        RebuildAttachmentModifier();
+        RebuildRuntime(attachment.slot, attachment);
+
+        int newMagazine = MagazineSize;
+        if (newMagazine > 0)
+        {
+            if (newMagazine > oldMagazine && !IsReloading)
+                ammo += newMagazine - oldMagazine;
+
+            ammo = Mathf.Clamp(ammo, 0, newMagazine);
+        }
+
+        OnStatsChanged();
+        RaiseAmmoChanged();
+        return true;
+    }
+
+    /// <summary>이 부착물을 달았다면의 스탯 — 정비 창의 교체 미리보기용. 실제로는 아무것도 바꾸지 않는다.</summary>
+    public WeaponRuntimeStats PreviewWith(AttachmentData attachment)
+    {
+        if (data == null) return default;
+        if (!CanAttach(attachment)) return Stats;
+
+        WeaponModifier sum = WeaponModifier.Identity;
+        int countOverride = attachment.projectileCountSet;
+
+        foreach (var pair in attachments)
+        {
+            if (pair.Key == attachment.slot || pair.Value == null) continue;
+            sum = WeaponModifier.Combine(sum, pair.Value.Resolve(data));
+            countOverride = Mathf.Max(countOverride, pair.Value.projectileCountSet);
+        }
+
+        sum = WeaponModifier.Combine(sum, attachment.Resolve(data));
+
+        WeaponModifier total = WeaponModifier.Combine(WeaponModifier.Combine(accumulated, sum),
+                                                      data.perLevelBonus.Scaled(level - 1));
+        return WithOverrides(data.Compose(total), countOverride);
+    }
+
+    void RebuildAttachmentModifier()
+    {
+        WeaponModifier sum = WeaponModifier.Identity;
+        int countOverride = 0;
+
+        foreach (AttachmentData a in attachments.Values)
+        {
+            if (a == null) continue;
+            sum = WeaponModifier.Combine(sum, a.Resolve(data));
+            countOverride = Mathf.Max(countOverride, a.projectileCountSet);
+        }
+
+        attachmentModifier = sum;
+        projectileCountOverride = countOverride;
+    }
+
+    /// <summary>그 부위의 동작 · E 능력을 새 부착물 것으로 바꾼다 (이전 것은 치운다).</summary>
+    void RebuildRuntime(AttachmentSlot slot, AttachmentData attachment)
+    {
+        if (runtimes.TryGetValue(slot, out AttachmentRuntime old))
+        {
+            old.Dispose();
+            runtimes.Remove(slot);
+            runtimeList.Remove(old);
+        }
+
+        if (ability != null && abilitySlot == slot)
+        {
+            ability.Cancel();
+            Destroy(ability.gameObject);
+            ability = null;
+        }
+
+        if (attachment == null) return;
+
+        if (attachment.effect != null)
+        {
+            AttachmentRuntime runtime = attachment.effect.CreateRuntime();
+            if (runtime != null)
+            {
+                runtime.Bind(this, attachment);
+                runtime.OnActiveChanged(IsActive);
+                runtimes[slot] = runtime;
+                runtimeList.Add(runtime);
+            }
+        }
+
+        if (attachment.ability != null && Owner != null)
+        {
+            // 플레이어 아래에 둔다 — 무기 아래에 두면 무기를 바꿔 들 때 같이 꺼져 쿨타임이 멈춘다
+            Transform holder = Owner.transform.Find("WeaponAbilities");
+            if (holder == null)
+            {
+                holder = new GameObject("WeaponAbilities").transform;
+                holder.SetParent(Owner.transform, false);
+            }
+
+            ability = Instantiate(attachment.ability, holder);
+            ability.name = $"{attachment.ability.name} ({data.weaponName})";
+            ability.EquipAttachment(Owner.gameObject, attachment);
+            abilitySlot = slot;
+        }
+    }
+
+    /// <summary>
+    /// 탄 · 빔이 적을 맞혔다 — 부착물 명중 효과(화상 · 전격 · 튕김 · 폭발)를 부른다.
+    /// 효과가 주는 추가 피해는 이것을 다시 부르지 않는다.
+    /// </summary>
+    public void NotifyHit(in WeaponHit hit)
+    {
+        for (int i = 0; i < runtimeList.Count; i++)
+            runtimeList[i].OnHit(in hit);
+
+        if (!hit.Killed) return;
+
+        for (int i = 0; i < runtimeList.Count; i++)
+            runtimeList[i].OnKill(in hit);
+    }
+
+    /// <summary>
+    /// 직접 공격(탄 · 휘두르기 · 빔, 그리고 공격을 대신하는 상위 무기 공격 — 용의 포효 불길 · 프리즘 · 태양창)이
+    /// 맞힌 뒤 부른다. 쓰러뜨렸으면 true, 그것이 적이면 Drain 스킬(Skill/Drain — 직접 공격 처치 시 회복)에 알린다.
+    /// wasAlive 는 맞히기 <b>전</b>에 잰다 — 죽는 동작 중인 적은 콜라이더가 남아 다시 맞는데, 그때 또 회복하지 않게.
+    /// 명중 효과(폭발 · 번개 · 파편 · 화상)와 서브 능력 · 패링 반사는 Drain 이 말하는 '스킬 공격' 쪽이라 부르지 않는다.
+    /// </summary>
+    public static bool CheckDirectKill(Transform root, bool wasAlive)
+    {
+        if (!wasAlive || CombatFx.IsAlive(root)) return false;
+
+        if (root != null && root.TryGetComponent(out Enemy _)) DrainSkill.Active?.OnKill();
+        return true;
+    }
+
+    /// <summary>탄이 아무것도 못 맞히고(또는 관통을 남긴 채) 사거리 끝에서 사라졌다 — 공성포의 끝 폭발.</summary>
+    public void NotifyProjectileExpired(Vector3 position, Vector3 direction)
+    {
+        for (int i = 0; i < runtimeList.Count; i++)
+            runtimeList[i].OnProjectileExpired(position, direction);
+    }
+
+    /// <summary>쏘거나 휘둘렀다 — 상위 무기 동작(검기 · 중력장)이 받는다.</summary>
+    public void NotifyAttack(in WeaponAttack attack)
+    {
+        for (int i = 0; i < runtimeList.Count; i++)
+            runtimeList[i].OnAttack(in attack);
+    }
+
+    /// <summary>공격 알림을 무기가 직접 보내는가 — 근접은 판정 순간에 보낸다. 아니면 Fire 가 쏘는 순간 보낸다.</summary>
+    protected virtual bool ReportsAttackItself => false;
+
+    /// <summary>명중 효과가 있는가 — 탄이 알림을 보낼지 고르는 데 쓴다.</summary>
+    public bool HasHitEffects => runtimeList.Count > 0;
+
+    /// <summary>탄 색 — 상위 무기 테마 색, 탄 부위 · 전용 개조 부착물의 색. 없으면 투명.</summary>
+    public Color AmmoTint
+    {
+        get
+        {
+            if (data != null && data.IsEvolved && data.HasThemeColor) return data.themeColor;
+
+            AttachmentData mod = GetAttachment(AttachmentSlot.Mod);
+            if (mod != null && mod.HasTint) return mod.tint;
+
+            AttachmentData ammoPart = GetAttachment(AttachmentSlot.Ammo);
+            return ammoPart != null && ammoPart.HasTint ? ammoPart.tint : new Color(1f, 1f, 1f, 0f);
+        }
+    }
+
+    protected virtual void OnDestroy()
+    {
+        for (int i = 0; i < runtimeList.Count; i++)
+            runtimeList[i].Dispose();
+
+        runtimeList.Clear();
+        runtimes.Clear();
+
+        if (ability != null) Destroy(ability.gameObject);
+        ability = null;
+    }
+
+    public virtual void SetActive(bool active)
+    {
+        // 서브유닛은 비활성화하지 않는다
+        if (data != null && data.IsAlwaysActive)
+            active = true;
+
+        IsActive = active;
+
+        // 모델 표시/숨김. 무기 프리팹 루트가 곧 이 컴포넌트의 오브젝트다.
+        for (int i = 0; i < transform.childCount; i++)
+            transform.GetChild(i).gameObject.SetActive(active);
+
+        var renderers = GetComponents<Renderer>();
+        for (int i = 0; i < renderers.Length; i++)
+            renderers[i].enabled = active;
+
+        for (int i = 0; i < runtimeList.Count; i++)
+            runtimeList[i].OnActiveChanged(active);
+
+        // 손에서 빠지면 그 총의 E 능력도 멈춘다 (돌진 · 날아가는 유탄은 끝까지 간다 — 능력이 정한다)
+        if (!active && ability != null) ability.Cancel();
+
+        if (active)
+        {
+            cooldown = 0f;       // 스왑 직후 바로 쏠 수 있게
+            RaiseAmmoChanged();  // HUD 를 이 무기의 탄약으로 바꾼다
+            return;
+        }
+
+        // 손에서 빠질 때 장전을 취소한다. 탄약은 유지되므로 다시 들면 그 상태 그대로다 (12번 R4).
+        // 취소하지 않으면 무기를 바꿔 둔 사이에 장전이 끝난다.
+        CancelReload();
+    }
+
+    // ───────── 파생 클래스가 구현/확장하는 부분 ─────────
+
+    /// <summary>
+    /// 지금 쏠(휘두를) 대상이 이 무기의 사거리 안에 있는지. 기본은 항상 true 다.
+    /// 근접 무기처럼 사거리가 감지 범위보다 짧은 무기가 재정의해, 허공에 휘두르며 쿨다운을 쓰지 않게 한다.
+    /// </summary>
+    public virtual bool HasTargetInReach(in WeaponFireContext context) => true;
+
+    /// <summary>실제 발사 동작.</summary>
+    protected abstract void OnFire(in WeaponRuntimeStats stats, in WeaponFireContext context);
+
+    /// <summary>매 프레임 추가 처리가 필요한 무기용 (드론 궤도 등).</summary>
+    protected virtual void OnTick(float deltaTime) { }
+
+    /// <summary>장전이 시작될 때. 투사체 무기가 애니메이션을 재생한다.</summary>
+    protected virtual void OnReloadStarted(float duration) { }
+
+    /// <summary>장전이 끝나 탄창이 찼을 때.</summary>
+    protected virtual void OnReloadFinished() { }
+
+    /// <summary>장전이 도중에 취소됐을 때 (스왑·구르기·사망).</summary>
+    protected virtual void OnReloadCanceled() { }
+
+    /// <summary>레벨·모디파이어가 바뀌었을 때. 드론이 수를 맞추는 데 쓴다.</summary>
+    protected virtual void OnStatsChanged() { }
+
+    // ───────── 공통 헬퍼 ─────────
+
+    /// <summary>
+    /// 크리티컬 판정. 무기가 판정 주체라는 점이 중요하다 —
+    /// 투사체가 없는 무기(근접/드론)도 같은 규칙을 쓸 수 있다.
+    /// </summary>
+    protected bool RollCritical(in WeaponRuntimeStats stats)
+    {
+        return Random.value < stats.CritChance;
+    }
+
+    protected float ApplyCritical(in WeaponRuntimeStats stats, bool isCritical)
+    {
+        return isCritical ? stats.Damage * stats.CritMultiplier : stats.Damage;
+    }
+
+    protected void SpawnEffect(GameObject prefab, Transform at)
+    {
+        if (prefab == null || at == null) return;
+        if (PoolManager.Instance == null) return;
+
+        GameObject fx = PoolManager.Instance.Get(prefab);
+        if (fx == null) return;
+
+        fx.transform.SetPositionAndRotation(at.position, at.rotation);
+    }
+
+    /// <summary>조준 방향 결정: 타겟이 있으면 그쪽, 없으면 플레이어가 보는 방향.</summary>
+    protected Vector3 ResolveFireDirection(in WeaponFireContext context, float maxRange, out Transform target)
+    {
+        target = context.Targets != null
+            ? context.Targets.GetNearest(Muzzle.position, maxRange)
+            : null;
+
+        if (target == null)
+            return context.AimDirection;
+
+        Vector3 dir = target.position - Muzzle.position;
+        dir.y = 0f;
+
+        return dir.sqrMagnitude > 0.0001f ? dir.normalized : context.AimDirection;
+    }
+
+    /// <summary>index 번째 탄의 퍼짐을 적용한 방향. 탄이 1발이면 그대로 반환한다.</summary>
+    protected static Vector3 ApplySpread(Vector3 direction, float spreadAngle, int index, int total)
+    {
+        if (spreadAngle <= 0f || total <= 1)
+        {
+            if (spreadAngle <= 0f) return direction;
+
+            // 단발이라도 spread 가 있으면 무작위로 흔든다
+            float jitter = Random.Range(-spreadAngle * 0.5f, spreadAngle * 0.5f);
+            return Quaternion.Euler(0f, jitter, 0f) * direction;
+        }
+
+        // 여러 발이면 부채꼴로 균등 분산
+        float step = spreadAngle / (total - 1);
+        float angle = -spreadAngle * 0.5f + step * index;
+
+        return Quaternion.Euler(0f, angle, 0f) * direction;
     }
 }

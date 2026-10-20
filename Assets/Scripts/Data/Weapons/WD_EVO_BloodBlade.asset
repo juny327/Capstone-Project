@@ -1,0 +1,65 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e9f188fced24a347854d377fb9adfd4, type: 3}
+  m_Name: WD_EVO_BloodBlade
+  m_EditorClassIdentifier: Assembly-CSharp::MeleeWeaponData
+  weaponName: "\uD608\uAC80"
+  description: "\uCC98\uCE58\uD560 \uB54C\uB9C8\uB2E4 \uD608\uAE30\uAC00 \uC313\uC774\uACE0
+    (HP \uAC00 \uAC00\uB4DD\uC774\uBA74 \uB450 \uBC30) \uAC00\uB4DD \uCC28\uBA74
+    6\uCD08 \uD3ED\uC8FC \u2014 \uACF5\uACA9 \uC18D\uB3C4 \xD71.5 \xB7 \uC0AC\uAC70\uB9AC
+    +1m \xB7 \uB9DE\uD78C \uD53C\uD574\uC758 10% \uD68C\uBCF5"
+  icon: {fileID: 21300000, guid: bd360907a21aaca4889db79141230616, type: 3}
+  weaponPrefab: {fileID: 5825881266557484979, guid: fcd7bbd21a7889a43a5bbb4191f6bd2c, type: 3}
+  socket: 0
+  fireInterval: 0.7
+  damage: 6.8999996
+  critChance: 0.1
+  critMultiplier: 2
+  maxLevel: 3
+  perLevelBonus:
+    damageAdd: 0.9
+    damageMul: 1
+    fireIntervalMul: 1
+    critChanceAdd: 0
+    critMultiplierAdd: 0
+    projectileSpeedAdd: 0
+    projectileCountAdd: 0
+    pierceAdd: 0
+    spreadMul: 1
+    lifeTimeMul: 1
+    burstAdd: 0
+    magazineAdd: 0
+    reloadTimeMul: 1
+    rangeAdd: 0
+    subUnitAdd: 0
+  requiresTarget: 1
+  evolvedFrom: {fileID: 11400000, guid: a5c5c099d896ba94a9b198ef0b9b8fc4, type: 2}
+  innateEffects:
+  - {fileID: 11400000, guid: 3c767faa1a97d8f45999551244fa3603, type: 2}
+  themeColor: {r: 0.9, g: 0.08, b: 0.14, a: 1}
+  fireSounds:
+  - {fileID: 8300000, guid: e3760d5047edad749ac1e25cd676ab46, type: 3}
+  - {fileID: 8300000, guid: 0c03edc4efa519a439adaf03a0af417a, type: 3}
+  fireVolume: 0.65
+  firePitchRange: {x: 0.96, y: 1.04}
+  reloadStartSound: {fileID: 0}
+  reloadEndSound: {fileID: 0}
+  reloadVolume: 0.8
+  range: 3
+  arcAngle: 120
+  maxTargets: 5
+  hitDelay: 0.23799998
+  hitLayers:
+    serializedVersion: 2
+    m_Bits: 129
+  cameraShake: 0.15
+  slashEffectPrefab: {fileID: 0}

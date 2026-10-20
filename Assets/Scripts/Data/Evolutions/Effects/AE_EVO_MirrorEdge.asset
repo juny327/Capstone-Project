@@ -1,0 +1,70 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b85e040d189c4e49987688aa9b3c9f3, type: 3}
+  m_Name: AE_EVO_MirrorEdge
+  m_EditorClassIdentifier: Assembly-CSharp::MirrorEdgeEffect
+  deflectReachBonus: 1.2
+  deflectArc: 150
+  deflectSpeedMultiplier: 1.4
+  deflectMinSpeed: 12
+  deflectDamageRatio: 1
+  deflectLifeTime: 2
+  waveEvery: 4
+  waveCount: 3
+  waveSpread: 18
+  waveDistance: 8
+  waveSpeed: 22
+  waveRadius: 0.9
+  waveDamageMul: 2
+  waveMaterial: {fileID: 2100000, guid: b6310812509a3ab46bf4e098541a27ab, type: 2}
+  sparkMaterial: {fileID: 2100000, guid: b6310812509a3ab46bf4e098541a27ab, type: 2}
+  color: {r: 0.25, g: 0.95, b: 1, a: 1}
+  waveWidth: 3
+  deflectSound:
+    clips:
+    - {fileID: 8300000, guid: 1142e7d5671a57243a260b6bed82d367, type: 3}
+    - {fileID: 8300000, guid: 2b0ca21db5d867143ae54ceb3fa6bebe, type: 3}
+    volume: 0.5
+    pitchRange: {x: 1.45, y: 1.6}
+    minInterval: 0.05
+  waveSound:
+    clips:
+    - {fileID: 8300000, guid: 7464c16cdf354f94a9d16d5aea57efa6, type: 3}
+    - {fileID: 8300000, guid: d3e8ad6433eb4724098935962aea45be, type: 3}
+    volume: 0.5
+    pitchRange: {x: 1.3, y: 1.45}
+    minInterval: 0
+  swingEdgeSound:
+    clips:
+    - {fileID: 8300000, guid: 5c35f36c5778fd040954cc219b57c10d, type: 3}
+    - {fileID: 8300000, guid: 702ac2b49db10eb4c96fed352a740d9f, type: 3}
+    - {fileID: 8300000, guid: 1843d7a139c2056488ccacb27f429f5e, type: 3}
+    volume: 0.4
+    pitchRange: {x: 1.05, y: 1.2}
+    minInterval: 0.05
+  swingMagicSound:
+    clips:
+    - {fileID: 8300000, guid: 897a5da63da05304ba0479f28f8ca1db, type: 3}
+    - {fileID: 8300000, guid: e48b8a6b9ae0b974dbc58e85d570fc69, type: 3}
+    - {fileID: 8300000, guid: f0cda4613f0287c4798337db941b283b, type: 3}
+    - {fileID: 8300000, guid: 6a87b22ea2611f844a53807358a4dda9, type: 3}
+    volume: 0.22
+    pitchRange: {x: 1.25, y: 1.45}
+    minInterval: 0.05
+  deflectShimmerSound:
+    clips:
+    - {fileID: 8300000, guid: fe7301f33d124344095534015e4688e3, type: 3}
+    - {fileID: 8300000, guid: 7c80a4678182e7c4aa208641b891ba16, type: 3}
+    - {fileID: 8300000, guid: 6581cba65966dac4091703e25fd3e145, type: 3}
+    volume: 0.35
+    pitchRange: {x: 1, y: 1.2}
+    minInterval: 0.05

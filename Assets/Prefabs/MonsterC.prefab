@@ -426,10 +426,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 1356630264984274148}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8d2f404e45afffd41a7be900cc1b6bdb, type: 3}
+  m_Script: {fileID: 11500000, guid: 4127eef0a7304ec78de9b38b6fb71508, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MeleeAttack
-  attackCooldown: 1
+  m_EditorClassIdentifier: Assembly-CSharp::RangedAttack
+  attackCooldown: 3
+  warningDuration: 0.8
+  spreadAngle: 25
+  localFirePoint: {x: 0, y: 1.1, z: 0.65}
+  projectilePrefab: {fileID: 100000, guid: 837fb05921494263a107d9bbd4aa19f9, type: 3}
+  chargeMaterial: {fileID: 2100000, guid: 1460a241f2ef4940877922c607e5a713, type: 2}
 --- !u!114 &1586727306208044197
 MonoBehaviour:
   m_ObjectHideFlags: 0

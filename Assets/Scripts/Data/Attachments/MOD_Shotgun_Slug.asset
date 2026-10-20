@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2053801b010909f488af8899e8b93e8a, type: 3}
+  m_Name: MOD_Shotgun_Slug
+  m_EditorClassIdentifier: Assembly-CSharp::AttachmentData
+  displayName: "\uC2AC\uB7EC\uADF8"
+  description: "\uC0B0\uD0C4 \uB300\uC2E0 \uBB34\uAC70\uC6B4 \uD55C \uBC1C \u2014
+    \uAFF0\uB6AB\uB294\uB2E4"
+  icon: {fileID: 21300000, guid: b5bbd12b820aeaf439acfcc99f12680f, type: 3}
+  slot: 5
+  tier: 2
+  families: 1
+  onlyFor:
+  - {fileID: 11400000, guid: 425b47f8befe4f34485ff97821ad886a, type: 2}
+  modifier:
+    damageAdd: 0
+    damageMul: 6
+    fireIntervalMul: 1
+    critChanceAdd: 0
+    critMultiplierAdd: 0
+    projectileSpeedAdd: 0
+    projectileCountAdd: 0
+    pierceAdd: 2
+    spreadMul: 0.05
+    lifeTimeMul: 1
+    burstAdd: 0
+    magazineAdd: 0
+    reloadTimeMul: 1
+    rangeAdd: 0
+    subUnitAdd: 0
+  magazinePercent: 0
+  projectileCountSet: 1
+  effect: {fileID: 0}
+  ability: {fileID: 0}
+  tint: {r: 0, g: 0, b: 0, a: 0}
+  note: 
+  minWeaponLevel: 3
+  basePrice: 30

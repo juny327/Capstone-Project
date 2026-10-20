@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ce34f496aceadc043a23d2b5e1122823, type: 3}
+  m_Name: AE_Explosive
+  m_EditorClassIdentifier: Assembly-CSharp::ExplodeOnHitEffect
+  radius: 1.5
+  damageRatio: 0.4
+  material: {fileID: 2100000, guid: b6310812509a3ab46bf4e098541a27ab, type: 2}
+  color: {r: 1, g: 0.6, b: 0.2, a: 0.9}
+  sound:
+    clips:
+    - {fileID: 8300000, guid: a9898a19fd926c0478e7b7bffafb4eec, type: 3}
+    - {fileID: 8300000, guid: 47b317d583f4e8b4098e828807ab98c2, type: 3}
+    - {fileID: 8300000, guid: 81e3ad067244c3b46a3f385c3cb8d8f5, type: 3}
+    - {fileID: 8300000, guid: 37611a59647a6734e9619bfca33a9d53, type: 3}
+    - {fileID: 8300000, guid: 4cdccc042cb621a47abab09517f17fef, type: 3}
+    volume: 0.35
+    pitchRange: {x: 1.1, y: 1.3}
+    minInterval: 0.03

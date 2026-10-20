@@ -11,11 +11,13 @@ public class UpgradeUI : MonoBehaviour
     void OnEnable()
     {
         GameEvents.OnOpenUpgradeUI += Open;
+        GameEvents.OnUpgradeSuccess += Close;
     }
 
     void OnDisable()
     {
         GameEvents.OnOpenUpgradeUI -= Open;
+        GameEvents.OnUpgradeSuccess -= Close;
     }
 
     void Open()
@@ -27,12 +29,16 @@ public class UpgradeUI : MonoBehaviour
 
         for (int i = 0; i < cards.Length; i++)
         {
-            cards[i].Setup(upgrades[i]);
+            bool hasUpgrade = i < upgrades.Count;
+            cards[i].gameObject.SetActive(hasUpgrade);
+
+            if (hasUpgrade)
+                cards[i].Setup(upgrades[i]);
         }
     }
 
-    public void OnNextButton()
+    void Close(UpgradeData data)
     {
-        GameEvents.OnNextStage?.Invoke();
+        panel.SetActive(false);
     }
 }

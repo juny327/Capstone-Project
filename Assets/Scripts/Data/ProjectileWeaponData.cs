@@ -1,0 +1,75 @@
+using UnityEngine;
+
+/// <summary>
+/// 투사체 무기 데이터. 소총 / 기관단총 / 스나이퍼가 모두 이 하나를 쓴다.
+/// 세 무기의 차이는 전부 수치이므로 에셋만 만들면 된다 (코드 추가 불필요).
+///
+/// 권장 초기값 (07번 문서 2-1)
+///   소총     : damage 10, fireInterval 0.50, speed 20, spread 0,  crit 0.05/2.0, pierce 0
+///   기관단총 : damage  4, fireInterval 0.12, speed 25, spread 5,  crit 0.03/2.0, pierce 0
+///   스나이퍼 : damage 36, fireInterval 1.60, speed 60, spread 0,  crit 0.25/2.5, pierce 3
+/// </summary>
+[CreateAssetMenu(menuName = "Weapon/Projectile Weapon Data", order = 0)]
+public class ProjectileWeaponData : WeaponData
+{
+    [Header("Aim")]
+    [Tooltip("AimDirection: 캐릭터가 바라보는 방향(마우스 방향)으로 쏜다. NearestTarget: 가장 가까운 적을 자동 조준한다")]
+    public WeaponAimMode aimMode = WeaponAimMode.AimDirection;
+
+    [Header("Projectile")]
+    public GameObject projectilePrefab;
+    public float projectileSpeed = 20f;
+    public float projectileLifeTime = 3f;
+
+    [Tooltip("한 번에 발사되는 탄 수. 산탄은 이 값을 올린다")]
+    [Min(1)] public int projectileCount = 1;
+
+    [Tooltip("탄 퍼짐 각도(도). 자동조준 게임에서는 실질 페널티가 된다")]
+    [Min(0f)] public float spreadAngle = 0f;
+
+    [Tooltip("관통 가능한 적 수. 0이면 첫 적에게 맞고 사라진다")]
+    [Min(0)] public int pierceCount = 0;
+
+    [Tooltip("끄면 탄을 만들지 않는다 — 쏘는 알림 · 탄약 · 소리만 남고, 공격은 상위 무기 고유 동작이 맡는다 (용의 포효 화염 방사)")]
+    public bool spawnProjectiles = true;
+
+    [Header("Homing (상위 무기 — 스웜 카빈)")]
+    [Tooltip("0 이면 곧게. 0 보다 크면 탄마다 다른 적을 골라 이 속도(도/초)로 꺾어 따라간다")]
+    [Min(0f)] public float homingTurnRate = 0f;
+    [Min(1f)] public float homingRange = 14f;
+
+    [Header("Ammo")]
+    [Tooltip("탄창 크기. 0 이면 무제한이라 장전하지 않는다")]
+    [Min(0)] public int magazineSize = 30;
+
+    [Tooltip("장전에 걸리는 시간(초). 모션 클립은 2.67초이며 코드가 배속을 맞춘다")]
+    [Min(0.1f)] public float reloadTime = 2f;
+
+    [Tooltip("탄이 떨어지면 자동으로 장전한다")]
+    public bool autoReload = true;
+
+    [Header("Effects")]
+    public GameObject muzzleFlashPrefab;
+    public GameObject casingPrefab;
+
+    public override WeaponKind Kind => WeaponKind.Projectile;
+
+    public override WeaponRuntimeStats Compose(in WeaponModifier modifier)
+    {
+        WeaponRuntimeStats s = base.Compose(modifier);
+        WeaponModifier m = modifier.Sanitized();
+
+        s.ProjectileSpeed = Mathf.Max(0.1f, projectileSpeed + m.projectileSpeedAdd);
+        s.ProjectileLifeTime = Mathf.Max(0.05f, projectileLifeTime * m.lifeTimeMul);
+        s.SpreadAngle = Mathf.Max(0f, spreadAngle * m.spreadMul);
+        s.ProjectileCount = Mathf.Max(1, projectileCount + m.projectileCountAdd);
+        s.PierceCount = Mathf.Max(0, pierceCount + m.pierceAdd);
+        s.BurstCount = Mathf.Max(1, 1 + m.burstAdd);
+
+        // 0 은 "무제한" 이라는 뜻이므로 업그레이드가 붙어도 0 을 유지한다
+        s.MagazineSize = magazineSize <= 0 ? 0 : Mathf.Max(1, magazineSize + m.magazineAdd);
+        s.ReloadTime = Mathf.Max(0.1f, reloadTime * m.reloadTimeMul);
+
+        return s;
+    }
+}

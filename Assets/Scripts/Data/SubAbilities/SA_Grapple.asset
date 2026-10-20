@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f5aa93a734447254c99b415d9d4d00d6, type: 3}
+  m_Name: SA_Grapple
+  m_EditorClassIdentifier: Assembly-CSharp::SubAbilityData
+  displayName: "\uADF8\uB7A9 \uD6C5"
+  description: "\uC67C\uC190 \uC640\uC774\uC5B4\uB85C \uCC98\uC74C \uB2FF\uC740 \uC801\uC744
+    \uB04C\uC5B4\uC628\uB2E4 \xB7 \uBCF4\uC2A4\uC5D0\uAC8C\uB294 \uB0B4\uAC00 \uB04C\uB824\uAC04\uB2E4"
+  icon: {fileID: 21300000, guid: 48f46913517fd7b42b229724c2889e44, type: 3}
+  prefab: {fileID: 3663024976920240850, guid: 505468886aa825743a3538a7ffe0074f, type: 3}
+  maxLevel: 3
+  basePrice: 25
+  levelPrices: 0f00000016000000
+  levelNotes:
+  - "\uBCC0\uD615 \u2014 \uC791\uC0B4 / \uCDA9\uACA9 \uC640\uC774\uC5B4"
+  - "\uBCC0\uD615 \u2014 \uB118\uAE30\uAE30 / \uCD94\uACA9"
+  variants:
+  - name: "\uC791\uC0B4"
+    description: "\uC640\uC774\uC5B4 \uBC29\uD5A5 30\xB0 \uC548\uC758 \uC801\uC744
+      \uCD5C\uB300 2\uBA85 \uB354 \uD568\uAED8 \uB04C\uC5B4\uC628\uB2E4"
+  - name: "\uCDA9\uACA9 \uC640\uC774\uC5B4"
+    description: "\uB04C\uB824\uC628 \uC801 \uACBD\uC9C1 +1\uCD08 \xB7 \uC640\uC774\uC5B4
+      \uD53C\uD574 \xD72"
+  - name: "\uB118\uAE30\uAE30"
+    description: "\uB04C\uC5B4\uC628 \uC801\uC744 \uB0B4 \uB4A4 3m \uB85C \uB118\uAE34\uB2E4"
+  - name: "\uCD94\uACA9"
+    description: "\uC77C\uBC18 \uC801\uC5D0\uAC8C\uB3C4 \uB0B4\uAC00 \uB04C\uB824\uAC00
+      \uB3C4\uCC29\uD558\uBA74 \uC55E\uC744 \uBCA4\uB2E4 (\uACF5\uACA9\uB825 \xD71.5
+      \xB7 \uACBD\uC9C1 1\uCD08)"

@@ -1,0 +1,63 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e9f188fced24a347854d377fb9adfd4, type: 3}
+  m_Name: WD_EVO_GravityCleaver
+  m_EditorClassIdentifier: Assembly-CSharp::MeleeWeaponData
+  weaponName: "\uC911\uB825 \uB300\uAC80"
+  description: "\uB0B4\uB824\uCC0D\uC740 \uC790\uB9AC\uC5D0 \uC911\uB825\uC7A5 \u2014
+    \uC8FC\uBCC0 \uC801\uC744 \uBE68\uC544\uB4E4\uC778 \uB4A4 \uBD95\uAD34 \uD3ED\uBC1C"
+  icon: {fileID: 21300000, guid: d2ac6467cba15b846944c593e14b5573, type: 3}
+  weaponPrefab: {fileID: 5825881266557484979, guid: 83f77106669404e449fb7bccd9631cf6, type: 3}
+  socket: 0
+  fireInterval: 1.4
+  damage: 19.2
+  critChance: 0.1
+  critMultiplier: 2
+  maxLevel: 3
+  perLevelBonus:
+    damageAdd: 2.4
+    damageMul: 1
+    fireIntervalMul: 1
+    critChanceAdd: 0
+    critMultiplierAdd: 0
+    projectileSpeedAdd: 0
+    projectileCountAdd: 0
+    pierceAdd: 0
+    spreadMul: 1
+    lifeTimeMul: 1
+    burstAdd: 0
+    magazineAdd: 0
+    reloadTimeMul: 1
+    rangeAdd: 0
+    subUnitAdd: 0
+  requiresTarget: 1
+  evolvedFrom: {fileID: 11400000, guid: 46bb3f2e7db4bdb488a708673ed6b1f3, type: 2}
+  innateEffects:
+  - {fileID: 11400000, guid: 8595a7e3c2aa3a244adefccedcef7026, type: 2}
+  themeColor: {r: 0.72, g: 0.32, b: 1, a: 1}
+  fireSounds:
+  - {fileID: 8300000, guid: 9a98cd2d981fab941879d3da078784d0, type: 3}
+  - {fileID: 8300000, guid: e3760d5047edad749ac1e25cd676ab46, type: 3}
+  fireVolume: 0.75
+  firePitchRange: {x: 0.8, y: 0.88}
+  reloadStartSound: {fileID: 0}
+  reloadEndSound: {fileID: 0}
+  reloadVolume: 0.8
+  range: 4
+  arcAngle: 160
+  maxTargets: 8
+  hitDelay: 0.41
+  hitLayers:
+    serializedVersion: 2
+    m_Bits: 129
+  cameraShake: 0.25
+  slashEffectPrefab: {fileID: 0}

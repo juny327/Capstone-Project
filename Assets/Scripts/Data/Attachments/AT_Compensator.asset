@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2053801b010909f488af8899e8b93e8a, type: 3}
+  m_Name: AT_Compensator
+  m_EditorClassIdentifier: Assembly-CSharp::AttachmentData
+  displayName: "\uBCF4\uC815\uAE30"
+  description: "\uBC18\uB3D9\uC744 \uB20C\uB7EC \uD0C4\uC774 \uBAA8\uC774\uACE0 \uC870\uAE08
+    \uBE68\uB77C\uC9C4\uB2E4"
+  icon: {fileID: 21300000, guid: 79de7efae0b3d3e4b9ec012a25c8bee3, type: 3}
+  slot: 1
+  tier: 0
+  families: 1
+  onlyFor: []
+  modifier:
+    damageAdd: 0
+    damageMul: 1
+    fireIntervalMul: 0.952
+    critChanceAdd: 0
+    critMultiplierAdd: 0
+    projectileSpeedAdd: 0
+    projectileCountAdd: 0
+    pierceAdd: 0
+    spreadMul: 0.7
+    lifeTimeMul: 1
+    burstAdd: 0
+    magazineAdd: 0
+    reloadTimeMul: 1
+    rangeAdd: 0
+    subUnitAdd: 0
+  magazinePercent: 0
+  projectileCountSet: 0
+  effect: {fileID: 0}
+  ability: {fileID: 0}
+  tint: {r: 0, g: 0, b: 0, a: 0}
+  note: 
+  minWeaponLevel: 1
+  basePrice: 12

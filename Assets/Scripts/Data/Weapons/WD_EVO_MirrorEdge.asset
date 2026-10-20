@@ -1,0 +1,64 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e9f188fced24a347854d377fb9adfd4, type: 3}
+  m_Name: WD_EVO_MirrorEdge
+  m_EditorClassIdentifier: Assembly-CSharp::MeleeWeaponData
+  weaponName: "\uAC70\uC6B8\uCE7C\uB0A0"
+  description: "\uD718\uB450\uB97C \uB54C\uB9C8\uB2E4 \uC801 \uD0C4\uC744 \uB418\uB3CC\uB9AC\uACE0,
+    \uB124 \uBC88\uC9F8 \uD718\uB450\uB974\uAE30\uB9C8\uB2E4 \uCD08\uC2B9\uB2EC \uAC80\uAE30
+    3\uAC1C"
+  icon: {fileID: 21300000, guid: 0bfc76417710fc8479e2f273e330d86a, type: 3}
+  weaponPrefab: {fileID: 5825881266557484979, guid: 276e1eb0799988e469f02ac90f59f64b, type: 3}
+  socket: 0
+  fireInterval: 0.7
+  damage: 7.5
+  critChance: 0.1
+  critMultiplier: 2
+  maxLevel: 3
+  perLevelBonus:
+    damageAdd: 0.9
+    damageMul: 1
+    fireIntervalMul: 1
+    critChanceAdd: 0
+    critMultiplierAdd: 0
+    projectileSpeedAdd: 0
+    projectileCountAdd: 0
+    pierceAdd: 0
+    spreadMul: 1
+    lifeTimeMul: 1
+    burstAdd: 0
+    magazineAdd: 0
+    reloadTimeMul: 1
+    rangeAdd: 0
+    subUnitAdd: 0
+  requiresTarget: 1
+  evolvedFrom: {fileID: 11400000, guid: a5c5c099d896ba94a9b198ef0b9b8fc4, type: 2}
+  innateEffects:
+  - {fileID: 11400000, guid: cb8b5c509cad7e34490af6be25a34654, type: 2}
+  themeColor: {r: 0.25, g: 0.95, b: 1, a: 1}
+  fireSounds:
+  - {fileID: 8300000, guid: e3760d5047edad749ac1e25cd676ab46, type: 3}
+  - {fileID: 8300000, guid: 0c03edc4efa519a439adaf03a0af417a, type: 3}
+  fireVolume: 0.65
+  firePitchRange: {x: 0.96, y: 1.04}
+  reloadStartSound: {fileID: 0}
+  reloadEndSound: {fileID: 0}
+  reloadVolume: 0.8
+  range: 3
+  arcAngle: 120
+  maxTargets: 5
+  hitDelay: 0.23799998
+  hitLayers:
+    serializedVersion: 2
+    m_Bits: 129
+  cameraShake: 0.15
+  slashEffectPrefab: {fileID: 0}

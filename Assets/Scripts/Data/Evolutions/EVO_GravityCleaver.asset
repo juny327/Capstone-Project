@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 774e8839cb40ed44f82f525be90550ac, type: 3}
+  m_Name: EVO_GravityCleaver
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponEvolutionData
+  from: {fileID: 11400000, guid: 46bb3f2e7db4bdb488a708673ed6b1f3, type: 2}
+  requiredLevel: 0
+  requiredAttachment: {fileID: 0}
+  requiredSubAbility: {fileID: 0}
+  requiredAbilityLevel: 1
+  requiredAnyGunAttachment: {fileID: 0}
+  requiredSkill: {fileID: 11400000, guid: 788bb7444772b6c4ba21f33ec5b9bf6d, type: 2}
+  result: {fileID: 11400000, guid: a1cd84c31a485514682df558dbb0e56b, type: 2}
+  title: "\uC911\uB825 \uB300\uAC80"
+  flavor: "\uB0B4\uB824\uCC0D\uC740 \uC790\uB9AC\uC5D0 \uC911\uB825\uC7A5 \u2014
+    \uC8FC\uBCC0 \uC801\uC744 \uBE68\uC544\uB4E4\uC778 \uB4A4 \uBD95\uAD34 \uD3ED\uBC1C"
+  color: {r: 0.72, g: 0.32, b: 1, a: 1}
+  sound: {fileID: 8300000, guid: f595650ca3f17154e8de61ccc64e6a00, type: 3}
+  soundVolume: 0.9
+  shopPrice: 0

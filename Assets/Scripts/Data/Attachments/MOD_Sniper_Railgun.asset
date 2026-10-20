@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2053801b010909f488af8899e8b93e8a, type: 3}
+  m_Name: MOD_Sniper_Railgun
+  m_EditorClassIdentifier: Assembly-CSharp::AttachmentData
+  displayName: "\uB808\uC77C\uAC74"
+  description: "\uBAA8\uB4E0 \uC801\uC744 \uAFF0\uB6AB\uB294 \uCD08\uACE0\uC18D \uD0C4
+    \u2014 \uC7A5\uC804\uC774 \uB290\uB9AC\uB2E4"
+  icon: {fileID: 21300000, guid: ad5dcdc263a0d474685ad18a3016b266, type: 3}
+  slot: 5
+  tier: 2
+  families: 1
+  onlyFor:
+  - {fileID: 11400000, guid: 180da6784ef99fc4db72586b0150f7a0, type: 2}
+  modifier:
+    damageAdd: 0
+    damageMul: 1
+    fireIntervalMul: 1
+    critChanceAdd: 0
+    critMultiplierAdd: 0
+    projectileSpeedAdd: 120
+    projectileCountAdd: 0
+    pierceAdd: 99
+    spreadMul: 1
+    lifeTimeMul: 1
+    burstAdd: 0
+    magazineAdd: 0
+    reloadTimeMul: 1.3
+    rangeAdd: 0
+    subUnitAdd: 0
+  magazinePercent: 0
+  projectileCountSet: 0
+  effect: {fileID: 0}
+  ability: {fileID: 0}
+  tint: {r: 0.5, g: 0.95, b: 1, a: 1}
+  note: 
+  minWeaponLevel: 3
+  basePrice: 30

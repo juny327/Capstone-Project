@@ -344,10 +344,23 @@ MonoBehaviour:
   m_GameObject: {fileID: 1147231289499110541}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8d2f404e45afffd41a7be900cc1b6bdb, type: 3}
+  m_Script: {fileID: 11500000, guid: b37c5e88a71046e0a9580e6df413b017, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MeleeAttack
-  attackCooldown: 1
+  m_EditorClassIdentifier: Assembly-CSharp::DashAttack
+  attackCooldown: 3
+  warningDuration: 0.9
+  dashDistance: 6
+  dashSpeed: 8
+  recoveryDuration: 1
+  pathWidth: 1.4
+  obstacleMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  telegraphMaterial: {fileID: 2100000, guid: 395337d866bf4a7d9f7daff205ba1621, type: 2}
+  warningColor: {r: 1, g: 0.25, b: 0.05, a: 0.18}
+  fillColor: {r: 1, g: 0.45, b: 0.05, a: 0.65}
+  edgeColor: {r: 1, g: 0.8, b: 0.15, a: 0.95}
+  cueVolume: 0.35
 --- !u!114 &2414513144815526704
 MonoBehaviour:
   m_ObjectHideFlags: 0

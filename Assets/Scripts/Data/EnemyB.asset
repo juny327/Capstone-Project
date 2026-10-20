@@ -15,7 +15,7 @@ MonoBehaviour:
   maxHp: 10
   attackPower: 5
   chaseRange: 30
-  attackRange: 2
-  moveSpeed: 3
+  attackRange: 6
+  moveSpeed: 4.5
   expDrop: 2
-  spawnWeight: 10
+  spawnWeight: 20
