@@ -31,7 +31,12 @@ public class MapGenerator : MonoBehaviour
 
         // 전략 선택
         //strategy = new HybridBSPStrategy(minRoomSize: 6, maxDepth: 4);
-        strategy = new CellularAutomataStrategy(10, 2, 4);
+        var campaignTheme = GetComponent<CampaignMapTheme>();
+        strategy = campaignTheme != null
+            ? new CampaignMapLayout(campaignTheme.sector)
+            : GetComponent<OrbitalMapTheme>() != null
+                ? new OrbitalMapLayout()
+                : new CellularAutomataStrategy(10, 2, 4);
 
         strategy.Generate(map);
         
