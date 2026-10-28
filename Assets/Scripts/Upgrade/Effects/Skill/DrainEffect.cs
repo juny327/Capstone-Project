@@ -8,6 +8,11 @@ public class DrainEffect : UpgradeEffect
 
     public override void Apply(GameObject player)
     {
+        Apply(player, 1);
+    }
+
+    public override void Apply(GameObject player, int level)
+    {
         if (player == null)
             return;
 
@@ -16,6 +21,10 @@ public class DrainEffect : UpgradeEffect
         if (skill == null)
             skill = player.AddComponent<DrainSkill>();
 
-        skill.AddHealAmount(healAmount);
+        int targetHeal = ScaleInt(healAmount, level);
+        int increase = targetHeal - skill.HealAmount;
+
+        if (increase > 0)
+            skill.AddHealAmount(increase);
     }
 }

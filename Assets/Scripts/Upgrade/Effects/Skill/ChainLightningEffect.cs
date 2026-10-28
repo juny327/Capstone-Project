@@ -22,6 +22,11 @@ public class ChainLightningEffect : UpgradeEffect
 
     public override void Apply(GameObject player)
     {
+        Apply(player, 1);
+    }
+
+    public override void Apply(GameObject player, int level)
+    {
         if (player == null)
             return;
 
@@ -31,8 +36,10 @@ public class ChainLightningEffect : UpgradeEffect
         if (skill == null)
             skill = player.AddComponent<ChainLightningSkill>();
 
+        float scaledDamage = ScaleValue(damage, level);
+
         skill.Setup(
-            damage,
+            scaledDamage,
             fireInterval,
             targetRange,
             chainRange,

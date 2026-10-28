@@ -1,6 +1,8 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "ElectricShotEffect", menuName = "Upgrade/Effects/ElectricShot")]
+[CreateAssetMenu(
+    fileName = "ElectricShotEffect",
+    menuName = "Upgrade/Effects/ElectricShot")]
 public class ElectricShotEffect : UpgradeEffect
 {
     [Header("Projectile")]
@@ -19,19 +21,36 @@ public class ElectricShotEffect : UpgradeEffect
 
     public override void Apply(GameObject player)
     {
-        Debug.Log("ElectricShot Effect Apply");
+        Apply(player, 1);
+    }
 
-        ElectricShotSkill skill = player.GetComponent<ElectricShotSkill>();
+    public override void Apply(GameObject player, int level)
+    {
+        if (player == null)
+            return;
+
+        ElectricShotSkill skill =
+            player.GetComponent<ElectricShotSkill>();
 
         if (skill == null)
             skill = player.AddComponent<ElectricShotSkill>();
+
+        level = Mathf.Max(1, level);
+
+        // Lv.1 = 2초
+        // Lv.2 = 3초
+        // Lv.3 = 4초
+        // Lv.4 = 5초
+        // Lv.5 = 6초
+        float scaledShockDuration =
+            shockDuration + (level - 1) * 1f;
 
         skill.Setup(
             projectilePrefab,
             fireInterval,
             projectileSpeed,
             targetRange,
-            shockDuration,
+            scaledShockDuration,
             spawnOffset
         );
     }

@@ -10,7 +10,7 @@ public class TornadoEffect : UpgradeEffect
     public float targetRange = 25f;
 
     public float duration = 5f;
-    public float damage = 10f;
+    public float damage = 2f;
     public float attackInterval = 0.5f;
     public float radius = 3f;
 
@@ -18,13 +18,36 @@ public class TornadoEffect : UpgradeEffect
 
     public override void Apply(GameObject player)
     {
+        Apply(player, 1);
+    }
+
+    public override void Apply(GameObject player, int level)
+    {
+        if (player == null)
+            return;
+
         TornadoSkill skill = player.GetComponent<TornadoSkill>();
 
         if (skill == null)
             skill = player.AddComponent<TornadoSkill>();
 
-        skill.Setup(projectilePrefab, fireInterval, projectileSpeed,
-            targetRange, duration, damage,
-            attackInterval, radius, spawnOffset);
+        // Lv.1 = 2
+        // Lv.2 = 3
+        // Lv.3 = 4
+        // Lv.4 = 5
+        // Lv.5 = 6
+        int scaledDamage =
+            Mathf.RoundToInt(damage) + (Mathf.Max(1, level) - 1);
+
+        skill.Setup(
+            projectilePrefab,
+            fireInterval,
+            projectileSpeed,
+            targetRange,
+            duration,
+            scaledDamage,
+            attackInterval,
+            radius,
+            spawnOffset);
     }
 }

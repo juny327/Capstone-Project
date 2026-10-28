@@ -11,5 +11,9 @@ public class UpgradeData : ScriptableObject
 
     public int costExp;   // 필요 경험치
 
+    [Header("Upgrade Level")]
+    [Min(1)]
+    public int maxLevel = 5;
+
     public UpgradeEffect effect;
 }
