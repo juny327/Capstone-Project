@@ -1,6 +1,8 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "BlackHoleEffect", menuName = "Upgrade/Effects/Skill/Black Hole")]
+[CreateAssetMenu(
+    fileName = "BlackHoleEffect",
+    menuName = "Upgrade/Effects/Skill/Black Hole")]
 public class BlackHoleEffect : UpgradeEffect
 {
     [Header("Black Hole")]
@@ -38,25 +40,48 @@ public class BlackHoleEffect : UpgradeEffect
 
     public override void Apply(GameObject player)
     {
+        Apply(player, 1);
+    }
+
+    public override void Apply(GameObject player, int level)
+    {
         if (player == null)
             return;
 
-        BlackHoleSkill skill = player.GetComponent<BlackHoleSkill>();
+        BlackHoleSkill skill =
+            player.GetComponent<BlackHoleSkill>();
 
         if (skill == null)
             skill = player.AddComponent<BlackHoleSkill>();
 
+        level = Mathf.Max(1, level);
+
+        // -----------------------------------------
+        // 레벨업 효과
+        // 데미지는 고정
+        // 지속시간 / 흡입범위 / 폭발범위만 증가
+        // -----------------------------------------
+
+        float scaledDuration =
+            duration + (level - 1) * 1f;
+
+        float scaledPullRadius =
+            pullRadius + (level - 1) * 1f;
+
+        float scaledExplosionRadius =
+            explosionRadius + (level - 1) * 0.5f;
+
         skill.Setup(
             blackHolePrefab,
             fireInterval,
-            duration,
+            scaledDuration,
             targetRange,
-            pullRadius,
+            scaledPullRadius,
             pullSpeed,
             damage,
             damageInterval,
             explosionDamage,
-            explosionRadius
+            scaledExplosionRadius
         );
     }
 }

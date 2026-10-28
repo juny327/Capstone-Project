@@ -23,15 +23,31 @@ public class UpgradeCard : MonoBehaviour
 
     public void Setup(UpgradeData upgrade)
     {
+        Setup(upgrade, 1);
+    }
+
+    public void Setup(UpgradeData upgrade, int nextLevel)
+    {
         data = upgrade;
         clicked = false;
 
-        icon.sprite = upgrade.icon;
-        title.text = upgrade.upgradeName;
-        description.text = upgrade.description;
+        if (upgrade == null)
+            return;
+
+        if (icon != null)
+            icon.sprite = upgrade.icon;
+
+        if (title != null)
+            title.text = $"{upgrade.upgradeName} Lv.{Mathf.Max(1, nextLevel)}";
+
+        if (description != null)
+            description.text = upgrade.description;
 
         if (cost != null)
-            cost.gameObject.SetActive(false);
+        {
+            cost.gameObject.SetActive(true);
+            cost.text = $"cost Exp : {upgrade.costExp}";
+        }
     }
 
     void OnEnable()
@@ -57,7 +73,8 @@ public class UpgradeCard : MonoBehaviour
 
     void OnSuccess(UpgradeData d)
     {
-        if (d != data) return;
+        if (d != data)
+            return;
 
         if (animator != null)
             animator.Play("Success");
@@ -68,8 +85,10 @@ public class UpgradeCard : MonoBehaviour
 
     void OnFailed(UpgradeData d)
     {
-        if (d != data) return;
+        if (d != data)
+            return;
 
+        // 경험치 부족 등으로 실패하면 다시 선택할 수 있게 한다.
         clicked = false;
 
         if (animator != null)
