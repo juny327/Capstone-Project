@@ -43,7 +43,7 @@ public static class EvoStrikes
         CombatFx.FindEnemies(at, radius, found);
         foreach (Transform t in found)
         {
-            CombatFx.Damage(t, damage, CombatFx.Body(t), Vector3.down);
+            CombatFx.Damage(t, damage, CombatFx.Body(t), Vector3.down, sound: HitSound.Electric);
             CombatFx.Stun(t, stun);
         }
 

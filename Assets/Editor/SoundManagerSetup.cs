@@ -153,6 +153,67 @@ public static class SoundManagerSetup
         Debug.Log($"{Tag} 믹서 그룹 추가: BGM · SFX · UI");
     }
 
+    /// <summary>
+    /// 맞힘 소리 — 공용 · 총알 · 근접 · 레이저 (2026-11-02 사용자 피드백: 발사음에 묻히고, 레이저에 '띵'은 어울리지 않는다).
+    /// 공용은 0.3 → 0.4 로 키우고, 총알 '퍽' · 근접 몸통 '퍽' · 레이저 '치익' 을 따로 둔다.
+    /// </summary>
+    static void FillHitKinds(SerializedObject so)
+    {
+        // 공용 (부착물 효과 · 범위 공격 · 전격 소총 · 반사 탄) — 가장 자주 나는 소리라 변형 많이
+        Fill(so, "hit", 0.4f, 0.04f,
+            $"{Impact}/impactGeneric_light_000.ogg",
+            $"{Impact}/impactGeneric_light_001.ogg",
+            $"{Impact}/impactGeneric_light_002.ogg",
+            $"{Impact}/impactGeneric_light_003.ogg",
+            $"{Impact}/impactGeneric_light_004.ogg");
+
+        // 총알 — 둔탁한 '퍽' (발사음에 묻히지 않게 공용보다 조금 크게)
+        Fill(so, "bulletHit", 0.45f, 0.04f,
+            $"{Impact}/impactPunch_medium_000.ogg",
+            $"{Impact}/impactPunch_medium_001.ogg",
+            $"{Impact}/impactPunch_medium_002.ogg",
+            $"{Impact}/impactPunch_medium_003.ogg",
+            $"{Impact}/impactPunch_medium_004.ogg");
+
+        // 근접 — 무기의 베는 소리(맞힌 순간) 밑에 깔리는 몸통 '퍽'
+        Fill(so, "meleeHit", 0.4f, 0.04f,
+            $"{Impact}/impactSoft_heavy_000.ogg",
+            $"{Impact}/impactSoft_heavy_001.ogg",
+            $"{Impact}/impactSoft_heavy_002.ogg",
+            $"{Impact}/impactSoft_heavy_003.ogg",
+            $"{Impact}/impactSoft_heavy_004.ogg");
+
+        // 레이저 — 금속 '띵' 대신 타는 '치익' (직접 합성)
+        Fill(so, "laserHit", 0.35f, 0.05f,
+            "Assets/AUDIO/Laser/LaserSizzle_01.wav",
+            "Assets/AUDIO/Laser/LaserSizzle_02.wav",
+            "Assets/AUDIO/Laser/LaserSizzle_03.wav");
+
+        // 전기 — 퍼지는 전기 · 낙뢰가 몸에 닿은 '치직' (직접 합성, 2026-11-02)
+        Fill(so, "electricHit", 0.35f, 0.05f,
+            "Assets/AUDIO/Electric/ArcHit_01.wav",
+            "Assets/AUDIO/Electric/ArcHit_02.wav",
+            "Assets/AUDIO/Electric/ArcHit_03.wav");
+    }
+
+    /// <summary>맞힘 소리만 다시 넣는다 — "전체 실행"은 소리 묶음 전체 · 믹서 · 장면까지 처음 값으로 덮어쓰므로.</summary>
+    [MenuItem("Tools/Audio/맞힘 소리만 다시 넣기")]
+    public static void HitSoundsMenu() => HitSoundsOnly();
+    public static void HitSoundsBatch() => HitSoundsOnly();
+
+    static void HitSoundsOnly()
+    {
+        GameSoundSet set = AssetDatabase.LoadAssetAtPath<GameSoundSet>(SoundSetPath);
+        if (set == null) { Debug.LogError($"{Tag} 소리 묶음이 없습니다: {SoundSetPath}"); return; }
+
+        var so = new SerializedObject(set);
+        FillHitKinds(so);
+        so.ApplyModifiedPropertiesWithoutUndo();
+        EditorUtility.SetDirty(set);
+        AssetDatabase.SaveAssets();
+        Debug.Log($"{Tag} 맞힘 소리 다시 넣기 — 공용 {set.hit.clips.Length} · 총알 {set.bulletHit.clips.Length} · 근접 {set.meleeHit.clips.Length} · 레이저 {set.laserHit.clips.Length} · 전기 {set.electricHit.clips.Length}");
+    }
+
     static AudioMixerGroup FindGroup(AudioMixer mixer, string name)
     {
         if (mixer == null) return null;
@@ -180,13 +241,7 @@ public static class SoundManagerSetup
         Fill(so, "upgradeOpen", 0.7f, 0f, $"{Interface}/open_001.ogg");
         Fill(so, "weaponAcquired", 0.8f, 0f, $"{Interface}/drop_001.ogg");
 
-        // 명중은 가장 자주 나는 소리다. 작게, 변형 많이.
-        Fill(so, "hit", 0.3f, 0.04f,
-            $"{Impact}/impactGeneric_light_000.ogg",
-            $"{Impact}/impactGeneric_light_001.ogg",
-            $"{Impact}/impactGeneric_light_002.ogg",
-            $"{Impact}/impactGeneric_light_003.ogg",
-            $"{Impact}/impactGeneric_light_004.ogg");
+        FillHitKinds(so);
 
         // 치명타는 확실히 달라야 체감된다 — 묵직한 금속 타격
         Fill(so, "criticalHit", 0.6f, 0.04f,
@@ -203,6 +258,14 @@ public static class SoundManagerSetup
             $"{Impact}/impactMetal_light_002.ogg",
             $"{Impact}/impactMetal_light_003.ogg",
             $"{Impact}/impactMetal_light_004.ogg");
+
+        // 벽 · 엄폐물에 막힘 — 적중음보다 작고 둔탁하게. 산탄이 한꺼번에 막혀도 한 번
+        Fill(so, "obstacleHit", 0.28f, 0.07f,
+            $"{Impact}/impactPlate_medium_000.ogg",
+            $"{Impact}/impactPlate_medium_001.ogg",
+            $"{Impact}/impactPlate_medium_002.ogg",
+            $"{Impact}/impactPlate_medium_003.ogg",
+            $"{Impact}/impactPlate_medium_004.ogg");
 
         Fill(so, "weaponSwap", 0.7f, 0f, $"{Interface}/switch_001.ogg");
         Fill(so, "playerDead", 1f, 0f, $"{SciFi}/lowFrequency_explosion_000.ogg");

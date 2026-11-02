@@ -31,11 +31,17 @@ MonoBehaviour:
     projectileSpeedAdd: 0
     projectileCountAdd: 0
     pierceAdd: 0
+    spreadMul: 1
+    lifeTimeMul: 1
+    burstAdd: 0
     magazineAdd: 0
     reloadTimeMul: 1
     rangeAdd: 0
     subUnitAdd: 0
   requiresTarget: 1
+  evolvedFrom: {fileID: 0}
+  innateEffects: []
+  themeColor: {r: 1, g: 1, b: 1, a: 0}
   fireSounds:
   - {fileID: 8300000, guid: 9a98cd2d981fab941879d3da078784d0, type: 3}
   - {fileID: 8300000, guid: e3760d5047edad749ac1e25cd676ab46, type: 3}
@@ -53,3 +59,9 @@ MonoBehaviour:
     m_Bits: 129
   cameraShake: 0.25
   slashEffectPrefab: {fileID: 0}
+  swingSounds:
+  - {fileID: 8300000, guid: 27ba4e5c0914d8646adc9885958471c8, type: 3}
+  - {fileID: 8300000, guid: 5b0254f09ba83b843b65757b7019cb20, type: 3}
+  - {fileID: 8300000, guid: 17f7ebd9779308646a88789556b5aa0b, type: 3}
+  swingVolume: 0.55
+  swingPitchRange: {x: 0.94, y: 1.06}

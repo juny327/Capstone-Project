@@ -149,7 +149,8 @@ public static class CombatFx
     }
 
     /// <summary>피해를 준다. 맞은 소리는 프레임 끝에 한 번 (탄 · 빔과 같다).</summary>
-    public static void Damage(Transform root, float amount, Vector3 point, Vector3 direction, bool critical = false, float cameraShake = 0f)
+    public static void Damage(Transform root, float amount, Vector3 point, Vector3 direction, bool critical = false, float cameraShake = 0f,
+        HitSound sound = HitSound.Normal)
     {
         if (root == null || amount <= 0f || !IsAlive(root)) return;
 
@@ -166,7 +167,7 @@ public static class CombatFx
         });
 
         if (SoundManager.Instance != null)
-            SoundManager.Instance.ReportHit(critical);
+            SoundManager.Instance.ReportHit(critical, sound);
     }
 
     /// <summary>경직 (보스는 경직이 없다 — 넘어간다).</summary>
@@ -189,5 +190,57 @@ public static class CombatFx
     public static void PlaySound(GameSoundSet.Entry entry)
     {
         if (entry != null && SoundManager.Instance != null) SoundManager.Instance.Play(entry);
+    }
+
+    /// <summary>총알 · 광선이 벽에 막힌 소리 ('탁').</summary>
+    public static void ObstacleHitSound()
+    {
+        if (SoundManager.Instance != null) SoundManager.Instance.PlayObstacleHit();
+    }
+
+    // ───────── 맵 장애물 — 총알 · 광선이 같은 규칙으로 벽에 막힌다 ─────────
+
+    static readonly RaycastHit[] lineHits = new RaycastHit[32];
+
+    /// <summary>
+    /// 맵 장애물인가 — 실행 중 생성되는 벽(MapRenderer), 배치된 장애물(StageObjectPlacer), 엄폐물 박스처럼
+    /// **움직이지 않는 단단한 충돌체**. 맵 쪽은 바닥과 같은 Ground 레이어라 레이어로는 못 가른다.
+    ///
+    /// 빼는 것: 트리거(픽업 · 위험 구역 · 탄 · 적 감지 범위) · Rigidbody 가 붙은 움직이는 물체(경험치 구슬 등)
+    /// · 플레이어 · 피해를 받는 것(적 · 보스 · 훈련 해골 — 태그 없는 자식 충돌체 포함)
+    /// · 위 끝이 <paramref name="minY"/> 보다 낮은 것(바닥 — 총알 · 광선은 총구 높이에서 수평으로 난다).
+    /// </summary>
+    public static bool IsMapObstacle(Collider c, float minY)
+    {
+        if (c == null || c.isTrigger || c.attachedRigidbody != null) return false;
+        if (c.CompareTag("Player") || c.transform.root.CompareTag("Player")) return false;
+        if (c.GetComponentInParent<IDamageable>() != null) return false;
+
+        return c.bounds.max.y > minY;
+    }
+
+    /// <summary>origin 에서 dir 로 range 안에 처음 막히는 거리. 막히지 않으면 range.</summary>
+    public static float ObstacleDistance(Vector3 origin, Vector3 dir, float range)
+    {
+        if (range <= 0f || dir.sqrMagnitude < 0.0001f) return range;
+
+        int count = Physics.RaycastNonAlloc(origin, dir.normalized, lineHits, range, ~0, QueryTriggerInteraction.Ignore);
+        float best = range;
+
+        for (int i = 0; i < count; i++)
+            if (lineHits[i].distance < best && IsMapObstacle(lineHits[i].collider, origin.y))
+                best = lineHits[i].distance;
+
+        return best;
+    }
+
+    /// <summary>두 점 사이를 맵 장애물이 막지 않는가 (연쇄 전기 · 프리즘 빛이 벽 너머로 튀지 않게).</summary>
+    public static bool HasLineOfSight(Vector3 from, Vector3 to)
+    {
+        Vector3 d = to - from;
+        float length = d.magnitude;
+        if (length < 0.01f) return true;
+
+        return ObstacleDistance(from, d / length, length) >= length - 0.01f;
     }
 }

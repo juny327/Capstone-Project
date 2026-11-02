@@ -54,6 +54,9 @@ public class SoundManager : MonoBehaviour
     /// <summary>효과음 그룹. 무기 소리가 여기로 나간다.</summary>
     public AudioMixerGroup SfxGroup => sfxGroup;
 
+    /// <summary>설정창 효과음 음량 — 자기 AudioSource 로 소리를 내는 쪽(중력 대검 블랙홀 반복음)이 맞춘다.</summary>
+    public float SfxVolume => masterVolume;
+
     private AudioSource[] voices;
     private int next;
     private bool isDuplicate;
@@ -162,44 +165,71 @@ public class SoundManager : MonoBehaviour
 
     // ───────── 타격 ─────────
 
-    private bool pendingHit;
-    private bool pendingCritical;
-    private int pendingHitCount;
+    // 맞힘 종류(HitSound)마다 따로 모은다 — 같은 프레임에 총 · 칼 · 레이저가 맞으면 각각 한 번씩 난다
+    private static readonly int HitKinds = System.Enum.GetValues(typeof(HitSound)).Length;
+    private readonly bool[] pendingHit = new bool[HitKinds];
+    private readonly bool[] pendingCritical = new bool[HitKinds];
+    private readonly int[] pendingHitCount = new int[HitKinds];
 
     /// <summary>
-    /// 적을 맞혔다고 알린다. **바로 재생하지 않고 프레임 끝에 한 번만 낸다.**
+    /// 적을 맞혔다고 알린다. **바로 재생하지 않고 프레임 끝에 종류마다 한 번만 낸다.**
     ///
     /// 스나이퍼(관통 3)나 검(최대 5명)은 같은 프레임에 여러 명을 때린다.
     /// 그대로 재생하면 같은 소리가 겹쳐 터지면서 뭉갠다.
     /// 모아 두었다가 한 번만 내고, 맞은 수만큼 볼륨을 조금 올린다.
     ///
-    /// 치명타가 하나라도 섞이면 치명타 소리로 낸다 — 그래서 즉시 재생하지 않고 미룬다.
+    /// 치명타가 하나라도 섞이면 치명타 소리로 낸다 (레이저는 '치익'을 조금 크게) — 그래서 즉시 재생하지 않고 미룬다.
     /// </summary>
-    public void ReportHit(bool isCritical)
+    public void ReportHit(bool isCritical, HitSound kind = HitSound.Normal)
     {
-        pendingHit = true;
-        pendingHitCount++;
+        int k = (int)kind;
+        pendingHit[k] = true;
+        pendingHitCount[k]++;
+        if (isCritical) pendingCritical[k] = true;
+    }
 
-        if (isCritical) pendingCritical = true;
+    /// <summary>총알 · 광선이 벽에 막혔다. 산탄처럼 몰려 와도 minInterval 로 한 번만 난다.</summary>
+    public void PlayObstacleHit() => Play(sounds != null ? sounds.obstacleHit : null, sfxGroup);
+
+    /// <summary>그 종류의 소리 (없으면 공용 적중음).</summary>
+    GameSoundSet.Entry HitEntry(HitSound kind)
+    {
+        GameSoundSet.Entry e = kind switch
+        {
+            HitSound.Laser => sounds.laserHit,
+            HitSound.Bullet => sounds.bulletHit,
+            HitSound.Melee => sounds.meleeHit,
+            HitSound.Electric => sounds.electricHit,
+            _ => null,
+        };
+        return e != null && e.HasClip ? e : sounds.hit;
     }
 
     void LateUpdate()
     {
-        if (!pendingHit) return;
-
-        if (sounds != null)
+        for (int k = 0; k < pendingHit.Length; k++)
         {
-            GameSoundSet.Entry entry = pendingCritical ? sounds.criticalHit : sounds.hit;
+            if (!pendingHit[k]) continue;
 
-            // 여러 명을 한 번에 맞히면 조금 더 크게 — 광역이 닿았다는 느낌
-            float scale = Mathf.Min(1.35f, 1f + (pendingHitCount - 1) * 0.08f);
+            if (sounds != null)
+            {
+                var kind = (HitSound)k;
+                bool laser = (kind == HitSound.Laser && sounds.laserHit.HasClip) ||
+                             (kind == HitSound.Electric && sounds.electricHit.HasClip);
 
-            Play(entry, sfxGroup, scale);
+                // 레이저 · 전기는 치명타도 제 소리 '치익' · '치직' (금속 '땡' 은 어울리지 않는다 — 사용자 피드백) — 대신 조금 크게
+                GameSoundSet.Entry entry = pendingCritical[k] && !laser ? sounds.criticalHit : HitEntry(kind);
+
+                // 여러 명을 한 번에 맞히면 조금 더 크게 — 광역이 닿았다는 느낌
+                float scale = Mathf.Min(1.35f, (laser && pendingCritical[k] ? 1.25f : 1f) + (pendingHitCount[k] - 1) * (laser ? 0.06f : 0.08f));
+
+                Play(entry, sfxGroup, scale);
+            }
+
+            pendingHit[k] = false;
+            pendingCritical[k] = false;
+            pendingHitCount[k] = 0;
         }
-
-        pendingHit = false;
-        pendingCritical = false;
-        pendingHitCount = 0;
     }
 
     /// <summary>
@@ -303,7 +333,7 @@ public class SoundManager : MonoBehaviour
     IEnumerator SwapMusic(MusicSet.SceneTrack track)
     {
         // 씬 로드 직후라 timeScale 이 0 일 수 있다 (보상 창 등). 실시간으로 센다.
-        yield return FadeMusic(0f);
+        yield return FadeMusic(() => 0f);
 
         musicSource.Stop();
 
@@ -316,16 +346,17 @@ public class SoundManager : MonoBehaviour
         musicSource.clip = track.clip;
         musicSource.Play();
 
-        yield return FadeMusic(track.volume * musicVolume);
+        // 목표는 매 프레임 다시 읽는다 — 페이드 도중 설정창에서 배경음을 바꾸면 끝난 뒤에도 그 값이 남게 (2026-11-02 고침)
+        yield return FadeMusic(() => track.volume * musicVolume);
 
         musicRoutine = null;
     }
 
-    IEnumerator FadeMusic(float target)
+    IEnumerator FadeMusic(System.Func<float> target)
     {
         if (musicFade <= 0.01f)
         {
-            musicSource.volume = target;
+            musicSource.volume = target();
             yield break;
         }
 
@@ -335,12 +366,12 @@ public class SoundManager : MonoBehaviour
         while (elapsed < musicFade)
         {
             elapsed += Time.unscaledDeltaTime;
-            musicSource.volume = Mathf.Lerp(from, target, elapsed / musicFade);
+            musicSource.volume = Mathf.Lerp(from, target(), elapsed / musicFade);
 
             yield return null;
         }
 
-        musicSource.volume = target;
+        musicSource.volume = target();
     }
 
     /// <summary>옵션 메뉴에서 부를 음악 볼륨. 0~1.</summary>

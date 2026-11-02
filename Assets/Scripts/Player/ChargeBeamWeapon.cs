@@ -102,8 +102,16 @@ public class ChargeBeamWeapon : WeaponBase
             Vector3 d = Quaternion.Euler(0f, angle, 0f) * dir;
 
             damageScale = cfg.beamsAllAround && i == 0 ? cfg.primaryBeamDamageMul : 1f;
-            ApplyBeamDamage(cfg, in stats, origin, d);
-            ShowBeam(cfg, i, origin, origin + d * stats.Range, BeamColor(cfg, i, count));
+
+            // 벽 · 엄폐물이 있으면 갈래마다 거기까지만 — 벽 너머 적은 맞지 않고, 빔도 벽에서 끝난다
+            float reach = CombatFx.ObstacleDistance(origin, d, stats.Range);
+            ApplyBeamDamage(cfg, in stats, origin, d, reach);
+            ShowBeam(cfg, i, origin, origin + d * reach, BeamColor(cfg, i, count));
+            if (reach < stats.Range)
+            {
+                SpawnFx(cfg.hitEffectPrefab, origin + d * reach, Quaternion.LookRotation(-d));
+                CombatFx.ObstacleHitSound();
+            }
         }
 
         damageScale = 1f;
@@ -166,7 +174,7 @@ public class ChargeBeamWeapon : WeaponBase
         if (target == null || damage <= 0f) return;
 
         bool wasAlive = CombatFx.IsAlive(target);
-        CombatFx.Damage(target, damage, point, direction, critical);
+        CombatFx.Damage(target, damage, point, direction, critical, 0f, HitSound.Laser);
         bool killed = CheckDirectKill(target, wasAlive);   // 레이저를 대신하는 공격 — Drain
 
         if (HasHitEffects)
@@ -254,12 +262,12 @@ public class ChargeBeamWeapon : WeaponBase
     }
 
     void ApplyBeamDamage(ChargeBeamWeaponData cfg, in WeaponRuntimeStats stats,
-        Vector3 origin, Vector3 dir)
+        Vector3 origin, Vector3 dir, float range)
     {
         struck.Clear();
 
         int count = Physics.SphereCastNonAlloc(
-            origin, cfg.beamRadius, dir, hits, stats.Range,
+            origin, cfg.beamRadius, dir, hits, range,
             cfg.hitLayers, QueryTriggerInteraction.Collide);
 
         for (int i = 0; i < count; i++)
@@ -318,7 +326,7 @@ public class ChargeBeamWeapon : WeaponBase
 
             // 관통이라 한 프레임에 여러 명이 들어온다. 소리는 프레임 끝에 한 번만.
             if (SoundManager.Instance != null)
-                SoundManager.Instance.ReportHit(isCritical);
+                SoundManager.Instance.ReportHit(isCritical, HitSound.Laser);
         }
     }
 
@@ -428,7 +436,7 @@ public class ChargeBeamWeapon : WeaponBase
 
             Vector3 d = Quaternion.Euler(0f, BeamAngle(cfg, i, count), 0f) * forward;
             t.SetPosition(0, from);
-            t.SetPosition(1, from + d * length);
+            t.SetPosition(1, from + d * CombatFx.ObstacleDistance(origin, d, length));   // 벽에서 끊는다
             t.startWidth = 0.05f;
             t.endWidth = 0.02f;
 

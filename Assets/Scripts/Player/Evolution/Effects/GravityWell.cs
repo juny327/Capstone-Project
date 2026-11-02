@@ -8,6 +8,10 @@ public class GravityWell : MonoBehaviour
     GravityWellEffect cfg;
     float damage;
     MeshRenderer disc;
+    Transform hole;          // 팀원 블랙홀 이펙트 (있으면 원판 · 고리 대신)
+    Vector3 holeScale;
+    AudioSource holeAudio;   // 블랙홀 반복음 — 커질 때 들어오고 오므라들 때 빠진다
+    float holeVolume;
     readonly HashSet<Transform> pulled = new HashSet<Transform>();
     readonly List<Transform> found = new List<Transform>();
 
@@ -19,9 +23,48 @@ public class GravityWell : MonoBehaviour
         var well = go.AddComponent<GravityWell>();
         well.cfg = cfg;
         well.damage = collapseDamage;
-        well.BuildDisc();
+        well.BuildBlackHole();
+        if (well.hole == null) well.BuildDisc();
         well.StartCoroutine(well.Run());
         return well;
+    }
+
+    /// <summary>
+    /// 팀원 블랙홀 스킬과 같은 이펙트를 띄운다. 크기만 맞추고 판정 · 시간은 중력 대검 값 그대로 —
+    /// 소용돌이 끝이 끌어당기는 반경(pullRadius × blackHoleFill)에 오게 키운다.
+    /// </summary>
+    void BuildBlackHole()
+    {
+        if (cfg.blackHolePrefab == null) return;
+
+        GameObject fx = Instantiate(cfg.blackHolePrefab, transform.position + Vector3.up * 0.05f, Quaternion.identity, transform);
+
+        // 원본 프리팹에는 단단한 충돌체가 붙어 있다 — 끌려오는 적 · 지나가는 총알을 막지 않게 뗀다
+        foreach (Collider c in fx.GetComponentsInChildren<Collider>(true)) Destroy(c);
+
+        // 반복음은 하나만 남겨 효과음 그룹 · 음량에 맞춘다. 원본은 음량 1 로 바로 울리므로 0 에서 시작한다
+        foreach (AudioSource a in fx.GetComponentsInChildren<AudioSource>(true))
+        {
+            a.volume = 0f;
+            if (holeAudio != null || cfg.blackHoleVolume <= 0f) { a.enabled = false; continue; }
+
+            holeAudio = a;
+            holeVolume = cfg.blackHoleVolume;
+            if (SoundManager.Instance != null)
+            {
+                a.outputAudioMixerGroup = SoundManager.Instance.SfxGroup;
+                holeVolume *= SoundManager.Instance.SfxVolume;
+            }
+        }
+
+        float radius = 0f;
+        foreach (MeshRenderer r in fx.GetComponentsInChildren<MeshRenderer>(true))
+            radius = Mathf.Max(radius, r.bounds.extents.x, r.bounds.extents.z);
+
+        float k = radius > 0.01f ? cfg.pullRadius * cfg.blackHoleFill / radius : 1f;
+        hole = fx.transform;
+        holeScale = hole.localScale * k;
+        hole.localScale = holeScale * 0.2f;
     }
 
     void BuildDisc()
@@ -67,8 +110,18 @@ public class GravityWell : MonoBehaviour
                 disc.transform.Rotate(0f, 0f, -540f * dt, Space.Self);
             }
 
-            // 안으로 빨려드는 고리
-            if (ring <= 0f)
+            // 블랙홀 — 처음 0.2초 커지고, 붕괴 직전 0.15초 오므라든다
+            if (hole != null)
+            {
+                float grow = Mathf.Clamp01(t / 0.2f);
+                float left = Mathf.Clamp01((cfg.duration - t) / 0.15f);
+                float shrink = Mathf.Lerp(0.35f, 1f, left);
+                hole.localScale = holeScale * Mathf.Lerp(0.2f, 1f, grow) * shrink;
+                if (holeAudio != null) holeAudio.volume = holeVolume * grow * left;
+            }
+
+            // 안으로 빨려드는 고리 (블랙홀 이펙트가 없을 때만)
+            if (hole == null && ring <= 0f)
             {
                 ring = 0.22f;
                 FxLine.Ring(cfg.ringMaterial, transform.position, cfg.pullRadius, 0.3f, cfg.color, 0.12f, 0.35f);

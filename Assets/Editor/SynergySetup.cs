@@ -253,9 +253,11 @@ public static class SynergySetup
                 rows.Add(row);
             }
 
-            // ── 작은 조합 알림 (화면 위, 체력바 · 처치 수 아래) — 플레이어 앞 전투 자리를 가리지 않게. 진화 배너가 뜨는 동안은 기다린다 ──
-            RectTransform toast = Box("Toast", root.transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -158f),
+            // ── 작은 조합 알림 (화면 아래 가운데, 0.85배) — 진화 배너가 뜨는 동안은 기다린다.
+            //    2026-11-02 위 가운데(-158)에서 옮김: 처치 수와 겹치고, 앞 8m 에 떨어지는 유탄 폭발 · 불바다를 가렸다 ──
+            RectTransform toast = Box("Toast", root.transform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 150f),
                 new Vector2(860f, 108f), Panel);
+            toast.localScale = Vector3.one * 0.85f;
             var toastGroup = toast.gameObject.AddComponent<CanvasGroup>();
             toastGroup.blocksRaycasts = false;
             Image bar = Box("Bar", toast, new Vector2(0f, 0f), new Vector2(0f, 0.5f), Vector2.zero, new Vector2(8f, 0f), Gold, stretchY: true).GetComponent<Image>();

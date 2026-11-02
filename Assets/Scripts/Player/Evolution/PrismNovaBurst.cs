@@ -94,6 +94,7 @@ public class PrismNovaBurst : MonoBehaviour
             if (m.body != null) Destroy(m.body.gameObject);
         motes.Clear();
 
+        if (hum != null) hum.Stop(0.1f);
         ShowBeam(false);
         SetCrystalsVisible(true);
         phase = Phase.Idle;
@@ -268,6 +269,11 @@ public class PrismNovaBurst : MonoBehaviour
 
             float sqr = (t.position - from).sqrMagnitude;
             if (sqr >= bestSqr) continue;
+
+            // 벽 너머 적은 고르지 않는다 (몸통 높이에서 잰다)
+            Vector3 body = CombatFx.Body(t);
+            if (!CombatFx.HasLineOfSight(new Vector3(from.x, body.y, from.z), body)) continue;
+
             bestSqr = sqr;
             best = t;
         }
@@ -314,6 +320,7 @@ public class PrismNovaBurst : MonoBehaviour
         CombatFx.PlaySound(cfg.beamSound);
         CombatFx.PlaySound(cfg.beamBassSound);
         CombatFx.PlaySound(cfg.beamHumSound);
+        if (cfg.beamLoop != null) Hum().Play(cfg.beamLoop, cfg.beamLoopVolume, cfg.beamLoopPitch, 0.08f);
         if (cfg.cameraShake > 0f && CameraShakeManager.Instance != null) CameraShakeManager.Instance.Shake(cfg.cameraShake);
 
         phase = Phase.Sustain;
@@ -330,7 +337,7 @@ public class PrismNovaBurst : MonoBehaviour
         beamDir = Vector3.RotateTowards(beamDir, want, cfg.turnRate * Mathf.Deg2Rad * dt, 0f).normalized;
 
         Vector3 origin = muzzle != null ? muzzle.position : OwnerPosition() + Vector3.up;
-        Vector3 end = origin + beamDir * range;
+        Vector3 end = origin + beamDir * CombatFx.ObstacleDistance(origin, beamDir, range);   // 벽에서 끊는다 — 돌면서 매 프레임
 
         tickTimer -= dt;
         if (tickTimer <= 0f)
@@ -360,8 +367,14 @@ public class PrismNovaBurst : MonoBehaviour
         DrawBeam(origin, end);
     }
 
+    LoopVoice hum;
+
+    /// <summary>빔 지속음 (자식 "PrismHum").</summary>
+    public LoopVoice Hum() => hum != null ? hum : hum = LoopVoice.On(transform, "PrismHum");
+
     void Finish()
     {
+        if (hum != null) hum.Stop(0.3f);
         ShowBeam(false);
         SetCrystalsVisible(true);
         phase = Phase.Idle;

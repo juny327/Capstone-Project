@@ -67,17 +67,24 @@ public class ChainBeamWeapon : WeaponBase
         Vector3 origin = Muzzle.position;
         Vector3 dir = context.AimDirection;   // 마우스 커서 방향
 
-        // 1. 커서 방향으로 얇은 레이저 — 처음 맞은 적 하나를 찾는다
-        Transform first = CastBeam(cfg, origin, dir, stats.Range, out Vector3 hitPoint);
+        // 1. 커서 방향으로 얇은 레이저 — 처음 맞은 적 하나를 찾는다. 벽 · 엄폐물이 있으면 거기까지만
+        float reach = CombatFx.ObstacleDistance(origin, dir, stats.Range);
+        Transform first = CastBeam(cfg, origin, dir, reach, out Vector3 hitPoint);
 
         // 맞지 않아도 레이저는 보여야 한다. 안 그러면 쏘는지 안 쏘는지 알 수 없다.
-        Vector3 beamEnd = first != null ? hitPoint : origin + dir * stats.Range;
+        Vector3 beamEnd = first != null ? hitPoint : origin + dir * reach;
 
         DrawBolt(cfg, origin, beamEnd, cfg.beamColor, cfg.beamWidth);
         SpawnFx(cfg.muzzleFlashPrefab, origin, Quaternion.LookRotation(dir));
 
         if (first == null)
         {
+            // 벽에 막혔으면 거기서 튄다
+            if (reach < stats.Range)
+            {
+                SpawnFx(cfg.hitEffectPrefab, beamEnd, Quaternion.LookRotation(-dir));
+                CombatFx.ObstacleHitSound();
+            }
             Show(cfg);
             return;
         }
@@ -184,6 +191,10 @@ public class ChainBeamWeapon : WeaponBase
 
             if (sqr >= bestSqr) continue;
 
+            // 벽 너머로는 튀지 않는다 (몸통 높이에서 잰다 — 발밑은 바닥에 닿는다)
+            Vector3 up = Vector3.up * cfg.hitHeight;
+            if (!CombatFx.HasLineOfSight(from + up, root.position + up)) continue;
+
             bestSqr = sqr;
             best = root;
         }
@@ -244,7 +255,7 @@ public class ChainBeamWeapon : WeaponBase
 
         // 조준한 적 + 퍼진 적이 한 프레임에 들어온다. 소리는 프레임 끝에 한 번만.
         if (SoundManager.Instance != null)
-            SoundManager.Instance.ReportHit(isCritical);
+            SoundManager.Instance.ReportHit(isCritical, HitSound.Electric);
     }
 
     // ───────── 연출 ─────────

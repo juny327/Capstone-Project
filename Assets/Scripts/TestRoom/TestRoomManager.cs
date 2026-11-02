@@ -31,6 +31,7 @@ public class TestRoomManager : MonoBehaviour
 
     WeaponData pendingSelection;
     WeaponEvolutionData pendingEvolution;
+    Func<string> pendingCustomization;
     bool pendingCrowd;
     TestRoomCrowd.Formation pendingFormation;
     Transform previousPlayerReference;
@@ -108,6 +109,13 @@ public class TestRoomManager : MonoBehaviour
         pendingEvolution = evolution;
     }
 
+    /// <summary>부착물 · 서브 능력 구역 (TestRoomCustomization) — LateUpdate 에서 한 번에 바꾸고 결과를 알린다.</summary>
+    public void QueueCustomization(Func<string> apply)
+    {
+        if (!IsReady || apply == null) return;
+        pendingCustomization = apply;
+    }
+
     [Tooltip("무리 표적 체력 튼튼 ↔ 한 방 키")]
     [SerializeField] Key crowdToughnessKey = Key.H;
 
@@ -150,6 +158,13 @@ public class TestRoomManager : MonoBehaviour
             pendingSelection = null;
             EvolutionService.PrepareForTest(Player, evolution, true, out string message);
             OnNotice?.Invoke(message);
+        }
+        if (pendingCustomization != null)
+        {
+            Func<string> apply = pendingCustomization;
+            pendingCustomization = null;
+            pendingSelection = null;
+            OnNotice?.Invoke(apply());
         }
         if (pendingCrowd)
         {

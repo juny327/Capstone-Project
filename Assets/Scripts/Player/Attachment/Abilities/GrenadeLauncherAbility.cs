@@ -24,6 +24,11 @@ public class GrenadeLauncherAbility : SubAbility
     [SerializeField] Material fxMaterial;
     [SerializeField] Color blastColor = new Color(1f, 0.55f, 0.18f, 0.95f);
     [SerializeField] ParryFlash sparkPrefab;
+    [Tooltip("폭발 이펙트 (2026-11-02 — 고리 · 불똥만으로는 '콩알탄' 같았다)")]
+    [SerializeField] GameObject explosionPrefab;
+    [Min(0f)] [SerializeField] float explosionScale = 1.3f;
+    [Tooltip("날아가는 동안 떨어질 자리에 폭발 반경을 표시한다")]
+    [SerializeField] bool showLanding = true;
     [SerializeField] GameSoundSet.Entry fireSound = new GameSoundSet.Entry();
     [SerializeField] GameSoundSet.Entry blastSound = new GameSoundSet.Entry();
 
@@ -34,6 +39,8 @@ public class GrenadeLauncherAbility : SubAbility
     float progress;
     float damage;
     ParryFlash sparks;
+    TrailRenderer trail;
+    float landingTimer;
     readonly List<Transform> targets = new List<Transform>();
 
     public override float CooldownRemaining => Mathf.Max(0f, cooldown);
@@ -69,7 +76,10 @@ public class GrenadeLauncherAbility : SubAbility
         {
             shell.gameObject.SetActive(true);
             shell.position = from;
+            EnsureTrail();
+            if (trail != null) trail.Clear();
         }
+        landingTimer = 0f;
 
         PlaySound(fireSound);
     }
@@ -88,7 +98,37 @@ public class GrenadeLauncherAbility : SubAbility
         if (shell != null)
             shell.position = Vector3.Lerp(from, to, t) + Vector3.up * (arcHeight * 4f * t * (1f - t));
 
+        // 떨어질 자리 — 폭발 반경을 바닥에 미리 그린다 (어디가 터지는지 읽히게)
+        landingTimer -= Time.deltaTime;
+        if (showLanding && landingTimer <= 0f && fxMaterial != null)
+        {
+            landingTimer = 0.12f;
+            Color c = blastColor;
+            c.a = 0.35f + 0.4f * t;
+            FxLine.Ring(fxMaterial, to + Vector3.up * 0.05f, radius * 0.92f, radius, c, 0.1f, 0.16f);
+        }
+
         if (t >= 1f) Explode();
+    }
+
+    /// <summary>유탄 꼬리 — 탄이 작아도 날아가는 길이 보이게 (2026-11-02).</summary>
+    void EnsureTrail()
+    {
+        if (trail != null || shell == null || fxMaterial == null) return;
+
+        trail = shell.gameObject.AddComponent<TrailRenderer>();
+        trail.sharedMaterial = fxMaterial;
+        trail.time = 0.3f;
+        trail.minVertexDistance = 0.05f;
+        trail.widthMultiplier = 1f;
+        trail.widthCurve = new AnimationCurve(new Keyframe(0f, 0.4f), new Keyframe(1f, 0f));
+        trail.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        trail.receiveShadows = false;
+        var g = new Gradient();
+        g.SetKeys(
+            new[] { new GradientColorKey(new Color(1f, 0.95f, 0.7f), 0f), new GradientColorKey(blastColor, 0.35f), new GradientColorKey(new Color(0.35f, 0.3f, 0.3f), 1f) },
+            new[] { new GradientAlphaKey(0.95f, 0f), new GradientAlphaKey(0.6f, 0.4f), new GradientAlphaKey(0f, 1f) });
+        trail.colorGradient = g;
     }
 
     void Explode()
@@ -114,6 +154,7 @@ public class GrenadeLauncherAbility : SubAbility
 
         FxLine.Ring(fxMaterial, to, radius * 0.2f, radius, blastColor, 0.4f, 0.45f);
         FxLine.Ring(fxMaterial, to, radius * 0.1f, radius * 0.6f, new Color(1f, 0.9f, 0.6f, 0.9f), 0.6f, 0.25f);
+        EvoStrikes.Spawn(explosionPrefab, to, blastColor, explosionScale);
 
         if (sparkPrefab != null)
         {

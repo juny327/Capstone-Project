@@ -15,7 +15,11 @@ public class FireField : MonoBehaviour
     float tick;
     float ringTimer;
     ParticleSystem flames;
+    MeshRenderer glow;
+    MaterialPropertyBlock block;
     readonly List<Transform> found = new List<Transform>();
+
+    static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
 
     /// <summary>지금 타고 있는 불바다 수 (테스트).</summary>
     public static int ActiveCount { get; private set; }
@@ -32,6 +36,7 @@ public class FireField : MonoBehaviour
         field.dps = burnDps;
         field.left = cfg.duration;
         field.flames = field.MakeFlames();
+        field.glow = field.MakeGlow();
         ActiveCount++;
         return field;
     }
@@ -52,9 +57,20 @@ public class FireField : MonoBehaviour
                 ParticleSystem.EmissionModule e = flames.emission;
                 e.enabled = false;
             }
+            if (glow != null) glow.enabled = false;
             Destroy(gameObject, 1f);
             enabled = false;
             return;
+        }
+
+        // 바닥 빛 — 들어오고, 일렁이고, 끝에 빠진다
+        if (glow != null)
+        {
+            float k = Mathf.Clamp01((cfg.duration - left) / 0.2f) * Mathf.Clamp01(left / 0.5f);
+            Color c = cfg.color;
+            c.a = (0.42f + 0.08f * Mathf.Sin(Time.time * 9f)) * k;
+            block.SetColor(BaseColorId, c);
+            glow.SetPropertyBlock(block);
         }
 
         tick -= dt;
@@ -90,13 +106,13 @@ public class FireField : MonoBehaviour
         main.duration = 1f;
         main.startLifetime = new ParticleSystem.MinMaxCurve(0.5f, 0.9f);
         main.startSpeed = new ParticleSystem.MinMaxCurve(0.8f, 2f);
-        main.startSize = new ParticleSystem.MinMaxCurve(0.45f, 0.9f);
+        main.startSize = new ParticleSystem.MinMaxCurve(0.9f, 1.8f);   // 2026-11-02 두 배 — 작은 불티처럼 보였다
         main.startRotation = new ParticleSystem.MinMaxCurve(0f, Mathf.PI * 2f);
         main.simulationSpace = ParticleSystemSimulationSpace.World;
-        main.maxParticles = 300;
+        main.maxParticles = 450;
 
         ParticleSystem.EmissionModule emission = ps.emission;
-        emission.rateOverTime = 28f * cfg.radius * cfg.radius / 2.5f;
+        emission.rateOverTime = 42f * cfg.radius * cfg.radius / 2.5f;
 
         ParticleSystem.ShapeModule shape = ps.shape;
         shape.shapeType = ParticleSystemShapeType.Circle;
@@ -127,6 +143,33 @@ public class FireField : MonoBehaviour
 
         ps.Play();
         return ps;
+    }
+
+    /// <summary>
+    /// 바닥에 깔리는 둥근 불빛 — 불바다가 반경 끝까지라는 것이 보이게 (2026-11-02). 불 입자 재질(부드러운 점)을 큰 원판에 쓴다.
+    /// </summary>
+    MeshRenderer MakeGlow()
+    {
+        if (cfg.particleMaterial == null) return null;
+
+        var quad = GameObject.CreatePrimitive(PrimitiveType.Quad);
+        Destroy(quad.GetComponent<Collider>());
+        quad.name = "Glow";
+        quad.transform.SetParent(transform, false);
+        quad.transform.localPosition = Vector3.up * 0.06f;
+        quad.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
+        quad.transform.localScale = Vector3.one * cfg.radius * 2.3f;   // 부드러운 점이라 가장자리가 흐려진다 — 조금 크게
+
+        var r = quad.GetComponent<MeshRenderer>();
+        r.sharedMaterial = cfg.particleMaterial;
+        r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        r.receiveShadows = false;
+        block = new MaterialPropertyBlock();
+        Color c = cfg.color;
+        c.a = 0f;
+        block.SetColor(BaseColorId, c);
+        r.SetPropertyBlock(block);
+        return r;
     }
 
     void OnDestroy()

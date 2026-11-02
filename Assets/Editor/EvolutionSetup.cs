@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// 상위 무기 20종 구성 (상위무기-계획.md 10 · 11 · 14 · 16장).
+/// 상위 무기 구성 (상위무기-계획.md 10 · 11 · 14 · 16장) — 지금 13종 (2026-10-31 돌풍 저격총 · 아킬레우스의 창 추가).
 ///
 ///  · 1차 4종 (이 파일) — 처형자 (소총 + 지정사수) · 프리즘 노바 (충전 레이저 + 분광 프리즘)
 ///                        거울칼날 (검 + 에너지 방패) · 중력 대검 (대검 + 블랙홀 — 팀원 스킬, 2026-10-13)
@@ -99,6 +99,9 @@ public static partial class EvolutionSetup
         {
             e.ringMaterial = fxLine;
             e.swirlMaterial = swirl;
+            // 모습은 팀원 블랙홀 스킬과 같은 이펙트 (2026-10-31 사용자 요청) — 크기만 끌어당기는 반경에 맞춘다
+            e.blackHolePrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Solodream/BlackHoleEffect/Prefab/BlackHole.prefab");
+            e.blackHoleFill = 1f;
             e.color = Violet;
             e.collapsePrefab = explosion;
             GravitySounds(e);
@@ -880,12 +883,28 @@ public static partial class EvolutionSetup
         e.collapseBassSound = SoundP(0.7f, 0.55f, 0.62f, 0f, $"{KImpact}/impactPunch_heavy_000.ogg", $"{KImpact}/impactPunch_heavy_004.ogg");
     }
 
-    /// <summary>프리즘 노바 — 최종 빔이 켜질 때 저음 "두우우웅".</summary>
+    /// <summary>레이저 지속음 — 직접 합성한 낮은 "우우우웅" (Assets/AUDIO/Laser, 2026-11-02 사용자 요청).</summary>
+    public const string LaserHumPath = "Assets/AUDIO/Laser/LaserHum_Low.wav";
+
+    /// <summary>프리즘 노바 — 최종 빔이 켜질 때 저음 "두우우웅" + 빔이 나가는 동안 지속음.
+    /// 예전 울림(impactBell — 종소리 "띠잉")은 2026-11-02 사용자 피드백으로 뺐다.</summary>
     static void PrismSounds(PrismBurstSettings s)
     {
         if (s == null) return;
         s.beamBassSound = SoundP(0.8f, 0.55f, 0.6f, 0f, $"{SciFi}/lowFrequency_explosion_000.ogg");
-        s.beamHumSound = SoundP(0.4f, 0.45f, 0.5f, 0f, $"{KImpact}/impactBell_heavy_000.ogg", $"{KImpact}/impactBell_heavy_001.ogg");
+        s.beamHumSound = new GameSoundSet.Entry();
+        s.beamLoop = Load<AudioClip>(LaserHumPath);
+        s.beamLoopVolume = 0.5f;
+        s.beamLoopPitch = 1f;
+    }
+
+    /// <summary>태양창 — 모으기 · 기둥 지속음.</summary>
+    static void SunLanceSounds(SunLanceSettings s)
+    {
+        if (s == null) return;
+        s.beamLoop = Load<AudioClip>(LaserHumPath);
+        s.beamLoopVolume = 0.5f;
+        s.beamLoopPitch = new Vector2(0.75f, 1f);
     }
 
     /// <summary>혈검 — 혈풍 베기 칼바람 · 피.</summary>
@@ -913,8 +932,14 @@ public static partial class EvolutionSetup
         if (blood != null) { BloodSounds(blood); EditorUtility.SetDirty(blood); n++; }
         var nova = Load<ChargeBeamWeaponData>($"{WeaponDataDir}/WD_EVO_PrismNova.asset");
         if (nova != null && nova.prismBurst != null) { PrismSounds(nova.prismBurst); EditorUtility.SetDirty(nova); n++; }
+        var sun = Load<ChargeBeamWeaponData>($"{WeaponDataDir}/WD_EVO_SunLance.asset");
+        if (sun != null && sun.sunLance != null) { SunLanceSounds(sun.sunLance); EditorUtility.SetDirty(sun); n++; }
+        var gale = Load<GaleLaneEffect>($"{EffectDir}/AE_EVO_GaleLane.asset");
+        if (gale != null) { GaleSounds(gale); EditorUtility.SetDirty(gale); n++; }
+        var achilles = Load<AchillesSpearEffect>($"{EffectDir}/AE_EVO_AchillesSpear.asset");
+        if (achilles != null) { AchillesSounds(achilles); EditorUtility.SetDirty(achilles); n++; }
         AssetDatabase.SaveAssets();
-        Debug.Log($"{Tag} 소리 다시 넣기 — {n}개 (거울칼날 · 중력 대검 · 혈검 · 프리즘 노바)");
+        Debug.Log($"{Tag} 소리 다시 넣기 — {n}개 (거울칼날 · 중력 대검 · 혈검 · 프리즘 노바 · 태양창 · 돌풍 저격총 · 아킬레우스의 창)");
     }
 
     static GameSoundSet.Entry Sound(float volume, float minInterval, params string[] paths)

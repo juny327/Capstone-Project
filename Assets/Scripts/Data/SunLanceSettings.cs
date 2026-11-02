@@ -54,6 +54,12 @@ public class SunLanceSettings
     public GameSoundSet.Entry gatherSound = new GameSoundSet.Entry();
     public GameSoundSet.Entry fireSound = new GameSoundSet.Entry();
 
+    [Tooltip("모으는 동안 · 기둥이 나가는 동안 이어지는 낮은 \"우우우웅\" (반복 소리) — 모을수록 커지고 높아진다 (2026-11-02). 비우면 없음")]
+    public AudioClip beamLoop;
+    [Range(0f, 1f)] public float beamLoopVolume = 0.5f;
+    [Tooltip("모으기 시작 → 다 모았을 때 피치")]
+    public Vector2 beamLoopPitch = new Vector2(0.75f, 1f);
+
     /// <summary>모은 정도(0~1) → 사거리.</summary>
     public float RangeAt(float charge) => Mathf.Lerp(minRange, Mathf.Max(minRange, maxRange), Mathf.Clamp01(charge));
 }

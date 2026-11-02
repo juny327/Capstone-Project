@@ -26,8 +26,9 @@ MonoBehaviour:
   impactPrefab: {fileID: 7834434380170384362, guid: 68101499d07aced4aa0ded4acb624942, type: 3}
   sound:
     clips:
-    - {fileID: 8300000, guid: 5d861def68982eb4296758ecddc38a80, type: 3}
-    - {fileID: 8300000, guid: 7c5fe6bdf80883243a4738c39cd1cea9, type: 3}
-    volume: 0.4
+    - {fileID: 8300000, guid: fe96114fd408e094fabe97de7169a7f3, type: 3}
+    - {fileID: 8300000, guid: 8151d6931ba78374e93b9ba47c6944e6, type: 3}
+    - {fileID: 8300000, guid: 2a973e38617103544a6fa5f7ebb9b843, type: 3}
+    volume: 0.42
     pitchRange: {x: 0.96, y: 1.04}
-    minInterval: 0.08
+    minInterval: 0.3

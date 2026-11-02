@@ -55,19 +55,35 @@ public class SunLanceBurst : MonoBehaviour
 
         EnsureLines();
         CombatFx.PlaySound(cfg.gatherSound);
+        if (cfg.beamLoop != null)
+        {
+            Hum().Play(cfg.beamLoop, cfg.beamLoopVolume, cfg.beamLoopPitch.x, 0.15f);
+            Hum().SetExtra(0.55f);
+        }
 
         phase = Phase.WindUp;
         phaseTime = 0f;
         ringTimer = 0f;
     }
 
+    LoopVoice hum;
+
+    /// <summary>모으기 · 기둥 지속음 (자식 "SunHum").</summary>
+    public LoopVoice Hum() => hum != null ? hum : hum = LoopVoice.On(transform, "SunHum");
+
     /// <summary>즉시 끝낸다 (무기 바꿈 · 사망 · 파괴). 끝 알림은 보내지 않는다.</summary>
     public void Cancel()
+    {
+        if (hum != null) hum.Stop(0.12f);
+        HideLines();
+        phase = Phase.Idle;
+    }
+
+    void HideLines()
     {
         if (telegraph != null) telegraph.enabled = false;
         if (outer != null) outer.enabled = false;
         if (inner != null) inner.enabled = false;
-        phase = Phase.Idle;
     }
 
     void OnDestroy() => Cancel();
@@ -101,7 +117,14 @@ public class SunLanceBurst : MonoBehaviour
         aim = Vector3.RotateTowards(aim, Forward(), cfg.turnRate * Mathf.Deg2Rad * dt, 0f).normalized;
 
         float charge = Mathf.Clamp01(phaseTime / cfg.windUpTime);
-        float range = cfg.RangeAt(charge);
+        float range = CombatFx.ObstacleDistance(Origin(), aim, cfg.RangeAt(charge));   // 벽에서 끊는다
+
+        // 지속음 — 모을수록 커지고 높아진다
+        if (hum != null)
+        {
+            hum.SetExtra(Mathf.Lerp(0.55f, 0.9f, charge));
+            hum.SetPitch(Mathf.Lerp(cfg.beamLoopPitch.x, cfg.beamLoopPitch.y, charge));
+        }
 
         // 바닥 예고선 — 끝이 앞으로 뻗어 나간다. 다 모아 갈수록 진하고 굵다
         Vector3 from = Ground(Origin());
@@ -135,10 +158,11 @@ public class SunLanceBurst : MonoBehaviour
 
     void Fire(float charge)
     {
-        float range = cfg.RangeAt(charge);
         float mul = cfg.damageMul * Mathf.Lerp(cfg.minChargeDamage, 1f, charge);
 
         Vector3 origin = Origin();
+        // 벽 · 엄폐물이 있으면 빛 기둥은 거기까지 — 벽 너머 적은 맞지 않는다
+        float range = CombatFx.ObstacleDistance(origin, aim, cfg.RangeAt(charge));
         beamFrom = origin;
         beamTo = origin + aim * range;
         LastRange = range;
@@ -171,6 +195,7 @@ public class SunLanceBurst : MonoBehaviour
 
         if (cfg.cameraShake > 0f && CameraShakeManager.Instance != null) CameraShakeManager.Instance.Shake(cfg.cameraShake);
         CombatFx.PlaySound(cfg.fireSound);
+        if (hum != null) { hum.SetExtra(1f); hum.SetPitch(cfg.beamLoopPitch.y * 0.92f); }   // 기둥 — 가장 크게, 살짝 내려 묵직하게
 
         phase = Phase.Beam;
         phaseTime = 0f;
@@ -194,7 +219,9 @@ public class SunLanceBurst : MonoBehaviour
 
     void Finish()
     {
-        Cancel();
+        if (hum != null) hum.Stop(0.35f);   // 기둥이 사라진 뒤 여운
+        HideLines();
+        phase = Phase.Idle;
         finished?.Invoke();
     }
 

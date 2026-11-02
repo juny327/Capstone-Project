@@ -28,6 +28,9 @@ public class BayonetChargeAbility : SubAbility
     [Header("연출")]
     [SerializeField] Transform blade;
     [SerializeField] ParryFlash sparkPrefab;
+    [Tooltip("돌진 궤적 · 찌른 자리 고리 (2026-11-02 — 칼날만으로는 돌진했는지 잘 안 보였다)")]
+    [SerializeField] Material fxMaterial;
+    [SerializeField] Color trailColor = new Color(0.75f, 0.95f, 1f, 0.8f);
     [SerializeField] GameSoundSet.Entry dashSound = new GameSoundSet.Entry();
     [SerializeField] GameSoundSet.Entry hitSound = new GameSoundSet.Entry();
 
@@ -35,6 +38,7 @@ public class BayonetChargeAbility : SubAbility
     bool charging;
     float damage;
     Vector3 sweepFrom;   // 지난 프레임 판정 자리 — 이번 프레임까지의 구간을 훑는다
+    Vector3 trailFrom;   // 지난 프레임 몸 자리 — 돌진 궤적
     ParryFlash sparks;
     readonly HashSet<Transform> struck = new HashSet<Transform>();
     readonly List<Transform> targets = new List<Transform>();
@@ -62,6 +66,7 @@ public class BayonetChargeAbility : SubAbility
         charging = true;
         struck.Clear();
         sweepFrom = Owner.transform.position + Forward * hitForward;
+        trailFrom = Owner.transform.position + Vector3.up * 1.1f;
         damage = Mathf.Max(minDamage, WeaponDamage(minDamage) * damageRatio);
         cooldown = PracticeRules.Cooldown(cooldownSeconds);
 
@@ -86,6 +91,7 @@ public class BayonetChargeAbility : SubAbility
         if (!charging) return;
 
         Sweep();
+        DrawTrail();
         if (Move == null || !Move.IsDashing)
         {
             // 작은 조합 — 같은 총에 폭발탄이면 돌진 끝에서 터진다 (끊긴 돌진은 터지지 않는다)
@@ -119,6 +125,7 @@ public class BayonetChargeAbility : SubAbility
             CombatFx.Damage(target, damage, at, Forward, false, 0.12f);
             CombatFx.Stun(target, stun);
             CombatFx.Push(this, target, Forward, push, pushDuration);
+            if (fxMaterial != null) FxLine.Ring(fxMaterial, target.position, 0.2f, 1.2f, trailColor, 0.18f, 0.22f);
 
             if (sparkPrefab != null)
             {
@@ -128,6 +135,18 @@ public class BayonetChargeAbility : SubAbility
 
             PlaySound(hitSound);
         }
+    }
+
+    /// <summary>돌진 궤적 — 지난 프레임부터 지금까지 굵은 빛 줄 + 흰 심 (잠깐 남는 잔상).</summary>
+    void DrawTrail()
+    {
+        if (fxMaterial == null || Owner == null) return;
+
+        Vector3 now = Owner.transform.position + Vector3.up * 1.1f;
+        if ((now - trailFrom).sqrMagnitude < 0.0025f) return;
+        FxLine.Line(fxMaterial, trailFrom, now, trailColor, 0.55f, 0.25f);
+        FxLine.Line(fxMaterial, trailFrom, now, Color.white, 0.18f, 0.18f);
+        trailFrom = now;
     }
 
     void Finish()

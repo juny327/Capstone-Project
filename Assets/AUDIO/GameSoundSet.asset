@@ -37,7 +37,7 @@ MonoBehaviour:
     - {fileID: 8300000, guid: 16d1118492a9f294383160f8e3ca9a37, type: 3}
     - {fileID: 8300000, guid: d5bb80e18d1c85e458aae1a2b0ae1848, type: 3}
     - {fileID: 8300000, guid: b8c8c1931eb111545abda9695c6fa112, type: 3}
-    volume: 0.3
+    volume: 0.4
     pitchRange: {x: 0.96, y: 1.04}
     minInterval: 0.04
   criticalHit:
@@ -50,6 +50,52 @@ MonoBehaviour:
     volume: 0.6
     pitchRange: {x: 0.96, y: 1.04}
     minInterval: 0.04
+  laserHit:
+    clips:
+    - {fileID: 8300000, guid: e885179ae27a2bc4c995ed0fcb3c0bb0, type: 3}
+    - {fileID: 8300000, guid: 57463db61bce6364b92c05352d5f65c4, type: 3}
+    - {fileID: 8300000, guid: 4e5a4f5dac886f1468c4ba662481afc3, type: 3}
+    volume: 0.35
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0.05
+  bulletHit:
+    clips:
+    - {fileID: 8300000, guid: 6b73692ba265ed24dbc71a45d6b73211, type: 3}
+    - {fileID: 8300000, guid: b468156eb68ae6a47b580e41cb5e2c0d, type: 3}
+    - {fileID: 8300000, guid: 9be9be90340c1634298356822b1c3353, type: 3}
+    - {fileID: 8300000, guid: 1e984c547d7bd934eb54789d566b24db, type: 3}
+    - {fileID: 8300000, guid: 6aca925f691e0874b852c8781c164b61, type: 3}
+    volume: 0.45
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0.04
+  meleeHit:
+    clips:
+    - {fileID: 8300000, guid: e2315b22763605347b5874fc46c2aea3, type: 3}
+    - {fileID: 8300000, guid: 442b32841e4124f4a867397f67e7a495, type: 3}
+    - {fileID: 8300000, guid: 4f7a058f42df22841a029b88e4a57e46, type: 3}
+    - {fileID: 8300000, guid: 7530c4e3d1fe5024689895450d205369, type: 3}
+    - {fileID: 8300000, guid: db374580e595f594383d6a9a5a7cbc6b, type: 3}
+    volume: 0.4
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0.04
+  electricHit:
+    clips:
+    - {fileID: 8300000, guid: 469d4d3886edf4a4aad9c7c24d8a634a, type: 3}
+    - {fileID: 8300000, guid: 3e0ee23367a8a534aaed1119ac513835, type: 3}
+    - {fileID: 8300000, guid: b1c34f331d94b524e914a9aa00d5c4d0, type: 3}
+    volume: 0.35
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0.05
+  obstacleHit:
+    clips:
+    - {fileID: 8300000, guid: 41d69101215b99b4c9044f9569f43d6a, type: 3}
+    - {fileID: 8300000, guid: e8663f88da1db124b9bc4abb3d57111a, type: 3}
+    - {fileID: 8300000, guid: 72acd4d054d72264593b768f793c63d1, type: 3}
+    - {fileID: 8300000, guid: ea8d153fc39680f4182fbf0a72ecacd4, type: 3}
+    - {fileID: 8300000, guid: 20e2bbb35df941e4f9884e62132247e9, type: 3}
+    volume: 0.28
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0.07
   enemyKilled:
     clips:
     - {fileID: 8300000, guid: 7f605232da260d545a53e92685c609fc, type: 3}

@@ -32,6 +32,12 @@ public class MeleeWeaponData : WeaponData
     [Header("Effects")]
     public GameObject slashEffectPrefab;
 
+    [Header("Sound")]
+    [Tooltip("휘두르기 시작 '휙' — 허공을 쳐도 난다 (2026-11-02). 베는 소리(fireSounds)는 판정이 적에게 들어간 순간에 난다. 비우면 휘두를 때 소리 없음")]
+    public AudioClip[] swingSounds;
+    [Range(0f, 1f)] public float swingVolume = 0.45f;
+    public Vector2 swingPitchRange = new Vector2(0.94f, 1.06f);
+
     public override WeaponKind Kind => WeaponKind.Melee;
 
     public override WeaponRuntimeStats Compose(in WeaponModifier modifier)

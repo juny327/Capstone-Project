@@ -31,3 +31,6 @@ MonoBehaviour:
   - sceneName: EndingScene
     clip: {fileID: 8300000, guid: 431fcee2e0297df4f920b31742b28619, type: 3}
     volume: 0.48
+  - sceneName: TestRoom
+    clip: {fileID: 8300000, guid: cc8c07b6860bad946b1b761e8f44fedf, type: 3}
+    volume: 0.38

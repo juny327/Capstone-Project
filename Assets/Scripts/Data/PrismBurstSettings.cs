@@ -82,6 +82,11 @@ public class PrismBurstSettings
     [Tooltip("③ 방사 동안 남는 낮은 울림 (종소리를 낮게 — 빔과 함께 사그라든다)")]
     public GameSoundSet.Entry beamHumSound = new GameSoundSet.Entry();
 
+    [Tooltip("빔이 나가는 동안 이어지는 낮은 \"우우우웅\" (반복 소리) — 2026-11-02. 비우면 없음")]
+    public AudioClip beamLoop;
+    [Range(0f, 1f)] public float beamLoopVolume = 0.5f;
+    [Range(0.3f, 2f)] public float beamLoopPitch = 1f;
+
     /// <summary>한 주기 길이 (분산 + 수렴 + 방사).</summary>
     public float CycleTime => scatterTime + convergeTime + sustainTime;
 }

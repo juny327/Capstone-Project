@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 774e8839cb40ed44f82f525be90550ac, type: 3}
+  m_Name: EVO_AchillesSpear
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponEvolutionData
+  from: {fileID: 11400000, guid: 7cc3048592b43e340bdf8f77ba9a5a1d, type: 2}
+  requiredLevel: 0
+  requiredAttachment: {fileID: 0}
+  requiredSubAbility: {fileID: 0}
+  requiredAbilityLevel: 1
+  requiredAnyGunAttachment: {fileID: 0}
+  requiredSkill: {fileID: 11400000, guid: 3d0d596970705d24a87ba311fa3f9a3b, type: 2}
+  result: {fileID: 11400000, guid: 8cc7754dc57cefd45bd2277e3ddc635d, type: 2}
+  title: "\uC544\uD0AC\uB808\uC6B0\uC2A4\uC758 \uCC3D"
+  flavor: "\uB124 \uBC88\uC9F8 \uCC0C\uB974\uAE30\uB9C8\uB2E4 \uCC3D\uC744 \uB358\uC9C4\uB2E4
+    \u2014 \uAFF0\uB6AB\uACE0, \uB358\uC9C4 \uAC70\uB9AC \uB05D\uC5D0\uC11C \uCE90\uB9AD\uD130
+    \uB458\uB808\uB97C \uB450 \uBC14\uD034 \uB3CC\uBA70 \uBCA4 \uB4A4 \uC190\uC73C\uB85C
+    \uB3CC\uC544\uC628\uB2E4"
+  color: {r: 1, g: 0.62, b: 0.28, a: 1}
+  sound: {fileID: 8300000, guid: f595650ca3f17154e8de61ccc64e6a00, type: 3}
+  soundVolume: 0.9
+  shopPrice: 0

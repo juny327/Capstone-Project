@@ -47,7 +47,7 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
     public int Level => level;
 
     /// <summary>쿨다운이 끝나고, 장전 중이 아니며, 탄약이 남아 있어야 쏠 수 있다.</summary>
-    public bool CanFire => cooldown <= 0f && IsActive && !IsReloading && HasAmmo && !IsBusy;
+    public bool CanFire => cooldown <= 0f && IsActive && !IsReloading && HasAmmo && !IsBusy && !HeldAway;
 
     /// <summary>
     /// 한 발이 여러 단계로 이어지는 동안(프리즘 노바: 분산 → 수렴 → 방사) — 다음 발 · 장전을 받지 않는다.
@@ -60,6 +60,11 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
     /// 회전 기관포(쏠수록 빨라짐) · 혈검(폭주 동안). 스탯이 아니라 다음 발 간격에만 쓴다.
     /// </summary>
     public float FireRateBoost { get; set; } = 1f;
+
+    /// <summary>
+    /// 무기가 손을 떠나 있다 — 아킬레우스의 창을 던진 동안 (손이 비어 공격하지 않는다). 상위 무기 동작이 켜고 끈다.
+    /// </summary>
+    public bool HeldAway { get; set; }
 
     /// <summary>사거리에 잠깐 더하는 값 (m) — 혈검 폭주 동안 휘두르기가 길어진다. 상위 무기 동작이 켜고 끈다.</summary>
     public float RangeBonus { get; set; }
@@ -219,7 +224,7 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
             });
         }
 
-        PlayFireSound();
+        if (FireSoundOnFire) PlayFireSound();
 
         // 산탄이어도 1회 발사는 탄약 1 소모다 (12번 R3).
         // 탄 수만큼 깎으면 산탄 업그레이드가 곧 탄약 소모 증가가 되어 벌칙이 된다.
@@ -279,7 +284,10 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
 
     // ───────── 소리 ─────────
 
-    void PlayFireSound()
+    /// <summary>쏘는 순간 발사음을 내는가 — 근접은 false (휘두를 때 '휙', 맞힌 순간 베는 소리를 스스로 낸다).</summary>
+    protected virtual bool FireSoundOnFire => true;
+
+    protected void PlayFireSound()
     {
         if (data == null) return;
 
@@ -445,6 +453,22 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
 
             ammo = Mathf.Clamp(ammo, 0, newMagazine);
         }
+
+        OnStatsChanged();
+        RaiseAmmoChanged();
+        return true;
+    }
+
+    /// <summary>그 부위의 부착물을 뗀다 (테스트 룸 "부착물 모두 떼기"). 잠긴 개조 칸 · 빈 칸이면 false.</summary>
+    public bool Detach(AttachmentSlot slot)
+    {
+        if (IsSlotLocked(slot) || !attachments.Remove(slot)) return false;
+
+        RebuildAttachmentModifier();
+        RebuildRuntime(slot, null);
+
+        int newMagazine = MagazineSize;
+        if (newMagazine > 0) ammo = Mathf.Clamp(ammo, 0, newMagazine);
 
         OnStatsChanged();
         RaiseAmmoChanged();
