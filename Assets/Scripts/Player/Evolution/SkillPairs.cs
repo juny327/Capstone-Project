@@ -14,14 +14,17 @@ public static class SkillPairs
         public Type Effect;
         public Type Skill;
         public string Name;
+
+        /// <summary>스킬이 EnemyManager 를 null 확인 없이 부른다 — 적 관리자가 없는 곳(테스트 룸)에서는 매 프레임 오류.</summary>
+        public bool NeedsEnemyManager;
     }
 
     static readonly Entry[] Table =
     {
         new Entry { Effect = typeof(DrainEffect), Skill = typeof(DrainSkill), Name = "흡혈" },
         new Entry { Effect = typeof(FireBallEffect), Skill = typeof(FireBallSkill), Name = "파이어볼" },
-        new Entry { Effect = typeof(ElectricShotEffect), Skill = typeof(ElectricShotSkill), Name = "전격 샷" },
-        new Entry { Effect = typeof(TornadoEffect), Skill = typeof(TornadoSkill), Name = "토네이도" },
+        new Entry { Effect = typeof(ElectricShotEffect), Skill = typeof(ElectricShotSkill), Name = "전격 샷", NeedsEnemyManager = true },
+        new Entry { Effect = typeof(TornadoEffect), Skill = typeof(TornadoSkill), Name = "토네이도", NeedsEnemyManager = true },
         new Entry { Effect = typeof(ShurikenEffect), Skill = typeof(ShurikenSkill), Name = "표창" },
         new Entry { Effect = typeof(ChainLightningEffect), Skill = typeof(ChainLightningSkill), Name = "연쇄 번개" },
         new Entry { Effect = typeof(BlackHoleEffect), Skill = typeof(BlackHoleSkill), Name = "블랙홀" },
@@ -67,6 +70,13 @@ public static class SkillPairs
         if (Has(player, card)) return true;
 
         card.effect.Apply(player);
+
+        // 테스트 룸처럼 적 관리자가 없는 곳 — 팀원 스킬(토네이도 · 전격 샷)이 매 프레임 NullReference 를 낸다.
+        // 팀원 코드는 고치지 않고, 쏠 적도 없으니 스킬 컴포넌트만 꺼 둔다 ("가졌다"는 그대로 — 진화 조건은 맞는다)
+        if (EnemyManager.Instance == null && TryFind(card, out Entry e) && e.NeedsEnemyManager
+            && player.GetComponent(e.Skill) is Behaviour skill)
+            skill.enabled = false;
+
         return Has(player, card);
     }
 }

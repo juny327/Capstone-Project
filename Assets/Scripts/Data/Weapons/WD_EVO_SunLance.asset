@@ -110,6 +110,19 @@ MonoBehaviour:
       volume: 1
       pitchRange: {x: 0.96, y: 1.04}
       minInterval: 0
+    beamBassSound:
+      clips: []
+      volume: 1
+      pitchRange: {x: 0.96, y: 1.04}
+      minInterval: 0
+    beamHumSound:
+      clips: []
+      volume: 1
+      pitchRange: {x: 0.96, y: 1.04}
+      minInterval: 0
+    beamLoop: {fileID: 0}
+    beamLoopVolume: 0.5
+    beamLoopPitch: 1
   sunLance:
     enabled: 1
     windUpTime: 0.8
@@ -143,6 +156,9 @@ MonoBehaviour:
       volume: 0.7
       pitchRange: {x: 0.96, y: 1.04}
       minInterval: 0
+    beamLoop: {fileID: 8300000, guid: 9ddc4190dede2a749a9c42a32eb9d1f5, type: 3}
+    beamLoopVolume: 0.5
+    beamLoopPitch: {x: 0.75, y: 1}
   chargeSound: {fileID: 8300000, guid: 3ca2d41d3f7d72a42a124c6debd80346, type: 3}
   chargeVolume: 0.55
   muzzleFlashPrefab: {fileID: 2916273817513264348, guid: 95044fb3908b36c46bc62060360f7ba6, type: 3}

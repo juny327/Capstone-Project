@@ -65,6 +65,12 @@ public class PrismBurstSettings
 
     [Min(0f)] public float cameraShake = 0.35f;
 
+    [Tooltip("빔이 나가는 동안 계속되는 잔 흔들림 — 짧은 충격 하나의 세기 (0 이면 없음). 2026-11-03 사용자 요청")]
+    [Min(0f)] public float sustainShake = 0.09f;
+
+    [Tooltip("잔 흔들림 충격 간격 (초) — 무작위 방향 충격이 겹쳐 떨림이 이어진다")]
+    [Min(0.02f)] public float sustainShakeInterval = 0.08f;
+
     [Header("연출")]
     [Tooltip("빔 · 빛 꼬리 재질 (가산 — FxLine 재질)")]
     public Material lineMaterial;
@@ -81,6 +87,11 @@ public class PrismBurstSettings
 
     [Tooltip("③ 방사 동안 남는 낮은 울림 (종소리를 낮게 — 빔과 함께 사그라든다)")]
     public GameSoundSet.Entry beamHumSound = new GameSoundSet.Entry();
+
+    [Tooltip("빔이 나가는 동안 이어지는 낮은 \"우우우웅\" (반복 소리) — 2026-11-02. 비우면 없음")]
+    public AudioClip beamLoop;
+    [Range(0f, 1f)] public float beamLoopVolume = 0.5f;
+    [Range(0.3f, 2f)] public float beamLoopPitch = 1f;
 
     /// <summary>한 주기 길이 (분산 + 수렴 + 방사).</summary>
     public float CycleTime => scatterTime + convergeTime + sustainTime;

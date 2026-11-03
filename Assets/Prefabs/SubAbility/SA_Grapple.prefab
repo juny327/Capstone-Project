@@ -215,7 +215,7 @@ LineRenderer:
   - {x: 0, y: 0, z: 1}
   m_Parameters:
     serializedVersion: 3
-    widthMultiplier: 0.08
+    widthMultiplier: 0.15
     widthCurve:
       serializedVersion: 2
       m_Curve:
@@ -281,15 +281,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: 0aeef7c85be8e504a9f054bed77cfd0c, type: 3}
       propertyPath: m_LocalScale.x
-      value: 6
+      value: 15
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 0aeef7c85be8e504a9f054bed77cfd0c, type: 3}
       propertyPath: m_LocalScale.y
-      value: 6
+      value: 15
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 0aeef7c85be8e504a9f054bed77cfd0c, type: 3}
       propertyPath: m_LocalScale.z
-      value: 6
+      value: 15
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 0aeef7c85be8e504a9f054bed77cfd0c, type: 3}
       propertyPath: m_LocalPosition.x

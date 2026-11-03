@@ -94,6 +94,7 @@ public class PrismNovaBurst : MonoBehaviour
             if (m.body != null) Destroy(m.body.gameObject);
         motes.Clear();
 
+        if (hum != null) hum.Stop(0.1f);
         ShowBeam(false);
         SetCrystalsVisible(true);
         phase = Phase.Idle;
@@ -268,6 +269,11 @@ public class PrismNovaBurst : MonoBehaviour
 
             float sqr = (t.position - from).sqrMagnitude;
             if (sqr >= bestSqr) continue;
+
+            // 벽 너머 적은 고르지 않는다 (몸통 높이에서 잰다)
+            Vector3 body = CombatFx.Body(t);
+            if (!CombatFx.HasLineOfSight(new Vector3(from.x, body.y, from.z), body)) continue;
+
             bestSqr = sqr;
             best = t;
         }
@@ -314,11 +320,13 @@ public class PrismNovaBurst : MonoBehaviour
         CombatFx.PlaySound(cfg.beamSound);
         CombatFx.PlaySound(cfg.beamBassSound);
         CombatFx.PlaySound(cfg.beamHumSound);
+        if (cfg.beamLoop != null) Hum().Play(cfg.beamLoop, cfg.beamLoopVolume, cfg.beamLoopPitch, 0.08f);
         if (cfg.cameraShake > 0f && CameraShakeManager.Instance != null) CameraShakeManager.Instance.Shake(cfg.cameraShake);
 
         phase = Phase.Sustain;
         phaseTime = 0f;
         tickTimer = 0f;
+        rumbleTimer = 0f;
         beamDir = Forward();
         EnsureBeam();
         ShowBeam(true);
@@ -330,7 +338,7 @@ public class PrismNovaBurst : MonoBehaviour
         beamDir = Vector3.RotateTowards(beamDir, want, cfg.turnRate * Mathf.Deg2Rad * dt, 0f).normalized;
 
         Vector3 origin = muzzle != null ? muzzle.position : OwnerPosition() + Vector3.up;
-        Vector3 end = origin + beamDir * range;
+        Vector3 end = origin + beamDir * CombatFx.ObstacleDistance(origin, beamDir, range);   // 벽에서 끊는다 — 돌면서 매 프레임
 
         tickTimer -= dt;
         if (tickTimer <= 0f)
@@ -358,10 +366,39 @@ public class PrismNovaBurst : MonoBehaviour
         }
 
         DrawBeam(origin, end);
+        Rumble(dt);
     }
+
+    float rumbleTimer;
+
+    /// <summary>
+    /// 빔이 나가는 동안 화면 잔 흔들림 (2026-11-03) — 무작위 방향 작은 충격을 잇달아 내 겹치게 한다.
+    /// 팀원의 CameraShakeManager 는 그대로 두고 그 충격 소스(Cinemachine)를 빌려 쓴다. 빔이 꺼지면 더 내지 않아 곧 가라앉는다.
+    /// 시간이 멈추면(일시정지 · 카드 창) dt 가 0 이라 내지 않는다.
+    /// </summary>
+    void Rumble(float dt)
+    {
+        if (cfg.sustainShake <= 0f || dt <= 0f) return;
+        CameraShakeManager shake = CameraShakeManager.Instance;
+        if (shake == null || shake.impulseSource == null) return;
+
+        rumbleTimer -= dt;
+        if (rumbleTimer > 0f) return;
+        rumbleTimer += cfg.sustainShakeInterval;
+
+        Vector2 flat = UnityEngine.Random.insideUnitCircle.normalized;
+        Vector3 v = new Vector3(flat.x, UnityEngine.Random.Range(-0.4f, 0.4f), flat.y);
+        shake.impulseSource.GenerateImpulseWithVelocity(v * cfg.sustainShake);
+    }
+
+    LoopVoice hum;
+
+    /// <summary>빔 지속음 (자식 "PrismHum").</summary>
+    public LoopVoice Hum() => hum != null ? hum : hum = LoopVoice.On(transform, "PrismHum");
 
     void Finish()
     {
+        if (hum != null) hum.Stop(0.3f);
         ShowBeam(false);
         SetCrystalsVisible(true);
         phase = Phase.Idle;

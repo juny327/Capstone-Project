@@ -63,3 +63,9 @@ MonoBehaviour:
     m_Bits: 129
   cameraShake: 0.15
   slashEffectPrefab: {fileID: 0}
+  swingSounds:
+  - {fileID: 8300000, guid: d399be1575252924bb0dbce62f6eaaa0, type: 3}
+  - {fileID: 8300000, guid: c3c6c74e9d07c8c4b9aadfdcac6fccdf, type: 3}
+  - {fileID: 8300000, guid: 24c8a9869b55cde4981e258b026bad7a, type: 3}
+  swingVolume: 0.45
+  swingPitchRange: {x: 0.94, y: 1.06}

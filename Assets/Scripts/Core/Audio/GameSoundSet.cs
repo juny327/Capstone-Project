@@ -1,6 +1,13 @@
 using UnityEngine;
 
 /// <summary>
+/// 맞힘 소리 종류 (2026-11-02) — 공격마다 맞는 느낌이 다르게.
+/// 레이저 계열(충전 레이저 · 프리즘 노바 · 태양창)은 금속 '띵' 대신 '치익', 총알은 둔탁한 '퍽', 근접은 몸에 닿는 '퍽'.
+/// 그 밖(부착물 효과 · 범위 공격 · 전격 소총 · 반사 탄)은 Normal — 공용 적중음.
+/// </summary>
+public enum HitSound { Normal, Laser, Bullet, Melee, Electric }
+
+/// <summary>
 /// 게임 이벤트에 붙일 소리 묶음.
 ///
 /// 클립을 코드가 아니라 **데이터에 두는 이유**: 소리를 바꿀 때마다 코드를 고치지 않기 위해서다.
@@ -59,6 +66,21 @@ public class GameSoundSet : ScriptableObject
 
     [Tooltip("치명타. 일반 명중과 확실히 달라야 체감된다")]
     public Entry criticalHit = new Entry();
+
+    [Tooltip("레이저 계열이 적을 맞혔을 때 (치명타 · 일반 모두 — 치명타면 조금 크게). 비우면 일반 적중음")]
+    public Entry laserHit = new Entry();
+
+    [Tooltip("총알이 적을 맞혔을 때 (치명타는 criticalHit). 비우면 일반 적중음")]
+    public Entry bulletHit = new Entry();
+
+    [Tooltip("근접 무기 판정이 적에게 들어갔을 때 — 무기의 베는 소리(fireSounds) 밑에 깔리는 몸통 소리 (치명타는 criticalHit). 비우면 일반 적중음")]
+    public Entry meleeHit = new Entry();
+
+    [Tooltip("전기 계열(전격 소총 · 퍼지는 전기 · 낙뢰)이 적을 맞혔을 때 '치직' (치명타 · 일반 모두 — 치명타면 조금 크게). 비우면 일반 적중음")]
+    public Entry electricHit = new Entry();
+
+    [Tooltip("총알 · 광선이 벽 · 엄폐물에 막혔을 때. 산탄은 여러 알이 한꺼번에 막히므로 minInterval 을 꼭 둘 것")]
+    public Entry obstacleHit = new Entry();
 
     [Tooltip("적을 처치할 때. 초당 여러 번 나므로 minInterval 을 꼭 둘 것")]
     public Entry enemyKilled = new Entry();

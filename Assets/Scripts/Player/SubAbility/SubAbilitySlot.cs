@@ -123,6 +123,19 @@ public class SubAbilitySlot : MonoBehaviour
         return false;
     }
 
+    /// <summary>그 능력을 칸에서 뺀다 (테스트 룸 — 변형을 다시 고르거나 비울 때). 뒤 칸은 앞으로 당기지 않는다.</summary>
+    public bool Remove(SubAbilityData data)
+    {
+        int i = IndexOf(data);
+        if (i < 0) return false;
+
+        equipped[i].Unequip();
+        Destroy(equipped[i].gameObject);
+        equipped[i] = null;
+        OnChanged?.Invoke();
+        return true;
+    }
+
     void Awake()
     {
         parry = GetComponent<ParryController>();

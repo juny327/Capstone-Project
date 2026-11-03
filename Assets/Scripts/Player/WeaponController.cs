@@ -429,6 +429,23 @@ public class WeaponController : MonoBehaviour
         return true;
     }
 
+    /// <summary>가진 무기의 부착물을 모두 뗀다 (테스트 룸). 잠긴 개조 칸(상위 무기)은 남는다. 뗀 개수를 돌려준다.</summary>
+    public int DetachAll(WeaponData target)
+    {
+        if (!(Find(target) is WeaponBase w)) return 0;
+
+        int removed = 0;
+        foreach (AttachmentSlot slot in System.Enum.GetValues(typeof(AttachmentSlot)))
+            if (w.Detach(slot)) removed++;
+
+        if (removed > 0)
+        {
+            RaiseLegacyStats();
+            OnAttachmentsChanged?.Invoke();
+        }
+        return removed;
+    }
+
     // ───────── 스왑 ─────────
 
     public void SwapNext()

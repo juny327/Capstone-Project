@@ -15,6 +15,9 @@ using Object = UnityEngine.Object;
 ///  · 무기 선반 간격 2.6 → <b>4.5m</b> (발판 사이 빈틈 1.0 → 2.9m) — 원거리 6 · 근거리 3 을 묶어 둔다
 ///  · 상위 무기 구역 간격 3.6 × 2.7 → <b>5 × 4m</b> (빈틈 2 × 1.1 → 3.4 × 2.4m)
 ///  · 훈련용 해골 x 14 → 22 (거리 표시 3 ~ 18m 도 같이), 무리 표적 · 무리 자리는 남쪽으로
+///
+/// 2026-11-02 상위 무기 구역을 북쪽 끝 → <b>가운데 남쪽</b>으로 (사용자 요청 — "몬스터 나오는 곳 근처로, 이동이 불편"):
+///  진화하고 바로 무리 자리(14, −16) · 훈련 해골(22, 0)에 쏴 볼 수 있게. 두 줄(z −7 · −11) · x −9 ~ 21
 /// </summary>
 internal static class TestRoomLayout
 {
@@ -45,12 +48,20 @@ internal static class TestRoomLayout
         return Rack[Rack.Length - 1].z - 4.5f * (fallbackIndex + 1);
     }
 
-    // ── 상위 무기 구역 (북쪽 7개씩 3줄) ──
+    // ── 상위 무기 구역 (가운데 남쪽 — 훈련 해골 줄과 무리 자리 사이, 7개씩 두 줄) ──
     public const int EvolutionPerRow = 7;
-    public const float EvolutionTopZ = 20.5f;
+    public const float EvolutionTopZ = -7f;
     public const float EvolutionRowStep = 4f;
-    public const float EvolutionStartX = -12f;
+    public const float EvolutionStartX = -9f;
     public const float EvolutionStepX = 5f;
+
+    // ── 커스터마이징 구역 (북쪽, 2026-11-02) — 왼쪽: 부착물(부위마다 한 줄) · 오른쪽 위: 개조 · 오른쪽 아래: 서브 능력 ──
+    public const float CustomTopZ = 21f;
+    public const float CustomRowStep = 3.5f;
+    public const float CustomStepX = 4.2f;
+    public const float AttachmentStartX = -18f;   // 판매 부착물 13종 (11-02) — 부위마다 한 줄
+    public const float ModStartX = 8f;            // 한 줄 3칸 → x 16.4
+    public const float AbilityTopZ = 12f;         // 능력마다 한 줄 (Lv1 · Lv2 A · B · Lv3 A · B) → x 24.8
 
     // ── 무리 표적 (남쪽) ──
     public static readonly Vector3 ClusterPoint = new Vector3(14f, 0f, -16f);
@@ -164,7 +175,8 @@ public static class TestRoomLayoutSetup
         EditorSceneManager.SaveScene(scene);
         Debug.Log($"{Tag} 방 {half.x * 2:0} × {half.y * 2:0}m · 선반 {pickups.Length}개 (간격 4.5m) · 해골 x {dummy.x:0} · 시작 {TestRoomLayout.PlayerSpawn}");
 
-        // ── 4) 상위 무기 구역 · 무리 표적을 새 자리로 (장면을 다시 열고 EvolutionArea 만 다시 만든다) ──
+        // ── 4) 상위 무기 구역 · 무리 표적 · 커스터마이징 구역을 새 자리로 (장면을 다시 열고 그 구역만 다시 만든다) ──
         TestRoomEvolutionSetup.BuildBatch();
+        TestRoomCustomizationSetup.BuildBatch();
     }
 }

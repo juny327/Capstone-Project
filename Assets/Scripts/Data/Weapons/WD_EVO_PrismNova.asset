@@ -93,6 +93,8 @@ MonoBehaviour:
     hitRadius: 0.7
     beamWidth: 2.4
     cameraShake: 0.35
+    sustainShake: 0.09
+    sustainShakeInterval: 0.08
     lineMaterial: {fileID: 2100000, guid: b6310812509a3ab46bf4e098541a27ab, type: 2}
     moteMaterial: {fileID: 2100000, guid: ae39686096520d44bbce285605330eb4, type: 2}
     scatterSound:
@@ -121,12 +123,13 @@ MonoBehaviour:
       pitchRange: {x: 0.55, y: 0.6}
       minInterval: 0
     beamHumSound:
-      clips:
-      - {fileID: 8300000, guid: c9004790cb7be584daa0c2993dae5fda, type: 3}
-      - {fileID: 8300000, guid: dc63c84253ca07d4e8cda7cd957bae4c, type: 3}
-      volume: 0.4
-      pitchRange: {x: 0.45, y: 0.5}
+      clips: []
+      volume: 1
+      pitchRange: {x: 0.96, y: 1.04}
       minInterval: 0
+    beamLoop: {fileID: 8300000, guid: 9ddc4190dede2a749a9c42a32eb9d1f5, type: 3}
+    beamLoopVolume: 0.5
+    beamLoopPitch: 1
   sunLance:
     enabled: 0
     windUpTime: 0.8
@@ -157,6 +160,9 @@ MonoBehaviour:
       volume: 1
       pitchRange: {x: 0.96, y: 1.04}
       minInterval: 0
+    beamLoop: {fileID: 0}
+    beamLoopVolume: 0.5
+    beamLoopPitch: {x: 0.75, y: 1}
   chargeSound: {fileID: 8300000, guid: 3ca2d41d3f7d72a42a124c6debd80346, type: 3}
   chargeVolume: 0.55
   muzzleFlashPrefab: {fileID: 2916273817513264348, guid: 95044fb3908b36c46bc62060360f7ba6, type: 3}

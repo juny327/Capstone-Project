@@ -90,10 +90,11 @@ MonoBehaviour:
   faceRadius: 1.1
   faceHeight: 1.5
   faceBottom: 0.15
-  faceColor: {r: 0.25, g: 0.85, b: 1, a: 0.55}
+  faceColor: {r: 0.3, g: 0.88, b: 1, a: 0.72}
   hitColor: {r: 0.8, g: 1, b: 1, a: 1}
-  lowColor: {r: 1, g: 0.35, b: 0.3, a: 0.55}
+  lowColor: {r: 1, g: 0.35, b: 0.3, a: 0.72}
   sparkPrefab: {fileID: 1157294452713321349, guid: 9469d2c9a439dff40a65bbc0f40fa3d7, type: 3}
+  rimMaterial: {fileID: 2100000, guid: b6310812509a3ab46bf4e098541a27ab, type: 2}
   raiseSound:
     clips:
     - {fileID: 8300000, guid: 7464c16cdf354f94a9d16d5aea57efa6, type: 3}

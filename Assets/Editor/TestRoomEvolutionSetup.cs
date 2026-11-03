@@ -11,7 +11,7 @@ using Object = UnityEngine.Object;
 /// <summary>
 /// 테스트 룸에 상위 무기 시험 구역을 덧붙인다 (상위무기-계획.md 16장). 메뉴: Tools / Test Room / 상위 무기 구역 추가
 ///
-///  · 위쪽 — 진화 조합(EvolutionCatalog)마다 구역 하나 (한 줄 7개씩 3줄): 들어가면 원래 무기 · 최대 레벨 · 짝 장비를 채우고 진화
+///  · 가운데 남쪽 — 진화 조합(EvolutionCatalog)마다 구역 하나 (한 줄 7개 · 무리 자리 · 훈련 해골 근처, 2026-11-02): 들어가면 원래 무기 · 최대 레벨 · 짝 장비를 채우고 진화
 ///  · 아래쪽 — 무리 표적 구역 두 개: 모여 있기(3 × 3, 오른쪽 아래 자리) · 둘러싸기(플레이어 둘레 8)
 ///
 /// TestRoomSetup 은 장면을 처음부터 다시 짓는다 (다시 돌리면 CharacterSetup 이 더한 대검 · 창 픽업이 빠진다).
@@ -82,7 +82,7 @@ public static class TestRoomEvolutionSetup
         Transform area = new GameObject(AreaName).transform;
         SceneManager.MoveGameObjectToScene(area.gameObject, scene);
 
-        // ── 위쪽: 상위 무기 구역 ──
+        // ── 상위 무기 구역 (자리는 TestRoomLayout) ──
         var recipes = catalog.evolutions.Where(e => e != null && e.result != null && e.from != null).ToArray();
         float centerX = PickupStartX + PickupStepX * (Mathf.Min(PerRow, recipes.Length) - 1) * 0.5f;
         // 위 줄 이름표(높이 1.75m)가 화면에서 위로 올라오므로 제목은 한 칸 더 위에
@@ -136,7 +136,7 @@ public static class TestRoomEvolutionSetup
         Debug.Log($"{Tag} 상위 무기 구역 {recipes.Length}개 · 무리 표적 구역 2개를 테스트 룸에 넣었습니다.");
     }
 
-    static void FillLabel(GameObject go, string title, string note, Sprite icon)
+    internal static void FillLabel(GameObject go, string title, string note, Sprite icon)
     {
         var name = go.transform.Find("Label/Name")?.GetComponent<TMP_Text>();
         var cond = go.transform.Find("Label/Note")?.GetComponent<TMP_Text>();
@@ -154,7 +154,7 @@ public static class TestRoomEvolutionSetup
     }
 
     /// <summary>구역 프리팹 — 무기 픽업과 같은 모양(바닥 판 + 떠 있는 이름표)에 색 · 동작만 다르다.</summary>
-    static GameObject MakePadPrefab<T>(string name, TMP_FontAsset font, Material mat, bool withIcon) where T : Component
+    internal static GameObject MakePadPrefab<T>(string name, TMP_FontAsset font, Material mat, bool withIcon) where T : Component
     {
         GameObject root = new GameObject(name, typeof(BoxCollider), typeof(T));
         var trigger = root.GetComponent<BoxCollider>();

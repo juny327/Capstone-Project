@@ -76,6 +76,9 @@ public abstract class AttachmentRuntime
 
     public virtual void OnReloadStarted() { }
 
+    /// <summary>true 면 쏜 탄이 첫 적에서 멈춘다 — 관통이 남아 있어도 (공성포 포탄은 부딪힌 자리에서 터진다).</summary>
+    public virtual bool StopsProjectile => false;
+
     /// <summary>쏜 탄이 사거리 끝에서 사라졌을 때 (맞히고 멈춘 탄은 오지 않는다).</summary>
     public virtual void OnProjectileExpired(Vector3 position, Vector3 direction) { }
 

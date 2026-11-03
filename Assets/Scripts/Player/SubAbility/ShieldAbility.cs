@@ -84,6 +84,8 @@ public class ShieldAbility : SubAbility, IDamageFilter
 
     [Header("연출")]
     [SerializeField] ParryFlash sparkPrefab;
+    [Tooltip("방패 위 테두리 빛 · 밀치기 부채꼴 (2026-11-02 — 방패가 흐려 잘 안 보였다)")]
+    [SerializeField] Material rimMaterial;
     [SerializeField] GameSoundSet.Entry raiseSound = new GameSoundSet.Entry();
     [SerializeField] GameSoundSet.Entry blockSound = new GameSoundSet.Entry();
     [SerializeField] GameSoundSet.Entry breakSound = new GameSoundSet.Entry();
@@ -296,6 +298,15 @@ public class ShieldAbility : SubAbility, IDamageFilter
         Vector3 forward = Forward;
         Spark(origin + forward * 1.2f + Vector3.up * 1.1f, forward);
 
+        // 밀치기 범위 — 앞 bashAngle 부채꼴 끝까지 칼바람처럼 (2026-11-02)
+        if (rimMaterial != null)
+        {
+            Color c = Color.Lerp(faceColor, Color.white, 0.35f);
+            c.a = 0.9f;
+            FxLine.Arc(rimMaterial, origin + Vector3.up * 0.6f, forward, bashRange, bashAngle * 0.5f, c, 0.35f, 0.22f);
+            FxLine.Arc(rimMaterial, origin + Vector3.up * 0.6f, forward, bashRange * 0.6f, bashAngle * 0.5f, Color.white, 0.15f, 0.16f);
+        }
+
         int count = Physics.OverlapSphereNonAlloc(origin, bashRange + 0.5f, overlaps, enemyLayers, QueryTriggerInteraction.Collide);
         float damage = WeaponDamage(6f) * bashDamageRatio;
         bashed.Clear();
@@ -497,6 +508,12 @@ public class ShieldAbility : SubAbility, IDamageFilter
         }
     }
 
+    // 테두리는 방패면과 함께 켜지고 꺼진다 (방패면은 여러 곳에서 enabled 를 바꾼다)
+    void LateUpdate()
+    {
+        if (rim != null) rim.enabled = face != null && face.enabled;
+    }
+
     void Update()
     {
         float dt = Time.deltaTime;
@@ -574,6 +591,42 @@ public class ShieldAbility : SubAbility, IDamageFilter
 
         face.transform.localPosition = Vector3.zero;
         face.transform.localRotation = Quaternion.identity;
+
+        BuildRim(half);
+    }
+
+    LineRenderer rim;
+
+    /// <summary>방패면 위 · 아래 테두리 빛 — 반투명 면만으로는 어디까지 막는지 잘 안 보였다 (2026-11-02).</summary>
+    void BuildRim(float half)
+    {
+        if (rimMaterial == null || face == null || rim != null) return;
+
+        var go = new GameObject("Rim");
+        go.transform.SetParent(face.transform, false);
+        rim = go.AddComponent<LineRenderer>();
+        rim.useWorldSpace = false;
+        rim.sharedMaterial = rimMaterial;
+        rim.widthMultiplier = 0.09f;
+        rim.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        rim.receiveShadows = false;
+        rim.loop = true;
+
+        // 위 호 → 오른쪽 아래로 → 아래 호(거꾸로) → 왼쪽 위로 닫힘
+        const int segments = 18;
+        var points = new System.Collections.Generic.List<Vector3>();
+        for (int i = 0; i <= segments; i++)
+        {
+            float a = Mathf.Lerp(-half, half, (float)i / segments);
+            points.Add(new Vector3(Mathf.Sin(a), 0f, Mathf.Cos(a)) * faceRadius + Vector3.up * (faceBottom + faceHeight));
+        }
+        for (int i = segments; i >= 0; i--)
+        {
+            float a = Mathf.Lerp(-half, half, (float)i / segments);
+            points.Add(new Vector3(Mathf.Sin(a), 0f, Mathf.Cos(a)) * faceRadius + Vector3.up * faceBottom);
+        }
+        rim.positionCount = points.Count;
+        rim.SetPositions(points.ToArray());
     }
 
     void UpdateFaceColor()
@@ -588,6 +641,13 @@ public class ShieldAbility : SubAbility, IDamageFilter
         face.GetPropertyBlock(block);
         block.SetColor(BaseColorId, c);
         face.SetPropertyBlock(block);
+
+        if (rim != null)
+        {
+            Color r = Color.Lerp(c, Color.white, 0.45f);
+            r.a = 0.95f;
+            rim.startColor = rim.endColor = r;
+        }
     }
 
     void Spark(Vector3 position, Vector3 dir)

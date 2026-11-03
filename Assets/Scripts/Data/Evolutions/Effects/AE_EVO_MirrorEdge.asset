@@ -22,13 +22,20 @@ MonoBehaviour:
   waveCount: 3
   waveSpread: 18
   waveDistance: 8
-  waveSpeed: 22
+  waveSpeed: 17
   waveRadius: 0.9
   waveDamageMul: 2
   waveMaterial: {fileID: 2100000, guid: b6310812509a3ab46bf4e098541a27ab, type: 2}
   sparkMaterial: {fileID: 2100000, guid: b6310812509a3ab46bf4e098541a27ab, type: 2}
   color: {r: 0.25, g: 0.95, b: 1, a: 1}
-  waveWidth: 3
+  waveWidth: 3.6
+  waveThickness: 0.3
+  coreColor: {r: 0.92, g: 1, b: 1, a: 1}
+  glowAlpha: 0.35
+  afterimages: 4
+  particleMaterial: {fileID: 2100000, guid: 64c7006049d2232409f63df522d0b206, type: 2}
+  sparkleRate: 14
+  hitSparkles: 12
   deflectSound:
     clips:
     - {fileID: 8300000, guid: 1142e7d5671a57243a260b6bed82d367, type: 3}

@@ -13,9 +13,7 @@ MonoBehaviour:
   m_Name: WD_EVO_SiegeCannon
   m_EditorClassIdentifier: Assembly-CSharp::ProjectileWeaponData
   weaponName: "\uACF5\uC131\uD3EC"
-  description: "\uAD00\uD1B5 \uBB34\uC81C\uD55C \uD3EC\uD0C4 \u2014 \uB9DE\uC740
-    \uC801\uB9C8\uB2E4 \uD3ED\uBC1C, \uC0AC\uAC70\uB9AC \uB05D\uC5D0\uC11C \uD070
-    \uD3ED\uBC1C"
+  description: "\uC801\uC5D0\uAC8C \uBD80\uB52A\uD788\uBA74 \uADF8 \uC790\uB9AC\uC5D0\uC11C \uD130\uC9C0\uB294 \uD3EC\uD0C4 \u2014 \uB458\uB808 3m \uD3ED\uBC1C"
   icon: {fileID: 21300000, guid: 9a0def7e8c1267640b88110544e0df97, type: 3}
   weaponPrefab: {fileID: 904226512922559315, guid: 4bc1890132649e24ba38d8fadff3ab34, type: 3}
   socket: 0
@@ -58,7 +56,7 @@ MonoBehaviour:
   projectileLifeTime: 0.7
   projectileCount: 8
   spreadAngle: 28
-  pierceCount: 99
+  pierceCount: 0
   spawnProjectiles: 1
   homingTurnRate: 0
   homingRange: 14

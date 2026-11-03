@@ -34,7 +34,10 @@ public class ArcOnHitEffect : AttachmentEffect
             Vector3 to = CombatFx.Body(next);
 
             CombatFx.Damage(next, hit.Damage * cfg.damageRatio, to, (to - from).normalized);
-            FxLine.Bolt(cfg.material, from, to, cfg.color, 0.05f, 0.12f);
+            // 2026-11-02 굵게 + 흰 심 · 오래 — 0.05m 줄기는 화면에서 거의 안 보였다
+            FxLine.Bolt(cfg.material, from, to, cfg.color, 0.14f, 0.2f, 0.25f);
+            FxLine.Bolt(cfg.material, from, to, Color.white, 0.05f, 0.14f, 0.2f);
+            FxLine.Ring(cfg.material, next.position, 0.15f, 0.9f, cfg.color, 0.12f, 0.18f);
             CombatFx.PlaySound(cfg.sound);
         }
     }

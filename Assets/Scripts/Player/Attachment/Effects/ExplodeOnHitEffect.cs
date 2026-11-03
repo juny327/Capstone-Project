@@ -15,6 +15,9 @@ public class ExplodeOnHitEffect : AttachmentEffect
     public Material material;
     public Color color = new Color(1f, 0.6f, 0.2f, 0.9f);
     public GameSoundSet.Entry sound = new GameSoundSet.Entry();
+    [Tooltip("작은 폭발 이펙트 (비우면 고리만) — 2026-11-02")]
+    public GameObject vfxPrefab;
+    [Min(0f)] public float vfxScale = 0.6f;
 
     // 산탄 8발이 한 프레임에 터지면 소리가 겹쳐 터진다 — 짧게 한 번만
     static float lastSound;
@@ -41,7 +44,8 @@ public class ExplodeOnHitEffect : AttachmentEffect
                 CombatFx.Damage(t, hit.Damage * cfg.damageRatio, CombatFx.Body(t), dir.sqrMagnitude > 0.0001f ? dir.normalized : Vector3.forward);
             }
 
-            FxLine.Ring(cfg.material, at, cfg.radius * 0.25f, cfg.radius, cfg.color, 0.2f, 0.25f);
+            FxLine.Ring(cfg.material, at, cfg.radius * 0.25f, cfg.radius, cfg.color, 0.3f, 0.28f);
+            if (cfg.vfxPrefab != null && EvoStrikes.Take(6)) EvoStrikes.Spawn(cfg.vfxPrefab, at, cfg.color, cfg.vfxScale);
 
             if (Time.time - lastSound > 0.08f)
             {

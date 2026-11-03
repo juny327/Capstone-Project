@@ -28,7 +28,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.05, y: 0.05, z: 0.9}
+  m_LocalScale: {x: 0.1, y: 0.1, z: 1.2}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 396412846529233844}
@@ -135,8 +135,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6515e0e34ccbd24fadf387a92500671, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BayonetChargeAbility
-  dashDistance: 3
-  dashDuration: 0.18
+  dashDistance: 4
+  dashDuration: 0.22
   invulnerable: 0.3
   hitRadius: 1.1
   hitForward: 0.7
@@ -148,6 +148,8 @@ MonoBehaviour:
   cooldownSeconds: 5
   blade: {fileID: 6648618304382179581}
   sparkPrefab: {fileID: 1157294452713321349, guid: 9469d2c9a439dff40a65bbc0f40fa3d7, type: 3}
+  fxMaterial: {fileID: 2100000, guid: b6310812509a3ab46bf4e098541a27ab, type: 2}
+  trailColor: {r: 0.75, g: 0.95, b: 1, a: 0.8}
   dashSound:
     clips:
     - {fileID: 8300000, guid: 295ace8a650602646bac8cc336a8a22b, type: 3}

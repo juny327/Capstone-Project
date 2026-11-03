@@ -21,6 +21,9 @@ using UnityEngine;
 ///  · Stage3  action-2 — 큰 북이 몰아치다 중반에 절정
 ///  · 보스    action-1 — 쉼 없이 몰아붙이는 타악 · 저음
 ///  · 엔딩    explo-2 — 고요하게 길게 끄는 소리
+///  · 테스트 룸 (2026-11-02 사용자 요청 — "정비창에서 나올 법한 잔잔한 곡") — Abstraction 'Seaside CORAL REEF' (CC0, 53초).
+///    남은 곡 35개를 박자 세기 · 타격감 · 밝기로 재서 가장 잔잔한 곡 (박자 0.10 · 타격 0.87 — 'Workshop' 은 밝고 박자가 세서 뺐다).
+///    시험 중 효과음이 계속 나므로 로비와 같은 체감 크기(-25 dBFS)로 낮게
 /// 볼륨은 곡마다 원래 음량(-13 ~ -19 dBFS)이 달라 체감 크기가 비슷하도록(-23 dBFS 기준) 맞췄다. 보스만 조금 크게.
 ///
 /// 여러 번 실행해도 결과가 같다(멱등). 배치: -executeMethod BgmSetup.RunBatch
@@ -32,14 +35,17 @@ public static class BgmSetup
     const string Prefix = "231006-torone-loop-pack-02-sf-";
     const string MusicSetPath = "Assets/AUDIO/MusicSet.asset";
 
-    static readonly (string scene, string track, float volume)[] Tracks =
+    static string Torone(string track) => $"{MusicDir}/{Prefix}{track}.ogg";
+
+    static readonly (string scene, string path, float volume)[] Tracks =
     {
-        ("Loby", "title-menu-credit", 0.32f),
-        ("Stage1", "explo-1", 0.65f),
-        ("Stage2", "explo-3", 0.53f),
-        ("Stage3", "action-2", 0.40f),
-        ("StageBoss", "action-1", 0.42f),
-        ("EndingScene", "explo-2", 0.48f),
+        ("Loby", Torone("title-menu-credit"), 0.32f),
+        ("Stage1", Torone("explo-1"), 0.65f),
+        ("Stage2", Torone("explo-3"), 0.53f),
+        ("Stage3", Torone("action-2"), 0.40f),
+        ("StageBoss", Torone("action-1"), 0.42f),
+        ("EndingScene", Torone("explo-2"), 0.48f),
+        ("TestRoom", "Assets/Abstraction/MusicLoops/Week 26 - Seaside CORAL REEF.ogg", 0.38f),
     };
 
     [MenuItem("Tools/Audio/배경음 — SF 오케스트라 적용")]
@@ -54,11 +60,10 @@ public static class BgmSetup
     {
         var clips = new Dictionary<string, AudioClip>();
 
-        foreach ((string _, string track, float _) in Tracks)
+        foreach ((string _, string path, float _) in Tracks)
         {
-            if (clips.ContainsKey(track)) continue;
+            if (clips.ContainsKey(path)) continue;
 
-            string path = $"{MusicDir}/{Prefix}{track}.ogg";
             if (!SetStreaming(path)) return false;
 
             var clip = AssetDatabase.LoadAssetAtPath<AudioClip>(path);
@@ -68,7 +73,7 @@ public static class BgmSetup
                 return false;
             }
 
-            clips[track] = clip;
+            clips[path] = clip;
         }
 
         var set = AssetDatabase.LoadAssetAtPath<MusicSet>(MusicSetPath);
@@ -82,7 +87,7 @@ public static class BgmSetup
         SerializedProperty list = so.FindProperty("tracks");
         var log = new System.Text.StringBuilder();
 
-        foreach ((string scene, string track, float volume) in Tracks)
+        foreach ((string scene, string path, float volume) in Tracks)
         {
             SerializedProperty entry = null;
             for (int i = 0; i < list.arraySize; i++)
@@ -99,9 +104,9 @@ public static class BgmSetup
                 entry.FindPropertyRelative("sceneName").stringValue = scene;
             }
 
-            entry.FindPropertyRelative("clip").objectReferenceValue = clips[track];
+            entry.FindPropertyRelative("clip").objectReferenceValue = clips[path];
             entry.FindPropertyRelative("volume").floatValue = volume;
-            log.Append($" {scene}={track}({volume:F2})");
+            log.Append($" {scene}={Path.GetFileNameWithoutExtension(path).Replace(Prefix, "")}({volume:F2})");
         }
 
         so.ApplyModifiedPropertiesWithoutUndo();

@@ -10,7 +10,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 /// <summary>
-/// 로비 선택 화면을 짓는다 (Docs/ClaudeAnalysis/Player/로비-선택화면-설계.md).
+/// 로비 선택 화면을 짓는다 (Docs/ClaudeAnalysis/Player/00-핵심-정리.md 8장).
 ///
 ///   위   : 작게 줄인 제목 로고(왼쪽) · [테스트 룸][설정](오른쪽)
 ///   왼쪽 : 원거리 무기(사수)   가운데 : 3D 캐릭터 + 능력치   오른쪽 : 근접 무기(검사)

@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 774e8839cb40ed44f82f525be90550ac, type: 3}
+  m_Name: EVO_GaleSniper
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponEvolutionData
+  from: {fileID: 11400000, guid: 180da6784ef99fc4db72586b0150f7a0, type: 2}
+  requiredLevel: 0
+  requiredAttachment: {fileID: 0}
+  requiredSubAbility: {fileID: 0}
+  requiredAbilityLevel: 1
+  requiredAnyGunAttachment: {fileID: 0}
+  requiredSkill: {fileID: 11400000, guid: 0d64edcbc48c67d44a6ce869b2113146, type: 2}
+  result: {fileID: 11400000, guid: 240b3b0babedcef459d05433ee8c0a46, type: 2}
+  title: "\uB3CC\uD48D \uC800\uACA9\uCD1D"
+  flavor: "\uD0C4 \uB458\uB808\uB85C \uBC14\uB78C\uC774 \uD718\uAC10\uAE30\uACE0,
+    \uC9C0\uB098\uAC04 \uAE38\uC5D0 2\uCD08 \uB3D9\uC548 \uBC14\uB78C\uC774 \uBD84\uB2E4
+    \u2014 \uAE38 \uC704\uC758 \uC801\uC740 40% \uB290\uB824\uC9C0\uACE0 0.3\uCD08\uB9C8\uB2E4
+    \uBCA0\uC778\uB2E4"
+  color: {r: 0.55, g: 1, b: 0.85, a: 1}
+  sound: {fileID: 8300000, guid: f595650ca3f17154e8de61ccc64e6a00, type: 3}
+  soundVolume: 0.9
+  shopPrice: 0

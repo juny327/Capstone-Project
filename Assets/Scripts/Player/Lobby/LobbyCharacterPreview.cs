@@ -5,7 +5,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 /// <summary>
-/// 로비 가운데 3D 캐릭터 미리보기 (로비-선택화면-설계.md).
+/// 로비 가운데 3D 캐릭터 미리보기 (Docs/ClaudeAnalysis/Player/00-핵심-정리.md 8장).
 ///
 /// 화면 밖 먼 곳에 작은 무대(받침 · 카메라)를 만들고, 그 카메라가 RenderTexture 에 찍은 그림을 RawImage 로 보여 준다.
 /// 모델은 게임과 같은 Player 프리팹을 꺼내 **그림에 필요 없는 컴포넌트(이동 · 체력 · 무기 로직 · 물리)를 모두 뗀 뒤** 켠다 —

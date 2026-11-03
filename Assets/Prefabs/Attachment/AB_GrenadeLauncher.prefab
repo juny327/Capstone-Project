@@ -28,7 +28,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.24, y: 0.24, z: 0.24}
+  m_LocalScale: {x: 0.55, y: 0.55, z: 0.55}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1951775954611132944}
@@ -140,14 +140,17 @@ MonoBehaviour:
   radius: 2.5
   damageRatio: 5
   minDamage: 10
-  flightTime: 0.45
-  arcHeight: 2.2
-  cameraShake: 0.25
+  flightTime: 0.6
+  arcHeight: 3
+  cameraShake: 0.35
   cooldownSeconds: 6
   shell: {fileID: 2076967414183530215}
   fxMaterial: {fileID: 2100000, guid: b6310812509a3ab46bf4e098541a27ab, type: 2}
   blastColor: {r: 1, g: 0.55, b: 0.18, a: 0.95}
   sparkPrefab: {fileID: 1157294452713321349, guid: 9469d2c9a439dff40a65bbc0f40fa3d7, type: 3}
+  explosionPrefab: {fileID: 5162910912013668194, guid: cf82839c411151342a7b2337bda9fb34, type: 3}
+  explosionScale: 1.3
+  showLanding: 1
   fireSound:
     clips:
     - {fileID: 8300000, guid: 295ace8a650602646bac8cc336a8a22b, type: 3}

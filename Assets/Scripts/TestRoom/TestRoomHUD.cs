@@ -60,7 +60,7 @@ public class TestRoomHUD : MonoBehaviour
         if (navigationText != null)
             navigationText.text = $"← 무기 선택 구역     |     훈련용 해골 {(delta.x >= 0 ? "→" : "←")}\n" +
                 "WASD 이동   ·   Q / 휠 교체   ·   R 장전   ·   무기 구역에 들어가 선택\n" +
-                "위쪽: 상위 무기 구역 (들어가면 진화)   ·   아래쪽: 무리 표적 (모여 있기 · 둘러싸기 · H 체력 튼튼 ↔ 한 방)" +
+                "위쪽: 부착물 · 개조 · 서브 능력 (들어가면 장착)   ·   아래쪽: 상위 무기 (들어가면 진화) · 무리 표적 (H 체력 튼튼 ↔ 한 방)" +
                 (PracticeRules.Active ? $"\n연습 규칙 — 스태미나 무한 · 능력 쿨타임 {PracticeRules.CooldownCap:0.#}초" : "");
     }
 }

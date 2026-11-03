@@ -95,7 +95,7 @@ public static class GameSettingsSetup
             prt.offsetMax = new Vector2(-3, -3);
             panel.GetComponent<Image>().color = Ink;
 
-            Text(panel.transform, "Title", "설정", font, 46, Accent, TextAlignmentOptions.Center,
+            TMP_Text title = Text(panel.transform, "Title", "설정", font, 46, Accent, TextAlignmentOptions.Center,
                 new Vector2(0.5f, 1), new Vector2(0, -52), new Vector2(600, 64));
             Text(panel.transform, "Section", "소리", font, 26, Muted, TextAlignmentOptions.Left,
                 new Vector2(0.5f, 1), new Vector2(-260, -112), new Vector2(160, 36));   // 아래 줄 이름들과 왼쪽을 맞춘다
@@ -104,9 +104,19 @@ public static class GameSettingsSetup
             (Slider musicSlider, TMP_Text musicValue) = Row(panel.transform, "Music", "배경음", -250, font, resources);
             (Slider sfxSlider, TMP_Text sfxValue) = Row(panel.transform, "Sfx", "효과음", -330, font, resources);
 
-            // 버튼 두 개(오른쪽 아래)와 겹치지 않게 왼쪽 300px 안에 둔다
-            Text(panel.transform, "Hint", "ESC 로 열고 닫기", font, 22, Muted, TextAlignmentOptions.Left,
-                new Vector2(0, 0), new Vector2(36 + 150, 56), new Vector2(300, 32));
+            // 왼쪽 아래는 "로비로" 버튼 자리 (2026-11-02) — 안내는 "소리" 줄 오른쪽 끝으로
+            Text(panel.transform, "Hint", "ESC 로 열고 닫기", font, 22, Muted, TextAlignmentOptions.Right,
+                new Vector2(0.5f, 1), new Vector2(205, -112), new Vector2(300, 36));
+
+            // 게임 중에만 보이는 "로비로" (왼쪽 아래) · 스테이지에서 처음 누르면 위에 확인 문구
+            Button toLobby = MakeButton(panel.transform, "ToLobbyButton", "로비로", font, 26,
+                new Vector2(0, 0), new Vector2(32, 28), new Vector2(190, 56), new Vector2(0, 0));
+            toLobby.GetComponent<Image>().color = new Color(0.22f, 0.09f, 0.08f, 1f);
+            TMP_Text toLobbyLabel = toLobby.transform.Find("Text").GetComponent<TMP_Text>();
+            toLobbyLabel.color = new Color(1f, 0.72f, 0.6f);
+            TMP_Text warning = Text(panel.transform, "ToLobbyWarning", "이번 판 진행이 사라집니다 — 한 번 더 누르면 로비로", font, 22,
+                new Color(1f, 0.62f, 0.45f), TextAlignmentOptions.Left, new Vector2(0, 0), new Vector2(32 + 300, 108), new Vector2(600, 32));
+            warning.gameObject.SetActive(false);
 
             Button reset = MakeButton(panel.transform, "ResetButton", "기본값", font, 26,
                 new Vector2(1, 0), new Vector2(-236, 28), new Vector2(170, 56), new Vector2(1, 0));
@@ -126,6 +136,10 @@ public static class GameSettingsSetup
             so.FindProperty("sfxValue").objectReferenceValue = sfxValue;
             so.FindProperty("closeButton").objectReferenceValue = close;
             so.FindProperty("resetButton").objectReferenceValue = reset;
+            so.FindProperty("title").objectReferenceValue = title;
+            so.FindProperty("toLobbyButton").objectReferenceValue = toLobby;
+            so.FindProperty("toLobbyLabel").objectReferenceValue = toLobbyLabel;
+            so.FindProperty("toLobbyWarning").objectReferenceValue = warning;
             so.ApplyModifiedPropertiesWithoutUndo();
 
             window.SetActive(false);
@@ -136,7 +150,7 @@ public static class GameSettingsSetup
             Object.DestroyImmediate(root);
         }
 
-        Debug.Log($"{Tag} 설정창: {PrefabPath} (전체 · 배경음 · 효과음, 로비 버튼 · ESC)");
+        Debug.Log($"{Tag} 설정창: {PrefabPath} (전체 · 배경음 · 효과음, 로비 버튼 · ESC · 게임 중 로비로)");
         return true;
     }
 

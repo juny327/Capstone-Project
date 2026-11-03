@@ -1,0 +1,59 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e7249f4a81a809448aa6320adc0dd48, type: 3}
+  m_Name: AE_EVO_AchillesSpear
+  m_EditorClassIdentifier: Assembly-CSharp::AchillesSpearEffect
+  throwEvery: 4
+  throwDistance: 6.5
+  flySpeed: 32
+  throwDamageMul: 1.5
+  hitRadius: 0.8
+  orbitLaps: 2
+  orbitDuration: 1.4
+  orbitDamageMul: 0.8
+  clockwise: 1
+  returnSpeed: 28
+  returnDamageMul: 1
+  material: {fileID: 2100000, guid: b6310812509a3ab46bf4e098541a27ab, type: 2}
+  color: {r: 1, g: 0.62, b: 0.28, a: 1}
+  flyHeight: 1
+  throwSound:
+    clips:
+    - {fileID: 8300000, guid: 5c35f36c5778fd040954cc219b57c10d, type: 3}
+    - {fileID: 8300000, guid: 702ac2b49db10eb4c96fed352a740d9f, type: 3}
+    - {fileID: 8300000, guid: 1843d7a139c2056488ccacb27f429f5e, type: 3}
+    volume: 0.5
+    pitchRange: {x: 0.75, y: 0.85}
+    minInterval: 0
+  landSound:
+    clips:
+    - {fileID: 8300000, guid: c69d98c7f05e71f44b711d81e62e27f0, type: 3}
+    - {fileID: 8300000, guid: 4cbad0b6ac522a9488910cc838a9d5b9, type: 3}
+    - {fileID: 8300000, guid: d346bb6ed7f09824c9ae4750ee7d6a11, type: 3}
+    volume: 0.45
+    pitchRange: {x: 0.9, y: 1}
+    minInterval: 0
+  orbitSound:
+    clips:
+    - {fileID: 8300000, guid: 0c03edc4efa519a439adaf03a0af417a, type: 3}
+    - {fileID: 8300000, guid: e3760d5047edad749ac1e25cd676ab46, type: 3}
+    volume: 0.22
+    pitchRange: {x: 1.25, y: 1.4}
+    minInterval: 0.15
+  catchSound:
+    clips:
+    - {fileID: 8300000, guid: ffbe205d3b2a443418095fb3750c642c, type: 3}
+    - {fileID: 8300000, guid: 8290c8e0630a9e04b92bf732d3c2b977, type: 3}
+    - {fileID: 8300000, guid: 1d12c59b2e2223d48bac3eb03488e040, type: 3}
+    volume: 0.35
+    pitchRange: {x: 1, y: 1.1}
+    minInterval: 0

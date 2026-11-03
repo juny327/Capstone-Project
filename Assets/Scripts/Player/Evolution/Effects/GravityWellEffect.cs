@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 상위 무기 "중력 대검" (대검 + 그랩 훅) — 내려찍은 자리에 중력장이 생겨 주변 적을 빨아들이고,
+/// 상위 무기 "중력 대검" (대검 + 블랙홀 — 팀원 스킬) — 내려찍은 자리에 중력장이 생겨 주변 적을 빨아들이고,
 /// 끝날 때 붕괴 폭발한다 (상위무기-계획.md 5장 · 14-5).
 ///
 ///  · 내려찍기(세로베기)에서만 생긴다 — 가로베기는 그대로. 한 번에 하나 (이미 있으면 새로 만들지 않는다)
@@ -28,6 +28,12 @@ public class GravityWellEffect : AttachmentEffect
     [Min(0f)] public float collapseStun = 0.6f;
 
     [Header("연출")]
+    [Tooltip("중력장 모습 — 팀원 블랙홀 스킬과 같은 이펙트 (Solodream BlackHole). 비우면 예전 소용돌이 원판 · 고리")]
+    public GameObject blackHolePrefab;
+    [Tooltip("블랙홀 소용돌이 끝이 끌어당기는 반경(pullRadius)의 몇 배에 오게 키울지 — 1 이면 보이는 크기 = 실제 범위")]
+    [Range(0.3f, 1.5f)] public float blackHoleFill = 1f;
+    [Tooltip("블랙홀 이펙트에 붙은 반복음(팀원 스킬과 같은 '웅~') 음량 — 0 이면 끈다. 설정창 효과음 음량을 따른다 (원본 1 은 땅울림 · 붕괴음을 덮는다)")]
+    [Range(0f, 1f)] public float blackHoleVolume = 0.3f;
     public Material ringMaterial;
     [Tooltip("바닥에 도는 소용돌이 원판 재질 (비우면 고리만)")]
     public Material swirlMaterial;

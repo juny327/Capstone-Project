@@ -45,8 +45,10 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 12d2ec64f5d1dca41ad8b63c17795fea, type: 2}
   themeColor: {r: 0.45, g: 0.42, b: 1, a: 1}
   fireSounds:
-  - {fileID: 8300000, guid: 9dc53fb1462d7834281b89d51ad7d7c4, type: 3}
-  fireVolume: 0.5
+  - {fileID: 8300000, guid: 17d752a2bc52b574eb89ee3f7594f91f, type: 3}
+  - {fileID: 8300000, guid: 01580c37a57dd484fa7e7411e95f8be7, type: 3}
+  - {fileID: 8300000, guid: 3d8e0fb3f27df2544bb9f05c11e5b24c, type: 3}
+  fireVolume: 0.45
   firePitchRange: {x: 0.96, y: 1.04}
   reloadStartSound: {fileID: 8300000, guid: 87793c96ae4e8cc479acb0087a81befd, type: 3}
   reloadEndSound: {fileID: 8300000, guid: 156334c5cbcdce44b8c384027a7d8f99, type: 3}

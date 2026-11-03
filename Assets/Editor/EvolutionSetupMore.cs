@@ -10,6 +10,8 @@ using UnityEngine;
 ///  · 검사 4 — 사슬검 · 성채 대검 · 천공창 · 팔랑크스
 ///  · 드론 2 — 폭격 편대 · 위성 방벽
 ///  → 2026-10-12 8종 · 2026-10-13 다중 표적 · 천공창 보관 (지금 만드는 것: 스웜 카빈 · 회전 기관포 · 공성포 · 용의 포효 · 뇌운 · 태양창 · 혈검)
+///  → 2026-10-31 돌풍 저격총 (스나이퍼 + 토네이도) · 아킬레우스의 창 (창 + 표창) 추가 — 스나이퍼 · 창도 상위 무기가 생겼다
+///  → 2026-11-02 용의 포효 보관 (사용자 요청) — 지금 12종
 /// 규칙은 1차와 같다 — 이미 있는 데이터는 덮어쓰지 않고, "다시 만들기" 만 처음 값으로 되돌린다.
 /// 총 상위 무기는 원래 총에 발광 재질 + 부속(다총열 · 레일 · 코일 등 기본 도형)을 붙여 모양을 바꾼다.
 /// </summary>
@@ -40,6 +42,11 @@ public static partial class EvolutionSetup
     static readonly Color Lance = new Color(0.3f, 0.95f, 1f, 1f);
     static readonly Color Phalanx = new Color(1f, 0.25f, 0.2f, 1f);
     static readonly Color Blood = new Color(0.9f, 0.08f, 0.14f, 1f);
+    static readonly Color Gale = new Color(0.55f, 1f, 0.85f, 1f);
+    static readonly Color Bronze = new Color(1f, 0.62f, 0.28f, 1f);
+
+    const string TornadoVfx = "Assets/GabrielAguiarProductions/FreeQuickEffectsVol1/Prefabs/vfx_Tornado_01.prefab";   // 팀원 토네이도 스킬과 같은 이펙트
+    const string TornadoClip = "Assets/Arts/Sounds/Tornado.wav";                                                       // 팀원 토네이도 스킬 소리
 
     /// <summary>총 상위 무기 부속 — 기본 도형으로 만든다 (상위무기-계획.md 14-3 표).</summary>
     [System.Flags]
@@ -51,7 +58,7 @@ public static partial class EvolutionSetup
         Coils = 1 << 2,         // 뇌운 — 총열 코일 고리 (폭풍 코일은 보관)
         FocusRing = 1 << 3,     // 태양창 — 총구 앞 집광 고리
         BigMuzzle = 1 << 4,     // 공성포 — 큰 포구
-        FuelTank = 1 << 5,      // 용의 포효 — 연료통 · 노즐
+        FuelTank = 1 << 5,      // 연료통 · 노즐 (용의 포효 — 2026-11-02 보관, 지금 쓰는 무기 없음)
         MissilePod = 1 << 6,    // 스웜 카빈 — 총열 아래 미사일 포드
         Scope = 1 << 7,         // 큰 조준경 (다중 표적 — 보관, 지금 쓰는 무기 없음)
     }
@@ -61,7 +68,7 @@ public static partial class EvolutionSetup
     {
         var electric = Load<GameObject>(ElectricVfx);
         var impact = Load<GameObject>(ImpactVfx);
-        Material flame = SoftDotMaterial("EVO_Flame", fxLine, false, reset);   // 반투명 — 가산은 밝은 바닥에서 묻힌다
+        SoftDotMaterial("EVO_Flame", fxLine, false, reset);   // 작은 조합(SynergySetup)이 쓴다 — 용의 포효 보관 뒤에도 만든다
         Material cloud = SoftDotMaterial("EVO_Cloud", fxLine, false, reset);
 
         // ═══════ 사수 ═══════
@@ -120,37 +127,37 @@ public static partial class EvolutionSetup
             siegeShell, Gold, d =>
             {
                 d.weaponName = "공성포";
-                d.description = "관통 무제한 포탄 — 맞은 적마다 폭발, 사거리 끝에서 큰 폭발";
+                d.description = "적에게 부딪히면 그 자리에서 터지는 포탄 — 둘레 3m 폭발";
                 d.damage *= 1.3f;
-                d.pierceCount = 99;
+                d.pierceCount = 0;   // 2026-11-03 관통 대신 첫 적에서 터진다 (SiegeShellEffect.StopsProjectile)
                 d.projectileSpeed = 22f;
                 d.projectileLifeTime = 0.7f;
             });
         SetPrefab(siege, shell);
 
-        // 용의 포효 — 샷건 + 파이어볼 (팀원 스킬 · 2026-10-13, 처음엔 용의 숨결 개조)
-        var flameCone = Effect<FlameConeEffect>("AE_EVO_FlameCone", reset, e =>
-        {
-            e.flameMaterial = flame;
-            e.lineMaterial = fxLine;
-            e.color = Ember;
-        });
-        var dragon = EvolvedData<ProjectileWeaponData>("WD_Shotgun", "WD_EVO_DragonRoar", reset,
-            GunVariant("W_Shotgun", "W_EVO_DragonRoar", GunGlowMaterial("EVO_Glow_Ember", Ember, reset), Ember, false, null, null, reset, GunPart.FuelTank),
-            flameCone, Ember, d =>
-            {
-                d.weaponName = "용의 포효";
-                d.description = "산탄 대신 화염 방사 — 정면 부채꼴을 태우고, 불타다 죽은 적은 불을 옮긴다";
-                d.spawnProjectiles = false;
-                d.fireInterval = 0.1f;
-                d.magazineSize = 40;
-                d.fireSounds = Clips($"{SciFi}/thrusterFire_000.ogg", $"{SciFi}/thrusterFire_001.ogg", $"{SciFi}/thrusterFire_002.ogg");
-                d.fireVolume = 0.22f;
-            });
+        // 용의 포효 (샷건 + 파이어볼) — 2026-11-02 보관 (사용자 요청) — 바탕화면 "캡스톤 사운드 집/상위무기 보관 2026-11-02"
 
         // 궤도 레일캐논 (스나이퍼 + 레일건) — 2026-10-12 보관 — 바탕화면 "캡스톤 사운드 집/상위무기 보관 2026-10-12" (계획은 상위무기-계획.md 16-11)
 
         // 다중 표적 (스나이퍼 + 반자동) — 2026-10-13 보관 — 바탕화면 "캡스톤 사운드 집/상위무기 보관 2026-10-13" (사용자 피드백 "삭제", 계획은 상위무기-계획.md 16-15)
+
+        // 돌풍 저격총 — 스나이퍼 + 토네이도 (팀원 스킬 · 2026-10-31, 상위무기-계획.md 16-17)
+        var galeLane = Effect<GaleLaneEffect>("AE_EVO_GaleLane", reset, e =>
+        {
+            e.material = fxLine;
+            e.color = Gale;
+            e.tornadoPrefab = null;   // 2026-11-01 — 길 끝 회오리 대신 탄 둘레 바람 소용돌이 (Bullet_EVO_Gale · WindVortex)
+            GaleSounds(e);
+        });
+        var gale = EvolvedData<ProjectileWeaponData>("WD_Sniper", "WD_EVO_GaleSniper", reset,
+            GunVariant("W_Sniper", "W_EVO_GaleSniper", GunGlowMaterial("EVO_Glow_Gale", Gale, reset), Gale, false, null, null, reset, GunPart.Scope),
+            galeLane, Gale, d =>
+            {
+                d.weaponName = "돌풍 저격총";
+                d.description = GaleSniperText;
+                d.damage *= 1.2f;
+            });
+        SetPrefab(gale, GaleBullet(fxLine, reset));
 
         // 폭풍 코일 (전격 소총 + 과부하 코일) — 2026-10-12 보관 — 바탕화면 "캡스톤 사운드 집/상위무기 보관 2026-10-12" (계획은 상위무기-계획.md 16-11)
 
@@ -161,7 +168,8 @@ public static partial class EvolutionSetup
             e.cloudMaterial = cloud;
             e.color = Indigo;
             e.impactPrefab = electric;
-            e.sound = Sound(0.4f, 0.08f, $"{SciFi}/laserLarge_001.ogg", $"{SciFi}/laserLarge_004.ogg");
+            // 2026-11-02 레이저음 → 직접 합성한 낙뢰 '찌지직-콰앙-우르릉' (1.6초). 초당 4번 떨어지므로 0.3초마다 한 번만 — 꼬리가 겹쳐 폭풍처럼
+            e.sound = Sound(0.42f, 0.3f, "Assets/AUDIO/Electric/ThunderStrike_01.wav", "Assets/AUDIO/Electric/ThunderStrike_02.wav", "Assets/AUDIO/Electric/ThunderStrike_03.wav");
         });
         var thundercloud = EvolvedData<ChainBeamWeaponData>("WD_TeslaRifle", "WD_EVO_Thundercloud", reset,
             GunVariant("W_TeslaRifle", "W_EVO_Thundercloud", GunGlowMaterial("EVO_Glow_Indigo", Indigo, reset), Indigo, false, null, null, reset, GunPart.Coils),
@@ -208,6 +216,23 @@ public static partial class EvolutionSetup
 
         // 천공창 (창 + 그랩 훅) — 2026-10-13 보관 — 바탕화면 "캡스톤 사운드 집/상위무기 보관 2026-10-13" (사용자 피드백 "삭제", 계획은 상위무기-계획.md 16-15)
 
+        // 아킬레우스의 창 — 창 + 표창 (팀원 스킬 · 2026-10-31, 상위무기-계획.md 16-17)
+        var achillesThrow = Effect<AchillesSpearEffect>("AE_EVO_AchillesSpear", reset, e =>
+        {
+            e.material = fxLine;
+            e.color = Bronze;
+            // 던진 거리(6.5m) 끝에서 캐릭터 둘레를 2바퀴 (2026-11-01 사용자 요청 — 제자리 회오리에서 바꿈)
+            AchillesSounds(e);
+        });
+        var achilles = EvolvedData<MeleeWeaponData>("WD_Spear", "WD_EVO_AchillesSpear", reset,
+            MeleeVariant("W_Spear", "W_EVO_AchillesSpear", HalberdRed, 1f, futuraGlow, Bronze, fxLine, reset),
+            achillesThrow, Bronze, d =>
+            {
+                d.weaponName = "아킬레우스의 창";
+                d.description = AchillesSpearText;
+                d.damage *= 1.2f;
+            });
+
         // 팔랑크스 (창 + 에너지 방패) — 2026-10-12 보관 — 바탕화면 "캡스톤 사운드 집/상위무기 보관 2026-10-12" (계획은 상위무기-계획.md 16-11)
 
         // ═══════ 드론 ═══════
@@ -222,17 +247,19 @@ public static partial class EvolutionSetup
         {
             Recipe("EVO_SwarmCarbine", reset, "WD_Rifle", swarm, Orange, clip, "점사 세 발이 유도 미사일 — 발마다 다른 적을 쫓아가 작은 폭발", attachment: "MOD_Rifle_Burst"),
             Recipe("EVO_Minigun", reset, "WD_SMG", minigun, Amber, clip, "장전 없이 계속 쏜다 — 쏘는 동안 연사가 2초에 걸쳐 3배까지 오른다", attachment: "MOD_SMG_DualMag"),
-            Recipe("EVO_SiegeCannon", reset, "WD_Shotgun", siege, Gold, clip, "관통 무제한 포탄 — 맞은 적마다 폭발, 사거리 끝에서 큰 폭발", attachment: "MOD_Shotgun_Slug"),
-            Recipe("EVO_DragonRoar", reset, "WD_Shotgun", dragon, Ember, clip, "산탄 대신 화염 방사 — 정면을 태우고, 불타다 죽은 적은 불을 옮긴다", skill: "FireBallUpgrade"),   // 2026-10-13 용의 숨결 → 파이어볼
+            Recipe("EVO_SiegeCannon", reset, "WD_Shotgun", siege, Gold, clip, "적에게 부딪히면 그 자리에서 터지는 포탄 — 둘레 3m 폭발", attachment: "MOD_Shotgun_Slug"),
             Recipe("EVO_Thundercloud", reset, "WD_TeslaRifle", thundercloud, Indigo, clip, "장전하는 동안 머리 위 먹구름이 주변 적에게 낙뢰를 쏟는다", skill: "ChainLightningUpgrade"),   // 2026-10-13 방전 → 연쇄 번개
             Recipe("EVO_SunLance", reset, "WD_ChargeLaser", sunLance, Solar, clip, SunLanceText, attachment: "MOD_Laser_Overcharge"),
             Recipe("EVO_BloodBlade", reset, "WD_Sword", bloodBlade, Blood, clip, BloodBladeText, skill: "DrainUpgrade"),
+            Recipe("EVO_GaleSniper", reset, "WD_Sniper", gale, Gale, clip, GaleSniperText, skill: "TornadoUpgrade"),            // 2026-10-31
+            Recipe("EVO_AchillesSpear", reset, "WD_Spear", achilles, Bronze, clip, AchillesSpearText, skill: "ShurikenUpgrade"), // 2026-10-31
         });
 
         icons.AddRange(new[]
         {
-            "WD_EVO_SwarmCarbine", "WD_EVO_Minigun", "WD_EVO_SiegeCannon", "WD_EVO_DragonRoar",
+            "WD_EVO_SwarmCarbine", "WD_EVO_Minigun", "WD_EVO_SiegeCannon",
             "WD_EVO_Thundercloud", "WD_EVO_SunLance", "WD_EVO_BloodBlade",
+            "WD_EVO_GaleSniper", "WD_EVO_AchillesSpear",
         });
     }
 
@@ -240,6 +267,53 @@ public static partial class EvolutionSetup
 
     /// <summary>혈검 카드 · 설명 (BloodFrenzyEffect 기본값 기준).</summary>
     public const string BloodBladeText = "처치할 때마다 혈기가 쌓이고 (HP 가 가득이면 두 배) 가득 차면 6초 폭주 — 공격 속도 ×1.5 · 사거리 +1m · 맞힌 피해의 10% 회복";
+
+    public const string GaleSniperText = "탄 둘레로 바람이 휘감기고, 지나간 길에 2초 동안 바람이 분다 — 길 위의 적은 40% 느려지고 0.3초마다 베인다";
+
+    /// <summary>돌풍 저격총 탄 — 기본 탄을 복제하고 자식에 바람 소용돌이(WindVortex)를 단다 (2026-11-01 — 니나브 에스더 스킬처럼).</summary>
+    static GameObject GaleBullet(Material fxLine, bool reset)
+    {
+        string path = $"{FxDir}/Bullet_EVO_Gale.prefab";
+        bool exists = Load<GameObject>(path) != null;
+        GameObject prefab = BulletVariant("Bullet_EVO_Gale", 1.2f, reset);
+        if (prefab == null || (exists && !reset)) return prefab;
+
+        GameObject root = PrefabUtility.LoadPrefabContents(path);
+        try
+        {
+            var child = new GameObject("WindVortex");
+            child.transform.SetParent(root.transform, false);
+            child.transform.localScale = new Vector3(1f / root.transform.localScale.x, 1f / root.transform.localScale.y, 1f / root.transform.localScale.z);
+            var vortex = child.AddComponent<WindVortex>();
+            vortex.material = fxLine;
+            vortex.color = Gale;
+            PrefabUtility.SaveAsPrefabAsset(root, path);
+        }
+        finally
+        {
+            PrefabUtility.UnloadPrefabContents(root);
+        }
+
+        return Load<GameObject>(path);
+    }
+
+    public const string AchillesSpearText = "네 번째 찌르기마다 창을 던진다 — 꿰뚫고, 던진 거리 끝에서 캐릭터 둘레를 두 바퀴 돌며 벤 뒤 손으로 돌아온다";
+
+    /// <summary>돌풍 저격총 — 바람 소리는 팀원 토네이도 스킬 소리를 길마다 낮게 깐다.</summary>
+    static void GaleSounds(GaleLaneEffect e)
+    {
+        e.windClip = Load<AudioClip>(TornadoClip);
+        e.windVolume = 0.22f;
+    }
+
+    /// <summary>아킬레우스의 창 — 던지기 휙 · 궤도 들어설 때 쿵 · 반 바퀴마다 칼바람 · 받기 쨍.</summary>
+    static void AchillesSounds(AchillesSpearEffect e)
+    {
+        e.throwSound = SoundP(0.5f, 0.75f, 0.85f, 0f, $"{KRpg}/drawKnife1.ogg", $"{KRpg}/drawKnife2.ogg", $"{KRpg}/drawKnife3.ogg");
+        e.landSound = SoundP(0.45f, 0.9f, 1f, 0f, $"{KImpact}/impactPlate_heavy_000.ogg", $"{KImpact}/impactPlate_heavy_001.ogg", $"{KImpact}/impactPlate_heavy_002.ogg");
+        e.orbitSound = SoundP(0.22f, 1.25f, 1.4f, 0.15f, $"{KRpg}/knifeSlice2.ogg", $"{KRpg}/knifeSlice.ogg");
+        e.catchSound = SoundP(0.35f, 1f, 1.1f, 0f, $"{KImpact}/impactTin_medium_000.ogg", $"{KImpact}/impactTin_medium_001.ogg", $"{KImpact}/impactTin_medium_002.ogg");
+    }
 
     public const string SunLanceText = "모으는 동안 사거리가 10m → 32m 로 늘어나는 한 방 — 굵은 빛 기둥 + 화상";
 
@@ -254,6 +328,7 @@ public static partial class EvolutionSetup
             gatherSound = Sound(0.45f, 0f, $"{SciFi}/forceField_004.ogg"),
             fireSound = Sound(0.7f, 0f, $"{SciFi}/laserLarge_002.ogg", $"{SciFi}/lowFrequency_explosion_001.ogg"),
         };
+        SunLanceSounds(d.sunLance);
 
         d.prismBurst = new PrismBurstSettings { enabled = false };
         d.extraBeams = 0;

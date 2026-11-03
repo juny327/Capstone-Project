@@ -165,6 +165,7 @@ public class MeleeWeapon : WeaponBase
         SwingVariant variant = PickVariant(in stats, in context);
 
         TriggerSwingAnimation(variant);
+        PlaySwingSound();
 
         swingRoutine = StartCoroutine(SwingRoutine(stats, context.OwnerRoot, variant));
     }
@@ -344,12 +345,15 @@ public class MeleeWeapon : WeaponBase
 
             // 최대 5명을 한 번에 때린다. SoundManager 가 프레임 끝에 한 번만 낸다.
             if (SoundManager.Instance != null)
-                SoundManager.Instance.ReportHit(isCritical);
+                SoundManager.Instance.ReportHit(isCritical, HitSound.Melee);
 
             applied++;
         }
 
         SpawnSlashEffect(cfg, origin, forward);
+
+        // 베는 소리는 칼이 적에게 닿은 순간에 (2026-11-02 — 예전엔 휘두르기 시작에 나서 0.24 ~ 0.58초 먼저 들렸다)
+        if (applied > 0) PlayFireSound();
 
         if (HasHitEffects)
         {
@@ -365,6 +369,23 @@ public class MeleeWeapon : WeaponBase
 
     // 판정 순간(hitDelay 뒤)에 직접 알린다 — 휘두르기 시작에 알리면 검기가 칼보다 먼저 나간다
     protected override bool ReportsAttackItself => true;
+
+    // 발사음(베는 소리)은 쏘는 순간이 아니라 맞힌 순간에 — ApplyHits 가 낸다
+    protected override bool FireSoundOnFire => false;
+
+    /// <summary>휘두르기 시작 '휙' — 맞든 안 맞든.</summary>
+    void PlaySwingSound()
+    {
+        MeleeWeaponData cfg = Config;
+        if (cfg == null || cfg.swingSounds == null || cfg.swingSounds.Length == 0) return;
+
+        AudioClip clip = cfg.swingSounds[Random.Range(0, cfg.swingSounds.Length)];
+        if (clip == null) return;
+
+        float min = Mathf.Min(cfg.swingPitchRange.x, cfg.swingPitchRange.y);
+        float max = Mathf.Max(cfg.swingPitchRange.x, cfg.swingPitchRange.y);
+        PlaySound(clip, cfg.swingVolume, Random.Range(min > 0f ? min : 1f, max > 0f ? max : 1f));
+    }
 
     void SpawnSlashEffect(MeleeWeaponData cfg, Vector3 origin, Vector3 forward)
     {

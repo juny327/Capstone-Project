@@ -27,7 +27,8 @@ public class MirrorEdgeEffect : AttachmentEffect
     [Tooltip("검기 사이 각도(도)")]
     [Range(0f, 60f)] public float waveSpread = 18f;
     [Min(0.5f)] public float waveDistance = 8f;
-    [Min(1f)] public float waveSpeed = 22f;
+    [Tooltip("22 → 17 (2026-11-03) — 화면에 머무는 시간 0.36 → 0.47초, 눈에 들어오게")]
+    [Min(1f)] public float waveSpeed = 17f;
     [Tooltip("판정 반경")]
     [Min(0.1f)] public float waveRadius = 0.9f;
     [Tooltip("검기 피해 = 무기 공격력 × 이 값")]
@@ -37,7 +38,24 @@ public class MirrorEdgeEffect : AttachmentEffect
     public Material waveMaterial;
     public Material sparkMaterial;
     public Color color = new Color(0.25f, 0.95f, 1f, 1f);
-    [Min(0.1f)] public float waveWidth = 3f;
+    [Min(0.1f)] public float waveWidth = 3.6f;
+
+    // 2026-11-03 "테라블레이드 검기처럼 굵고 눈에 확" — 세 겹 · 잔상 · 반짝이 (CrescentWave)
+    [Tooltip("몸통 두께 (폭 1 기준, 가운데). 예전 0.16")]
+    [Range(0.05f, 0.45f)] public float waveThickness = 0.3f;
+    [Tooltip("앞날을 따라가는 심지 색 — 희게 하면 빛나는 칼날처럼 보인다")]
+    public Color coreColor = new Color(0.92f, 1f, 1f, 1f);
+    [Tooltip("넓은 빛무리 진하기 (몸통 색 × 이 값)")]
+    [Range(0f, 1f)] public float glowAlpha = 0.35f;
+    [Tooltip("뒤따르는 잔상 수 (0 ~ 6)")]
+    [Range(0, 6)] public int afterimages = 4;
+    [Tooltip("반짝이 가루 재질 (부드러운 점 · 더하기). 비우면 가루 없이")]
+    public Material particleMaterial;
+    [Tooltip("1m 날 때마다 흩날리는 가루 수")]
+    [Min(0f)] public float sparkleRate = 14f;
+    [Tooltip("적을 벨 때 · 끝에서 흩어질 때 터지는 가루 수")]
+    [Range(0, 40)] public int hitSparkles = 12;
+
     public GameSoundSet.Entry deflectSound = new GameSoundSet.Entry();
     public GameSoundSet.Entry waveSound = new GameSoundSet.Entry();
 
@@ -89,6 +107,10 @@ public class MirrorEdgeEffect : AttachmentEffect
 
             float damage = Weapon.Stats.Damage * cfg.waveDamageMul;
             Vector3 start = attack.Origin + forward * 0.8f + Vector3.up * 0.9f;
+
+            // 날아가기 전 칼끝에서 한 번 번쩍 (세 갈래가 같은 자리에서 나간다)
+            FxLine.Ring(cfg.sparkMaterial, start - Vector3.up * 0.8f, 0.2f, 1.8f, cfg.coreColor, 0.12f, 0.18f);
+            FxLine.Ring(cfg.sparkMaterial, start - Vector3.up * 0.8f, 0.4f, 2.6f, cfg.color, 0.16f, 0.24f);
 
             for (int i = 0; i < cfg.waveCount; i++)
             {

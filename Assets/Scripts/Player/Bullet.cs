@@ -134,23 +134,35 @@ public class Bullet : MonoBehaviour, IPoolable
         if (!returned && homingTurnRate > 0f) Steer();
         if (returned || speed < SweepSpeed) return;
 
-        Vector3 now = transform.position;
-        Vector3 path = now - lastPosition;
+        // 지난 위치부터 **이번 물리 단계가 끝날 자리까지** 훑는다 — 뒤만 훑으면 벽을 지나친 자리에 한 프레임 보였다가 사라진다
+        Vector3 end = transform.position + rb.linearVelocity * Time.fixedDeltaTime;
+        Vector3 path = end - lastPosition;
         float distance = path.magnitude;
 
         if (distance > 0.01f)
         {
-            int count = Physics.SphereCastNonAlloc(lastPosition, sweepRadius, path / distance, sweepHits, distance,
+            Vector3 dir = path / distance;
+            Vector3 keep = transform.position;
+            int count = Physics.SphereCastNonAlloc(lastPosition, sweepRadius, dir, sweepHits, distance,
                 ~0, QueryTriggerInteraction.Collide);
 
             // 가까운 것부터 — 관통이 다하면 거기서 멈춰야 한다
             System.Array.Sort(sweepHits, 0, count, HitDistanceComparer.Instance);
 
             for (int i = 0; i < count && !returned; i++)
-                if (sweepHits[i].collider != null) HandleHit(sweepHits[i].collider);
+            {
+                if (sweepHits[i].collider == null) continue;
+
+                // 닿은 자리로 옮겨 놓고 처리한다 — 적중 효과 · 공성포 폭발이 맞은 곳에서 난다
+                if (sweepHits[i].distance > 0f) transform.position = lastPosition + dir * sweepHits[i].distance;
+                HandleHit(sweepHits[i].collider);
+            }
+
+            // 관통해서 계속 날아가면 원래 자리로 — 옮긴 채로 두면 앞으로 튀거나 뒤로 밀린다
+            if (!returned) transform.position = keep;
         }
 
-        lastPosition = now;
+        lastPosition = transform.position;
     }
 
     /// <summary>목표 쪽으로 조금씩 꺾는다 (수평으로만). 목표가 죽었거나 꺼졌으면 그대로 간다.</summary>
@@ -195,7 +207,11 @@ public class Bullet : MonoBehaviour, IPoolable
     void HandleHit(Collider other)
     {
         if (!other.CompareTag("Enemy") && !other.CompareTag("Boss"))
+        {
+            // 벽 · 엄폐물 · 상자 같은 맵 장애물이면 거기서 사라진다 (관통 탄도 벽은 못 뚫는다)
+            if (IsObstacle(other)) HitObstacle();
             return;
+        }
 
         // IDamageable 을 가진 루트 기준으로 중복 히트를 제거한다.
         // 자식 히트박스가 여러 개인 적을 한 번만 때리기 위함.
@@ -228,7 +244,7 @@ public class Bullet : MonoBehaviour, IPoolable
 
             // 프레임 끝에 한 번만 난다 — 관통이면 같은 프레임에 여러 번 들어온다
             if (SoundManager.Instance != null)
-                SoundManager.Instance.ReportHit(isCritical);
+                SoundManager.Instance.ReportHit(isCritical, HitSound.Bullet);
 
             // 착탄 후 파생 효과(전격 연쇄 · 파열 · 폭발)가 끼어드는 자리.
             // 여기 한 곳만 열어 두면 무기마다 Bullet 을 복사하지 않아도 된다.
@@ -250,12 +266,27 @@ public class Bullet : MonoBehaviour, IPoolable
             }
         }
 
-        // 관통이 남아 있으면 계속 날아간다
-        if (pierceRemaining > 0)
+        // 관통이 남아 있으면 계속 날아간다 — 첫 적에서 멈추는 탄(공성포 포탄)은 빼고
+        if (pierceRemaining > 0 && (source == null || !source.StopsProjectileOnHit))
         {
             pierceRemaining--;
             return;
         }
+
+        ReturnToPool();
+    }
+
+    /// <summary>맵 장애물인가 — 규칙은 광선과 같다 (<see cref="CombatFx.IsMapObstacle"/>). 총알보다 낮은 것(바닥)은 뺀다.</summary>
+    bool IsObstacle(Collider other) => CombatFx.IsMapObstacle(other, transform.position.y - sweepRadius);
+
+    /// <summary>장애물에 막혔다 — 작은 적중 효과를 남기고, 사거리 끝처럼 쏜 무기에 알린 뒤(공성포는 벽에서 터진다) 풀로 돌아간다.</summary>
+    void HitObstacle()
+    {
+        SpawnEffectAt(hitEffectPrefab, transform.position + new Vector3(0f, -1f, 0f), Quaternion.identity);
+        CombatFx.ObstacleHitSound();
+
+        if (source != null && source.HasHitEffects)
+            source.NotifyProjectileExpired(transform.position, transform.forward);
 
         ReturnToPool();
     }
@@ -296,6 +327,16 @@ public class Bullet : MonoBehaviour, IPoolable
             effect.transform.position = transform.position + new Vector3(0, -1f, 0);
             effect.transform.rotation = Quaternion.identity;
         }
+    }
+
+    static void SpawnEffectAt(GameObject prefab, Vector3 position, Quaternion rotation)
+    {
+        if (prefab == null || PoolManager.Instance == null) return;
+
+        GameObject effect = PoolManager.Instance.Get(prefab);
+        if (effect == null) return;
+
+        effect.transform.SetPositionAndRotation(position, rotation);
     }
 
     void ApplyDamageVisual()

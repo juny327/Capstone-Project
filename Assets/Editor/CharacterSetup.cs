@@ -2333,7 +2333,7 @@ public static class CharacterSetup
     // ═══════════════════════════════════════════════════════════
     // 10. 로비
     // ═══════════════════════════════════════════════════════════
-    // 로비 선택 화면(왼쪽 원거리 무기 · 가운데 3D 캐릭터 · 오른쪽 근접 무기)은 LobbySetup 이 짓는다 (로비-선택화면-설계.md).
+    // 로비 선택 화면(왼쪽 원거리 무기 · 가운데 3D 캐릭터 · 오른쪽 근접 무기)은 LobbySetup 이 짓는다 (Docs/ClaudeAnalysis/Player/00-핵심-정리.md 8장).
     // 예전 배치(두 칸 무기 버튼 · "CharacterSelect")는 LobbySetup 이 지운다.
     static bool BuildLobby() => LobbySetup.Build();
 
