@@ -65,6 +65,12 @@ public class PrismBurstSettings
 
     [Min(0f)] public float cameraShake = 0.35f;
 
+    [Tooltip("빔이 나가는 동안 계속되는 잔 흔들림 — 짧은 충격 하나의 세기 (0 이면 없음). 2026-11-03 사용자 요청")]
+    [Min(0f)] public float sustainShake = 0.09f;
+
+    [Tooltip("잔 흔들림 충격 간격 (초) — 무작위 방향 충격이 겹쳐 떨림이 이어진다")]
+    [Min(0.02f)] public float sustainShakeInterval = 0.08f;
+
     [Header("연출")]
     [Tooltip("빔 · 빛 꼬리 재질 (가산 — FxLine 재질)")]
     public Material lineMaterial;

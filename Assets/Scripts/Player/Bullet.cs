@@ -266,8 +266,8 @@ public class Bullet : MonoBehaviour, IPoolable
             }
         }
 
-        // 관통이 남아 있으면 계속 날아간다
-        if (pierceRemaining > 0)
+        // 관통이 남아 있으면 계속 날아간다 — 첫 적에서 멈추는 탄(공성포 포탄)은 빼고
+        if (pierceRemaining > 0 && (source == null || !source.StopsProjectileOnHit))
         {
             pierceRemaining--;
             return;

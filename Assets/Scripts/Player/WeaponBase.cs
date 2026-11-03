@@ -611,6 +611,17 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
     /// <summary>명중 효과가 있는가 — 탄이 알림을 보낼지 고르는 데 쓴다.</summary>
     public bool HasHitEffects => runtimeList.Count > 0;
 
+    /// <summary>탄이 첫 적에서 멈춰야 하는가 — 부착물 · 상위 무기 효과 중 하나라도 원하면 (관통 무시).</summary>
+    public bool StopsProjectileOnHit
+    {
+        get
+        {
+            for (int i = 0; i < runtimeList.Count; i++)
+                if (runtimeList[i].StopsProjectile) return true;
+            return false;
+        }
+    }
+
     /// <summary>탄 색 — 상위 무기 테마 색, 탄 부위 · 전용 개조 부착물의 색. 없으면 투명.</summary>
     public Color AmmoTint
     {

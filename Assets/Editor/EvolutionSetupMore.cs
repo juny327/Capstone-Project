@@ -127,9 +127,9 @@ public static partial class EvolutionSetup
             siegeShell, Gold, d =>
             {
                 d.weaponName = "공성포";
-                d.description = "관통 무제한 포탄 — 맞은 적마다 폭발, 사거리 끝에서 큰 폭발";
+                d.description = "적에게 부딪히면 그 자리에서 터지는 포탄 — 둘레 3m 폭발";
                 d.damage *= 1.3f;
-                d.pierceCount = 99;
+                d.pierceCount = 0;   // 2026-11-03 관통 대신 첫 적에서 터진다 (SiegeShellEffect.StopsProjectile)
                 d.projectileSpeed = 22f;
                 d.projectileLifeTime = 0.7f;
             });
@@ -247,7 +247,7 @@ public static partial class EvolutionSetup
         {
             Recipe("EVO_SwarmCarbine", reset, "WD_Rifle", swarm, Orange, clip, "점사 세 발이 유도 미사일 — 발마다 다른 적을 쫓아가 작은 폭발", attachment: "MOD_Rifle_Burst"),
             Recipe("EVO_Minigun", reset, "WD_SMG", minigun, Amber, clip, "장전 없이 계속 쏜다 — 쏘는 동안 연사가 2초에 걸쳐 3배까지 오른다", attachment: "MOD_SMG_DualMag"),
-            Recipe("EVO_SiegeCannon", reset, "WD_Shotgun", siege, Gold, clip, "관통 무제한 포탄 — 맞은 적마다 폭발, 사거리 끝에서 큰 폭발", attachment: "MOD_Shotgun_Slug"),
+            Recipe("EVO_SiegeCannon", reset, "WD_Shotgun", siege, Gold, clip, "적에게 부딪히면 그 자리에서 터지는 포탄 — 둘레 3m 폭발", attachment: "MOD_Shotgun_Slug"),
             Recipe("EVO_Thundercloud", reset, "WD_TeslaRifle", thundercloud, Indigo, clip, "장전하는 동안 머리 위 먹구름이 주변 적에게 낙뢰를 쏟는다", skill: "ChainLightningUpgrade"),   // 2026-10-13 방전 → 연쇄 번개
             Recipe("EVO_SunLance", reset, "WD_ChargeLaser", sunLance, Solar, clip, SunLanceText, attachment: "MOD_Laser_Overcharge"),
             Recipe("EVO_BloodBlade", reset, "WD_Sword", bloodBlade, Blood, clip, BloodBladeText, skill: "DrainUpgrade"),

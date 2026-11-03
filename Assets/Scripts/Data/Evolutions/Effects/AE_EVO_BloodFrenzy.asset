@@ -44,7 +44,7 @@ MonoBehaviour:
   slashArc: 110
   slashTilt: 55
   slashDamageMul: 0.4
-  slashCoreColor: {r: 1, g: 0.55, b: 0.55, a: 1}
+  slashCoreColor: {r: 1, g: 0.8, b: 0.78, a: 1}
   slashSound:
     clips:
     - {fileID: 8300000, guid: e3760d5047edad749ac1e25cd676ab46, type: 3}

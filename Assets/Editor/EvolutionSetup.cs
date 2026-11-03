@@ -111,6 +111,7 @@ public static partial class EvolutionSetup
         {
             e.waveMaterial = fxLine;
             e.sparkMaterial = fxLine;
+            e.particleMaterial = SoftDotMaterial("EVO_Spark", fxLine, true, reset);   // 2026-11-03 검기 반짝이 가루
             e.color = Cyan;
             MirrorSounds(e);
         });

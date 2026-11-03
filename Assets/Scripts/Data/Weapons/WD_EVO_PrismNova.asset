@@ -93,6 +93,8 @@ MonoBehaviour:
     hitRadius: 0.7
     beamWidth: 2.4
     cameraShake: 0.35
+    sustainShake: 0.09
+    sustainShakeInterval: 0.08
     lineMaterial: {fileID: 2100000, guid: b6310812509a3ab46bf4e098541a27ab, type: 2}
     moteMaterial: {fileID: 2100000, guid: ae39686096520d44bbce285605330eb4, type: 2}
     scatterSound:

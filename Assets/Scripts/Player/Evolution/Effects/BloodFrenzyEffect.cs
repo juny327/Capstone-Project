@@ -12,6 +12,8 @@ using UnityEngine;
 ///    시작할 때 한꺼번에 쏟아지고, 그 뒤 폭주가 끝날 때까지 stormWaveInterval 마다 한 차례씩 몰아친다.
 ///    검격마다 방향 · 크기 · 길이 · 기울기 · 높이가 무작위 — 날아가지 않고 내 둘레를 사선으로 베는 호 (거울칼날 검기와 다르게).
 ///    검의 직접 공격으로 센다 — 흡혈 · 폭주 회복 · 처치로 폭주 연장이 같이 된다.
+///    2026-11-03 "딱딱하고 멋이 없다" → 검격 모양을 BloodSlash 로 (뾰족한 초승달이 휙 그어지고 꼬리부터 걷힌다) ·
+///    폭주 동안 칼끝 궤적(BladeTrail)도 길고 붉고 뾰족하게.
 /// 흡혈 스킬(Skill/Drain)은 그대로 돈다 — 여기서는 회복량을 읽기만 한다.
 /// </summary>
 [CreateAssetMenu(menuName = "Weapons/Evolution Effects/Blood Frenzy", fileName = "AE_EVO_BloodFrenzy")]
@@ -96,7 +98,26 @@ public class BloodFrenzyEffect : AttachmentEffect
     [Tooltip("검격 한 줄 피해 = 무기 공격력 × 이 값")]
     [Min(0f)] public float slashDamageMul = 0.4f;   // 촘촘한 만큼 한 줄은 약하게 (폭주 한 번 합계는 비슷)
 
-    public Color slashCoreColor = new Color(1f, 0.55f, 0.55f, 1f);
+    public Color slashCoreColor = new Color(1f, 0.8f, 0.78f, 1f);
+
+    [Tooltip("검격 가장 두꺼운 곳의 두께 (m) — 줄마다 80 ~ 115% 무작위. 꼬리 · 머리는 뾰족하다")]
+    [Min(0.05f)] public float slashWidth = 0.55f;
+
+    [Tooltip("검격이 호를 따라 그어지는 시간 (초) — 짧을수록 날카롭다")]
+    [Min(0.01f)] public float slashSweepTime = 0.07f;
+
+    [Tooltip("다 그어진 뒤 꼬리부터 걷히며 사라지는 시간 (초)")]
+    [Min(0.01f)] public float slashFadeTime = 0.24f;
+
+    [Header("폭주 칼끝 궤적 (무기의 BladeTrail)")]
+    [Tooltip("폭주 동안 궤적 길이(초) — 평소 0.14")]
+    [Min(0.01f)] public float frenzyTrailTime = 0.22f;
+
+    [Tooltip("폭주 동안 궤적 두께 (칼끝 쪽, m) — 평소 0.35")]
+    [Min(0.01f)] public float frenzyTrailWidth = 0.6f;
+
+    [Tooltip("폭주 동안 궤적 머리 색 (꼬리는 color 로 사라진다)")]
+    public Color frenzyTrailHead = new Color(1f, 0.85f, 0.85f, 1f);
     public GameSoundSet.Entry slashSound = new GameSoundSet.Entry();
     public GameSoundSet.Entry bloodSound = new GameSoundSet.Entry();
 
@@ -135,6 +156,13 @@ public class BloodFrenzyEffect : AttachmentEffect
 
         LineRenderer back;    // 빈 고리 (흐리게)
         LineRenderer fill;    // 찬 만큼
+
+        // 폭주 동안 바꾸는 칼끝 궤적 — 처음 값을 기억해 두었다가 되돌린다
+        TrailRenderer trail;
+        bool trailSaved;
+        float trailTime;
+        float trailWidth;
+        Gradient trailColors;
 
         // 혈풍 난무 — 지금 몰아치는 차례에 남은 검격 · 다음 검격까지 · 다음 차례까지
         int pending;
@@ -198,8 +226,8 @@ public class BloodFrenzyEffect : AttachmentEffect
 
             if (cfg.material != null)
             {
-                FxLine.SlashArc(cfg.material, body, dir, r, half, tilt, cfg.color, Random.Range(0.36f, 0.52f), Random.Range(0.28f, 0.4f));
-                FxLine.SlashArc(cfg.material, body, dir, r * 0.9f, half * 0.85f, tilt, cfg.slashCoreColor, 0.13f, 0.2f);
+                BloodSlash.Spawn(cfg.material, body, dir, r, half, tilt, cfg.slashWidth * Random.Range(0.8f, 1.15f),
+                    cfg.color, cfg.slashCoreColor, cfg.slashSweepTime, cfg.slashFadeTime * Random.Range(0.85f, 1.2f), Random.value < 0.5f);
 
                 // 피 방울 — 호에서 바깥 · 아래로 튀는 짧은 줄기
                 Color drop = new Color(cfg.color.r * 0.7f, 0f, 0.02f, 1f);
@@ -295,6 +323,7 @@ public class BloodFrenzyEffect : AttachmentEffect
             frenzySwings = 0;
 
             CombatFx.PlaySound(cfg.frenzySound);
+            FrenzyTrail(true);
             Transform owner = OwnerRoot;
             if (owner != null && cfg.material != null)
             {
@@ -310,7 +339,46 @@ public class BloodFrenzyEffect : AttachmentEffect
             pending = 0;
             Weapon.FireRateBoost = 1f;
             Weapon.RangeBonus = 0f;
+            FrenzyTrail(false);
             Publish();
+        }
+
+        /// <summary>폭주 동안 칼끝 궤적을 길고 · 두껍고 · 머리가 희게 빛나는 붉은 줄로 (끝나면 처음 값으로).</summary>
+        void FrenzyTrail(bool on)
+        {
+            if (trail == null)
+            {
+                BladeTrail blade = Weapon.GetComponentInChildren<BladeTrail>(true);
+                trail = blade != null ? blade.GetComponent<TrailRenderer>() : null;
+                if (trail == null) return;
+            }
+
+            if (!trailSaved)
+            {
+                trailTime = trail.time;
+                trailWidth = trail.widthMultiplier;
+                trailColors = trail.colorGradient;
+                trailSaved = true;
+            }
+
+            if (!on)
+            {
+                trail.time = trailTime;
+                trail.widthMultiplier = trailWidth;
+                trail.colorGradient = trailColors;
+                return;
+            }
+
+            // 프리팹 곡선은 머리 0.35 → 꼬리 0 — 배율로 키운다 (꼬리 뾰족함은 그대로)
+            float headWidth = trail.widthCurve.length > 0 ? Mathf.Max(0.01f, trail.widthCurve.Evaluate(0f)) : 1f;
+            trail.time = cfg.frenzyTrailTime;
+            trail.widthMultiplier = cfg.frenzyTrailWidth / headWidth;
+
+            var g = new Gradient();
+            Color tailColor = cfg.color;
+            g.SetKeys(new[] { new GradientColorKey(cfg.frenzyTrailHead, 0f), new GradientColorKey(cfg.color, 0.25f), new GradientColorKey(tailColor, 1f) },
+                      new[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(0.85f, 0.35f), new GradientAlphaKey(0f, 1f) });
+            trail.colorGradient = g;
         }
 
         /// <summary>폭주 회복 — 맞힌 피해 × 비율, 초당 상한. 회복하면 적에게서 피 줄기가 날아온다.</summary>
