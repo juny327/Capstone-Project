@@ -11,11 +11,32 @@ public class UpgradeUI : MonoBehaviour
     void OnEnable()
     {
         GameEvents.OnOpenUpgradeUI += Open;
+        GameEvents.OnUpgradeSuccess += RefreshBought;
     }
 
     void OnDisable()
     {
         GameEvents.OnOpenUpgradeUI -= Open;
+        GameEvents.OnUpgradeSuccess -= RefreshBought;
+    }
+
+    // 2026-11-04 — 산 카드는 다음 레벨 · 비용으로 바로 바꾼다 (예전에는 한 번 사면 다시 눌러도 아무 일이 없었다).
+    // 남은 경험치로 같은 카드를 또 살 수 있고, 최대 레벨이면 MAX 로 막는다.
+    void RefreshBought(UpgradeData data)
+    {
+        if (panel == null || !panel.activeInHierarchy || manager == null || data == null)
+            return;
+
+        foreach (UpgradeCard card in cards)
+        {
+            if (card == null || !card.gameObject.activeInHierarchy || card.Data != data)
+                continue;
+
+            card.Setup(data, manager.GetNextUpgradeLevel(data), manager.GetUpgradeCost(data));
+
+            if (data.IsMaxed(manager.GetCurrentUpgradeLevel(data)))
+                card.ShowMaxed();
+        }
     }
 
     void Open()

@@ -11,6 +11,12 @@ public class ShopContext
 
     /// <summary>방금 클리어한 스테이지 번호 (1 · 2 · 3). 가격 배율에 쓴다.</summary>
     public int StageIndex = 1;
+
+    /// <summary>
+    /// 앞 공급원이 이미 진열한 상품 (부착물 · 서브 능력 · 스킬 카드) — 뒤 공급원이 같은 것을 또 올리지 않게.
+    /// 진화 짝(EvolutionPairSource)이 먼저 자리를 잡는다. 진열을 새로 만들 때마다 비운다.
+    /// </summary>
+    public readonly HashSet<Object> Reserved = new HashSet<Object>();
 }
 
 /// <summary>카드 색을 고르는 데 쓰는 상품 종류.</summary>
@@ -22,6 +28,8 @@ public enum ShopOfferKind
     Consumable,   // 회복 등 (나중)
     SubAbility,   // 검사 서브 능력
     Evolution,    // 상위 무기 진화 (무기 줄)
+    Skill,        // 레벨업 카드 스킬 — 상위 무기 짝 (장비 줄, 2026-11-04)
+    Shortcut,     // 상위 무기 바로 갖추기 (줄 밖 — 따로 여는 창, 2026-11-04)
 }
 
 /// <summary>

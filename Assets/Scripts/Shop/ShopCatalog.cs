@@ -45,6 +45,10 @@ public class ShopCatalog : ScriptableObject
     [Tooltip("한 번 정비 안에서 새로고침할 때마다 더한다")]
     [Min(0)] public int rerollStepPerUse = 2;
 
+    [Header("상위 무기")]
+    [Tooltip("상위 무기 짝인 스킬(레벨업 카드 — 흡혈 · 연쇄 번개 등)을 정비 창에서 살 때 Stage1 가격 (2026-11-04)")]
+    [Min(0)] public int skillPairPrice = 30;
+
     [Header("진열")]
     [Tooltip("진열 공급원. 위에서부터 칸을 채운다. 새 상품 종류(부품 등)는 공급원 에셋을 하나 더 만들어 넣는다")]
     public ShopOfferSource[] sources;

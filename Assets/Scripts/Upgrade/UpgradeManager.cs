@@ -156,6 +156,27 @@ public class UpgradeManager : MonoBehaviour
         return result;
     }
 
+    /// <summary>
+    /// 경험치 없이 카드를 한 단계 준다 — 정비 창에서 상위 무기 짝 스킬을 크레딧으로 살 때 (2026-11-04).
+    /// 카드로 고른 것과 같게 레벨이 오르고 효과가 그 레벨로 적용된다. 최대 레벨이면 0, 아니면 오른 레벨.
+    /// </summary>
+    public static int GrantFree(GameObject player, UpgradeData data)
+    {
+        if (player == null || data == null || data.effect == null)
+            return 0;
+
+        int current = upgradeLevels.TryGetValue(data.effect, out int level) ? level : 0;
+        if (data.IsMaxed(current))
+            return 0;
+
+        int next = current + 1;
+        data.effect.Apply(player, next);
+        upgradeLevels[data.effect] = next;
+
+        Debug.Log($"[Upgrade] {data.upgradeName} Lv.{next} 지급 (정비 창)");
+        return next;
+    }
+
     // 필요할 때 새 게임의 업그레이드 상태를 강제로 초기화
     public static void ResetAllUpgradeLevels()
     {

@@ -25,7 +25,7 @@ public class SubAbilitySource : ShopOfferSource
 
         foreach (SubAbilityData data in abilities)
         {
-            if (data == null || !slot.CanAcquire(data)) continue;
+            if (data == null || ctx.Reserved.Contains(data) || !slot.CanAcquire(data)) continue;   // 진화 짝으로 이미 진열됐으면 건너뛴다
 
             int index = slot.IndexOf(data);
             int level = index >= 0 ? slot.Get(index).Level : 0;
