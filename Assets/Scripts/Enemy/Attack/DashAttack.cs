@@ -18,14 +18,11 @@ public class DashAttack : EnemyAttack
     public Color warningColor = new Color(1f, 0.25f, 0.05f, 0.18f);
     public Color fillColor = new Color(1f, 0.45f, 0.05f, 0.65f);
     public Color edgeColor = new Color(1f, 0.8f, 0.15f, 0.95f);
-    [Range(0f, 1f)] public float cueVolume = 0.35f;
 
     public override bool IsBusy => routine != null;
     Coroutine routine;
     NavMeshAgent agent;
     CapsuleCollider body;
-    AudioSource audioSource;
-    AudioClip cue;
     bool savedRootMotion, savedRotation, motionLocked;
     Vector3 origin, bodyOrigin, direction;
     Quaternion facing;
@@ -33,6 +30,8 @@ public class DashAttack : EnemyAttack
     DashFootprint footprint;
     GameObject visual;
     Transform fill;
+    float baseDashSpeed;
+    bool baseDashSpeedCaptured;
     readonly List<Mesh> meshes = new List<Mesh>();
     readonly HashSet<PlayerStats> victims = new HashSet<PlayerStats>();
     static readonly WaitForFixedUpdate PhysicsStep = new WaitForFixedUpdate();
@@ -41,24 +40,6 @@ public class DashAttack : EnemyAttack
     {
         agent = GetComponent<NavMeshAgent>();
         body = GetComponent<CapsuleCollider>();
-        audioSource = gameObject.AddComponent<AudioSource>();
-        audioSource.playOnAwake = false;
-        audioSource.spatialBlend = 0.5f;
-        audioSource.minDistance = 4f;
-        audioSource.maxDistance = 25f;
-        audioSource.rolloffMode = AudioRolloffMode.Linear;
-        // Short synthesized cue: no external sound asset is required.
-        const int sampleRate = 22050;
-        float[] samples = new float[(int)(sampleRate * 0.12f)];
-        float phase = 0f;
-        for (int i = 0; i < samples.Length; i++)
-        {
-            float t = (float)i / (samples.Length - 1);
-            phase += 2f * Mathf.PI * Mathf.Lerp(650f, 1100f, t) / sampleRate;
-            samples[i] = Mathf.Sin(phase) * Mathf.Sin(Mathf.PI * t) * 0.4f;
-        }
-        cue = AudioClip.Create("Monster B dash cue", samples.Length, 1, sampleRate, false);
-        cue.SetData(samples, 0);
     }
 
     void OnEnable() { GameEvents.OnPlayerDeadStart += CancelAttack; }
@@ -72,7 +53,23 @@ public class DashAttack : EnemyAttack
     {
         CancelAttack();
         base.Initialize(owner);
+        if (!baseDashSpeedCaptured)
+        {
+            baseDashSpeed = dashSpeed;
+            baseDashSpeedCaptured = true;
+        }
+        SetMovementSpeedMultiplier(1f);
         lastAttackTime = Time.time - attackCooldown;
+    }
+
+    public override void SetMovementSpeedMultiplier(float multiplier)
+    {
+        if (!baseDashSpeedCaptured)
+        {
+            baseDashSpeed = dashSpeed;
+            baseDashSpeedCaptured = true;
+        }
+        dashSpeed = baseDashSpeed * Mathf.Max(0f, multiplier);
     }
 
     protected override void StartAttack()
@@ -117,26 +114,20 @@ public class DashAttack : EnemyAttack
         CreateVisual();
         victims.Clear();
         float elapsed = 0f;
-        bool playedCue = false;
         while (elapsed < warningDuration)
         {
             if (!CanContinue()) { Finish(); yield break; }
             transform.rotation = facing;
             float progress = Mathf.Clamp01(elapsed / warningDuration);
             SetFill(progress);
-            if (!playedCue && warningDuration - elapsed <= 0.15f)
-            {
-                audioSource.PlayOneShot(cue, cueVolume);
-                playedCue = true;
-            }
             elapsed += Time.deltaTime;
             yield return null;
         }
         if (!CanContinue()) { Finish(); yield break; }
-        if (!playedCue) audioSource.PlayOneShot(cue, cueVolume);
         SetFill(1f);
         enemy.animator.SetBool("isMove", true);
         enemy.animator.SetFloat("Speed", dashSpeed);
+        PlayAttackSound();
         float moved = 0f;
         while (moved < travel)
         {
@@ -295,7 +286,6 @@ public class DashAttack : EnemyAttack
         if (wasBusy) lastAttackTime = Time.time;
         RestoreMotion();
         if (visual != null) visual.SetActive(false);
-        if (audioSource != null) audioSource.Stop();
         victims.Clear();
     }
 
@@ -323,7 +313,6 @@ public class DashAttack : EnemyAttack
     void OnDestroy()
     {
         DestroyVisual();
-        if (cue != null) Destroy(cue);
     }
 }
 

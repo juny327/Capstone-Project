@@ -180,6 +180,7 @@ public sealed class LaserAttack : EnemyAttack
 
         // The direction is fixed for the whole damaging phase.
         direction = transform.forward;
+        PlayAttackSound();
         victims.Clear();
         SetBeamStyle(fireColor, beamRadius * 2f);
         elapsed = 0f;

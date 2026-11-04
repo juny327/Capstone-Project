@@ -125,6 +125,7 @@ public class RangedAttack : EnemyAttack
         }
         if (CanContinue() && Vector3.Distance(transform.position, enemy.target.position) <= enemy.data.attackRange && HasLineOfSight())
         {
+            PlayAttackSound();
             Vector3 heading = AimDirection();
             transform.rotation = Quaternion.LookRotation(heading);
             Vector3 muzzle = FirePoint(heading);

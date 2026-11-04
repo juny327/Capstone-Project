@@ -8,6 +8,7 @@ public class EnemyManager : MonoBehaviour
 
     public List<EnemySpawner> spawners = new List<EnemySpawner>();
     private List<Enemy> enemies = new List<Enemy>();
+    public IReadOnlyList<Enemy> ActiveEnemies => enemies;
 
     [Header("Spawn")]
     public Enemy[] enemyPrefabs;
@@ -39,6 +40,11 @@ public class EnemyManager : MonoBehaviour
         {
             specialStageEnemy = Resources.Load<Enemy>("MonsterF");
             specialSpawnDelay = 10f;
+        }
+        else if (SceneManager.GetActiveScene().name == "Stage3" && specialStageEnemy == null)
+        {
+            specialStageEnemy = Resources.Load<Enemy>("MonsterG");
+            specialSpawnDelay = 15f;
         }
     }
 
@@ -124,7 +130,7 @@ public class EnemyManager : MonoBehaviour
 
         spawner.Spawn(specialStageEnemy, player);
         specialSpawned = true;
-        Debug.Log("[EnemyManager] Stage2 MonsterF spawned after 10 seconds.");
+        Debug.Log($"[EnemyManager] {specialStageEnemy.name} spawned in {SceneManager.GetActiveScene().name} after {specialSpawnDelay:0.#} seconds.");
     }
 
     // 특정 거리 내에 있는 spawner만 고려하자.

@@ -4,6 +4,7 @@ using UnityEngine.AI;
 public class NavMeshMovement : EnemyMovement
 {
     private NavMeshAgent agent;
+    private float speedMultiplier = 1f;
 
     void Awake()
     {
@@ -13,8 +14,8 @@ public class NavMeshMovement : EnemyMovement
     public override void Initialize(Enemy enemy)
     {
         base.Initialize(enemy);
-
-        agent.speed = enemy.data.moveSpeed;
+        speedMultiplier = 1f;
+        ApplySpeed();
     }
 
     public override void MoveTo(Vector3 position)
@@ -40,5 +41,17 @@ public class NavMeshMovement : EnemyMovement
         {
             agent.isStopped = false;
         }
+    }
+
+    public override void SetSpeedMultiplier(float multiplier)
+    {
+        speedMultiplier = Mathf.Max(0f, multiplier);
+        ApplySpeed();
+    }
+
+    void ApplySpeed()
+    {
+        if (agent != null && enemy != null && enemy.data != null)
+            agent.speed = enemy.data.moveSpeed * speedMultiplier;
     }
 }

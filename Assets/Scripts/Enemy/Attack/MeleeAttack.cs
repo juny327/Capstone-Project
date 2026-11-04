@@ -5,6 +5,7 @@ public class MeleeAttack : EnemyAttack
     protected override void StartAttack()
     {
         enemy.animator.SetBool("isAttack", true);
+        PlayAttackSound();
     }
 
     // 애니메이션 이벤트에서 호출

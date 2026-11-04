@@ -253,6 +253,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DashAttack
   attackCooldown: 3
+  attackSound: {fileID: 8300000, guid: b2c8ea5af61c4d7292565db2aab8f102, type: 3}
+  attackSoundDuration: 1.5
+  attackSoundVolume: 0.8
   warningDuration: 0.9
   dashDistance: 6
   dashSpeed: 8
@@ -265,7 +268,6 @@ MonoBehaviour:
   warningColor: {r: 1, g: 0.25, b: 0.05, a: 0.18}
   fillColor: {r: 1, g: 0.45, b: 0.05, a: 0.65}
   edgeColor: {r: 1, g: 0.8, b: 0.15, a: 0.95}
-  cueVolume: 0.35
 --- !u!114 &2414513144815526704
 MonoBehaviour:
   m_ObjectHideFlags: 0

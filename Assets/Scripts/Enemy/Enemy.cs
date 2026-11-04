@@ -149,6 +149,8 @@ public class Enemy : MonoBehaviour, IDamageable, IPoolable
     public void OnDespawn()
     {
         attack?.CancelAttack();
+        attack?.ResetBuffModifiers();
+        movement?.SetSpeedMultiplier(1f);
         OnDeath = null;
         OnCriticalHit = null;
 
@@ -208,6 +210,7 @@ public class Enemy : MonoBehaviour, IDamageable, IPoolable
         ChangeState(EnemyState.Dead);
 
         GetComponent<MonsterFController>()?.ClearEffects();
+        GetComponent<MonsterGController>()?.ClearEffects();
 
         movement.Stop();      
 

@@ -147,6 +147,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RangedAttack
   attackCooldown: 3
+  attackSound: {fileID: 8300000, guid: c3d9fb6b072e4e83a3676ec3bbc9f203, type: 3}
+  attackSoundDuration: 1.5
+  attackSoundVolume: 0.8
   warningDuration: 0.8
   spreadAngle: 25
   localFirePoint: {x: 0, y: 1.1, z: 0.65}

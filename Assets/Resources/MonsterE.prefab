@@ -147,6 +147,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LaserAttack
   attackCooldown: 2.5
+  attackSound: {fileID: 8300000, guid: e5fb1d8d294f46a5b5898fe5ddebf405, type: 3}
+  attackSoundDuration: 1.5
+  attackSoundVolume: 0.8
   warningDuration: 1.4
   aimDuration: 0.8
   predictionTime: 0.45

@@ -927,8 +927,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SuicideAttack
   attackCooldown: 1
-  explosionDelay: 0.3
+  explosionDelay: 0.9
+  chargeSpeed: 10
+  chargeDuration: 0.8
+  chargeStopDistance: 1.4
+  explosionRadius: 2.25
   explosionEffect: {fileID: 8919546882320206668, guid: c49a7026b3c2dc041a47f5dddd59f7a5, type: 3}
+  visualPrefab: {fileID: 434023797309887072, guid: cf32d1dc353245644b4351266129b21b, type: 3}
+  visualHeight: 1.5
 --- !u!1 &3141116307832430840
 GameObject:
   m_ObjectHideFlags: 0
