@@ -446,6 +446,27 @@ public class WeaponController : MonoBehaviour
         return removed;
     }
 
+    // ───────── 몬스터 상태 이상 (monster 브랜치 2026-10-11, 병합 11-04) ─────────
+
+    private float externalFireIntervalMultiplier = 1f;
+
+    /// <summary>외부 상태효과가 적용한 발사 간격 배율. 1.3이면 발사 속도가 약 23% 느려진다.</summary>
+    public float ExternalFireIntervalMultiplier => externalFireIntervalMultiplier;
+
+    /// <summary>MonsterF 저주 — 켜면 발사 속도를 fireRateSlow 만큼 늦춘다 (WeaponBase.Stats 가 발사 간격에 곱한다).</summary>
+    public void SetFireRateDebuff(bool enabled, float fireRateSlow = 0.23f)
+    {
+        float next = enabled
+            ? 1f / Mathf.Clamp(1f - fireRateSlow, 0.05f, 1f)
+            : 1f;
+
+        if (Mathf.Approximately(externalFireIntervalMultiplier, next))
+            return;
+
+        externalFireIntervalMultiplier = next;
+        RaiseLegacyStats();
+    }
+
     // ───────── 스왑 ─────────
 
     public void SwapNext()

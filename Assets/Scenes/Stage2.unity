@@ -36291,6 +36291,7 @@ MonoBehaviour:
   - {fileID: 7825948330110257694, guid: 8e988dc45d5a3c14fb66e2ddf5464a71, type: 3}
   - {fileID: 5336096609891130127, guid: d60ee0708db88ed498ecb4b77e3ab456, type: 3}
   - {fileID: 8162335778504266055, guid: 8bd3d77cd8392274183d5dc9bc9bf826, type: 3}
+  - {fileID: 5336096609891130127, guid: 8728157ee24e47a887801857335db6bb, type: 3}
   player: {fileID: 0}
   spawnInterval: 3
   rangedProjectileSpeed: 3.5

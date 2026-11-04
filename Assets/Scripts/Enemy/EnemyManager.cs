@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class EnemyManager : MonoBehaviour
 {
@@ -7,6 +8,7 @@ public class EnemyManager : MonoBehaviour
 
     public List<EnemySpawner> spawners = new List<EnemySpawner>();
     private List<Enemy> enemies = new List<Enemy>();
+    public IReadOnlyList<Enemy> ActiveEnemies => enemies;
 
     [Header("Spawn")]
     public Enemy[] enemyPrefabs;
@@ -14,6 +16,13 @@ public class EnemyManager : MonoBehaviour
     public float spawnInterval = 3f;
     [Min(0.1f)] public float rangedProjectileSpeed = 3.5f;
     public int maxEnemyCount = 20;
+
+    [Header("Stage Event")]
+    [Tooltip("Stage2에서 자동으로 로드되는 특수 몬스터. 다른 스테이지에서는 비워 둔다.")]
+    [SerializeField] private Enemy specialStageEnemy;
+    [SerializeField] private float specialSpawnDelay = -1f;
+    private bool specialSpawned;
+    private float stageElapsed;
 
     [Header("Spawn Distance")]
     public float minSpawnDistance = 10f;
@@ -26,12 +35,25 @@ public class EnemyManager : MonoBehaviour
     void Awake()
     {
         Instance = this;
+
+        if (SceneManager.GetActiveScene().name == "Stage2" && specialStageEnemy == null)
+        {
+            specialStageEnemy = Resources.Load<Enemy>("MonsterF");
+            specialSpawnDelay = 10f;
+        }
+        else if (SceneManager.GetActiveScene().name == "Stage3" && specialStageEnemy == null)
+        {
+            specialStageEnemy = Resources.Load<Enemy>("MonsterG");
+            specialSpawnDelay = 15f;
+        }
     }
 
     void Update()
     {
         TickEnemies();
         UpdateSpawn();
+        stageElapsed += Time.deltaTime;
+        UpdateSpecialSpawn();
     }
 
     void OnEnable()
@@ -92,6 +114,23 @@ public class EnemyManager : MonoBehaviour
         if (prefab == null) return;
 
         spawner.Spawn(prefab, player);
+    }
+
+    void UpdateSpecialSpawn()
+    {
+        if (specialSpawned || specialStageEnemy == null || player == null)
+            return;
+
+        if (specialSpawnDelay < 0f || stageElapsed < specialSpawnDelay)
+            return;
+
+        EnemySpawner spawner = FindValidSpawner();
+        if (spawner == null)
+            return;
+
+        spawner.Spawn(specialStageEnemy, player);
+        specialSpawned = true;
+        Debug.Log($"[EnemyManager] {specialStageEnemy.name} spawned in {SceneManager.GetActiveScene().name} after {specialSpawnDelay:0.#} seconds.");
     }
 
     // 특정 거리 내에 있는 spawner만 고려하자.
@@ -195,6 +234,7 @@ public class EnemyManager : MonoBehaviour
     void OnEnemyDeath(Enemy enemy)
     {
         enemies.Remove(enemy);
-        GameEvents.OnEnemyKilled?.Invoke();
+        if (enemy == null || enemy.countsTowardKillGoal)
+            GameEvents.OnEnemyKilled?.Invoke();
     }
 }
