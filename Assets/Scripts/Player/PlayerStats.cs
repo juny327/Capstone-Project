@@ -16,7 +16,13 @@ public class PlayerStats : MonoBehaviour, IDamageable
 {
     [Header("Level")]
     public int level = 1;
+
+    [Tooltip("보유 경험치 — 레벨업 카드를 살 때만 줄어든다 (HUD 의 EXP)")]
     public int currentExp = 0;
+
+    [Tooltip("이번 레벨 게이지 — 구슬로 차고, expToNextLevel 을 넘으면 레벨업 (보유 경험치는 그대로)")]
+    public int levelExp = 0;
+
     public int expToNextLevel = 10;
     public float expGrowthRate = 1.3f;
 
@@ -87,11 +93,14 @@ public class PlayerStats : MonoBehaviour, IDamageable
         if (isDead || amount <= 0)
             return;
 
+        // 2026-11-04 — 레벨업이 경험치를 가져가지 않는다. 예전에는 레벨업에 다 써서 카드 창이 열린 순간 보유 경험치가 0 이라
+        // 경험치를 내는 카드(팀원 스킬 레벨 시스템)를 하나도 살 수 없었다. 이제 게이지(levelExp)만 넘은 만큼 줄고, 보유 경험치는 남는다.
         currentExp += amount;
+        levelExp += amount;
 
-        while (currentExp >= expToNextLevel)
+        while (levelExp >= expToNextLevel)
         {
-            currentExp -= expToNextLevel;
+            levelExp -= expToNextLevel;
             level++;
 
             expToNextLevel = Mathf.Max(

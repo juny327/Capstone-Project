@@ -62,17 +62,19 @@ public class UpgradeManager : MonoBehaviour
         if (playerStats == null)
             return;
 
-        if (playerStats.currentExp < data.costExp)
+        // 현재 레벨 + 1
+        int nextLevel = GetNextUpgradeLevel(data);
+        int cost = GetUpgradeCost(data);
+
+        // 최대 레벨이거나 경험치가 모자라면 실패 (최대 레벨 카드는 풀에 나오지 않지만 디버그 메뉴로 올 수 있다)
+        if (data.IsMaxed(GetCurrentUpgradeLevel(data)) || playerStats.currentExp < cost)
         {
             GameEvents.OnUpgradeFailed?.Invoke(data);
             return;
         }
 
-        // 현재 레벨 + 1
-        int nextLevel = GetNextUpgradeLevel(data);
-
-        // 경험치 차감
-        playerStats.SpendExp(data.costExp);
+        // 경험치 차감 — 카드 레벨이 높을수록 비싸다 (2026-11-04)
+        playerStats.SpendExp(cost);
 
         // 실제 스킬 수치 적용
         data.effect.Apply(player, nextLevel);
@@ -103,6 +105,9 @@ public class UpgradeManager : MonoBehaviour
 
         return currentLevel + 1;
     }
+
+    /// <summary>이 카드를 지금 사면 내는 경험치 — 다음 레벨 × 기본 비용.</summary>
+    public int GetUpgradeCost(UpgradeData data) => data != null ? data.CostFor(GetNextUpgradeLevel(data)) : 0;
 
     public int GetCurrentUpgradeLevel(UpgradeData data)
     {
@@ -135,7 +140,8 @@ public class UpgradeManager : MonoBehaviour
         List<UpgradeData> pool =
             new List<UpgradeData>(upgradePool.upgrades);
 
-        pool.RemoveAll(x => x == null);
+        // 최대 레벨에 닿은 카드는 더 나오지 않는다 (2026-11-04)
+        pool.RemoveAll(x => x == null || x.IsMaxed(GetCurrentUpgradeLevel(x)));
 
         count = Mathf.Min(count, pool.Count);
 

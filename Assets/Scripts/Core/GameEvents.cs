@@ -19,6 +19,9 @@ public static class GameEvents
 
     public static Action<UpgradeData> OnUpgradeFailed;
 
+    /// <summary>레벨업 카드 창의 "다음" — 카드 단계가 끝났다 (사지 않고 넘겨도 온다). GameManager 가 이때 게임을 다시 흐르게 한다.</summary>
+    public static Action OnUpgradeClosed;
+
     public static Action OnPlayerDeadStart;
 
     public static Action OnPlayerDeadEnd;

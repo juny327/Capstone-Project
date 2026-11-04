@@ -49,18 +49,21 @@ public class UpgradeUI : MonoBehaviour
             int nextLevel =
                 manager.GetNextUpgradeLevel(data);
 
-            cards[i].Setup(data, nextLevel);
+            cards[i].Setup(data, nextLevel, manager.GetUpgradeCost(data));
         }
     }
 
     // 업그레이드 선택 완료 후 창을 닫고 게임을 재개한다.
     // 다음 스테이지로 넘어가지는 않는다.
+    // 2026-11-04 — 게임 재개는 GameManager 가 맡는다 (쌓인 레벨업이 더 있으면 다음 카드를 열고, 클리어 흐름이 기다리고 있으면 그쪽으로).
     public void OnNextButton()
     {
         if (panel != null)
             panel.SetActive(false);
 
-        // 레벨업으로 일시정지된 게임 재개
-        Time.timeScale = 1f;
+        if (GameEvents.OnUpgradeClosed != null)
+            GameEvents.OnUpgradeClosed.Invoke();
+        else
+            Time.timeScale = 1f;   // GameManager 가 없는 장면(디버그로 연 창) — 예전처럼 바로 재개
     }
 }

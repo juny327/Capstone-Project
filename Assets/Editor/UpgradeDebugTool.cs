@@ -169,7 +169,7 @@ public static class UpgradeDebugTool
             // 일반 업그레이드 이벤트를 그대로 호출해서
             // UpgradeManager의 레벨 관리와 Effect 적용을 동일하게 사용한다.
             playerStats.currentExp =
-                Mathf.Max(playerStats.currentExp, target.costExp);
+                Mathf.Max(playerStats.currentExp, manager.GetUpgradeCost(target));
 
             GameEvents.OnUpgradeSelected?.Invoke(target);
         }

@@ -9,6 +9,7 @@ using UnityEngine.SceneManagement;
 ///  · 사망 &gt; 클리어 &gt; 레벨업. 판이 끝나면(사망 · 승리) 먼저 일어난 쪽만 처리하고 뒤따르는 것은 무시한다
 ///  · 클리어한 순간 플레이어를 무적으로 잠근다 — 같은 프레임에 뒤따르는 피해, 클리어 문구 동안의 공격으로 죽지 않게
 ///  · 클리어 흐름 중에 생긴 레벨업은 쌓아 두었다가 클리어 문구 뒤 · 보상 카드 앞에서 연다 — 두 창이 겹치지 않게
+///  · 레벨업 카드는 경험치로 사는 작은 상점이다 (팀원 스킬 레벨 시스템) — 사도 창은 그대로, "다음"(OnUpgradeClosed)을 누를 때까지 멈춘다
 ///
 /// 클리어 흐름: 클리어 문구 → 레벨업 카드 → 보상 카드 → 정비(상점) → 다음 씬
 /// </summary>
@@ -44,7 +45,7 @@ public class GameManager : MonoBehaviour
         GameEvents.OnNextStage += LoadNextStage;
         GameEvents.OnGameWin += OnGameWin;
         GameEvents.OnPlayerLevelUp += OnPlayerLevelUp;
-        GameEvents.OnUpgradeSuccess += OnUpgradeSuccess;
+        GameEvents.OnUpgradeClosed += OnUpgradeClosed;
         GameEvents.OnStageRewardApplied += OnStageRewardApplied;
         GameEvents.OnPlayerDeadStart += OnPlayerDeadStart;
         GameEvents.OnMaintenanceClosed += OnMaintenanceClosed;
@@ -56,7 +57,7 @@ public class GameManager : MonoBehaviour
         GameEvents.OnNextStage -= LoadNextStage;
         GameEvents.OnGameWin -= OnGameWin;
         GameEvents.OnPlayerLevelUp -= OnPlayerLevelUp;
-        GameEvents.OnUpgradeSuccess -= OnUpgradeSuccess;
+        GameEvents.OnUpgradeClosed -= OnUpgradeClosed;
         GameEvents.OnStageRewardApplied -= OnStageRewardApplied;
         GameEvents.OnPlayerDeadStart -= OnPlayerDeadStart;
         GameEvents.OnMaintenanceClosed -= OnMaintenanceClosed;
@@ -91,7 +92,11 @@ public class GameManager : MonoBehaviour
         GameEvents.OnOpenUpgradeUI?.Invoke();
     }
 
-    void OnUpgradeSuccess(UpgradeData data)
+    /// <summary>
+    /// 카드 창의 "다음" — 레벨업 하나를 끝낸다. 카드를 사는 것(OnUpgradeSuccess)으로는 끝나지 않는다:
+    /// 남은 경험치로 더 살 수 있고, 하나도 안 사고 넘길 수도 있다. 그동안 게임은 멈춰 있다.
+    /// </summary>
+    void OnUpgradeClosed()
     {
         if (!isUpgradeOpen)
             return;

@@ -28,6 +28,11 @@ public class UpgradeCard : MonoBehaviour
 
     public void Setup(UpgradeData upgrade, int nextLevel)
     {
+        Setup(upgrade, nextLevel, upgrade != null ? upgrade.CostFor(nextLevel) : 0);
+    }
+
+    public void Setup(UpgradeData upgrade, int nextLevel, int costExp)
+    {
         data = upgrade;
         clicked = false;
 
@@ -46,7 +51,7 @@ public class UpgradeCard : MonoBehaviour
         if (cost != null)
         {
             cost.gameObject.SetActive(true);
-            cost.text = $"cost Exp : {upgrade.costExp}";
+            cost.text = $"cost Exp : {costExp}";
         }
     }
 
