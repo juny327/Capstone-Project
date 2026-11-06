@@ -9,7 +9,8 @@ public class MapGenerator : MonoBehaviour
     public int height = 50;
 
     [Header("Renderer")]
-    public MapRenderer renderer;
+    // 씬에 저장된 이름이라 그대로 두고 new 로 Component.renderer 를 가린다고 밝힌다 — CS0108 경고 (2026-11-06)
+    public new MapRenderer renderer;
 
     [Header("Placer")]
     public MonsterSpawnerPlacer monsterPlacer;

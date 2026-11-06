@@ -284,7 +284,7 @@ public static class StageRewardSetup
             so.FindProperty("icon").objectReferenceValue = icon;
             so.FindProperty("title").objectReferenceValue = title;
             so.FindProperty("description").objectReferenceValue = description;
-            so.FindProperty("tag").objectReferenceValue = tag;
+            so.FindProperty("tagLabel").objectReferenceValue = tag;
             so.ApplyModifiedPropertiesWithoutUndo();
 
             // 버튼을 누르면 카드가 선택 이벤트를 쏜다

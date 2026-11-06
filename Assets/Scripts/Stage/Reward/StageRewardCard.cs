@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 /// <summary>
@@ -15,8 +16,10 @@ public class StageRewardCard : MonoBehaviour
     public TextMeshProUGUI title;
     public TextMeshProUGUI description;
 
+    // 예전 이름 tag 는 GameObject 태그(Component.tag)와 겹쳐 CS0108 경고가 났다 — 씬에 저장된 값은 그대로 읽힌다 (2026-11-06)
     [Tooltip("이미 가진 무기일 때 '레벨 업' 을 띄운다. 없어도 동작한다")]
-    public TextMeshProUGUI tag;
+    [FormerlySerializedAs("tag")]
+    public TextMeshProUGUI tagLabel;
 
     [Header("Sound")]
     public AudioSource audioSource;
@@ -54,14 +57,14 @@ public class StageRewardCard : MonoBehaviour
     /// </summary>
     void UpdateTag(StageReward data, GameObject player)
     {
-        if (tag == null) return;
+        if (tagLabel == null) return;
 
         // 종류를 묻는 유일한 곳이다. 모르는 종류면 그냥 표시하지 않는다.
         bool owned = data is WeaponReward weaponReward && weaponReward.IsOwnedBy(player);
 
-        tag.gameObject.SetActive(owned);
+        tagLabel.gameObject.SetActive(owned);
 
-        if (owned) tag.text = "레벨 업";
+        if (owned) tagLabel.text = "레벨 업";
     }
 
     /// <summary>버튼 OnClick 에 연결한다.</summary>
