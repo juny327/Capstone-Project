@@ -734,7 +734,7 @@ public static class EconomyShopSetup
             drt.pivot = new Vector2(0, 1);
             drt.offsetMin = new Vector2(104, -60);
             drt.offsetMax = new Vector2(-6, -36);
-            detail.enableWordWrapping = false;
+            detail.textWrappingMode = TextWrappingModes.NoWrap;
             detail.overflowMode = TextOverflowModes.Ellipsis;
             detail.gameObject.SetActive(false);
 

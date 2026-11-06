@@ -118,7 +118,7 @@ public static class LobySelectSetup
             label.fontSize = 30f;
             label.color = Color.black;
             label.alignment = TextAlignmentOptions.Center;
-            label.enableWordWrapping = false;
+            label.textWrappingMode = TextWrappingModes.NoWrap;
 
             buttons[i] = button;
         }

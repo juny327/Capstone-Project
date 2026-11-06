@@ -7,12 +7,10 @@ public class SpeedUpgrade : UpgradeEffect
 
     public override void Apply(GameObject player)
     {
-        Debug.Log("SpeedUpgrade Apply : " + player.name);
         PlayerMove move = player.GetComponent<PlayerMove>();
 
         if (move != null)
         {
-            Debug.Log("a");
             move.AddSpeed(amount);
         }
         else

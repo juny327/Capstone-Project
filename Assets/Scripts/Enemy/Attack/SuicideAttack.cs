@@ -288,7 +288,10 @@ public class SuicideAttack : EnemyAttack
     {
         if (attackRoutine != null)
         {
-            StopCoroutine(attackRoutine);
+            // enemy.StartCoroutine 으로 시작했으니 enemy 에서 멈춘다 (2026-11-06).
+            // 이 컴포넌트에서 멈추면 Unity 가 "Coroutine continue failure" 를 낸다.
+            if (enemy != null)
+                enemy.StopCoroutine(attackRoutine);
             attackRoutine = null;
         }
 

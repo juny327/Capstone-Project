@@ -24,8 +24,6 @@ public class TornadoProjectile : MonoBehaviour
         float interval,
         float attackRadius)
     {
-        Debug.Log("Tornado Initialize");
-
         target = enemy;
 
         speed = moveSpeed;
@@ -46,7 +44,6 @@ public class TornadoProjectile : MonoBehaviour
         // 지속시간 종료
         if (lifeTimer >= duration)
         {
-            Debug.Log("Tornado Destroy");
             Destroy(gameObject);
             return;
         }
@@ -92,10 +89,6 @@ public class TornadoProjectile : MonoBehaviour
         if (newTarget != null)
         {
             target = newTarget;
-
-            Debug.Log(
-                "Tornado New Target : " + target.name
-            );
         }
     }
 
@@ -105,11 +98,6 @@ public class TornadoProjectile : MonoBehaviour
         Collider[] hits = Physics.OverlapSphere(
             transform.position,
             radius
-        );
-
-
-        Debug.Log(
-            "Tornado Detect Count : " + hits.Length
         );
 
 
@@ -123,11 +111,6 @@ public class TornadoProjectile : MonoBehaviour
 
             if (enemy.state == EnemyState.Dead)
                 continue;
-
-
-            Debug.Log(
-                "Tornado Damage Apply : " + enemy.name
-            );
 
 
             enemy.TakeDamage(new DamageInfo

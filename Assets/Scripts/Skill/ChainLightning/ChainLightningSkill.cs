@@ -97,6 +97,10 @@ public class ChainLightningSkill : MonoBehaviour
 
             yield return new WaitForSeconds(chainDelay);
 
+            // 기다리는 사이 씬이 바뀌면 적은 파괴된다 — 플레이어와 이 코루틴은 씬을 넘어 살아 있다 (2026-11-06)
+            if (current == null)
+                yield break;
+
             Enemy next = FindClosestEnemy(
                 current.transform.position,
                 chainRange,
