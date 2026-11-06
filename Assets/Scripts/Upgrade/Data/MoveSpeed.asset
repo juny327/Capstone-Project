@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: MoveSpeed
   m_EditorClassIdentifier: Assembly-CSharp::UpgradeData
   upgradeName: SpeedUp
-  description: Speed + 0.5
+  description: Speed + 0.1
   icon: {fileID: -2150586605909947391, guid: d4cb51f642015c44294a9fc6ceaa2aa7, type: 3}
   costExp: 2
   maxLevel: 0
