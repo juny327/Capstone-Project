@@ -16,7 +16,7 @@ MonoBehaviour:
   count: 3
   orbitRadius: 2.7
   rotationSpeed: 190
-  damage: 3
+  damage: 1
   hitInterval: 0.5
   duration: 12
   cooldown: 18
