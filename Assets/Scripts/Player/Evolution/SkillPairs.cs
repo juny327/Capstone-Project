@@ -46,6 +46,9 @@ public static class SkillPairs
         return false;
     }
 
+    /// <summary>자동 스킬 카드인가 (이동 속도 · 공격력 같은 능력치 카드가 아니라) — 스킬 HUD 가 고른다.</summary>
+    public static bool IsSkill(UpgradeData card) => TryFind(card, out _);
+
     /// <summary>그 카드의 스킬을 플레이어가 가지고 있는가.</summary>
     public static bool Has(GameObject player, UpgradeData card)
     {

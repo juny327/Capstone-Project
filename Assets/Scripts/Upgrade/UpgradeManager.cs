@@ -124,6 +124,12 @@ public class UpgradeManager : MonoBehaviour
         return currentLevel;
     }
 
+    /// <summary>그 카드 효과의 지금 레벨 (없으면 0) — 스킬 HUD 가 읽는다 (2026-11-06).</summary>
+    public static int LevelOf(UpgradeEffect effect)
+    {
+        return effect != null && upgradeLevels.TryGetValue(effect, out int level) ? level : 0;
+    }
+
     public List<UpgradeData> GetRandomUpgrades(int count)
     {
         List<UpgradeData> result =
