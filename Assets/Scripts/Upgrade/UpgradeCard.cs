@@ -54,7 +54,7 @@ public class UpgradeCard : MonoBehaviour
         if (cost != null)
         {
             cost.gameObject.SetActive(true);
-            cost.text = $"cost Exp : {costExp}";
+            cost.text = $"경험치 {costExp}";
         }
     }
 

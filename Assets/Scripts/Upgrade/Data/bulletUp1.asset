@@ -12,4 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8d0639bd9a264fa4da9d1fbde5295631, type: 3}
   m_Name: bulletUp1
   m_EditorClassIdentifier: Assembly-CSharp::DamageUpgrade
-  amount: 1
+  amount: 0
+  percent: 0.1

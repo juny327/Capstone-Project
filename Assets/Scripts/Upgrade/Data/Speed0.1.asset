@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f0a01a440bfa2b64bbaadcf499e4f56c, type: 3}
   m_Name: Speed0.1
   m_EditorClassIdentifier: Assembly-CSharp::SpeedUpgrade
-  amount: 0.1
+  amount: 0.3

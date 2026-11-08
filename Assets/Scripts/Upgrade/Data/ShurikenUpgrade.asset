@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84bc2621c547cb84c86833668e594c86, type: 3}
   m_Name: ShurikenUpgrade
   m_EditorClassIdentifier: Assembly-CSharp::UpgradeData
-  upgradeName: Shuriken
-  description: "\uC288\uB9AC\uCF04\uC744 \uC18C\uD658"
+  upgradeName: "\uD45C\uCC3D"
+  description: "\uD45C\uCC3D 3\uAC1C\uAC00 12\uCD08\uAC04 \uBAB8 \uB458\uB808\uB97C \uB3C8\uB2E4 (\uD53C\uD574 1)\n\uB808\uBCA8\uB9C8\uB2E4 \uD45C\uCC3D +1"
   icon: {fileID: 21300000, guid: 249f9bfcf47ceec48b6db33d2cb3c9b5, type: 3}
   costExp: 10
   maxLevel: 3

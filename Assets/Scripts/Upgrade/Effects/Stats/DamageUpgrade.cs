@@ -9,7 +9,11 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Upgrade/Effects/Damage")]
 public class DamageUpgrade : UpgradeEffect
 {
+    [Tooltip("모든 무기 피해 + 고정값 (탄마다 붙어 샷건 · 연사 무기만 크게 오른다)")]
     public float amount;
+
+    [Tooltip("모든 무기 피해 × (1 + percent). 0.1 = +10%, 살 때마다 곱해진다 (2026-11-08)")]
+    public float percent;
 
     public override void Apply(GameObject player)
     {
@@ -25,6 +29,7 @@ public class DamageUpgrade : UpgradeEffect
 
         WeaponModifier modifier = WeaponModifier.Identity;
         modifier.damageAdd = amount;
+        modifier.damageMul = 1f + percent;
 
         controller.ApplyGlobalModifier(modifier);
     }

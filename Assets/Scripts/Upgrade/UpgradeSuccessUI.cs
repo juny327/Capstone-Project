@@ -26,7 +26,7 @@ public class UpgradeSuccessUI : MonoBehaviour
         }
 
         panel.SetActive(true);
-        text.text = data.upgradeName + " Upgrade Success!";
+        text.text = data.upgradeName + " 강화 성공!";
     }
 
     public void OnClose()

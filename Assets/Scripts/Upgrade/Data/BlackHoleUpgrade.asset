@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84bc2621c547cb84c86833668e594c86, type: 3}
   m_Name: BlackHoleUpgrade
   m_EditorClassIdentifier: Assembly-CSharp::UpgradeData
-  upgradeName: BlackHole
-  description: "\uBE14\uB799\uD640"
+  upgradeName: "\uBE14\uB799\uD640"
+  description: "\uC801\uC744 4\uCD08\uAC04 \uB04C\uC5B4\uB2F9\uACA8 \uBB36\uACE0 \uD3ED\uBC1C (\uD53C\uD574 4)\n\uB808\uBCA8\uB9C8\uB2E4 \uC9C0\uC18D +1\uCD08"
   icon: {fileID: 21300000, guid: da88b1ff266954f44abd6d1472bd9323, type: 3}
   costExp: 10
   maxLevel: 5
