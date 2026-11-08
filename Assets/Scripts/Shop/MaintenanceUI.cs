@@ -216,9 +216,13 @@ public class MaintenanceUI : MonoBehaviour
                 return;
             }
 
-            if (title != null) title.text = "정비";
-            if (subtitle != null) subtitle.text = $"스테이지 {stage} 클리어 — 크레딧으로 무기를 갖추고 출발하세요";
-            if (nextLabel != null) nextLabel.text = stage >= bossAfterStage ? "보스전으로  ▶" : "다음 스테이지  ▶";
+            // 정비 신호기로 연 중간 정비면 문구가 다르다 — 닫으면 같은 스테이지로 돌아간다 (2026-11-05)
+            bool midStage = GameManager.Instance != null && GameManager.Instance.MidStageMaintenance;
+            if (title != null) title.text = midStage ? "보급 정비" : "정비";
+            if (subtitle != null) subtitle.text = midStage
+                ? $"스테이지 {stage} — 정비 신호기를 찾았습니다. 정비를 마치면 전투로 돌아갑니다"
+                : $"스테이지 {stage} 클리어 — 크레딧으로 무기를 갖추고 출발하세요";
+            if (nextLabel != null) nextLabel.text = midStage ? "전투로 돌아가기  ▶" : stage >= bossAfterStage ? "보스전으로  ▶" : "다음 스테이지  ▶";
 
             ShowMessage(null);
             SetShortcutOpen(false);
