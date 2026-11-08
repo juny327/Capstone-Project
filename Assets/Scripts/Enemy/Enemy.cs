@@ -395,10 +395,17 @@ public class Enemy : MonoBehaviour, IDamageable, IPoolable
         GetComponent<MonsterFController>()?.ClearEffects();
         GetComponent<MonsterGController>()?.ClearEffects();
 
+        // 하던 공격을 멈춘다 — 근접 공격의 isAttack 이 켜진 채면 애니메이터가 죽음 대신 공격을 다시 틀었다 (2026-11-08)
+        attack?.CancelAttack();
+
         movement.Stop();
 
 
         animator.Play("Die");
+
+        // 풀 반납은 죽음 애니메이션 끝의 이벤트가 한다. 어떤 이유로 그 애니메이션이 끊겨도 시체가 남지 않게
+        // 조금 뒤 직접 돌려보낸다. 먼저 돌아가면 꺼지면서 이 코루틴도 멈추니 두 번 반납되지 않는다 (2026-11-08)
+        StartCoroutine(ReturnToPoolFallback());
 
 
         OnDeath?.Invoke(this);
@@ -434,5 +441,16 @@ public class Enemy : MonoBehaviour, IDamageable, IPoolable
     void ReturnToPool()
     {
         PoolManager.Instance.Return(gameObject);
+    }
+
+    // 가장 긴 죽음 애니메이션(몬스터 B, 약 2.3초)보다 넉넉하게
+    const float DeathReturnFallbackSeconds = 4f;
+
+    IEnumerator ReturnToPoolFallback()
+    {
+        yield return new WaitForSeconds(DeathReturnFallbackSeconds);
+
+        if (state == EnemyState.Dead && gameObject.activeInHierarchy)
+            ReturnToPool();
     }
 }
