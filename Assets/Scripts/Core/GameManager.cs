@@ -251,7 +251,7 @@ public class GameManager : MonoBehaviour
     public bool MidStageMaintenance { get; private set; }
 
     /// <summary>
-    /// 정비 신호기 — 스테이지 중간 정비 (스테이지-템포-개편안.md, 2026-11-05).
+    /// 정비 신호기 — 스테이지 중간 정비 (정리/게임흐름-밸런스-변경.md, 2026-11-05).
     /// 쌓인 레벨업 카드가 있으면 먼저 고르고 연다. 클리어 흐름 중 · 판이 끝났으면 열지 않는다 (false).
     /// 닫으면 게임이 다시 흐르고 스테이지가 이어진다.
     /// </summary>

@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// 보급 아이템 수치 (스테이지-템포-개편안.md, 2026-11-05) — 자석 · 힐팩 · 정비 신호기.
+/// 보급 아이템 수치 (정리/게임흐름-밸런스-변경.md, 2026-11-05) — 자석 · 힐팩 · 정비 신호기.
 /// Resources/Economy/SupplySettings 에 하나. 프리팹 · UI 는 Tools / 재화 · 상점 / 보급 아이템 만들기 가 만든다.
 /// </summary>
 [CreateAssetMenu(menuName = "Economy/Supply Settings", fileName = "SupplySettings")]

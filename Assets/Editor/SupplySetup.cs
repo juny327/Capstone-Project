@@ -7,7 +7,7 @@ using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
 /// <summary>
-/// 보급 아이템 만들기 (스테이지-템포-개편안.md, 2026-11-05). 메뉴: Tools / 재화 · 상점 / 보급 아이템 만들기
+/// 보급 아이템 만들기 (정리/게임흐름-밸런스-변경.md, 2026-11-05). 메뉴: Tools / 재화 · 상점 / 보급 아이템 만들기
 ///
 ///  · Resources/Economy/SupplySettings — 확률 · 상한 · 회복량 등 수치. <b>없을 때만 수치를 넣는다</b> (조절한 값을 덮어쓰지 않는다)
 ///  · Prefabs/Supply — 자석 · 힐팩 · 정비 신호기 모양(기본 도형 + 발광 재질), 신호기 위치 표시 UI, 화살표 그림
