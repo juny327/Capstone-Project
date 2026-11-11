@@ -18,4 +18,4 @@ MonoBehaviour:
   attackRange: 14
   moveSpeed: 1.8
   expDrop: 3
-  spawnWeight: 35
+  spawnWeight: 30

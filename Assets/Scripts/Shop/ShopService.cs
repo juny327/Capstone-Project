@@ -100,6 +100,7 @@ public class ShopService
     void BuildStock()
     {
         offers.Clear();
+        Context.Reserved.Clear();
 
         ShopOfferSource[] sources = Context.Catalog.sources;
         if (sources != null)

@@ -31,6 +31,8 @@ public static class EconomyShopSetup
     const string CatalogPath = ShopDir + "/ShopCatalog.asset";
     const string PurchaseSourcePath = ShopDir + "/ShopSource_WeaponPurchase.asset";
     const string UpgradeSourcePath = ShopDir + "/ShopSource_WeaponUpgrade.asset";
+    const string PairSourcePath = ShopDir + "/ShopSource_EvolutionPair.asset";           // 2026-11-04 상위 무기 짝 보장
+    const string ShortcutSourcePath = ShopDir + "/ShopSource_EvolutionShortcut.asset";   // 2026-11-04 상위 무기 바로 갖추기
     const string CoinPrefabPath = CoinDir + "/Coin.prefab";
     const string CoinMaterialPath = CoinDir + "/CoinGold.mat";
     const string ShopPrefabPath = UiDir + "/Shop.prefab";
@@ -64,6 +66,7 @@ public static class EconomyShopSetup
     static readonly Color Dim = new Color(0f, 0f, 0f, 0.65f);
     static readonly Color Muted = new Color(0.62f, 0.68f, 0.74f);
     static readonly Color Warn = new Color(1f, 0.62f, 0.35f);
+    static readonly Color Gold = new Color(1f, 0.82f, 0.35f);
 
     static Material textMaterial;
 
@@ -253,8 +256,38 @@ public static class EconomyShopSetup
             catalog.sources = new ShopOfferSource[] { purchase, upgrade };
         }
 
+        EnsureEvolutionSources(catalog);
+
         EditorUtility.SetDirty(catalog);
         return catalog;
+    }
+
+    /// <summary>
+    /// 상위 무기 공급원 둘을 카탈로그에 넣는다 (2026-11-04) — 없을 때만 만들고, 목록에 없을 때만 넣는다 (값은 덮어쓰지 않는다).
+    ///  · 짝 보장 — 서브 능력 · 부착물 공급원보다 앞 (장비 줄 앞자리를 먼저 잡고, 같은 것을 뒤에서 또 올리지 않게)
+    ///  · 바로 갖추기 — 맨 뒤 (줄 밖 창에 나온다)
+    /// </summary>
+    static void EnsureEvolutionSources(ShopCatalog catalog)
+    {
+        EvolutionPairSource pair = LoadOrCreate<EvolutionPairSource>(PairSourcePath, out bool newPair);
+        if (newPair) { pair.slots = 3; EditorUtility.SetDirty(pair); }
+
+        EvolutionShortcutSource shortcut = LoadOrCreate<EvolutionShortcutSource>(ShortcutSourcePath, out bool newShortcut);
+        if (newShortcut) { shortcut.slots = 4; shortcut.markup = 1.5f; EditorUtility.SetDirty(shortcut); }
+
+        var list = (catalog.sources ?? new ShopOfferSource[0]).Where(s => s != null).ToList();
+
+        if (!list.Contains(pair))
+        {
+            int at = list.FindIndex(s => s is SubAbilitySource || s is AttachmentSource);
+            if (at < 0) list.Add(pair);
+            else list.Insert(at, pair);
+        }
+
+        if (!list.Contains(shortcut)) list.Add(shortcut);
+
+        catalog.sources = list.ToArray();
+        Debug.Log($"{Tag} 공급원: {string.Join(" · ", list.Select(s => $"{s.name}({s.slots})"))}");
     }
 
     static T LoadOrCreate<T>(string path, out bool created) where T : ScriptableObject
@@ -383,6 +416,43 @@ public static class EconomyShopSetup
             TMP_Text message = Text(panel.transform, "Message", "", font, 24, Highlight, TextAlignmentOptions.Left,
                 new Vector2(0, 0), new Vector2(40 + 330, 30), new Vector2(660, 36));
 
+            // 상위 무기 바로 갖추기 — 아래 버튼 + 카드 영역 위에 뜨는 창 (2026-11-04)
+            Button shortcutButton = MakeButton(panel.transform, "ShortcutButton", "상위 무기 바로 갖추기", font, 24,
+                new Vector2(1, 0), new Vector2(-640, 34), new Vector2(310, 66), new Vector2(1, 0), out TMP_Text shortcutLabel);
+            shortcutButton.GetComponent<Image>().color = new Color(0.22f, 0.16f, 0.04f, 1f);
+            shortcutLabel.color = Gold;
+
+            var shortcutPanel = new GameObject("ShortcutPanel", typeof(RectTransform), typeof(Image));
+            shortcutPanel.transform.SetParent(panel.transform, false);
+            // 금색 테두리 판 + 안쪽 어두운 판 (Outline 효과는 그림 전체를 금색으로 겹쳐 그려 배경이 누렇게 비친다)
+            Place(shortcutPanel, new Vector2(0.5f, 0.5f), new Vector2(leftCenter, -14), new Vector2(1200, 640), new Vector2(0.5f, 0.5f));
+            shortcutPanel.GetComponent<Image>().color = Gold;
+            var shortcutInner = new GameObject("Inner", typeof(RectTransform), typeof(Image));
+            shortcutInner.transform.SetParent(shortcutPanel.transform, false);
+            Inset(shortcutInner, 3);
+            shortcutInner.GetComponent<Image>().color = new Color(0.02f, 0.035f, 0.05f, 1f);
+
+            Text(shortcutPanel.transform, "Title", "상위 무기 바로 갖추기", font, 34, Gold, TextAlignmentOptions.Center,
+                new Vector2(0.5f, 1), new Vector2(0, -42), new Vector2(900, 48));
+            Text(shortcutPanel.transform, "Hint", "모자란 무기 레벨 · 짝 장비를 한꺼번에 채우고 바로 진화합니다 — 값 = 따로 살 때 × 1.5 (우클릭 · 닫기)", font, 21, Muted, TextAlignmentOptions.Center,
+                new Vector2(0.5f, 1), new Vector2(0, -86), new Vector2(1140, 32));
+
+            const int shortcutCount = 4;
+            var shortcutCards = new ShopCardView[shortcutCount];
+            for (int k = 0; k < shortcutCount; k++)
+            {
+                float x = (k - (shortcutCount - 1) * 0.5f) * (cardW + gap);
+                shortcutCards[k] = MakeCard(shortcutPanel.transform, $"Shortcut{k + 1}", font, coinIcon, new Vector2(x, -30), new Vector2(cardW, cardH));
+            }
+
+            TMP_Text shortcutEmpty = Text(shortcutPanel.transform, "Empty", "바로 갖출 수 있는 상위 무기가 없습니다", font, 26, Muted, TextAlignmentOptions.Center,
+                new Vector2(0.5f, 0.5f), new Vector2(0, -40), new Vector2(900, 44));
+            shortcutEmpty.gameObject.SetActive(false);
+
+            Button shortcutClose = MakeButton(shortcutPanel.transform, "Close", "닫기", font, 24,
+                new Vector2(1, 1), new Vector2(-18, -18), new Vector2(130, 50), new Vector2(1, 1), out _);
+            shortcutPanel.SetActive(false);
+
             Button reroll = MakeButton(panel.transform, "RerollButton", "새로고침  3", font, 28,
                 new Vector2(1, 0), new Vector2(-340, 34), new Vector2(270, 66), new Vector2(1, 0), out TMP_Text rerollLabel);
             Button next = MakeButton(panel.transform, "NextButton", "다음 스테이지  ▶", font, 30,
@@ -416,6 +486,12 @@ public static class EconomyShopSetup
             so.FindProperty("promptRoot").objectReferenceValue = prompt;
             so.FindProperty("promptText").objectReferenceValue = promptText;
             so.FindProperty("cancelButton").objectReferenceValue = cancel;
+            so.FindProperty("shortcutButton").objectReferenceValue = shortcutButton;
+            so.FindProperty("shortcutLabel").objectReferenceValue = shortcutLabel;
+            so.FindProperty("shortcutPanel").objectReferenceValue = shortcutPanel;
+            SetObjects(so.FindProperty("shortcutCards"), shortcutCards);
+            so.FindProperty("shortcutEmpty").objectReferenceValue = shortcutEmpty;
+            so.FindProperty("shortcutClose").objectReferenceValue = shortcutClose;
 
             SetSound(so.FindProperty("buySound"), 0.55f, "Assets/Kenney/InterfaceSounds/confirmation_002.ogg");
             SetSound(so.FindProperty("failSound"), 0.5f, "Assets/Kenney/InterfaceSounds/error_004.ogg");
@@ -430,7 +506,7 @@ public static class EconomyShopSetup
             Object.DestroyImmediate(root);
         }
 
-        Debug.Log($"{Tag} 상점 창: {ShopPrefabPath} (카드 두 줄 6장 · 내 장비 판 · 대상 고르기 · 새로고침 · 다음 스테이지 · 전투 HUD 크레딧)");
+        Debug.Log($"{Tag} 상점 창: {ShopPrefabPath} (카드 두 줄 6장 · 내 장비 판 · 대상 고르기 · 상위 무기 바로 갖추기 · 새로고침 · 다음 스테이지 · 전투 HUD 크레딧)");
     }
 
     static void SetObjects<T>(SerializedProperty prop, T[] values) where T : Object
@@ -658,7 +734,7 @@ public static class EconomyShopSetup
             drt.pivot = new Vector2(0, 1);
             drt.offsetMin = new Vector2(104, -60);
             drt.offsetMax = new Vector2(-6, -36);
-            detail.enableWordWrapping = false;
+            detail.textWrappingMode = TextWrappingModes.NoWrap;
             detail.overflowMode = TextOverflowModes.Ellipsis;
             detail.gameObject.SetActive(false);
 

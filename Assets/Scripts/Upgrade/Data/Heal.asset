@@ -12,9 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84bc2621c547cb84c86833668e594c86, type: 3}
   m_Name: Heal
   m_EditorClassIdentifier: Assembly-CSharp::UpgradeData
-  upgradeName: Heal
-  description: HP + 10
+  upgradeName: "\uD68C\uBCF5"
+  description: "\uCCB4\uB825 10 \uD68C\uBCF5\n\uC5EC\uB7EC \uBC88 \uC0AC\uB3C4 \uBE44\uC6A9 \uADF8\uB300\uB85C"
   icon: {fileID: 2715409951904314068, guid: 97da73e1e810d264792bc5a70ff6e6b4, type: 3}
   costExp: 3
+  fixedCost: 1
   maxLevel: 0
   effect: {fileID: 11400000, guid: 917e6d09cc8d2d64fac118d9065b0337, type: 2}

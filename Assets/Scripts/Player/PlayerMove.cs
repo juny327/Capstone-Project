@@ -318,6 +318,9 @@ public class PlayerMove : MonoBehaviour
     {
         playerInput = new PlayerInput();
         rb = GetComponent<Rigidbody>();
+        // Y 축 회전도 물리에서 잠근다 (프리팹은 X · Z 만 잠겨 있었다) — 구르다 부딪히면 팽이처럼 돌던 원인 (2026-11-04).
+        // 바라보는 방향은 늘 MoveRotation 이 정하므로 물리가 돌릴 일은 없다
+        if (rb != null) rb.constraints |= RigidbodyConstraints.FreezeRotationY;
         anim = GetComponent<Animator>();
         stats = GetComponent<PlayerStats>();
 
@@ -446,6 +449,11 @@ public class PlayerMove : MonoBehaviour
     void FixedUpdate()
     {
         if (isDead) return;
+
+        // 2026-11-04 — 구르다 적 · 벽에 부딪히면 물리가 몸에 Y축 회전 속도를 준다 (Rigidbody 는 X · Z 회전만 잠겨 있고
+        // 회전 감쇠도 0.05 로 거의 없다). 구르는 동안은 바라보는 방향을 잡지 않아 그대로 팽이처럼 돌았다.
+        // 방향은 늘 코드(MoveRotation)가 정하므로 물리가 준 회전 속도는 매 프레임 지운다.
+        if (rb != null) rb.angularVelocity = Vector3.zero;
 
         if (rollCdTimer > 0f)
             rollCdTimer -= Time.fixedDeltaTime;
@@ -830,6 +838,10 @@ public class PlayerMove : MonoBehaviour
         rb.linearVelocity = v;   // y는 보존 → 중력 유지
 
         rollCodeDistance += speed * Time.fixedDeltaTime;
+
+        // 구르는 방향을 계속 바라본다 — 부딪혀 돌아가도 다음 프레임에 바로잡는다 (클립이 정면 구르기 하나라서)
+        if (rollDir.sqrMagnitude > 0.001f)
+            rb.MoveRotation(Quaternion.LookRotation(rollDir));
 
         currentGround = Physics.Raycast(transform.position, Vector3.down, GroundCheckDis, groundLayer);
         wasGround = currentGround;

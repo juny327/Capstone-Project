@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84bc2621c547cb84c86833668e594c86, type: 3}
   m_Name: ElectricShotUpgrade
   m_EditorClassIdentifier: Assembly-CSharp::UpgradeData
-  upgradeName: Electric Shot
-  description: "\uC801\uC744 \uACBD\uC9C1\uC2DC\uD0A4\uB294 \uBC88\uAC1C\uB8F0 \uBC1C\uC0AC"
+  upgradeName: "\uC804\uACA9 \uC0F7"
+  description: "4\uCD08\uB9C8\uB2E4 \uC801 1\uBA85\uC744 2\uCD08\uAC04 \uACBD\uC9C1\n\uB808\uBCA8\uB9C8\uB2E4 \uACBD\uC9C1 +1\uCD08"
   icon: {fileID: 21300000, guid: 2467fd7f0af6c4e42a5ff3cdcb943bef, type: 3}
   costExp: 10
   maxLevel: 5

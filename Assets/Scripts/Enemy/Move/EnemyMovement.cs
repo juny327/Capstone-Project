@@ -13,4 +13,6 @@ public abstract class EnemyMovement : MonoBehaviour
 
     public abstract void Stop();
     public abstract void Resume();
+
+    public virtual void SetSpeedMultiplier(float multiplier) { }
 }

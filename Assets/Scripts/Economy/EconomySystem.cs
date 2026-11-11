@@ -114,8 +114,17 @@ public class EconomySystem : MonoBehaviour
 
         Vector3 d = player.position - position;
         d.y = 0f;
-        float r = Settings.magnetRadius;
+        float r = Time.time < boostUntil ? Mathf.Max(Settings.magnetRadius, boostRadius) : Settings.magnetRadius;
         return d.sqrMagnitude <= r * r;
+    }
+
+    float boostRadius, boostUntil = -1f;
+
+    /// <summary>자석 아이템 — 잠깐 동안 끌어오는 거리를 넓힌다 (땅에 있는 코인이 날아온다).</summary>
+    public void Magnetize(float radius, float duration)
+    {
+        boostRadius = radius;
+        boostUntil = Time.time + duration;
     }
 
     // ───────── 코인 ─────────
@@ -127,7 +136,10 @@ public class EconomySystem : MonoBehaviour
         ResolvePlayer();
         if (!HasLivePlayer) return;
 
-        int total = Settings.CoinsFor(enemy.data);
+        // 배율 (0.7) — 소수 부분은 확률로 (코인 1 × 0.7 = 70% 확률로 1)
+        float scaled = Settings.CoinsFor(enemy.data) * Settings.coinMultiplier;
+        int total = Mathf.FloorToInt(scaled);
+        if (Random.value < scaled - total) total++;
         if (total <= 0) return;
 
         int count = Mathf.Clamp(total, 1, Settings.maxCoinObjects);

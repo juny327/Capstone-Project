@@ -21,6 +21,9 @@ public class UpgradeCard : MonoBehaviour
     UpgradeData data;
     bool clicked;
 
+    /// <summary>이 카드가 보여 주는 업그레이드 (UpgradeUI 가 산 뒤 다시 그린다).</summary>
+    public UpgradeData Data => data;
+
     public void Setup(UpgradeData upgrade)
     {
         Setup(upgrade, 1);
@@ -51,7 +54,7 @@ public class UpgradeCard : MonoBehaviour
         if (cost != null)
         {
             cost.gameObject.SetActive(true);
-            cost.text = $"cost Exp : {costExp}";
+            cost.text = $"경험치 {costExp}";
         }
     }
 
@@ -65,6 +68,21 @@ public class UpgradeCard : MonoBehaviour
     {
         GameEvents.OnUpgradeSuccess -= OnSuccess;
         GameEvents.OnUpgradeFailed -= OnFailed;
+    }
+
+    /// <summary>최대 레벨 — 더 살 수 없다 (2026-11-04).</summary>
+    public void ShowMaxed()
+    {
+        clicked = true;
+
+        if (data != null && title != null)
+            title.text = $"{data.upgradeName} MAX";
+
+        if (cost != null)
+        {
+            cost.gameObject.SetActive(true);
+            cost.text = "최대 레벨";
+        }
     }
 
     public void OnClick()

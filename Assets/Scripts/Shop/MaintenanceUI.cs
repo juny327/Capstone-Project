@@ -21,6 +21,7 @@ using UnityEngine.UI;
 ///
 /// 카드는 두 줄이다 (커스터마이징-구현계획.md 7장) — 위 = 무기 줄(새 무기 · 강화), 아래 = 장비 줄(부착물 · 서브 능력).
 /// 오른쪽 "내 장비" 판에 가진 무기 · 부착물 · 서브 능력이 보인다. 부착물 카드를 누르면 장착할 총을 고른다.
+/// 아래 "상위 무기 바로 갖추기" 버튼은 줄 밖 창을 연다 — 크레딧을 크게 내고 모자란 레벨 · 짝을 채워 바로 진화 (2026-11-04).
 /// </summary>
 public class MaintenanceUI : MonoBehaviour
 {
@@ -61,6 +62,15 @@ public class MaintenanceUI : MonoBehaviour
     [SerializeField] Button nextButton;
     [SerializeField] TMP_Text nextLabel;
 
+    [Header("상위 무기 바로 갖추기 (2026-11-04)")]
+    [SerializeField] Button shortcutButton;
+    [SerializeField] TMP_Text shortcutLabel;
+    [Tooltip("카드 영역 위에 뜨는 창 — 뒤쪽 카드 클릭을 막는다")]
+    [SerializeField] GameObject shortcutPanel;
+    [SerializeField] ShopCardView[] shortcutCards;
+    [SerializeField] TMP_Text shortcutEmpty;
+    [SerializeField] Button shortcutClose;
+
     [Header("소리")]
     [SerializeField] GameSoundSet.Entry buySound = new GameSoundSet.Entry();
     [SerializeField] GameSoundSet.Entry failSound = new GameSoundSet.Entry();
@@ -78,6 +88,7 @@ public class MaintenanceUI : MonoBehaviour
     ShopOffer pending;
     readonly List<IWeapon> targets = new List<IWeapon>();
     readonly List<ShopOffer>[] rowsBuffer = { new List<ShopOffer>(), new List<ShopOffer>() };
+    readonly List<ShopOffer> shortcuts = new List<ShopOffer>();
     Vector2[] rowCenters;
 
     /// <summary>부착물을 사는 중 — 장착할 총을 고르고 있다.</summary>
@@ -120,6 +131,13 @@ public class MaintenanceUI : MonoBehaviour
         if (rerollButton != null) rerollButton.onClick.AddListener(OnReroll);
         if (nextButton != null) nextButton.onClick.AddListener(OnNext);
         if (cancelButton != null) cancelButton.onClick.AddListener(CancelTargeting);
+
+        if (shortcutCards != null)
+            foreach (ShopCardView card in shortcutCards)
+                if (card != null) card.Clicked += OnCardClicked;
+        if (shortcutButton != null) shortcutButton.onClick.AddListener(() => SetShortcutOpen(!ShortcutOpen));
+        if (shortcutClose != null) shortcutClose.onClick.AddListener(() => SetShortcutOpen(false));
+        if (shortcutPanel != null) shortcutPanel.SetActive(false);
 
         if (loadout != null)
         {
@@ -198,11 +216,16 @@ public class MaintenanceUI : MonoBehaviour
                 return;
             }
 
-            if (title != null) title.text = "정비";
-            if (subtitle != null) subtitle.text = $"스테이지 {stage} 클리어 — 크레딧으로 무기를 갖추고 출발하세요";
-            if (nextLabel != null) nextLabel.text = stage >= bossAfterStage ? "보스전으로  ▶" : "다음 스테이지  ▶";
+            // 정비 신호기로 연 중간 정비면 문구가 다르다 — 닫으면 같은 스테이지로 돌아간다 (2026-11-05)
+            bool midStage = GameManager.Instance != null && GameManager.Instance.MidStageMaintenance;
+            if (title != null) title.text = midStage ? "보급 정비" : "정비";
+            if (subtitle != null) subtitle.text = midStage
+                ? $"스테이지 {stage} — 정비 신호기를 찾았습니다. 정비를 마치면 전투로 돌아갑니다"
+                : $"스테이지 {stage} 클리어 — 크레딧으로 무기를 갖추고 출발하세요";
+            if (nextLabel != null) nextLabel.text = midStage ? "전투로 돌아가기  ▶" : stage >= bossAfterStage ? "보스전으로  ▶" : "다음 스테이지  ▶";
 
             ShowMessage(null);
+            SetShortcutOpen(false);
             if (window != null) window.SetActive(true);
             if (hud != null) hud.SetActive(false);
 
@@ -227,6 +250,7 @@ public class MaintenanceUI : MonoBehaviour
     void Continue()
     {
         EndTargetingState();
+        SetShortcutOpen(false);
         if (window != null) window.SetActive(false);
         UpdateHud(SceneManager.GetActiveScene());
 
@@ -247,10 +271,58 @@ public class MaintenanceUI : MonoBehaviour
 
     // ───────── 진열 ─────────
 
-    /// <summary>위 줄(무기)인지 — 새 무기 · 강화 · 진화. 나머지(부착물 · 서브 능력 · 회복)는 아래 장비 줄.</summary>
+    /// <summary>위 줄(무기)인지 — 새 무기 · 강화 · 진화. 나머지(부착물 · 서브 능력 · 회복)는 아래 장비 줄. 바로 갖추기는 줄 밖(−1).</summary>
     static int RowOf(ShopOffer offer)
     {
+        if (offer.Kind == ShopOfferKind.Shortcut) return -1;
         return offer.Kind == ShopOfferKind.Weapon || offer.Kind == ShopOfferKind.Upgrade || offer.Kind == ShopOfferKind.Evolution ? 0 : 1;
+    }
+
+    bool ShortcutOpen => shortcutPanel != null && shortcutPanel.activeSelf;
+
+    void SetShortcutOpen(bool open)
+    {
+        if (shortcutPanel == null) return;
+        if (open) CancelTargeting();
+        shortcutPanel.SetActive(open);
+        if (IsOpen) Refresh();
+    }
+
+    /// <summary>바로 갖추기 창 — 카드를 가운데로 모아 보여 주고, 아래 버튼에 몇 장인지 적는다.</summary>
+    void RefreshShortcuts(Sprite currency)
+    {
+        int available = 0;
+        foreach (ShopOffer o in shortcuts)
+            if (!o.Sold && o.IsAvailable(shop.Context, out _)) available++;
+
+        if (shortcutLabel != null) shortcutLabel.text = available > 0 ? $"상위 무기 바로 갖추기  {available}" : "상위 무기 바로 갖추기";
+        if (shortcutButton != null) shortcutButton.interactable = available > 0 || ShortcutOpen;
+
+        if (!ShortcutOpen || shortcutCards == null) return;
+
+        int shown = Mathf.Min(shortcuts.Count, shortcutCards.Length);
+        for (int k = 0; k < shortcutCards.Length; k++)
+        {
+            ShopCardView card = shortcutCards[k];
+            if (card == null) continue;
+
+            if (k < shown)
+            {
+                ShopOffer offer = shortcuts[k];
+                bool canBuy = shop.CanBuy(offer, out string reason);
+                card.Show(offer, canBuy, reason, currency);
+
+                var rt = (RectTransform)card.transform;
+                float step = rt.sizeDelta.x + cardSpacing;
+                rt.anchoredPosition = new Vector2((k - (shown - 1) * 0.5f) * step, rt.anchoredPosition.y);
+            }
+            else
+            {
+                card.Hide();
+            }
+        }
+
+        if (shortcutEmpty != null) shortcutEmpty.gameObject.SetActive(shown == 0);
     }
 
     void Refresh()
@@ -262,7 +334,13 @@ public class MaintenanceUI : MonoBehaviour
 
         rowsBuffer[0].Clear();
         rowsBuffer[1].Clear();
-        foreach (ShopOffer offer in offers) rowsBuffer[RowOf(offer)].Add(offer);
+        shortcuts.Clear();
+        foreach (ShopOffer offer in offers)
+        {
+            int row = RowOf(offer);
+            if (row < 0) shortcuts.Add(offer);
+            else rowsBuffer[row].Add(offer);
+        }
 
         int rowCount = rowCenters != null ? rowCenters.Length : 0;
         for (int r = 0; r < rowCount; r++)
@@ -305,7 +383,8 @@ public class MaintenanceUI : MonoBehaviour
         if (rowEmptyTexts != null && rowEmptyTexts.Length > 1 && rowEmptyTexts[1] != null)
             rowEmptyTexts[1].text = abilityRow ? "얻을 수 있는 서브 능력이 없습니다" : "달 수 있는 부착물이 없습니다";
 
-        if (emptyText != null) emptyText.gameObject.SetActive(offers.Count == 0);
+        if (emptyText != null) emptyText.gameObject.SetActive(rowsBuffer[0].Count + rowsBuffer[1].Count == 0);
+        RefreshShortcuts(currency);
 
         if (rerollLabel != null) rerollLabel.text = $"새로고침  {shop.RerollCost}";
         if (rerollButton != null) rerollButton.interactable = shop.CanReroll;
@@ -362,7 +441,12 @@ public class MaintenanceUI : MonoBehaviour
         if (ok)
         {
             PlaySound(buySound);
-            ShowMessage(target != null ? $"{target.Data.weaponName} — {offer.Title} 장착" : $"{offer.Title} 구매");
+            ShowMessage(target != null ? $"{target.Data.weaponName} — {offer.Title} 장착"
+                : offer.Kind == ShopOfferKind.Shortcut ? $"{offer.Title} — 바로 갖췄다"
+                : $"{offer.Title} 구매");
+
+            // 바로 갖추기를 샀으면 창을 닫아 바뀐 내 장비가 보이게
+            if (offer.Kind == ShopOfferKind.Shortcut) SetShortcutOpen(false);
         }
         else
         {
@@ -456,9 +540,11 @@ public class MaintenanceUI : MonoBehaviour
 
     void Update()
     {
-        // 고르는 중 우클릭 = 취소
+        // 고르는 중 우클릭 = 취소 · 바로 갖추기 창도 우클릭으로 닫는다
         if (pending != null && Mouse.current != null && Mouse.current.rightButton.wasPressedThisFrame)
             CancelTargeting();
+        else if (ShortcutOpen && Mouse.current != null && Mouse.current.rightButton.wasPressedThisFrame)
+            SetShortcutOpen(false);
 
         if (messageLeft > 0f)
         {
@@ -485,6 +571,7 @@ public class MaintenanceUI : MonoBehaviour
     {
         // 씬이 바뀌면 창을 닫는다 (정비 → 다음 스테이지)
         EndTargetingState();
+        if (shortcutPanel != null) shortcutPanel.SetActive(false);
         if (window != null) window.SetActive(false);
         UpdateHud(scene);
     }

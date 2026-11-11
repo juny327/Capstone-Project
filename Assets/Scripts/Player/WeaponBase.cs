@@ -105,6 +105,9 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
         {
             WeaponRuntimeStats s = WithOverrides(data.Compose(TotalModifier), projectileCountOverride);
             if (RangeBonus != 0f) s.Range = Mathf.Max(0.1f, s.Range + RangeBonus);
+
+            // 몬스터 상태 이상 (MonsterF 저주 — monster 브랜치 2026-10-11, 병합 11-04) — 발사 간격이 늘어난다
+            if (Owner != null) s.FireInterval *= Owner.ExternalFireIntervalMultiplier;
             return s;
         }
     }

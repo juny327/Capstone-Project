@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84bc2621c547cb84c86833668e594c86, type: 3}
   m_Name: GunSpeed
   m_EditorClassIdentifier: Assembly-CSharp::UpgradeData
-  upgradeName: GunSpeedUpgrade
-  description: GunspeedUp
+  upgradeName: "\uD0C4\uC18D"
+  description: "\uBAA8\uB4E0 \uD0C4 \uC18D\uB3C4 +0.2"
   icon: {fileID: 5978732359254556080, guid: c4b4bc492ad6e45469e60ed5fb1b38b1, type: 3}
   costExp: 2
   maxLevel: 0

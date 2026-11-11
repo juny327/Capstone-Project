@@ -4,16 +4,34 @@ using System.Collections;
 public class EnemyBrain : MonoBehaviour
 {
     private Enemy enemy;
+    private MonsterFController monsterF;
+    private MonsterGController monsterG;
 
     private static readonly WaitForSeconds hitDelay = new WaitForSeconds(1f);
 
     public void Initialize(Enemy enemy)
     {
         this.enemy = enemy;
+        monsterF = GetComponent<MonsterFController>();
+        monsterG = GetComponent<MonsterGController>();
+        monsterF?.Initialize(enemy);
+        monsterG?.Initialize(enemy);
     }
 
     public void Tick()
     {
+        if (monsterF != null)
+        {
+            monsterF.Tick();
+            return;
+        }
+
+        if (monsterG != null)
+        {
+            monsterG.Tick();
+            return;
+        }
+
         switch (enemy.state)
         {
             case EnemyState.Idle:
@@ -56,49 +74,39 @@ public class EnemyBrain : MonoBehaviour
     void UpdateIdle()
     {
         if (enemy.target == null) return;
-
         float dist = Vector3.Distance(
             enemy.transform.position,
             enemy.target.position);
-
         if (dist < enemy.data.chaseRange)
         {
             enemy.ChangeState(EnemyState.Chase);
         }
     }
-
     void UpdateChase()
     {
         if (enemy.target == null) return;
-
         enemy.movement.MoveTo(enemy.target.position);
-
         float dist = Vector3.Distance(
             enemy.transform.position,
             enemy.target.position);
-
         if (dist < enemy.data.attackRange && enemy.attack.HasLineOfSight())
         {
             enemy.ChangeState(EnemyState.Attack);
         }
     }
-
     void UpdateAttack()
     {
         // Commit to the warning/dash/recovery even if the target moves away.
         if (enemy.attack.IsBusy) return;
         if (enemy.target == null) return;
-
         float dist = Vector3.Distance(
             enemy.transform.position,
             enemy.target.position);
-
         if (dist > enemy.data.attackRange || !enemy.attack.HasLineOfSight())
         {
             enemy.ChangeState(EnemyState.Chase);
             return;
         }
-
         enemy.attack.TryAttack();
     }
 

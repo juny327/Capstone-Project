@@ -20,5 +20,5 @@ MonoBehaviour:
   pullSpeed: 6
   damage: 1
   damageInterval: 0.5
-  explosionDamage: 10
+  explosionDamage: 4
   explosionRadius: 4

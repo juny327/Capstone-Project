@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84bc2621c547cb84c86833668e594c86, type: 3}
   m_Name: FireBallUpgrade
   m_EditorClassIdentifier: Assembly-CSharp::UpgradeData
-  upgradeName: Fire Ball
-  description: "\uD654\uC5FC\uAD6C\uB97C \uBC1C\uC0AC\uD569\uB2C8\uB2E4"
+  upgradeName: "\uD30C\uC774\uC5B4\uBCFC"
+  description: "4\uCD08\uB9C8\uB2E4 \uAC00\uAE4C\uC6B4 \uC801\uC5D0\uAC8C \uD654\uC5FC\uAD6C (\uD53C\uD574 8)\n\uB808\uBCA8\uB9C8\uB2E4 \uD53C\uD574 +25%"
   icon: {fileID: 21300000, guid: 04841b8a9cae96b42aa2a2689b689515, type: 3}
   costExp: 10
   maxLevel: 5

@@ -3448,6 +3448,13 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 7b3ac41e575f30c4c8e7832bb7bf1c88, type: 2}
   - {fileID: 11400000, guid: 9ac95302bbc73874baa9b52c3bb20053, type: 2}
   - {fileID: 11400000, guid: bf3a989154be14a4796394ff0482b4fe, type: 2}
+  - {fileID: 11400000, guid: d3fbda5eee10e7a429b55ec27f2fb4c7, type: 2}
+  - {fileID: 11400000, guid: 1eb29d985f493dd4497f5d1646a4682a, type: 2}
+  - {fileID: 11400000, guid: d3e9b9ce94b82694c9565ed06e0f3a9d, type: 2}
+  - {fileID: 11400000, guid: 7bfd342021851c544b0ea407a747a92d, type: 2}
+  - {fileID: 11400000, guid: c5a700908e04d55408da3e43cd1f47c6, type: 2}
+  - {fileID: 11400000, guid: 7c0d367b3775a2a479ba48a609ee2517, type: 2}
+  - {fileID: 11400000, guid: 30907fdf48f88984b9ca899ab179af40, type: 2}
 --- !u!4 &258006506
 Transform:
   m_ObjectHideFlags: 0
@@ -32793,6 +32800,7 @@ MonoBehaviour:
   - {fileID: 7825948330110257694, guid: 8e988dc45d5a3c14fb66e2ddf5464a71, type: 3}
   - {fileID: 5336096609891130127, guid: d60ee0708db88ed498ecb4b77e3ab456, type: 3}
   - {fileID: 8162335778504266055, guid: 8bd3d77cd8392274183d5dc9bc9bf826, type: 3}
+  - {fileID: 5336096609891130127, guid: 8728157ee24e47a887801857335db6bb, type: 3}
   player: {fileID: 0}
   spawnInterval: 3
   rangedProjectileSpeed: 3.5

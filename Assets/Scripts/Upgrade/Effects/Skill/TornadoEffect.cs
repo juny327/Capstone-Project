@@ -31,13 +31,9 @@ public class TornadoEffect : UpgradeEffect
         if (skill == null)
             skill = player.AddComponent<TornadoSkill>();
 
-        // Lv.1 = 2
-        // Lv.2 = 3
-        // Lv.3 = 4
-        // Lv.4 = 5
-        // Lv.5 = 6
-        int scaledDamage =
-            Mathf.RoundToInt(damage) + (Mathf.Max(1, level) - 1);
+        // 레벨마다 +25% (화염구 · 연쇄 번개와 같은 규칙, Lv5 = ×2) — 2026-11-08.
+        // 예전 +1 정수는 기본 피해를 낮추면 Lv5 가 5~6배가 되어 메인 무기 DPS 를 넘었다
+        float scaledDamage = ScaleValue(damage, level);
 
         skill.Setup(
             projectilePrefab,

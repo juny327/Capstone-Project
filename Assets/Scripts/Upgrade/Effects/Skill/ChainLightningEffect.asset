@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 04698d79f4c710e4d9f9ac904ae428d7, type: 3}
   m_Name: ChainLightningEffect
   m_EditorClassIdentifier: Assembly-CSharp::ChainLightningEffect
-  damage: 10
+  damage: 4
   fireInterval: 5
   targetRange: 15
   chainRange: 10
-  maxChains: 5
+  maxChains: 3
   chainDelay: 0.08
   lightningPrefab: {fileID: 178460, guid: 2736bbc2f2c78a949957b0719c2992bd, type: 3}

@@ -33,6 +33,9 @@ public class EconomySettings : ScriptableObject
 
     [Min(0)] public int defaultCoins = 1;
 
+    [Tooltip("몬스터 코인 배율 (정리/게임흐름-밸런스-변경.md, 2026-11-05 — 처치 목표가 늘어 0.7). 소수는 확률로 반올림한다 (코인 1 × 0.7 = 70% 확률로 1)")]
+    [Range(0f, 2f)] public float coinMultiplier = 0.7f;
+
     [Tooltip("한 번에 떨어뜨리는 코인 오브젝트 수의 상한. 넘으면 한 개가 여러 크레딧을 갖는다")]
     [Min(1)] public int maxCoinObjects = 4;
 

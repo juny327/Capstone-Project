@@ -16,8 +16,8 @@ MonoBehaviour:
   fireInterval: 15
   projectileSpeed: 3
   targetRange: 25
-  duration: 10
-  damage: 2
+  duration: 7
+  damage: 1
   attackInterval: 0.5
   radius: 3
   spawnOffset: {x: 0, y: 1, z: 0}
