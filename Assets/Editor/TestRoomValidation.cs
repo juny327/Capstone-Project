@@ -230,16 +230,21 @@ public static class TestRoomValidation
             int oldIndex = room.Controller.ActiveIndex;
             PositionPlayer(room, pickup.transform.position + Vector3.up * 0.05f);
             wait = Wait(0.15); while (wait.MoveNext()) yield return null;
-            Check(room.Controller.ActiveWeapon.Data == data[i], "body trigger equips " + data[i].name);
+            // 보조 무기 방식(사수): 드론 전용 무기(샷건 · 전격 · 레이저)는 손에 들지 않고 보조 칸에 들어간다
+            bool drone = room.Controller.UsesSupportWeapons && data[i].SupportOnly;
+            IWeapon picked = room.Controller.Find(data[i]);
+            if (drone) Check(picked is WeaponBase pb && pb.IsSupport && room.Controller.ActiveIndex == oldIndex, "body trigger adds drone " + data[i].name);
+            else Check(room.Controller.ActiveWeapon.Data == data[i], "body trigger equips " + data[i].name);
             Check(room.Controller.HeldWeapons.Count == Mathf.Min(i + 1, 4), "held capacity remains four");
             if (old.Length == 4)
             {
                 Check(room.Controller.ActiveIndex == oldIndex, "replacement keeps the active slot index");
                 for (int j = 0; j < old.Length; j++)
-                    if (j != oldIndex) Check(ReferenceEquals(old[j], room.Controller.HeldWeapons[j]), "replacement preserves slot " + j);
+                    if (j != oldIndex && !ReferenceEquals(room.Controller.HeldWeapons[j], picked))
+                        Check(ReferenceEquals(old[j], room.Controller.HeldWeapons[j]), "replacement preserves slot " + j);
             }
             wait = Wait(0.1); while (wait.MoveNext()) yield return null;
-            Check(room.Controller.ActiveWeapon.Level == 1, "remaining in pickup does not level up");
+            Check((drone ? picked : room.Controller.ActiveWeapon).Level == 1, "remaining in pickup does not level up");
         }
 
         PositionPlayer(room, new Vector3(-7, 0.05f, 0));
@@ -277,7 +282,8 @@ public static class TestRoomValidation
         {
             ClearBullets();
             room.Controller.SelectHeldWeapon(data[i]);
-            IWeapon weapon = room.Controller.ActiveWeapon;
+            bool drone = room.Controller.UsesSupportWeapons && data[i].SupportOnly;
+            IWeapon weapon = drone ? room.Controller.Find(data[i]) : room.Controller.ActiveWeapon;
             float dummyX = room.Dummy.transform.position.x;
             PositionPlayer(room, new Vector3(dummyX - (data[i] is MeleeWeaponData ? 2.4f : 4f), 0.05f, 0));   // 근접은 사거리 안으로
             wait = Wait(0.3); while (wait.MoveNext()) yield return null;
@@ -286,11 +292,17 @@ public static class TestRoomValidation
             room.Dummy.Stats.Reset();
             weapon.Tick(10);
             context = new WeaponFireContext(room.Detector, room.Player.transform);
+            if (drone && weapon is WeaponBase sw && sw.SupportMount != null)
+            {
+                // 드론은 제 자리에서 해골 쪽으로 돌아 쏜다 (WeaponController.FireSupport 와 같은 길)
+                sw.SupportMount.GetComponent<SupportMount>().FaceNow(room.Dummy.transform.position - sw.SupportMount.position);
+                context = new WeaponFireContext(room.Detector, sw.SupportMount);
+            }
             weapon.Fire(in context);
             wait = Wait(0.65); while (wait.MoveNext()) yield return null;
             Check(room.Dummy.Stats.HitCount > 0, data[i].name + " real attack hits the skeleton");
             Check(room.Dummy.Stats.HitCount <= (i == 4 ? 8 : 1), data[i].name + " does not duplicate a hit on the same target");
-            if (i == 4) Check(weapon.Ammo == weapon.MagazineSize - 1, "shotgun spends one round for eight pellets");
+            if (i == 4) Check(weapon.Ammo == weapon.MagazineSize - (drone ? 0 : 1), drone ? "shotgun drone does not spend ammo" : "shotgun spends one round for eight pellets");
         }
         wait = Capture("room-combat", 1920, 1080); while (wait.MoveNext()) yield return null;
         wait = Capture("room-wide", 2520, 1080); while (wait.MoveNext()) yield return null;
@@ -301,7 +313,9 @@ public static class TestRoomValidation
         active.StartReload();
         Check(active.IsReloading, "manual reload starts");
         int beforeCancel = active.Ammo;
-        room.Controller.SelectHeldWeapon(data[1]);
+        // 이미 가진 다른 총으로 바꾼다 — 가지지 않은 무기를 고르면 손 무기 칸이 그것으로 교체되어 이 총이 사라진다
+        IWeapon other = room.Controller.HeldWeapons.FirstOrDefault(w => w != active && w.Data != null && !w.Data.SupportOnly);
+        room.Controller.SelectHeldWeapon(other != null ? other.Data : data[1]);
         Check(!active.IsReloading && active.Ammo == beforeCancel, "swap cancels reload and preserves ammo");
         room.Controller.SelectHeldWeapon(data[0]);
         active.StartReload();

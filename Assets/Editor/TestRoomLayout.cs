@@ -63,6 +63,12 @@ internal static class TestRoomLayout
     public const float ModStartX = 8f;            // 한 줄 3칸 → x 16.4
     public const float AbilityTopZ = 12f;         // 능력마다 한 줄 (Lv1 · Lv2 A · B · Lv3 A · B) → x 24.8
 
+    // ── 보조 무기 구역 (남쪽 가운데, 2026-11-11) — 상위 무기 구역 아래 · 무리 자리 왼쪽, 4 × 3 ──
+    public const float SupportTopZ = -15f;
+    public const float SupportRowStep = 3.6f;
+    public const float SupportStartX = -5f;
+    public const float SupportStepX = 4.5f;
+
     // ── 무리 표적 (남쪽) ──
     public static readonly Vector3 ClusterPoint = new Vector3(14f, 0f, -16f);
     public static readonly Vector3[] CrowdPads = { new Vector3(-14f, 0f, -18f), new Vector3(-9f, 0f, -18f) };

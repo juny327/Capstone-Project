@@ -59,8 +59,10 @@ public class TestRoomHUD : MonoBehaviour
                     "검 사거리 밖 · 더 가까이 이동하세요" : "표적 감지 · 마우스로 조준하면 자동 공격");
         if (navigationText != null)
             navigationText.text = $"← 무기 선택 구역     |     훈련용 해골 {(delta.x >= 0 ? "→" : "←")}\n" +
-                "WASD 이동   ·   Q / 휠 교체   ·   R 장전   ·   무기 구역에 들어가 선택\n" +
-                "위쪽: 부착물 · 개조 · 서브 능력 (들어가면 장착)   ·   아래쪽: 상위 무기 (들어가면 진화) · 무리 표적 (H 체력 튼튼 ↔ 한 방)" +
+                (room.Controller != null && room.Controller.UsesSupportWeapons
+                    ? "WASD 이동   ·   R 장전   ·   선반: 주무기로 들기 (원래 주무기는 보조로 · 드론 무기는 보조 칸)\n"
+                    : "WASD 이동   ·   Q / 휠 교체   ·   R 장전   ·   무기 구역에 들어가 선택\n") +
+                "위쪽: 부착물 · 개조 · 서브 능력 (들어가면 장착)   ·   아래쪽: 상위 무기 (들어가면 진화) · 보조 무기 · 무리 표적 (H 체력 튼튼 ↔ 한 방)" +
                 (PracticeRules.Active ? $"\n연습 규칙 — 스태미나 무한 · 능력 쿨타임 {PracticeRules.CooldownCap:0.#}초" : "");
     }
 }
