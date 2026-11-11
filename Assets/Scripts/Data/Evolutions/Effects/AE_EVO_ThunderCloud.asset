@@ -15,7 +15,7 @@ MonoBehaviour:
   range: 8
   strikesPerSecond: 4
   radius: 1.2
-  damageMul: 1.5
+  damageMul: 2
   stun: 0.3
   cloudHeight: 5
   cloudRadius: 2.2

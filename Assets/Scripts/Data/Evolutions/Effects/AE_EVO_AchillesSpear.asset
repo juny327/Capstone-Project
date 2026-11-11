@@ -19,7 +19,7 @@ MonoBehaviour:
   hitRadius: 0.8
   orbitLaps: 2
   orbitDuration: 1.4
-  orbitDamageMul: 0.8
+  orbitDamageMul: 0.5
   clockwise: 1
   returnSpeed: 28
   returnDamageMul: 1

@@ -24,7 +24,7 @@ MonoBehaviour:
   waveDistance: 8
   waveSpeed: 17
   waveRadius: 0.9
-  waveDamageMul: 2
+  waveDamageMul: 0.8
   waveMaterial: {fileID: 2100000, guid: b6310812509a3ab46bf4e098541a27ab, type: 2}
   sparkMaterial: {fileID: 2100000, guid: b6310812509a3ab46bf4e098541a27ab, type: 2}
   color: {r: 0.25, g: 0.95, b: 1, a: 1}

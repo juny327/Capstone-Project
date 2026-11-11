@@ -15,7 +15,7 @@ MonoBehaviour:
   duration: 2
   halfWidth: 0.9
   tickInterval: 0.3
-  tickDamageMul: 0.15
+  tickDamageMul: 0.1
   slowFactor: 0.6
   slowLinger: 0.35
   maxLength: 14

@@ -83,12 +83,12 @@ MonoBehaviour:
     hopRange: 5
     seekRange: 12
     coneAngle: 140
-    moteDamageMul: 0.4
+    moteDamageMul: 0.2
     moteScale: 0.55
     convergeTime: 0.3
     sustainTime: 2
     tickInterval: 0.1
-    tickDamageMul: 0.35
+    tickDamageMul: 0.06
     turnRate: 120
     hitRadius: 0.7
     beamWidth: 2.4

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b28815d6941648d4aab50aea47481f26, type: 3}
   m_Name: AE_EVO_SpinUp
   m_EditorClassIdentifier: Assembly-CSharp::SpinUpEffect
-  maxBoost: 3
+  maxBoost: 1.5
   spinUpTime: 2
   spinDownTime: 1
   idleGrace: 0.35
