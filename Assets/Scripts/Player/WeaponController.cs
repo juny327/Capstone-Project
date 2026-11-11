@@ -30,7 +30,7 @@ public enum HeldWeaponSelectionResult { Invalid, NotReady, Unchanged, Equipped, 
 /// 장착 정책 — 보조 무기 (무기-개편-개발-계획, 사수 2026-11-10)
 ///   · 손에는 <b>주무기 하나</b>만 든다 (로비에서 고른 것). 바꿔 들기는 없다.
 ///   · 그 밖에 얻은 총은 전부 <b>보조 무기</b> — 몸 둘레(왼쪽 · 오른쪽 · 뒤)에 떠서 스스로 적을 골라 쏜다.
-///     드론 전용 무기(전격 · 충전 레이저 · 샷건)는 드론 몸체에 실린다. 세기는 피해 ×0.8 · 간격 ×1.33 (상위 무기 ×0.7 · ×1.4).
+///     드론 전용 무기(전격 · 충전 레이저 · 샷건)는 드론 몸체에 실린다. 세기는 피해 ×0.6 · 간격 ×1.33 (상위 무기 ×0.5 · ×1.4 — 2026-11-12 보조 칸이 차면 너무 쉽게 녹아 낮춤).
 ///   · 보조 칸은 3칸 — 드론(SubUnit)도 이 칸을 같이 쓴다. 드론은 원래처럼 스스로 궤도를 돈다.
 ///   · 근접 무기(검사, 2026-11-10)도 떠서 싸운다 — 사거리 + 뛰쳐나갈 거리 안의 적에게 날아가 찌르기 · 휘두르기 · 내려찍기 후 돌아온다.
 ///   · 패링 연계 — 패링에 성공하면 떠 있는 근접 무기가 막은 방향으로 일제히 찌르고, 주무기의 다음 한 방은 확정 치명.
@@ -62,12 +62,12 @@ public class WeaponController : MonoBehaviour
     [Tooltip("보조 무기 칸 수 — 주무기 1 + 이만큼. 드론도 이 칸을 같이 쓴다")]
     [Min(0)] [SerializeField] private int supportSlots = 3;
 
-    [Tooltip("보조 무기 세기 — 피해 배율 · 공격 간격 배율 (손에 든 같은 무기의 약 60%)")]
-    [SerializeField] private float supportDamageMul = 0.8f;
+    [Tooltip("보조 무기 세기 — 피해 배율 · 공격 간격 배율 (손에 든 같은 무기의 약 45%, 2026-11-12 0.8 → 0.6)")]
+    [SerializeField] private float supportDamageMul = 0.6f;
     [SerializeField] private float supportIntervalMul = 1.33f;
 
-    [Tooltip("보조 칸의 상위 무기 세기 — 연출은 그대로, 피해 · 간격만 (손에 든 상위 무기의 약 절반)")]
-    [SerializeField] private float evolvedSupportDamageMul = 0.7f;
+    [Tooltip("보조 칸의 상위 무기 세기 — 연출은 그대로, 피해 · 간격만 (손에 든 상위 무기의 약 36%, 2026-11-12 0.7 → 0.5)")]
+    [SerializeField] private float evolvedSupportDamageMul = 0.5f;
     [SerializeField] private float evolvedSupportIntervalMul = 1.4f;
 
     [Tooltip("보조 무기 자리 (플레이어 기준). 왼쪽 · 오른쪽 · 뒤. " +
@@ -326,7 +326,7 @@ public class WeaponController : MonoBehaviour
         hiddenModels.Remove(previous);
         Destroy(previous.gameObject);
 
-        // 보조 칸에서 진화하면 같은 자리에서 상위 무기 보조판으로 (연출 그대로 · 피해 ×0.7 · 간격 ×1.4)
+        // 보조 칸에서 진화하면 같은 자리에서 상위 무기 보조판으로 (연출 그대로 · 피해 ×0.5 · 간격 ×1.4)
         if (wasSupport) AssignSupport(next, mount);
         else next.SetActive(list == subUnits || wasActive);
 
@@ -728,7 +728,7 @@ public class WeaponController : MonoBehaviour
         useSupportWeapons && weapon != null && weapon.Data != null &&
         (weapon.Data.Kind == WeaponKind.Projectile || weapon.Data.Kind == WeaponKind.Melee);
 
-    /// <summary>보조 무기 세기 — 보통 무기 ×0.8 · ×1.33, 상위 무기 ×0.7 · ×1.4.</summary>
+    /// <summary>보조 무기 세기 — 보통 무기 ×0.6 · ×1.33, 상위 무기 ×0.5 · ×1.4.</summary>
     WeaponModifier SupportRoleFor(WeaponData data)
     {
         bool evolved = data != null && data.IsEvolved;

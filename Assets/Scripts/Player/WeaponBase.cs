@@ -98,7 +98,7 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
     protected Vector3 LastAimDirection { get; private set; } = Vector3.forward;
 
     /// <summary>
-    /// 보조 무기로 / 주무기로 바꾼다 (WeaponController). role 은 보조일 때만 곱하는 세기 — 피해 ×0.8 · 간격 ×1.33 (상위 무기 ×0.7 · ×1.4).
+    /// 보조 무기로 / 주무기로 바꾼다 (WeaponController). role 은 보조일 때만 곱하는 세기 — 피해 ×0.6 · 간격 ×1.33 (상위 무기 ×0.5 · ×1.4).
     /// </summary>
     public void SetSupportRole(bool support, Transform mount, in WeaponModifier role)
     {

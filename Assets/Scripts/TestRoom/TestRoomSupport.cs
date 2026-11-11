@@ -123,7 +123,7 @@ public static class TestRoomSupport
         }
 
         return done.Count > 0
-            ? $"보조 칸 진화 — {string.Join(" · ", done)} (연출 그대로 · 피해 ×0.7 · 간격 ×1.4)"
+            ? $"보조 칸 진화 — {string.Join(" · ", done)} (연출 그대로 · 피해 ×0.5 · 간격 ×1.4)"
             : "진화할 보조 무기가 없습니다 (드론 · 상위 무기가 없는 무기)";
     }
 }

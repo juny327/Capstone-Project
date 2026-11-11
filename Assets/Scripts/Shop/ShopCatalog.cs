@@ -26,7 +26,7 @@ public class ShopCatalog : ScriptableObject
     [Tooltip("목록에 없는 무기의 가격 (강화 가격 계산용)")]
     [Min(0)] public int defaultWeaponPrice = 30;
 
-    [Tooltip("보조 무기 방식(산 무기가 보조 칸에 들어감)에서 새 무기 값에 곱한다. 보조 무기는 세기가 약 60%(피해 ×0.8 · 간격 ×1.33)라 값도 그만큼 (2026-11-11). 강화 가격은 그대로")]
+    [Tooltip("보조 무기 방식(산 무기가 보조 칸에 들어감)에서 새 무기 값에 곱한다. 보조 무기는 손에 든 무기보다 약해서(피해 ×0.6 · 간격 ×1.33, 약 45%) 값도 낮춘다 (2026-11-11). 강화 가격은 그대로")]
     [Range(0.1f, 1f)] public float supportPriceMultiplier = 0.6f;
 
     [Header("보유 무기 강화")]

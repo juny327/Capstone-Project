@@ -2930,9 +2930,9 @@ MonoBehaviour:
   maxSubUnitSlots: 2
   droneBodyPrefab: {fileID: 7734045794844672905, guid: 4b075ab29d7979b449c09eb29abf8616, type: 3}
   supportSlots: 3
-  supportDamageMul: 0.8
+  supportDamageMul: 0.6
   supportIntervalMul: 1.33
-  evolvedSupportDamageMul: 0.7
+  evolvedSupportDamageMul: 0.5
   evolvedSupportIntervalMul: 1.4
   supportOffsets:
   - {x: -0.95, y: 1.15, z: -0.15}
