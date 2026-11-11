@@ -82,11 +82,15 @@ public class LoadoutPanelView : MonoBehaviour
             FillBlock(b);
         }
 
-        int free = ctx?.Weapons != null ? Mathf.Max(0, ctx.Weapons.MaxHeldSlots - count) : 0;
+        // 보조 무기 방식(사수) — 빈 칸은 보조 칸 (드론도 같은 칸을 쓴다)
+        bool support = ctx?.Weapons != null && ctx.Weapons.UsesSupportWeapons;
+        int free = ctx?.Weapons == null ? 0
+                 : support ? Mathf.Max(0, ctx.Weapons.SupportSlots - ctx.Weapons.SupportCount)
+                 : Mathf.Max(0, ctx.Weapons.MaxHeldSlots - count);
         if (emptySlotText != null)
         {
             emptySlotText.gameObject.SetActive(free > 0);
-            emptySlotText.text = $"빈 무기 슬롯 {free}칸";
+            emptySlotText.text = support ? $"빈 보조 칸 {free}칸" : $"빈 무기 슬롯 {free}칸";
         }
 
         RefreshAbilities(ctx);
@@ -98,7 +102,14 @@ public class LoadoutPanelView : MonoBehaviour
         WeaponData data = b.weapon.Data;
 
         if (b.icon != null) { b.icon.sprite = data.icon; b.icon.enabled = data.icon != null; }
-        if (b.title != null) b.title.text = $"{data.weaponName}  Lv{b.weapon.Level}";
+        WeaponBase wb = b.weapon as WeaponBase;
+        bool support = wb != null && wb.IsSupport;
+        // 보조 무기 방식이면 손에 든 무기에 "주무기" — HUD 슬롯 표시와 같게 (2026-11-11)
+        WeaponController owner = wb != null ? wb.GetComponentInParent<WeaponController>() : null;
+        bool main = !support && owner != null && owner.UsesSupportWeapons;
+        string role = support ? (data.SupportOnly ? "<color=#9AA3BD>드론</color>  " : "<color=#9AA3BD>보조</color>  ")
+                    : main ? "<color=#F4CD75>주무기</color>  " : string.Empty;
+        if (b.title != null) b.title.text = $"{role}{data.weaponName}  Lv{b.weapon.Level}";
 
         WeaponFamily family = AttachmentData.FamilyOf(data);
         bool attachable = family != WeaponFamily.None && family != WeaponFamily.Melee;
@@ -110,7 +121,8 @@ public class LoadoutPanelView : MonoBehaviour
 
             if (b.slotFrames != null && s < b.slotFrames.Length && b.slotFrames[s] != null)
             {
-                b.slotFrames[s].transform.parent.gameObject.SetActive(attachable);
+                // 보조 무기는 개조 칸만 보인다 (다른 부위는 달 수 없다)
+                b.slotFrames[s].transform.parent.gameObject.SetActive(attachable && (!support || s == (int)AttachmentSlot.Mod));
                 b.slotFrames[s].color = a != null ? AttachmentData.TierColor(a.tier) : emptyFrame;
             }
 
@@ -124,7 +136,9 @@ public class LoadoutPanelView : MonoBehaviour
         }
 
         if (b.parts != null)
-            b.parts.text = !attachable ? "근접 무기 — 부착물 없음" : names.Length > 0 ? names.ToString() : "부착물 없음";
+            b.parts.text = !attachable ? "근접 무기 — 부착물 없음"
+                         : names.Length > 0 ? names.ToString()
+                         : support ? "보조 무기 — 전용 개조 칸만" : "부착물 없음";
     }
 
     void RefreshAbilities(ShopContext ctx)

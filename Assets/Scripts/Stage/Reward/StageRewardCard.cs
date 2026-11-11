@@ -61,10 +61,21 @@ public class StageRewardCard : MonoBehaviour
 
         // 종류를 묻는 유일한 곳이다. 모르는 종류면 그냥 표시하지 않는다.
         bool owned = data is WeaponReward weaponReward && weaponReward.IsOwnedBy(player);
+        string text = owned ? "레벨 업" : SupportTag(data, player);
 
-        tagLabel.gameObject.SetActive(owned);
+        tagLabel.gameObject.SetActive(!string.IsNullOrEmpty(text));
+        if (!string.IsNullOrEmpty(text)) tagLabel.text = text;
+    }
 
-        if (owned) tagLabel.text = "레벨 업";
+    /// <summary>보조 무기 방식(사수)에서 새 무기 카드 — 받으면 보조 칸에 들어간다는 표시.</summary>
+    static string SupportTag(StageReward data, GameObject player)
+    {
+        if (!(data is WeaponReward wr) || wr.weapon == null || player == null) return null;
+
+        WeaponController wc = player.GetComponent<WeaponController>();
+        if (wc == null || !wc.UsesSupportWeapons || wc.MainWeapon == null) return null;
+
+        return wr.weapon.SupportOnly ? "보조 · 드론" : "보조 무기";
     }
 
     /// <summary>버튼 OnClick 에 연결한다.</summary>
