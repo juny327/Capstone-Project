@@ -74,6 +74,12 @@ public class SuicideAttack : EnemyAttack
         if (visualAnimator != null)
             visualAnimator.applyRootMotion = false;
 
+        // 2026-11-11 — Devil Bulldog 프리팹의 SkinnedMeshRenderer 루트 본이 프리팹 안의 뼈가 아니라
+        // FBX 원본 에셋의 뼈를 가리킨다. 경계 상자는 루트 본을 따라가므로 월드 원점에 멈춰 있었고,
+        // 카메라가 몸을 화면 밖으로 보고 빼 버려 그림자만 보였다 (아래 높이 맞춤도 그 상자로 계산해 몸이 떠 있었다).
+        // 크기를 재기 전에 복제본 안의 같은 이름 뼈로 다시 잇는다.
+        RelinkRootBones(visualInstance.transform);
+
         // Normalize against the imported renderer bounds so a differently
         // authored model keeps a predictable in-game size.
         Renderer[] modelRenderers = visualInstance.GetComponentsInChildren<Renderer>(true);
@@ -128,6 +134,34 @@ public class SuicideAttack : EnemyAttack
         {
             warningMaterial = new Material(shader);
             warningLine.material = warningMaterial;
+        }
+    }
+
+    /// <summary>루트 본이 복제본 밖(원본 에셋)을 가리키는 스킨 메시를 복제본 안의 같은 이름 뼈로 다시 잇는다.</summary>
+    static void RelinkRootBones(Transform root)
+    {
+        foreach (SkinnedMeshRenderer skinned in root.GetComponentsInChildren<SkinnedMeshRenderer>(true))
+        {
+            Transform bone = skinned.rootBone;
+            if (bone != null && bone.IsChildOf(root))
+                continue;
+
+            Transform local = null;
+            if (bone != null)
+            {
+                foreach (Transform candidate in root.GetComponentsInChildren<Transform>(true))
+                {
+                    if (candidate.name != bone.name) continue;
+                    local = candidate;
+                    break;
+                }
+            }
+
+            if (local == null && skinned.bones != null && skinned.bones.Length > 0)
+                local = skinned.bones[0];
+
+            if (local != null)
+                skinned.rootBone = local;
         }
     }
 
