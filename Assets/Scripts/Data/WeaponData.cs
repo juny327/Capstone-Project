@@ -35,6 +35,31 @@ public enum WeaponAimMode
 }
 
 /// <summary>
+/// 보조 무기가 노리는 적 (무기-개편-개발-계획 · 보조 무기 수치). 보조 무기도 "무기 = 한 마리 화력" 원칙을 따른다 —
+/// 무기마다 노리는 적을 달리해 역할을 나눈다.
+/// </summary>
+public enum SupportTarget
+{
+    /// <summary>가장 가까운 적 (기관단총 · 전격).</summary>
+    Nearest,
+
+    /// <summary>체력이 가장 높은 적 — 네임드 · 보스 먼저 (스나이퍼).</summary>
+    HighestHealth,
+
+    /// <summary>주무기가 노리는 적 — 플레이어가 조준한 방향에 가장 가까운 적 (기본 소총).</summary>
+    MainTarget,
+
+    /// <summary>플레이어 가까이 붙은 적만 (샷건 — 3m 안). 없으면 쏘지 않는다.</summary>
+    NearPlayer,
+
+    /// <summary>적이 가장 많이 겹친 줄 (충전 레이저 — 일직선 관통).</summary>
+    MostInLine,
+
+    /// <summary>가장 가까운 무리 — 둘레에 적이 가장 많이 모인 적 (대검 — 넓게 휘두르기).</summary>
+    Crowd,
+}
+
+/// <summary>
 /// 무기 밸런싱 데이터의 공통 부분.
 ///
 /// ⚠ 이 SO는 읽기 전용 기본값 소스다. 런타임에 이 값을 수정하면 에디터에서
@@ -98,6 +123,26 @@ public abstract class WeaponData : ScriptableObject
     }
 
     public bool HasThemeColor => themeColor.a > 0.01f;
+
+    // 보조 무기 (무기-개편-개발-계획). 주무기 하나만 손에 들고, 나머지는 몸 둘레에 떠서 스스로 싸운다
+    [Header("Support (보조 무기)")]
+    [Tooltip("드론 전용 — 주무기(손)로 고를 수 없고, 얻으면 드론에 실려 보조 무기가 된다 (전격 · 충전 레이저 · 샷건)")]
+    public bool supportOnly;
+
+    [Tooltip("보조 무기일 때 노리는 적")]
+    public SupportTarget supportTarget = SupportTarget.Nearest;
+
+    [Tooltip("드론 몸체 강조색 — 드론 전용 무기를 서로 구분한다. 상위 무기는 테마 색을 쓴다. 투명이면 몸체 색 그대로")]
+    public Color supportTint = new Color(1f, 1f, 1f, 0f);
+
+    /// <summary>드론 전용인가 — 상위 무기는 원래 무기 것을 따른다 (공성포 = 샷건).</summary>
+    public bool SupportOnly => Root.supportOnly;
+
+    /// <summary>보조 무기일 때 노리는 적 — 상위 무기는 원래 무기 것을 따른다.</summary>
+    public SupportTarget SupportTargetRule => Root.supportTarget;
+
+    /// <summary>드론 몸체 강조색 — 상위 무기는 테마 색, 아니면 원래 무기의 강조색. 없으면 투명.</summary>
+    public Color SupportTint => IsEvolved && HasThemeColor ? themeColor : Root.supportTint;
 
     // 소리를 데이터에 두는 이유: 무기를 추가할 때 `.asset` 하나로 끝나는 규칙을
     // 소리까지 포함해 지키기 위해서다. 코드를 고치지 않아도 새 무기가 소리를 낸다.

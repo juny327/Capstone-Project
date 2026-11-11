@@ -136,7 +136,7 @@ public class ChargeBeamWeapon : WeaponBase
 
         if (burst == null) burst = gameObject.AddComponent<PrismNovaBurst>();
 
-        Transform ownerRoot = Owner != null ? Owner.transform : transform;
+        Transform ownerRoot = AimRoot;   // 보조 무기면 제 자리(노리는 적 쪽)
         burst.Begin(this, cfg.prismBurst, Muzzle, ownerRoot, stats.Range, OnPrismBurstFinished);
         SpawnFx(cfg.muzzleFlashPrefab, Muzzle.position, Quaternion.LookRotation(ownerRoot.forward));
     }
@@ -148,7 +148,7 @@ public class ChargeBeamWeapon : WeaponBase
 
         if (sun == null) sun = gameObject.AddComponent<SunLanceBurst>();
 
-        Transform ownerRoot = Owner != null ? Owner.transform : transform;
+        Transform ownerRoot = AimRoot;   // 보조 무기면 제 자리(노리는 적 쪽)
         sun.Begin(this, cfg.sunLance, Muzzle, ownerRoot, OnPrismBurstFinished);
     }
 
@@ -229,7 +229,7 @@ public class ChargeBeamWeapon : WeaponBase
         if (chargeSource == null) return;
 
         chargeSource.clip = cfg.chargeSound;
-        chargeSource.volume = cfg.chargeVolume;
+        chargeSource.volume = cfg.chargeVolume * SoundScale;   // 보조 무기는 작게
 
         float offset = cfg.chargeSound.length - duration;
 

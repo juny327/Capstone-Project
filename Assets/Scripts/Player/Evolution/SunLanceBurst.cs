@@ -193,7 +193,7 @@ public class SunLanceBurst : MonoBehaviour
         FxLine.Ring(cfg.lineMaterial, origin - Vector3.up * 0.3f, 0.3f, 2.4f, Color.white, 0.35f, 0.3f);
         FxLine.Ring(cfg.lineMaterial, Ground(beamTo), 0.4f, 2.2f, cfg.color, 0.3f, 0.35f);
 
-        if (cfg.cameraShake > 0f && CameraShakeManager.Instance != null) CameraShakeManager.Instance.Shake(cfg.cameraShake);
+        WeaponBase.ShakeCamera(weapon, cfg.cameraShake);   // 보조 무기는 흔들지 않는다
         CombatFx.PlaySound(cfg.fireSound);
         if (hum != null) { hum.SetExtra(1f); hum.SetPitch(cfg.beamLoopPitch.y * 0.92f); }   // 기둥 — 가장 크게, 살짝 내려 묵직하게
 

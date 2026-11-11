@@ -119,7 +119,8 @@ public class ProjectileWeapon : WeaponBase
         burstTimer += BurstGap;
         burstRemaining--;
 
-        Vector3 dir = Owner != null ? Owner.transform.forward : transform.forward;
+        // 보조 무기는 주무기 조준(마우스)과 무관하게 처음 쏜 방향으로 잇는다
+        Vector3 dir = IsSupport ? LastAimDirection : Owner != null ? Owner.transform.forward : transform.forward;
         dir.y = 0f;
         if (dir.sqrMagnitude < 0.0001f) return;
 
@@ -132,7 +133,7 @@ public class ProjectileWeapon : WeaponBase
     void SpawnVolley(ProjectileWeaponData cfg, in WeaponRuntimeStats stats, Vector3 baseDir)
     {
         SpawnEffect(cfg.muzzleFlashPrefab, Muzzle);
-        SpawnEffect(cfg.casingPrefab, casingPoint);
+        if (!IsSupport) SpawnEffect(cfg.casingPrefab, casingPoint);   // 보조 무기는 탄피를 흘리지 않는다 (셋이 쏘면 바닥이 탄피로 덮인다)
 
         Color tint = AmmoTint;
 

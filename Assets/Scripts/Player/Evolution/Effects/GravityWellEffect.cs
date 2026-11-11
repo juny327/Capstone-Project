@@ -75,7 +75,7 @@ public class GravityWellEffect : AttachmentEffect
             if (dir.sqrMagnitude < 0.0001f) dir = Vector3.forward;
 
             Vector3 at = attack.Origin + dir.normalized * attack.Range * cfg.forwardRatio;
-            active = GravityWell.Spawn(cfg, at, Weapon.Stats.Damage * cfg.collapseDamageMul);
+            active = GravityWell.Spawn(cfg, at, Weapon.Stats.Damage * cfg.collapseDamageMul, !Weapon.IsSupport);
             Spawned++;
         }
 

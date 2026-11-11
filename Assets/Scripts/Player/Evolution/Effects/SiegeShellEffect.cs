@@ -49,7 +49,7 @@ public class SiegeShellEffect : AttachmentEffect
         {
             Vector3 at = attack.Origin;
             FxLine.Ring(cfg.material, at, 0.2f, 1.6f, cfg.color, 0.22f, 0.22f);
-            if (CameraShakeManager.Instance != null) CameraShakeManager.Instance.Shake(cfg.cameraShake * 0.5f);
+            WeaponBase.ShakeCamera(Weapon, cfg.cameraShake * 0.5f);   // 보조 무기는 흔들지 않는다
         }
 
         public override void OnHit(in WeaponHit hit)

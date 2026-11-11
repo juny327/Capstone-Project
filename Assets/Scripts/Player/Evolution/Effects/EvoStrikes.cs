@@ -68,7 +68,7 @@ public static class EvoStrikes
             if (push > 0f && runner != null) CombatFx.Push(runner, t, away, push, 0.2f);
         }
 
-        if (shake > 0f && CameraShakeManager.Instance != null) CameraShakeManager.Instance.Shake(shake);
+        WeaponBase.ShakeCamera(runner as WeaponBase, shake);   // 보조 무기는 흔들지 않는다
         return found.Count;
     }
 

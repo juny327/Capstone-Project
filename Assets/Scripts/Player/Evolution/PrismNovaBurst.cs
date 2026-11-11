@@ -321,7 +321,7 @@ public class PrismNovaBurst : MonoBehaviour
         CombatFx.PlaySound(cfg.beamBassSound);
         CombatFx.PlaySound(cfg.beamHumSound);
         if (cfg.beamLoop != null) Hum().Play(cfg.beamLoop, cfg.beamLoopVolume, cfg.beamLoopPitch, 0.08f);
-        if (cfg.cameraShake > 0f && CameraShakeManager.Instance != null) CameraShakeManager.Instance.Shake(cfg.cameraShake);
+        WeaponBase.ShakeCamera(weapon, cfg.cameraShake);   // 보조 무기는 흔들지 않는다
 
         phase = Phase.Sustain;
         phaseTime = 0f;
@@ -378,7 +378,7 @@ public class PrismNovaBurst : MonoBehaviour
     /// </summary>
     void Rumble(float dt)
     {
-        if (cfg.sustainShake <= 0f || dt <= 0f) return;
+        if (cfg.sustainShake <= 0f || dt <= 0f || (weapon != null && weapon.IsSupport)) return;   // 보조 무기는 흔들지 않는다
         CameraShakeManager shake = CameraShakeManager.Instance;
         if (shake == null || shake.impulseSource == null) return;
 

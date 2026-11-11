@@ -74,6 +74,79 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
 
     public bool IsActive { get; private set; } = true;
 
+    // ───────── 보조 무기 (무기-개편-개발-계획) ─────────
+
+    private WeaponModifier roleModifier = WeaponModifier.Identity;
+    private Transform supportMount;
+
+    /// <summary>
+    /// 주무기가 아니라 몸 둘레에 떠서 스스로 싸우는 보조 무기인가.
+    /// 보조 무기는 장전하지 않고(탄창 무제한) · HUD 탄약을 덮지 않고 · 전용 개조 칸만 단다.
+    /// </summary>
+    public bool IsSupport { get; private set; }
+
+    /// <summary>한 발이 여러 단계로 이어지는 중인가 (프리즘 노바 빔 · 태양창 모으기) — 보조 무기는 그동안 노린 적을 계속 본다.</summary>
+    public bool InSequence => IsBusy;
+
+    /// <summary>보조 무기가 떠 있는 자리. 주무기면 null.</summary>
+    public Transform SupportMount => supportMount;
+
+    /// <summary>조준 기준 — 주무기는 플레이어(마우스 방향), 보조 무기는 제 자리(노리는 적 쪽으로 돈다).</summary>
+    public Transform AimRoot => IsSupport && supportMount != null ? supportMount : (Owner != null ? Owner.transform : transform);
+
+    /// <summary>마지막으로 쏜 방향 — 점사의 이어지는 발이 쓴다.</summary>
+    protected Vector3 LastAimDirection { get; private set; } = Vector3.forward;
+
+    /// <summary>
+    /// 보조 무기로 / 주무기로 바꾼다 (WeaponController). role 은 보조일 때만 곱하는 세기 — 피해 ×0.8 · 간격 ×1.33 (상위 무기 ×0.7 · ×1.4).
+    /// </summary>
+    public void SetSupportRole(bool support, Transform mount, in WeaponModifier role)
+    {
+        CancelReload();
+        OnSupportRoleChanged(support);   // 이전 자리가 남아 있을 때 — 뛰쳐나간 자세를 그 자리에서 풀 수 있게
+
+        IsSupport = support;
+        supportMount = support ? mount : null;
+        roleModifier = support ? role.Sanitized() : WeaponModifier.Identity;
+
+        // 탄약은 그대로 둔다 — 보조일 때는 쓰지 않으니, 다시 손에 들면 떠날 때 그대로다 (예전 스왑과 같다)
+        OnStatsChanged();
+    }
+
+    /// <summary>
+    /// 손 ↔ 보조로 역할이 바뀔 때 — 진행 중인 휘두르기 · 뛰쳐나가기를 끊는다.
+    /// 예전에는 손에서 빠지면 꺼지며(SetActive false) 끊겼는데, 보조로 가면 켜진 채라 직접 끊어야 한다.
+    /// </summary>
+    protected virtual void OnSupportRoleChanged(bool support) { }
+
+    // 패링 연계 — 이 시각까지의 다음 공격 한 번은 무조건 치명타
+    private float forcedCritUntil = -1f;
+
+    /// <summary>패링 연계 (검사) — window 초 안의 다음 공격(한 번 휘두르기)은 무조건 치명타. 쿨다운도 비워 곧바로 반격한다.</summary>
+    public void GrantForcedCrit(float window)
+    {
+        forcedCritUntil = Time.time + Mathf.Max(0f, window);
+        cooldown = 0f;
+    }
+
+    /// <summary>확정 치명이 남아 있는가.</summary>
+    public bool HasForcedCrit => Time.time <= forcedCritUntil;
+
+    /// <summary>확정 치명을 쓴다 — 남아 있으면 true 를 돌려주고 지운다.</summary>
+    protected bool TakeForcedCrit()
+    {
+        if (Time.time > forcedCritUntil) return false;
+        forcedCritUntil = -1f;
+        return true;
+    }
+
+    /// <summary>카메라를 흔든다 — 보조 무기는 스스로 자주 쏘므로 흔들지 않는다 (화면이 계속 떨린다).</summary>
+    public static void ShakeCamera(WeaponBase source, float amount)
+    {
+        if (amount <= 0f || (source != null && source.IsSupport)) return;
+        if (CameraShakeManager.Instance != null) CameraShakeManager.Instance.Shake(amount);
+    }
+
     // ───────── 탄창 ─────────
 
     /// <summary>탄창 크기. 0 이면 무제한이라 장전 자체를 하지 않는다.</summary>
@@ -84,7 +157,7 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
     public bool IsReloading => reloadRemaining > 0f;
 
     /// <summary>탄창을 쓰지 않는 무기이거나, 탄이 남아 있는가.</summary>
-    public bool HasAmmo => MagazineSize <= 0 || ammo > 0;
+    public bool HasAmmo => IsSupport || MagazineSize <= 0 || ammo > 0;
 
     /// <summary>
     /// 다음 발사까지 남은 시간(초). 0 이하면 쏠 수 있다.
@@ -94,10 +167,11 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
     /// </summary>
     protected float CooldownRemaining => cooldown;
 
-    /// <summary>누적 업그레이드 + 부착물 + 레벨 보너스. 셋은 곱해서 함께 적용된다.</summary>
+    /// <summary>누적 업그레이드 + 부착물 + 레벨 보너스 (+ 보조 무기 세기). 넷은 곱해서 함께 적용된다.</summary>
     protected WeaponModifier TotalModifier =>
-        WeaponModifier.Combine(WeaponModifier.Combine(accumulated, attachmentModifier),
-                               data.perLevelBonus.Scaled(level - 1));
+        WeaponModifier.Combine(WeaponModifier.Combine(WeaponModifier.Combine(accumulated, attachmentModifier),
+                                                      data.perLevelBonus.Scaled(level - 1)),
+                               roleModifier);
 
     public WeaponRuntimeStats Stats
     {
@@ -210,6 +284,7 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
     public void Fire(in WeaponFireContext context)
     {
         WeaponRuntimeStats stats = Stats;
+        LastAimDirection = context.AimDirection;
 
         OnFire(in stats, in context);
 
@@ -231,7 +306,7 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
 
         // 산탄이어도 1회 발사는 탄약 1 소모다 (12번 R3).
         // 탄 수만큼 깎으면 산탄 업그레이드가 곧 탄약 소모 증가가 되어 벌칙이 된다.
-        if (stats.MagazineSize > 0)
+        if (stats.MagazineSize > 0 && !IsSupport)   // 보조 무기는 장전하지 않는다
         {
             ammo = Mathf.Max(0, ammo - 1);
             RaiseAmmoChanged();
@@ -247,6 +322,7 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
         WeaponRuntimeStats stats = Stats;
 
         if (stats.MagazineSize <= 0) return;   // 탄창을 쓰지 않는 무기
+        if (IsSupport) return;                 // 보조 무기는 장전하지 않는다
         if (IsReloading || IsBusy) return;
         if (ammo >= stats.MagazineSize) return;
         if (!IsActive) return;
@@ -335,8 +411,11 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
     {
         if (clip == null || SoundManager.Instance == null) return;
 
-        SoundManager.Instance.PlayClip(clip, volume, pitch);
+        SoundManager.Instance.PlayClip(clip, volume * SoundScale, pitch);
     }
+
+    /// <summary>보조 무기 소리 크기 — 주무기와 보조 셋이 한꺼번에 쏘면 시끄럽다. 주무기 소리가 앞에 선다.</summary>
+    protected float SoundScale => IsSupport ? 0.5f : 1f;
 
     /// <summary>
     /// 손에 든 무기의 탄약 변화를 HUD 에 알린다.
@@ -344,7 +423,7 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
     /// </summary>
     protected void RaiseAmmoChanged()
     {
-        if (!IsActive) return;
+        if (!IsActive || IsSupport) return;   // 보조 무기 탄약은 HUD 의 주무기 숫자를 덮지 않는다
         if (data == null || data.IsAlwaysActive) return;
 
         GameEvents.OnAmmoChanged?.Invoke(IsReloading ? 0 : ammo, MagazineSize);
@@ -375,7 +454,8 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
     public bool CanAttach(AttachmentData attachment)
     {
         return attachment != null && data != null && attachment.Fits(data) && level >= attachment.minWeaponLevel
-               && !IsSlotLocked(attachment.slot);
+               && !IsSlotLocked(attachment.slot)
+               && (!IsSupport || attachment.slot == AttachmentSlot.Mod);   // 보조 무기는 전용 개조 칸만 (진화 조건)
     }
 
     /// <summary>
@@ -496,8 +576,9 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
 
         sum = WeaponModifier.Combine(sum, attachment.Resolve(data));
 
-        WeaponModifier total = WeaponModifier.Combine(WeaponModifier.Combine(accumulated, sum),
-                                                      data.perLevelBonus.Scaled(level - 1));
+        WeaponModifier total = WeaponModifier.Combine(WeaponModifier.Combine(WeaponModifier.Combine(accumulated, sum),
+                                                                             data.perLevelBonus.Scaled(level - 1)),
+                                                      roleModifier);
         return WithOverrides(data.Compose(total), countOverride);
     }
 

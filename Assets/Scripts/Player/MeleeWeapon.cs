@@ -18,6 +18,13 @@ using UnityEngine;
 ///   · 기본 공격 : 무기 데이터의 arcAngle · hitDelay (검 · 대검은 가로베기, 창은 두 손 찌르기)
 ///   · 내려찍기  : 프리팹의 verticalArcAngle · verticalHitDelay (두 손으로 머리 위에서 내리친다)
 /// 애니메이터에 SlashVariant(Int) 가 없으면 항상 기본 공격이다 (예전 컨트롤러 호환).
+///
+/// 보조 무기 (무기-개편-개발-계획, 검사 2026-11-10) — 손에 들지 않은 근접 무기는 몸 둘레에 떠 있다가
+/// 사거리 안의 적에게 뛰쳐나가 공격하고 제자리로 돌아온다. 플레이어 모션은 쓰지 않고 무기 자체가 움직인다.
+///   · 창   : 찌르기 — 직선으로 쭉 뻗어 꿰뚫는다
+///   · 대검 : 넓게 휘두르기 · 머리 위에서 내려찍기를 번갈아 (내려찍기가 중력 대검의 중력장을 연다)
+///   · 검   : 빠른 베기 — 좌우를 번갈아
+/// 판정 · 상위 무기 동작 · 처치 회복은 손에 든 무기와 같은 길(ApplyHits)을 쓴다. 패링에 성공하면 막은 방향으로 일제히 찌른다.
 /// </summary>
 public class MeleeWeapon : WeaponBase
 {
@@ -113,6 +120,9 @@ public class MeleeWeapon : WeaponBase
     /// </summary>
     public override bool HasTargetInReach(in WeaponFireContext context)
     {
+        // 떠 있는 무기는 WeaponController 가 뛰쳐나갈 거리 안에서 적을 골라 준다
+        if (IsSupport) return context.Targets != null && context.Targets.HasTarget;
+
         WeaponRuntimeStats stats = Stats;
         float arc = CanVary ? Mathf.Max(stats.ArcAngle, verticalArcAngle) : stats.ArcAngle;
 
@@ -158,6 +168,15 @@ public class MeleeWeapon : WeaponBase
 
     protected override void OnFire(in WeaponRuntimeStats stats, in WeaponFireContext context)
     {
+        // 패링 직후의 한 방 — 무조건 치명타 (패링 연계)
+        bool forceCrit = TakeForcedCrit();
+
+        if (IsSupport)
+        {
+            BeginSupportStrike(in stats, in context, forceCrit);
+            return;
+        }
+
         // 휘두르는 중 다시 들어오면 이전 스윙을 버린다
         if (swingRoutine != null)
             StopCoroutine(swingRoutine);
@@ -167,7 +186,7 @@ public class MeleeWeapon : WeaponBase
         TriggerSwingAnimation(variant);
         PlaySwingSound();
 
-        swingRoutine = StartCoroutine(SwingRoutine(stats, context.OwnerRoot, variant));
+        swingRoutine = StartCoroutine(SwingRoutine(stats, context.OwnerRoot, variant, forceCrit));
     }
 
     /// <summary>
@@ -245,7 +264,7 @@ public class MeleeWeapon : WeaponBase
         ownerAnim.SetTrigger(HashSlash);
     }
 
-    IEnumerator SwingRoutine(WeaponRuntimeStats stats, Transform ownerRoot, SwingVariant variant)
+    IEnumerator SwingRoutine(WeaponRuntimeStats stats, Transform ownerRoot, SwingVariant variant, bool forceCrit)
     {
         MeleeWeaponData cfg = Config;
 
@@ -260,12 +279,12 @@ public class MeleeWeapon : WeaponBase
         if (delay > 0f)
             yield return new WaitForSeconds(delay);
 
-        ApplyHits(in stats, ownerRoot, vertical ? verticalArcAngle : stats.ArcAngle, vertical);
+        ApplyHits(in stats, ownerRoot, vertical ? verticalArcAngle : stats.ArcAngle, vertical, forceCrit);
 
         swingRoutine = null;
     }
 
-    void ApplyHits(in WeaponRuntimeStats stats, Transform ownerRoot, float arcAngle, bool vertical)
+    void ApplyHits(in WeaponRuntimeStats stats, Transform ownerRoot, float arcAngle, bool vertical, bool forceCrit = false)
     {
         MeleeWeaponData cfg = Config;
         if (cfg == null || ownerRoot == null) return;
@@ -300,8 +319,8 @@ public class MeleeWeapon : WeaponBase
 
             if (!struck.Add(root)) continue;
 
-            // 플레이어 자신은 제외 (hitLayers 를 잘못 잡았을 때의 안전장치)
-            if (root == ownerRoot) continue;
+            // 플레이어 자신은 제외 (hitLayers 를 잘못 잡았을 때의 안전장치 — 떠 있는 무기는 판정 기준이 플레이어가 아니다)
+            if (root == ownerRoot || (Owner != null && root == Owner.transform)) continue;
 
             Vector3 dir = root.position - origin;
             dir.y = 0f;
@@ -311,7 +330,7 @@ public class MeleeWeapon : WeaponBase
 
             if (Vector3.Angle(forward, dir) > halfArc) continue;   // 부채꼴 밖
 
-            bool isCritical = RollCritical(in stats);
+            bool isCritical = forceCrit || RollCritical(in stats);
             float dealt = ApplyCritical(in stats, isCritical);
             Vector3 point = col.ClosestPoint(origin);
             bool wasAlive = CombatFx.IsAlive(root);   // 맞히기 전 — 처치 판정 (Drain · 상위 무기)
@@ -322,7 +341,7 @@ public class MeleeWeapon : WeaponBase
                 isCritical = isCritical,
                 hitPoint = point,
                 hitDirection = dir,
-                cameraShake = cfg.cameraShake,   // 근접은 흔들어야 타격감이 난다
+                cameraShake = IsSupport ? 0f : cfg.cameraShake,   // 근접은 흔들어야 타격감이 난다 — 떠 있는 무기는 스스로 자주 베므로 흔들지 않는다
             });
 
             // Drain: 직접 근접 공격으로 적을 처치했을 때만 고정 HP 회복 (이미 쓰러진 적을 다시 벤 것은 세지 않는다)
@@ -400,7 +419,7 @@ public class MeleeWeapon : WeaponBase
 
     void LateUpdate()
     {
-        if (!IsActive || Owner == null) return;
+        if (!IsActive || Owner == null || IsSupport) return;   // 떠 있는 무기는 손에 붙어 있지 않다
 
         KeepTipAboveGround(Owner.transform);
     }
@@ -431,6 +450,213 @@ public class MeleeWeapon : WeaponBase
 
         Vector3 lifted = flat.normalized * Mathf.Sqrt(length * length - height * height) + Vector3.up * height;
         transform.rotation = Quaternion.FromToRotation(dir, lifted) * transform.rotation;
+    }
+
+    // ───────── 보조 무기 — 떠 있다가 뛰쳐나가 공격하고 돌아온다 ─────────
+
+    private Coroutine supportRoutine;
+    private Transform strikeOrigin;
+    private int supportStrikes;
+
+    /// <summary>떠 있는 근접 무기가 뛰쳐나간 수 · 패링 연계로 찌른 수 (테스트).</summary>
+    public static int SupportStrikeCount { get; private set; }
+    public static int CounterThrustCount { get; private set; }
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetStatics() { SupportStrikeCount = 0; CounterThrustCount = 0; }
+
+    /// <summary>떠 있는 무기가 지금 뛰쳐나가 공격하는 중인가.</summary>
+    public bool IsSupportStriking => supportRoutine != null;
+
+    /// <summary>칼끝까지의 길이 (무기 루트 기준 로컬). 없으면 0.</summary>
+    public float BladeLocalLength => bladeTip.magnitude;
+
+    void BeginSupportStrike(in WeaponRuntimeStats stats, in WeaponFireContext context, bool forceCrit)
+    {
+        Transform target = context.Targets != null ? context.Targets.GetNearest(context.Origin) : null;
+        SupportMount mount = SupportMount != null ? SupportMount.GetComponent<SupportMount>() : null;
+        if (target == null || mount == null) return;
+
+        // 대검은 휘두르기 · 내려찍기를 번갈아 — 내려찍기가 중력 대검의 중력장을 연다
+        bool vertical = swingStyle == SwingStyle.TwoHanded && supportStrikes % 2 == 1;
+        bool thrust = swingStyle == SwingStyle.Polearm;
+
+        StopSupportStrike();
+        PlaySwingSound();
+        supportStrikes++;
+        SupportStrikeCount++;
+        supportRoutine = StartCoroutine(SupportStrikeRoutine(stats, mount, target, target.position, thrust, vertical, forceCrit));
+    }
+
+    /// <summary>
+    /// 패링 연계 — 막은 방향으로 곧장 찌른다 (무기 종류와 상관없이 찌르기). 그쪽에 적이 없으면 허공을 찌른다.
+    /// WeaponController 가 패링 성공 때 떠 있는 근접 무기 전부에 부른다.
+    /// </summary>
+    public bool CounterThrust(Vector3 direction)
+    {
+        if (!IsSupport || !IsActive || HeldAway || Owner == null) return false;
+
+        SupportMount mount = SupportMount != null ? SupportMount.GetComponent<SupportMount>() : null;
+        if (mount == null) return false;
+
+        Vector3 dir = direction;
+        dir.y = 0f;
+        dir = dir.sqrMagnitude > 0.0001f ? dir.normalized : Owner.transform.forward;
+
+        WeaponRuntimeStats stats = Stats;
+        Vector3 point = Owner.transform.position + dir * (BladeWorldLength() * 0.8f + 1.6f);
+
+        StopSupportStrike();
+        PlaySwingSound();
+        supportStrikes++;
+        CounterThrustCount++;
+        supportRoutine = StartCoroutine(SupportStrikeRoutine(stats, mount, null, point, true, false, false));
+        return true;
+    }
+
+    protected override void OnSupportRoleChanged(bool support)
+    {
+        // 손에서 시작한 휘두르기가 보조로 간 뒤에 판정되지 않게 (예전 스왑은 SetActive(false) 가 끊었다)
+        if (swingRoutine != null) StopCoroutine(swingRoutine);
+        swingRoutine = null;
+        StopSupportStrike();
+    }
+
+    void StopSupportStrike()
+    {
+        if (supportRoutine != null) StopCoroutine(supportRoutine);
+        supportRoutine = null;
+
+        if (SupportMount != null && SupportMount.TryGetComponent(out SupportMount mount)) mount.ReleasePose();
+    }
+
+    /// <summary>지금 크기의 칼 길이 (월드). 칼끝 정보가 없으면 모형 크기로.</summary>
+    float BladeWorldLength()
+    {
+        if (bladeTip.sqrMagnitude > 0.0001f) return (transform.TransformPoint(bladeTip) - transform.position).magnitude;
+
+        float size = 1f;
+        foreach (Renderer r in GetComponentsInChildren<Renderer>())
+            if (r is MeshRenderer || r is SkinnedMeshRenderer) size = Mathf.Max(size, r.bounds.size.magnitude * 0.8f);
+        return size;
+    }
+
+    /// <summary>
+    /// 떠 있는 무기 한 번 — 다가가기 → 찌르기 / 휘두르기 / 내려찍기 → 판정 → 제자리로 (SupportMount 가 돌아온다).
+    /// 자리(SupportMount)를 통째로 움직인다 — 무기는 자리의 앞을 칼끝으로 두고 붙어 있다.
+    /// </summary>
+    IEnumerator SupportStrikeRoutine(WeaponRuntimeStats stats, SupportMount mount, Transform target, Vector3 point,
+                                     bool thrust, bool vertical, bool forceCrit)
+    {
+        Transform owner = Owner != null ? Owner.transform : transform;
+        Transform mountT = mount.transform;
+        Vector3 start = mountT.position;
+        Quaternion startRot = mountT.rotation;
+        float len = Mathf.Max(0.6f, BladeWorldLength());
+        float sweepSign = supportStrikes % 2 == 0 ? 1f : -1f;   // 검은 좌우를 번갈아
+
+        // 폭주(혈검) 등 연사 가속이 걸리면 그만큼 빠르게
+        float speed = Mathf.Max(1f, FireRateBoost);
+        float approach = 0.15f / speed;
+        float act = (thrust ? 0.08f : swingStyle == SwingStyle.TwoHanded ? 0.16f : 0.1f) / speed;
+
+        Vector3 Aim()
+        {
+            Vector3 a = target != null && target.gameObject.activeInHierarchy ? target.position : point;
+            return a;
+        }
+
+        Vector3 dir = Aim() - start;
+        dir.y = 0f;
+        dir = dir.sqrMagnitude > 0.0001f ? dir.normalized : owner.forward;
+
+        float y = owner.position.y + 1.0f;
+
+        void Pose(float u, out Vector3 outPos, out Quaternion outRot)
+        {
+            Vector3 tp = Aim();
+            tp.y = y;
+
+            if (thrust)
+            {
+                Vector3 p0 = tp - dir * (len * 0.75f + 0.5f);
+                Vector3 p1 = tp - dir * (len * 0.15f);
+                outPos = Vector3.Lerp(p0, p1, u * u);
+                outRot = Quaternion.LookRotation(dir, Vector3.up);
+                return;
+            }
+
+            if (vertical)
+            {
+                // 머리 위에서 칼끝을 앞 아래로 — 쥔 점을 축으로 내리친다
+                Vector3 pivot = tp - dir * (len * 0.5f);
+                pivot.y = y + 0.5f;
+                float pitch = Mathf.Lerp(-80f, 35f, u * u);
+                outRot = Quaternion.LookRotation(dir, Vector3.up) * Quaternion.Euler(pitch, 0f, 0f);
+                outPos = pivot + outRot * Vector3.forward * (len * 0.5f);
+                return;
+            }
+
+            float arc = swingStyle == SwingStyle.TwoHanded ? 150f : 110f;
+            float sweep = Mathf.Lerp(-arc * 0.5f, arc * 0.5f, Mathf.SmoothStep(0f, 1f, u)) * sweepSign;
+            Vector3 pv = tp - dir * (len * 0.55f);
+            outRot = Quaternion.LookRotation(Quaternion.Euler(0f, sweep, 0f) * dir, Vector3.up);
+            outPos = pv + outRot * Vector3.forward * (len * 0.5f);
+        }
+
+        // 1) 다가가기 — 지금 자리에서 첫 자세로
+        Pose(0f, out Vector3 firstPos, out Quaternion firstRot);
+        for (float t = 0f; t < approach; t += Time.deltaTime)
+        {
+            float k = Mathf.SmoothStep(0f, 1f, t / approach);
+            mount.OverridePose(Vector3.Lerp(start, firstPos, k), Quaternion.Slerp(startRot, firstRot, k));
+            yield return null;
+        }
+
+        // 2) 찌르기 / 휘두르기 / 내려찍기 — 찌르기 · 내려찍기는 끝에서, 휘두르기는 가운데서 맞힌다
+        float hitAt = thrust || vertical ? 0.9f : 0.5f;
+        bool hit = false;
+        Vector3 pos = firstPos;
+        Quaternion rot = firstRot;
+        for (float t = 0f; t < act; t += Time.deltaTime)
+        {
+            float u = Mathf.Clamp01(t / act);
+            Pose(u, out pos, out rot);
+            mount.OverridePose(pos, rot);
+            if (!hit && u >= hitAt) { StrikeHits(stats, Aim(), dir, len, thrust, vertical, forceCrit); hit = true; }
+            yield return null;
+        }
+
+        Pose(1f, out pos, out rot);
+        mount.OverridePose(pos, rot);
+        if (!hit) StrikeHits(stats, Aim(), dir, len, thrust, vertical, forceCrit);
+
+        // 3) 잠깐 멈췄다가 제자리로
+        for (float t = 0f; t < 0.06f; t += Time.deltaTime)
+        {
+            mount.OverridePose(pos, rot);
+            yield return null;
+        }
+
+        mount.ReleasePose();
+        supportRoutine = null;
+    }
+
+    /// <summary>뛰쳐나간 자리에서의 판정 — 기준점은 발 높이(손에 든 무기와 같다 · 검기 · 중력장이 그 높이를 기준으로 난다).</summary>
+    void StrikeHits(in WeaponRuntimeStats stats, Vector3 aim, Vector3 dir, float len, bool thrust, bool vertical, bool forceCrit)
+    {
+        if (strikeOrigin == null)
+        {
+            strikeOrigin = new GameObject("StrikeOrigin").transform;
+            strikeOrigin.SetParent(transform, false);
+        }
+
+        Vector3 origin = thrust ? aim - dir * (len * 0.75f + 0.5f) : aim - dir * (len * 0.55f);
+        origin.y = Owner != null ? Owner.transform.position.y : aim.y;
+        strikeOrigin.SetPositionAndRotation(origin, Quaternion.LookRotation(dir, Vector3.up));
+
+        float arc = vertical ? verticalArcAngle : thrust ? Mathf.Max(stats.ArcAngle, 40f) : stats.ArcAngle;
+        ApplyHits(in stats, strikeOrigin, arc, vertical, forceCrit);
     }
 
     /// <summary>무기 루트(쥔 손) 기준 칼끝 방향.</summary>
@@ -475,7 +701,9 @@ public class MeleeWeapon : WeaponBase
     {
         base.SetActive(active);
 
-        if (active)
+        if (!active) StopSupportStrike();
+
+        if (active && !IsSupport)
             ApplyStyle();
 
         // 스왑으로 손에서 빠질 때 진행 중인 스윙을 정리한다.

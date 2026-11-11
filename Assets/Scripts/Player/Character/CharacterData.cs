@@ -54,8 +54,15 @@ public class CharacterData : ScriptableObject
     [Tooltip("로비에서 고를 수 있는 시작 무기. 첫 번째가 기본값이다")]
     public WeaponData[] startWeapons;
 
-    [Tooltip("스테이지 보상 · 획득으로 얻을 수 있는 손 무기 종류. 서브유닛(드론)은 항상 허용된다")]
+    [Tooltip("스테이지 보상 · 정비 창으로 얻을 수 있는 무기 종류 — 검사는 검사 무기만, 사수는 사수 무기만. 서브유닛(드론)은 총(Projectile)을 쓰는 캐릭터만")]
     public WeaponKind[] allowedHeldKinds = { WeaponKind.Projectile };
+
+    [Tooltip("보조 무기 방식 (무기-개편-개발-계획) — 주무기 하나만 손에 들고, 나머지는 몸 둘레에 떠서 스스로 싸운다. " +
+             "끄면 예전 방식(손 무기 여럿 · 스왑). 사수 · 검사 모두 켬")]
+    public bool useSupportWeapons = true;
+
+    [Tooltip("보조 무기 칸 수 — 사수 3 (고르지 않은 총 2 + 드론 무기들 중) · 검사 2 (고르지 않은 근접 2 — 드론은 사수 무기라 못 얻는다)")]
+    [Range(0, 3)] public int supportSlots = 3;
 
     [Header("Look")]
     [Tooltip("몸 머티리얼. 비우면 프리팹 기본값을 그대로 쓴다")]

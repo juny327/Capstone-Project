@@ -17,6 +17,8 @@ MonoBehaviour:
   icon: {fileID: 21300000, guid: 58d8c1fdf1f4ecf4f91741810cbcfa4f, type: 3}
   weaponPrefab: {fileID: 5825881266557484979, guid: 78fb8db727b07ee4da8d0682b614dc6c, type: 3}
   socket: 0
+  supportOnly: 0
+  supportTarget: 1
   fireInterval: 0.9
   damage: 9
   critChance: 0.1

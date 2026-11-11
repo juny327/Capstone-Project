@@ -28,4 +28,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 46bb3f2e7db4bdb488a708673ed6b1f3, type: 2}
   - {fileID: 11400000, guid: 7cc3048592b43e340bdf8f77ba9a5a1d, type: 2}
   allowedHeldKinds: 01000000
+  useSupportWeapons: 1
+  supportSlots: 2
   bodyMaterial: {fileID: 0}

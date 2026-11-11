@@ -45,7 +45,7 @@ public class CharacterLoadout : MonoBehaviour
 
         WeaponController weapons = GetComponent<WeaponController>();
         if (weapons != null)
-            weapons.ApplyCharacterRules(Data.allowedHeldKinds, Data.FirstStartWeapon);
+            weapons.ApplyCharacterRules(Data.allowedHeldKinds, Data.FirstStartWeapon, Data.useSupportWeapons, Data.supportSlots);
 
         // 서브 능력 칸 (검사). 능력은 정비에서 얻는다 — 칸만 만들어 둔다
         if (Data.subAbilitySlots > 0)

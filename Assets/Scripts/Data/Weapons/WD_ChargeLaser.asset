@@ -13,11 +13,13 @@ MonoBehaviour:
   m_Name: WD_ChargeLaser
   m_EditorClassIdentifier: Assembly-CSharp::ChargeBeamWeaponData
   weaponName: "\uCDA9\uC804 \uB808\uC774\uC800"
-  description: "\uCD1D\uAD6C\uC5D0 \uD798\uC744 \uBAA8\uC558\uB2E4\uAC00 \uC77C\uC9C1\uC120\uC744
-    \uAFF0\uB6AB\uB294\uB2E4. \uB290\uB9AC\uC9C0\uB9CC \uD55C \uBC29\uC774 \uD06C\uB2E4."
+  description: "\uB4DC\uB860\uC5D0 \uC2E4\uB824 \uD798\uC744 \uBAA8\uC558\uB2E4\uAC00, \uC801\uC774 \uAC00\uC7A5 \uB9CE\uC774 \uACB9\uCE5C \uC904\uC744 \uC77C\uC9C1\uC120\uC73C\uB85C \uAFF0\uB6AB\uB294\uB2E4. \uB290\uB9AC\uC9C0\uB9CC \uD55C \uBC29\uC774 \uD06C\uB2E4."
   icon: {fileID: 21300000, guid: b99fc7fc0c734fb4cbdb85288b4617b4, type: 3}
   weaponPrefab: {fileID: 1597846053522236169, guid: f2e9bd52ecb8a42468a639ed1b81eb23, type: 3}
   socket: 0
+  supportOnly: 1
+  supportTarget: 4
+  supportTint: {r: 1, g: 0.3, b: 0.45, a: 1}
   fireInterval: 2.2
   damage: 9
   critChance: 0.15

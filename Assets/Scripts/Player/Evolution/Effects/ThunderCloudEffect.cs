@@ -29,6 +29,12 @@ public class ThunderCloudEffect : AttachmentEffect
     public GameObject impactPrefab;
     public GameSoundSet.Entry sound = new GameSoundSet.Entry();
 
+    [Header("보조 칸 (무기-개편-개발-계획)")]
+    [Tooltip("보조 무기(전격 드론)는 장전하지 않는다 — 대신 이 주기마다 먹구름을 띄운다 (초)")]
+    [Min(1f)] public float supportPeriod = 8f;
+    [Tooltip("한 번 띄운 먹구름이 낙뢰를 쏟는 시간 (초)")]
+    [Min(0.2f)] public float supportStormTime = 2f;
+
     public static int Strikes { get; private set; }
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -48,9 +54,12 @@ public class ThunderCloudEffect : AttachmentEffect
 
         public override void OnReloadStarted() => timer = 0.15f;
 
+        float supportClock;
+        bool supportStorming;
+
         public override void Tick(float deltaTime)
         {
-            bool storming = Weapon != null && Weapon.IsActive && Weapon.IsReloading;
+            bool storming = Weapon != null && Weapon.IsActive && (Weapon.IsSupport ? SupportStorm(deltaTime) : Weapon.IsReloading);
             Transform player = Weapon != null && Weapon.Controller != null ? Weapon.Controller.transform : null;
 
             UpdateCloud(storming, player);
@@ -76,6 +85,19 @@ public class ThunderCloudEffect : AttachmentEffect
                 soundTimer = 0.12f;
                 CombatFx.PlaySound(cfg.sound);
             }
+        }
+
+        /// <summary>보조 칸 — 장전이 없으니 supportPeriod 마다 supportStormTime 동안 먹구름 (8초마다 2초).</summary>
+        bool SupportStorm(float deltaTime)
+        {
+            float period = Mathf.Max(cfg.supportPeriod, cfg.supportStormTime + 0.1f);
+            supportClock += deltaTime;
+            if (supportClock >= period) supportClock -= period;
+
+            bool on = supportClock >= period - cfg.supportStormTime;
+            if (on && !supportStorming) timer = 0.15f;   // 장전 시작과 같은 첫 낙뢰 지연
+            supportStorming = on;
+            return on;
         }
 
         public override void Dispose()

@@ -27,10 +27,17 @@ public enum HeldWeaponSelectionResult { Invalid, NotReady, Unchanged, Equipped, 
 /// <summary>
 /// 플레이어의 무기를 소유하고 구동한다.
 ///
-/// 장착 정책 (W3)
-///   · 손에 드는 무기(투사체/근접)는 여러 개 보유하지만 **한 번에 하나만 활성**이다.
-///     스왑으로 활성 무기를 바꾼다. 비활성 무기는 모델이 숨겨지고 발사되지 않는다.
-///   · 드론(SubUnit)은 스왑과 무관하게 **항상 동작**한다. 손에 드는 무기가 아니기 때문이다.
+/// 장착 정책 — 보조 무기 (무기-개편-개발-계획, 사수 2026-11-10)
+///   · 손에는 <b>주무기 하나</b>만 든다 (로비에서 고른 것). 바꿔 들기는 없다.
+///   · 그 밖에 얻은 총은 전부 <b>보조 무기</b> — 몸 둘레(왼쪽 · 오른쪽 · 뒤)에 떠서 스스로 적을 골라 쏜다.
+///     드론 전용 무기(전격 · 충전 레이저 · 샷건)는 드론 몸체에 실린다. 세기는 피해 ×0.8 · 간격 ×1.33 (상위 무기 ×0.7 · ×1.4).
+///   · 보조 칸은 3칸 — 드론(SubUnit)도 이 칸을 같이 쓴다. 드론은 원래처럼 스스로 궤도를 돈다.
+///   · 근접 무기(검사, 2026-11-10)도 떠서 싸운다 — 사거리 + 뛰쳐나갈 거리 안의 적에게 날아가 찌르기 · 휘두르기 · 내려찍기 후 돌아온다.
+///   · 패링 연계 — 패링에 성공하면 떠 있는 근접 무기가 막은 방향으로 일제히 찌르고, 주무기의 다음 한 방은 확정 치명.
+///
+/// 예전 방식 (W3, useSupportWeapons 를 끈 캐릭터)
+///   · 손에 드는 무기(투사체/근접)는 여러 개 보유하지만 **한 번에 하나만 활성**이다. 스왑으로 바꾼다.
+///   · 드론(SubUnit)은 스왑과 무관하게 **항상 동작**한다.
 ///
 /// AutoAttack 을 대체한다. 둘을 동시에 켜두면 이중 발사가 되므로 Awake 에서 경고한다.
 /// </summary>
@@ -50,6 +57,48 @@ public class WeaponController : MonoBehaviour
 
     [Tooltip("서브유닛(드론) 보유 가능 수")]
     [Min(1)] [SerializeField] private int maxSubUnitSlots = 2;
+
+    [Header("Support Weapons (보조 무기)")]
+    [Tooltip("보조 무기 칸 수 — 주무기 1 + 이만큼. 드론도 이 칸을 같이 쓴다")]
+    [Min(0)] [SerializeField] private int supportSlots = 3;
+
+    [Tooltip("보조 무기 세기 — 피해 배율 · 공격 간격 배율 (손에 든 같은 무기의 약 60%)")]
+    [SerializeField] private float supportDamageMul = 0.8f;
+    [SerializeField] private float supportIntervalMul = 1.33f;
+
+    [Tooltip("보조 칸의 상위 무기 세기 — 연출은 그대로, 피해 · 간격만 (손에 든 상위 무기의 약 절반)")]
+    [SerializeField] private float evolvedSupportDamageMul = 0.7f;
+    [SerializeField] private float evolvedSupportIntervalMul = 1.4f;
+
+    [Tooltip("보조 무기 자리 (플레이어 기준). 왼쪽 · 오른쪽 · 뒤. " +
+             "높이는 주무기 총구(약 1.1m) 근처로 — 탄 · 빔은 쏜 높이 그대로 날아가므로 너무 높으면 작은 적 머리 위로 지나간다")]
+    [SerializeField] private Vector3[] supportOffsets =
+    {
+        new Vector3(-0.95f, 1.15f, -0.15f),
+        new Vector3(0.95f, 1.15f, -0.15f),
+        new Vector3(0f, 1.3f, -1.1f),
+    };
+
+    [Tooltip("떠 있는 총 크기 (손에 들 때 대비)")]
+    [SerializeField] private float floatingWeaponScale = 0.85f;
+
+    [Tooltip("드론 전용 무기의 몸체 — 기존 드론 프리팹(Model 만 쓴다). 총 모형은 숨기고 드론 총구에서 쏜다. 비우면 총만 뜬다")]
+    [SerializeField] private GameObject droneBodyPrefab;
+
+    [Tooltip("드론 몸체 크기 (기존 드론 대비) — 보통 드론보다 조금 크게 해 무기 드론임을 보인다")]
+    [SerializeField] private float droneBodyScale = 1.5f;
+
+    [Tooltip("떠 있는 근접 무기 — 칼 길이 상한 (m). 손에 든 대검 · 창은 길어서 그대로 띄우면 화면을 가린다")]
+    [SerializeField] private float floatingMeleeMaxLength = 1.8f;
+
+    [Tooltip("떠 있는 근접 무기가 뛰쳐나갈 수 있는 거리 (m) — 무기 사거리에 더한다")]
+    [SerializeField] private float meleeLunge = 3.5f;
+
+    [Tooltip("떠 있는 근접 무기의 기울기 (도) — 칼끝을 조금 아래로")]
+    [SerializeField] private float meleeTilt = 12f;
+
+    [Tooltip("패링 연계 — 패링 모션이 끝난 뒤 이 시간(초) 안의 주무기 다음 한 방은 확정 치명")]
+    [SerializeField] private float parryCritWindow = 0.5f;
 
     [Header("Start")]
     [Tooltip("게임 시작 시 장착할 무기. 비워두면 무기 없이 시작한다")]
@@ -92,6 +141,15 @@ public class WeaponController : MonoBehaviour
     private WeaponKind[] allowedHeldKinds;
     private WeaponData characterStarter;
 
+    // 보조 무기 방식인가 (사수). 끄면 예전 방식 — 손 무기 여럿 · 스왑 (검사, 근접 보조 무기 전까지)
+    private bool useSupportWeapons = true;
+
+    // 보조 무기 자리 (만들어 두고 다시 쓴다)
+    private readonly List<SupportMount> mounts = new List<SupportMount>();
+    private readonly SupportTargeting.Provider supportTargets = new SupportTargeting.Provider();
+    private readonly Dictionary<WeaponBase, Transform> supportAim = new Dictionary<WeaponBase, Transform>();
+    private readonly Dictionary<WeaponBase, List<Renderer>> hiddenModels = new Dictionary<WeaponBase, List<Renderer>>();
+
     // 패링 모션 동안 손 무기 발사를 멈춘다
     private float suppressFireUntil;
 
@@ -116,11 +174,88 @@ public class WeaponController : MonoBehaviour
 
     public int ActiveIndex => activeHeldIndex;
 
-    public bool HasFreeHeldSlot => held.Count < maxHeldSlots;
-    public bool HasFreeSubUnitSlot => subUnits.Count < maxSubUnitSlots;
+    /// <summary>
+    /// 손 무기 목록에 하나 더 넣을 수 있는가. 보조 무기 방식이면 주무기가 없을 때 · 보조 칸이 남았을 때.
+    /// </summary>
+    public bool HasFreeHeldSlot => useSupportWeapons
+        ? held.Count == 0 || (HasFreeSupportSlot && held.Count < MaxHeldSlots)
+        : held.Count < maxHeldSlots;
 
-    /// <summary>손 무기 슬롯 수. 슬롯 UI 가 빈 칸을 그리는 데 쓴다.</summary>
-    public int MaxHeldSlots => maxHeldSlots;
+    public bool HasFreeSubUnitSlot => subUnits.Count < maxSubUnitSlots && (!useSupportWeapons || HasFreeSupportSlot);
+
+    /// <summary>손 무기 슬롯 수 (주무기 + 보조). 슬롯 UI 가 빈 칸을 그리는 데 쓴다.</summary>
+    public int MaxHeldSlots => useSupportWeapons ? Mathf.Min(maxHeldSlots, 1 + supportSlots) : maxHeldSlots;
+
+    /// <summary>보조 무기 방식인가 (사수). 꺼져 있으면 예전 방식 — 손 무기 스왑.</summary>
+    public bool UsesSupportWeapons => useSupportWeapons;
+
+    /// <summary>보조 칸 수.</summary>
+    public int SupportSlots => supportSlots;
+
+    /// <summary>보조 칸을 쓰는 무기 수 — 주무기를 뺀 손 무기 + 드론.</summary>
+    public int SupportCount => (held.Count > 0 ? held.Count - 1 : 0) + subUnits.Count;
+
+    /// <summary>보조 칸이 남았는가.</summary>
+    public bool HasFreeSupportSlot => SupportCount < supportSlots;
+
+    /// <summary>주무기 (손에 든 무기). ActiveWeapon 과 같다.</summary>
+    public IWeapon MainWeapon => ActiveWeapon;
+
+    /// <summary>
+    /// 보조 무기 하나를 뺀다 (테스트 룸 "보조 비우기" · 가득할 때 바꾸기). 주무기는 빼지 않는다.
+    /// 게임에서는 쓰지 않는다 — 보조 칸이 가득하면 새 무기가 나오지 않고 가진 무기 강화만 나온다.
+    /// </summary>
+    public bool RemoveSupport(IWeapon weapon)
+    {
+        if (!(weapon is WeaponBase w)) return false;
+
+        int index = held.IndexOf(w);
+        if (index >= 0)
+        {
+            if (index == activeHeldIndex) return false;
+
+            SupportMount mount = w.IsSupport ? MountOf(w) : null;
+            w.SetActive(false);
+            held.RemoveAt(index);
+            if (index < activeHeldIndex) activeHeldIndex--;
+            FreeMount(mount);
+        }
+        else if (subUnits.Remove(w)) w.SetActive(false);
+        else return false;
+
+        supportAim.Remove(w);
+        hiddenModels.Remove(w);
+        Destroy(w.gameObject);
+
+        RaiseLegacyStats();
+        GameEvents.OnWeaponsChanged?.Invoke();
+        OnAttachmentsChanged?.Invoke();
+        return true;
+    }
+
+    /// <summary>보조 무기를 모두 뺀다 (테스트 룸). 뺀 수를 돌려준다.</summary>
+    public int RemoveAllSupports()
+    {
+        int removed = 0;
+        for (int i = held.Count - 1; i >= 0; i--)
+            if (i != activeHeldIndex && RemoveSupport(held[i])) removed++;
+        for (int i = subUnits.Count - 1; i >= 0; i--)
+            if (RemoveSupport(subUnits[i])) removed++;
+        return removed;
+    }
+
+    /// <summary>
+    /// 보조 칸의 그 무기를 다른 무기로 바꾼다 — 같은 자리 · 보조 그대로 (테스트 룸 상위 무기 보조판).
+    /// 새 무기는 레벨 1 · 부착물 없음이다.
+    /// </summary>
+    public bool ReplaceSupport(IWeapon support, WeaponData data)
+    {
+        if (!(support is WeaponBase w) || !IsValidHeldWeapon(data)) return false;
+
+        int index = held.IndexOf(w);
+        if (index < 0 || index == activeHeldIndex) return false;
+        return ReplaceHeldAt(index, data, keepRole: true);
+    }
 
     /// <summary>서브유닛 슬롯 수.</summary>
     public int MaxSubUnitSlots => maxSubUnitSlots;
@@ -181,13 +316,19 @@ public class WeaponController : MonoBehaviour
         next.InheritFrom(previous);   // 범용 강화 누적분도 원래 무기 것을 그대로 받는다
 
         bool wasActive = list == held && index == activeHeldIndex;
+        bool wasSupport = list == held && previous.IsSupport;
+        SupportMount mount = wasSupport ? MountOf(previous) : null;
 
         previous.SetActive(false);              // 장전 · 휘두르기 · 충전 소리 · 빔을 끊는다
         previous.gameObject.SetActive(false);
         list[index] = next;
+        supportAim.Remove(previous);
+        hiddenModels.Remove(previous);
         Destroy(previous.gameObject);
 
-        next.SetActive(list == subUnits || wasActive);
+        // 보조 칸에서 진화하면 같은 자리에서 상위 무기 보조판으로 (연출 그대로 · 피해 ×0.7 · 간격 ×1.4)
+        if (wasSupport) AssignSupport(next, mount);
+        else next.SetActive(list == subUnits || wasActive);
 
         ApplyUpperBodyLayers();
         RaiseLegacyStats();
@@ -260,8 +401,10 @@ public class WeaponController : MonoBehaviour
         {
             held.Add(weapon);
 
-            // 첫 무기는 자동으로 손에 들린다. 그 외에는 보유만 하고 스왑으로 꺼낸다.
+            // 첫 무기는 자동으로 손에 들린다 (주무기).
+            // 그 뒤에 얻은 무기는 보조 무기 방식이면 몸 둘레에 떠서 스스로 싸우고, 아니면 보유만 하고 스왑으로 꺼낸다.
             if (activeHeldIndex < 0) SwapTo(held.Count - 1);
+            else if (CanBeSupport(weapon)) AssignSupport(weapon, null);
             else weapon.SetActive(false);
         }
 
@@ -276,20 +419,26 @@ public class WeaponController : MonoBehaviour
     ///   · allowed : 보상 · 획득으로 얻을 수 있는 손 무기 종류. 비우면 전부 허용
     ///   · starter : 로비 선택이 없거나 이 캐릭터가 쓸 수 없는 무기일 때 대신 들 무기
     /// </summary>
-    public void ApplyCharacterRules(WeaponKind[] allowed, WeaponData starter)
+    public void ApplyCharacterRules(WeaponKind[] allowed, WeaponData starter, bool supportWeapons = true, int supportSlotCount = -1)
     {
         allowedHeldKinds = allowed;
         characterStarter = starter;
+        useSupportWeapons = supportWeapons;
+        if (supportSlotCount >= 0) supportSlots = supportSlotCount;
     }
 
-    /// <summary>이 캐릭터가 쓸 수 있는 무기인지. 서브유닛(드론)은 두 캐릭터 모두 쓴다.</summary>
+    /// <summary>
+    /// 이 캐릭터가 쓸 수 있는 무기인지 — 검사는 검사 무기만, 사수는 사수 무기만 (2026-11-11).
+    /// 드론(서브유닛)은 사수 무기다 — 총을 쓰는 캐릭터만 얻는다.
+    /// 정비 창 · 보상 카드가 이것으로 거른다. 테스트 룸 선반 · 구역은 거르지 않고 모든 무기를 시험할 수 있다.
+    /// </summary>
     public bool IsAllowedForCharacter(WeaponData data)
     {
         if (data == null) return false;
-        if (data.IsAlwaysActive) return true;
         if (allowedHeldKinds == null || allowedHeldKinds.Length == 0) return true;
 
-        return System.Array.IndexOf(allowedHeldKinds, data.Kind) >= 0;
+        WeaponKind kind = data.IsAlwaysActive ? WeaponKind.Projectile : data.Kind;
+        return System.Array.IndexOf(allowedHeldKinds, kind) >= 0;
     }
 
     /// <summary>duration 초 동안 손 무기를 쏘지 않는다. 쿨다운은 그대로 흐른다 (패링 모션용).</summary>
@@ -312,6 +461,10 @@ public class WeaponController : MonoBehaviour
     {
         if (!IsInitialized || isDead) return HeldWeaponSelectionResult.NotReady;
         if (!IsValidHeldWeapon(data)) return HeldWeaponSelectionResult.Invalid;
+
+        // 드론 전용 무기는 손에 들지 않는다 — 보조 칸에 넣는다 (가득하면 마지막 보조 칸을 바꾼다)
+        if (useSupportWeapons && data.SupportOnly && activeHeldIndex >= 0)
+            return SelectSupportWeapon(data);
 
         for (int i = 0; i < held.Count; i++)
         {
@@ -340,19 +493,52 @@ public class WeaponController : MonoBehaviour
         return ReplaceHeldAt(activeHeldIndex, data) ? HeldWeaponSelectionResult.Replaced : HeldWeaponSelectionResult.Invalid;
     }
 
-    /// <summary>그 칸의 무기를 새 무기(레벨 1 · 부착물 없음)로 바꾸고 손에 든다. 실패하면 이전 무기를 그대로 둔다.</summary>
-    bool ReplaceHeldAt(int index, WeaponData data)
+    /// <summary>드론 전용 무기 고르기 (테스트 룸) — 이미 있으면 그대로, 칸이 남으면 보조로 얻고, 가득하면 마지막 보조 칸을 바꾼다.</summary>
+    HeldWeaponSelectionResult SelectSupportWeapon(WeaponData data)
+    {
+        if (Find(data) != null) return HeldWeaponSelectionResult.Unchanged;
+
+        if (HasFreeHeldSlot)
+            return Acquire(data) == WeaponAcquireResult.Equipped ? HeldWeaponSelectionResult.Equipped : HeldWeaponSelectionResult.Invalid;
+
+        for (int i = held.Count - 1; i >= 0; i--)
+        {
+            if (i == activeHeldIndex) continue;
+            return ReplaceHeldAt(i, data, keepRole: true) ? HeldWeaponSelectionResult.Replaced : HeldWeaponSelectionResult.Invalid;
+        }
+
+        return HeldWeaponSelectionResult.Invalid;
+    }
+
+    /// <summary>
+    /// 그 칸의 무기를 새 무기(레벨 1 · 부착물 없음)로 바꾸고 손에 든다. 실패하면 이전 무기를 그대로 둔다.
+    /// keepRole 이면 손에 들지 않고 그 칸의 역할(보조)을 그대로 잇는다.
+    /// </summary>
+    bool ReplaceHeldAt(int index, WeaponData data, bool keepRole = false)
     {
         // Validate and create first: failure must preserve the previous loadout.
         WeaponBase replacement = SpawnWeapon(data);
         if (replacement == null) return false;
         replacement.ApplyModifier(globalModifier);
         WeaponBase previous = held[index];
+        SupportMount previousMount = previous.IsSupport ? MountOf(previous) : null;
         previous.SetActive(false); // cancels reload, pending melee hits, charge audio and beams
         previous.gameObject.SetActive(false);
         held[index] = replacement;
         replacement.SetActive(false);
+        supportAim.Remove(previous);
+        hiddenModels.Remove(previous);
         Destroy(previous.gameObject);
+
+        if (keepRole && index != activeHeldIndex)
+        {
+            if (CanBeSupport(replacement)) AssignSupport(replacement, previousMount);
+            else FreeMount(previousMount);
+            GameEvents.OnWeaponsChanged?.Invoke();
+            return true;
+        }
+
+        FreeMount(previousMount);
 
         if (index != activeHeldIndex)
         {
@@ -486,6 +672,12 @@ public class WeaponController : MonoBehaviour
         if (index < 0 || index >= held.Count) return;
         if (index == activeHeldIndex) return;
 
+        if (useSupportWeapons)
+        {
+            SwapMain(index);
+            return;
+        }
+
         for (int i = 0; i < held.Count; i++)
             held[i].SetActive(i == index);
 
@@ -496,6 +688,263 @@ public class WeaponController : MonoBehaviour
 
         RaiseLegacyStats();
         GameEvents.OnWeaponSwapped?.Invoke(ActiveWeapon);
+    }
+
+    // ───────── 보조 무기 ─────────
+
+    /// <summary>
+    /// 주무기를 바꾼다 (보조 무기 방식). 게임에서는 쓰지 않고 테스트 룸 · 진화 시험 · 조합 시험이 부른다.
+    /// 새 주무기는 손으로, 원래 주무기는 그 자리(보조 칸)로 간다 — 서로 자리를 바꾼다.
+    /// </summary>
+    void SwapMain(int index)
+    {
+        WeaponBase next = held[index];
+        WeaponBase previous = activeHeldIndex >= 0 && activeHeldIndex < held.Count ? held[activeHeldIndex] : null;
+
+        SupportMount freed = next.IsSupport ? MountOf(next) : null;
+        AttachToHand(next);
+        next.SetSupportRole(false, null, WeaponModifier.Identity);
+        next.SetActive(true);
+        activeHeldIndex = index;
+
+        if (previous != null && previous != next)
+        {
+            if (CanBeSupport(previous)) AssignSupport(previous, freed);
+            else
+            {
+                FreeMount(freed);
+                previous.SetActive(false);
+            }
+        }
+        else FreeMount(freed);
+
+        ApplyUpperBodyLayers();
+        RaiseLegacyStats();
+        GameEvents.OnWeaponSwapped?.Invoke(ActiveWeapon);
+    }
+
+    /// <summary>보조 무기로 띄울 수 있는가 — 보조 무기 방식이고, 드론이 아닌 손 무기 (총 · 근접).</summary>
+    bool CanBeSupport(WeaponBase weapon) =>
+        useSupportWeapons && weapon != null && weapon.Data != null &&
+        (weapon.Data.Kind == WeaponKind.Projectile || weapon.Data.Kind == WeaponKind.Melee);
+
+    /// <summary>보조 무기 세기 — 보통 무기 ×0.8 · ×1.33, 상위 무기 ×0.7 · ×1.4.</summary>
+    WeaponModifier SupportRoleFor(WeaponData data)
+    {
+        bool evolved = data != null && data.IsEvolved;
+        WeaponModifier m = WeaponModifier.Identity;
+        m.damageMul = evolved ? evolvedSupportDamageMul : supportDamageMul;
+        m.fireIntervalMul = evolved ? evolvedSupportIntervalMul : supportIntervalMul;
+        return m;
+    }
+
+    /// <summary>
+    /// 몸 둘레에 띄운다. preferred 자리가 비어 있으면 거기에, 아니면 빈 자리에.
+    /// 드론 전용 무기는 드론 몸체 아래에 작게 매단다.
+    /// </summary>
+    void AssignSupport(WeaponBase weapon, SupportMount preferred)
+    {
+        SupportMount mount = preferred != null && !IsMountUsed(preferred, weapon) ? preferred : FreeMountSlot(weapon);
+
+        bool drone = weapon.Data != null && weapon.Data.SupportOnly && droneBodyPrefab != null;
+        int slot = mounts.IndexOf(mount);
+        Vector3 offset = supportOffsets != null && supportOffsets.Length > 0
+            ? supportOffsets[Mathf.Clamp(slot, 0, supportOffsets.Length - 1)]
+            : new Vector3(0f, 1.6f, -0.6f);
+
+        Transform t = weapon.transform;
+        Vector3 handScale = ResolveSocket(weapon.Data.socket).lossyScale;
+
+        // 근접 무기는 칼 길이를 상한까지만 — 손에 든 대검 · 창은 길어서 그대로 띄우면 화면을 가린다
+        float scale = floatingWeaponScale;
+        MeleeWeapon melee = weapon as MeleeWeapon;
+        if (melee != null && melee.BladeLocalLength > 0.01f)
+        {
+            // 종류마다 상한을 조금씩 — 창이 가장 길고, 대검 · 검 순 (모두 같으면 창이 검처럼 짧아 보인다)
+            float cap = floatingMeleeMaxLength * (melee.Style == MeleeWeapon.SwingStyle.Polearm ? 1.35f
+                                                : melee.Style == MeleeWeapon.SwingStyle.TwoHanded ? 1.15f : 1f);
+            float handLength = melee.BladeLocalLength * Mathf.Abs(handScale.x * PrefabScale(weapon).x);
+            if (handLength * scale > cap) scale = cap / handLength;
+        }
+
+        mount.gameObject.SetActive(true);
+        mount.Setup(transform, offset, slot, drone ? droneBodyPrefab : null, scale,
+                    droneBodyScale, weapon.Data != null ? weapon.Data.SupportTint : Color.clear);
+
+        t.SetParent(mount.Holder, false);
+        t.localPosition = Vector3.zero;
+        t.localRotation = Quaternion.identity;
+        t.localScale = Divide(Vector3.Scale(handScale, PrefabScale(weapon)), mount.transform.lossyScale);
+
+        // 총구가 자리의 앞을 보게 돌린다 — 손에서는 손목 각도가 총구를 앞으로 돌려 준다.
+        // 근접 무기는 칼끝이 앞(조금 아래)을 보게 — 뛰쳐나갈 때 자리째 돌아 칼끝이 적을 향한다
+        Transform muzzle = weapon.MuzzlePoint;
+        if (melee != null)
+            t.rotation = mount.Holder.rotation * Quaternion.Euler(meleeTilt, 0f, 0f) * Quaternion.FromToRotation(melee.BladeAxisLocal, Vector3.forward);
+        else if (muzzle != null && muzzle != t)
+        {
+            Quaternion rel = Quaternion.Inverse(t.rotation) * muzzle.rotation;
+            t.rotation = mount.Holder.rotation * Quaternion.Inverse(rel);
+        }
+
+        // 드론: 총 모형은 숨기고 총구를 드론 총구에 — 탄 · 빔 · 충전 빛은 드론에서 나온다
+        if (drone)
+        {
+            ShowModel(weapon, false);
+            if (muzzle != null && mount.BodyMuzzle != null) t.position += mount.BodyMuzzle.position - muzzle.position;
+            weapon.SetSupportRole(true, mount.transform, SupportRoleFor(weapon.Data));
+            weapon.SetActive(true);
+            return;
+        }
+
+        ShowModel(weapon, true);
+
+        // 총 모형의 가운데가 자리에 오게 (총마다 피벗이 손잡이 · 개머리판 등 제각각이다)
+        bool any = false;
+        Bounds bounds = default;
+        foreach (Renderer r in t.GetComponentsInChildren<Renderer>())
+        {
+            if (!r.enabled || r is ParticleSystemRenderer || r is LineRenderer || r is TrailRenderer) continue;
+            if (!any) { bounds = r.bounds; any = true; }
+            else bounds.Encapsulate(r.bounds);
+        }
+        if (any) t.position += mount.Holder.position - bounds.center;
+
+        weapon.SetSupportRole(true, mount.transform, SupportRoleFor(weapon.Data));
+        weapon.SetActive(true);
+    }
+
+    /// <summary>손 소켓으로 되돌린다 (보조 → 주무기).</summary>
+    void AttachToHand(WeaponBase weapon)
+    {
+        Transform t = weapon.transform;
+        Transform socket = ResolveSocket(weapon.Data.socket);
+        if (t.parent == socket) return;
+
+        t.SetParent(socket, false);
+        t.localPosition = Vector3.zero;
+        t.localRotation = Quaternion.identity;
+        t.localScale = PrefabScale(weapon);
+        ShowModel(weapon, true);
+    }
+
+    /// <summary>
+    /// 총 모형(메시)만 숨기거나 되살린다 — 탄 · 빔 · 입자 · 선은 그대로 둔다.
+    /// 숨길 때 켜져 있던 것만 기억해 두었다가 그것만 다시 켠다 (충전 빛처럼 무기가 스스로 켜고 끄는 메시를 건드리지 않게).
+    /// </summary>
+    void ShowModel(WeaponBase weapon, bool show)
+    {
+        if (show)
+        {
+            if (!hiddenModels.TryGetValue(weapon, out List<Renderer> list)) return;
+            foreach (Renderer r in list) if (r != null) r.enabled = true;
+            hiddenModels.Remove(weapon);
+            return;
+        }
+
+        if (hiddenModels.ContainsKey(weapon)) return;
+
+        var hidden = new List<Renderer>();
+        foreach (Renderer r in weapon.GetComponentsInChildren<Renderer>(true))
+        {
+            if (!(r is MeshRenderer || r is SkinnedMeshRenderer) || !r.enabled) continue;
+            r.enabled = false;
+            hidden.Add(r);
+        }
+        hiddenModels[weapon] = hidden;
+    }
+
+    static Vector3 PrefabScale(WeaponBase weapon) =>
+        weapon.Data != null && weapon.Data.weaponPrefab != null ? weapon.Data.weaponPrefab.transform.localScale : Vector3.one;
+
+    static Vector3 Divide(Vector3 a, Vector3 b) =>
+        new Vector3(a.x / NonZero(b.x), a.y / NonZero(b.y), a.z / NonZero(b.z));
+
+    static float NonZero(float v) => Mathf.Abs(v) < 0.0001f ? 1f : v;
+
+    /// <summary>그 보조 무기가 떠 있는 자리.</summary>
+    SupportMount MountOf(WeaponBase weapon)
+    {
+        if (weapon == null || weapon.SupportMount == null) return null;
+        return weapon.SupportMount.GetComponent<SupportMount>();
+    }
+
+    bool IsMountUsed(SupportMount mount, WeaponBase except)
+    {
+        for (int i = 0; i < held.Count; i++)
+            if (held[i] != except && held[i] != null && held[i].IsSupport && held[i].SupportMount == mount.transform) return true;
+        return false;
+    }
+
+    /// <summary>빈 자리. 없으면 하나 더 만든다.</summary>
+    SupportMount FreeMountSlot(WeaponBase forWeapon)
+    {
+        for (int i = 0; i < mounts.Count; i++)
+            if (mounts[i] != null && !IsMountUsed(mounts[i], forWeapon)) return mounts[i];
+
+        Transform root = transform.Find("SupportWeapons");
+        if (root == null)
+        {
+            root = new GameObject("SupportWeapons").transform;
+            root.SetParent(transform, false);
+        }
+
+        var go = new GameObject($"SupportMount{mounts.Count}");
+        go.transform.SetParent(root, false);
+        SupportMount mount = go.AddComponent<SupportMount>();
+        mounts.Add(mount);
+        return mount;
+    }
+
+    /// <summary>빈 자리는 숨긴다 (드론 몸체가 혼자 떠 있지 않게).</summary>
+    void FreeMount(SupportMount mount)
+    {
+        if (mount == null || IsMountUsed(mount, null)) return;
+        mount.gameObject.SetActive(false);
+    }
+
+    /// <summary>
+    /// 보조 무기 하나를 쏜다 — 규칙대로 적을 고르고, 그쪽으로 돌아, 그 적만 보이는 적 정보로 쏜다.
+    /// 무기 코드(투사체 · 빔 · 상위 무기 동작)는 주무기와 똑같이 돈다.
+    /// </summary>
+    void FireSupport(WeaponBase weapon)
+    {
+        // 빔이 이어지는 동안(프리즘 노바 · 태양창)은 노린 적을 계속 본다 — 주무기가 마우스를 따라가듯
+        if (weapon.InSequence)
+        {
+            if (supportAim.TryGetValue(weapon, out Transform aimed) && aimed != null && CombatFx.IsAlive(aimed))
+            {
+                SupportMount m = MountOf(weapon);
+                if (m != null) m.FaceNow(aimed.position - m.transform.position);
+            }
+            return;
+        }
+
+        if (!weapon.CanFire || weapon.Data == null) return;
+        if (weapon.Data.requiresTarget && (detector == null || !detector.HasTarget)) return;
+
+        SupportMount mount = MountOf(weapon);
+        if (mount == null) return;
+
+        if (mount.IsStriking) return;   // 뛰쳐나가 있는 동안은 다음 적을 고르지 않는다
+
+        Vector3 from = mount.transform.position;
+        WeaponRuntimeStats s = weapon.Stats;
+        float range = weapon is MeleeWeapon ? s.Range + meleeLunge   // 근접은 뛰쳐나갈 거리까지
+                    : s.Range > 0.01f ? s.Range
+                    : s.ProjectileSpeed * s.ProjectileLifeTime > 0.01f ? s.ProjectileSpeed * s.ProjectileLifeTime
+                    : float.PositiveInfinity;
+
+        Transform target = SupportTargeting.Pick(weapon.Data.SupportTargetRule, detector, from, range, transform);
+        if (target == null) return;   // 노릴 적이 없으면 쿨다운을 쓰지 않고 기다린다
+
+        mount.FaceNow(target.position - from);
+        supportAim[weapon] = target;
+
+        WeaponFireContext ctx = new WeaponFireContext(supportTargets.Set(target, detector), mount.transform);
+        if (!weapon.HasTargetInReach(in ctx)) return;
+
+        weapon.Fire(in ctx);
     }
 
     // ───────── 생명주기 ─────────
@@ -563,12 +1012,49 @@ public class WeaponController : MonoBehaviour
         if (characterStarter != null && (starter == null || !IsAllowedForCharacter(starter)))
             starter = characterStarter;
 
+        // 드론 전용 무기(전격 · 레이저 · 샷건)는 주무기가 될 수 없다 — 예전 로비 선택이 남아 있어도 기본 무기로
+        if (useSupportWeapons && starter != null && starter.SupportOnly && !hasStarterOverride && characterStarter != null)
+            starter = characterStarter;
+
         if (starter != null)
             Acquire(starter);
 
         // CharacterLoadout(실행 순서 −100)가 Awake 에서 붙인다 — 여기서는 이미 있다
         abilitySlot = GetComponent<SubAbilitySlot>();
+
+        // 패링 연계 (검사) — 프리팹에 늘 붙어 있다. 패링 캐릭터가 아니면 성공 알림이 오지 않는다
+        parry = GetComponent<ParryController>();
+        if (parry != null) parry.OnParryResolved += OnParryResolved;
+
         IsInitialized = true;
+    }
+
+    void OnDestroy()
+    {
+        if (parry != null) parry.OnParryResolved -= OnParryResolved;
+    }
+
+    private ParryController parry;
+
+    /// <summary>패링 연계로 찌른 수 (테스트).</summary>
+    public int ParryCounters { get; private set; }
+
+    /// <summary>
+    /// 패링 연계 — 성공하면 떠 있는 근접 무기가 막은 방향으로 일제히 찌르고,
+    /// 주무기의 다음 한 방(패링 모션이 끝난 뒤 parryCritWindow 초 안)은 무조건 치명타. 쿨다운도 비워 곧바로 반격한다.
+    /// </summary>
+    void OnParryResolved(bool success)
+    {
+        if (!success || isDead) return;
+
+        Vector3 dir = transform.forward;
+        dir.y = 0f;
+
+        for (int i = 0; i < held.Count; i++)
+            if (held[i].IsSupport && held[i] is MeleeWeapon melee && melee.CounterThrust(dir)) ParryCounters++;
+
+        if (activeHeldIndex >= 0 && activeHeldIndex < held.Count)
+            held[activeHeldIndex].GrantForcedCrit(Mathf.Max(0f, suppressFireUntil - Time.time) + parryCritWindow);
     }
 
     void OnPlayerDead()
@@ -581,7 +1067,10 @@ public class WeaponController : MonoBehaviour
             subUnits[i].SetActive(false);
 
         for (int i = 0; i < held.Count; i++)
+        {
             if (held[i].Ability != null) held[i].Ability.Cancel();
+            if (held[i].IsSupport) held[i].SetActive(false);   // 떠 있는 보조 무기 · 빔 · 충전 소리를 끈다
+        }
     }
 
     void Update()
@@ -596,12 +1085,17 @@ public class WeaponController : MonoBehaviour
         WeaponFireContext ctx = new WeaponFireContext(detector, transform);
 
         // 손에 든 무기: 활성 1개만 발사. 비활성도 Tick 은 돌려 쿨다운을 진행시킨다.
+        // 보조 무기는 스스로 적을 골라 쏜다 (패링 중에도 — 손이 아니라 몸 둘레에 떠 있다)
         for (int i = 0; i < held.Count; i++)
         {
             WeaponBase w = held[i];
             w.Tick(dt);
 
-            if (i != activeHeldIndex) continue;
+            if (i != activeHeldIndex)
+            {
+                if (w.IsSupport) FireSupport(w);
+                continue;
+            }
 
             // 패링 모션 중에는 휘두르지 않는다 (쿨다운 Tick 은 위에서 이미 돌았다)
             if (Time.time < suppressFireUntil) continue;
@@ -704,6 +1198,7 @@ public class WeaponController : MonoBehaviour
     void HandleSwapInput()
     {
         if (!enableDirectSwapInput) return;
+        if (useSupportWeapons) return;   // 주무기는 로비에서 고른 하나 — 바꿔 들지 않는다
         if (held.Count <= 1) return;
 
         if (Keyboard.current != null && Keyboard.current[swapKey].wasPressedThisFrame)

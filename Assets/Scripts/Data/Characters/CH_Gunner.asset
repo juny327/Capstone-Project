@@ -25,8 +25,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: e61cedaa53406ed4f8ea56c742ecc880, type: 2}
   - {fileID: 11400000, guid: 16be6279c8aab6d4798e7db59d161183, type: 2}
   - {fileID: 11400000, guid: 180da6784ef99fc4db72586b0150f7a0, type: 2}
-  - {fileID: 11400000, guid: 425b47f8befe4f34485ff97821ad886a, type: 2}
-  - {fileID: 11400000, guid: 21df41de1e2707f43b034c469705ca17, type: 2}
-  - {fileID: 11400000, guid: 74ca696becb4fb443800afef14778251, type: 2}
   allowedHeldKinds: 00000000
+  useSupportWeapons: 1
+  supportSlots: 3
   bodyMaterial: {fileID: 0}
