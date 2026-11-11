@@ -16,7 +16,11 @@ public class WeaponPurchaseSource : ShopOfferSource
             // 이미 있거나, 캐릭터가 못 쓰거나, 슬롯이 가득 찬 무기는 진열하지 않는다
             if (weapon == null || ctx.Weapons.Has(weapon) || !ctx.Weapons.CanAcquire(weapon)) continue;
 
-            into.Add(new WeaponPurchaseOffer(weapon, ctx.Catalog.Scaled(entry.price, ctx.StageIndex), ctx.Weapons.UsesSupportWeapons));
+            // 보조 무기 방식이면 산 무기는 약 60% 세기의 보조 무기가 된다 — 값도 그만큼 (2026-11-11)
+            bool support = ctx.Weapons.UsesSupportWeapons;
+            int basePrice = support ? Mathf.Max(1, Mathf.RoundToInt(entry.price * ctx.Catalog.supportPriceMultiplier)) : entry.price;
+
+            into.Add(new WeaponPurchaseOffer(weapon, ctx.Catalog.Scaled(basePrice, ctx.StageIndex), support));
         }
     }
 }
