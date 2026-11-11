@@ -106,8 +106,8 @@ public class LobbyScreen : MonoBehaviour
     [SerializeField] private string rangedRole = "원거리 캐릭터";
     [SerializeField] private string meleeRole = "근거리 캐릭터";
     [SerializeField] private string rollText = "<color=#9AA3BD>회피</color>  구르기 — 무적으로 재빨리 굴러 빠진다";
-    [SerializeField] private string parryText = "<color=#9AA3BD>회피</color>  패링 — 적을 밀쳐 내고 날아오는 탄을 쳐 낸다";
-    [SerializeField] private string gunnerSpecial = "<color=#9AA3BD>특기</color>  총 부착물 · 개조 — 정비 창에서 단다";
+    [SerializeField] private string parryText = "<color=#9AA3BD>회피</color>  패링 — 밀쳐 내고 탄을 쳐 낸다 · 성공하면 떠 있는 무기가 반격";
+    [SerializeField] private string gunnerSpecial = "<color=#9AA3BD>특기</color>  보조 무기 3칸 — 얻은 총이 떠서 스스로 쏜다";
     [Tooltip("{0} = 서브 능력 칸 수")]
     [SerializeField] private string swordsmanSpecial = "<color=#9AA3BD>특기</color>  서브 능력 {0}칸 — 정비 창에서 얻는다";
     [SerializeField] private string dragCaption = "◀  끌어서 돌려 보기  ▶";
