@@ -15,3 +15,4 @@ MonoBehaviour:
   stageIndex: 3
   killTarget: 0
   maxEnemyCount: 0
+  enemyHealthMultiplier: 2.5

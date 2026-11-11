@@ -15,6 +15,8 @@ public class EnemyManager : MonoBehaviour
     public Transform player;
     public float spawnInterval = 3f;
     [Min(0.1f)] public float rangedProjectileSpeed = 3.5f;
+    [Tooltip("새로 나오는 몬스터의 체력 배율 — StageManager 가 스테이지 데이터 값으로 채운다 (2026-11-12)")]
+    [Min(0.1f)] public float healthMultiplier = 1f;
     public int maxEnemyCount = 20;
 
     [Header("Stage Event")]

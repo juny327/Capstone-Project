@@ -104,9 +104,14 @@ public class Enemy : MonoBehaviour, IDamageable, IPoolable
 
 
 
+    /// <summary>이번에 나왔을 때의 최대 체력 — 몬스터 데이터 × 스테이지 배율 (2026-11-12).</summary>
+    public float MaxHp { get; private set; }
+
     public void OnSpawn()
     {
-        currentHp = data.maxHp;
+        float multiplier = EnemyManager.Instance != null ? EnemyManager.Instance.healthMultiplier : 1f;
+        MaxHp = data.maxHp * multiplier;
+        currentHp = MaxHp;
 
         isFrozen = false;
         freezeRoutine = null;
@@ -339,7 +344,7 @@ public class Enemy : MonoBehaviour, IDamageable, IPoolable
 
 
         ui.Show();
-        ui.UpdateHealth(currentHp, data.maxHp);
+        ui.UpdateHealth(currentHp, MaxHp > 0f ? MaxHp : data.maxHp);
 
 
         DamageTextManager.Instance.ShowDamage(
