@@ -37,7 +37,10 @@ public class UpgradeManager : MonoBehaviour
         GameObject newPlayer = p.gameObject;
 
         // 새로운 게임/새 플레이어라면 업그레이드 레벨 초기화
-        if (trackedPlayer != null && trackedPlayer != newPlayer)
+        // 2026-11-11 — 지난 판 플레이어는 죽거나 로비로 갈 때 Destroy 된다. 파괴된 오브젝트는 Unity 비교에서
+        // null 과 같아 `trackedPlayer != null` 이 거짓이 되고, 스킬 레벨이 다음 판으로 넘어가 스킬 HUD 에
+        // 전판 스킬이 남았다. 참조가 있었는지는 ReferenceEquals 로 본다
+        if (!ReferenceEquals(trackedPlayer, null) && trackedPlayer != newPlayer)
         {
             upgradeLevels.Clear();
 
