@@ -13,3 +13,5 @@ MonoBehaviour:
   m_Name: ShopSource_WeaponUpgrade
   m_EditorClassIdentifier: Assembly-CSharp::WeaponUpgradeSource
   slots: 1
+  maxSlotsWhenNoNewWeapon: 3
+  weaponRowSize: 3
