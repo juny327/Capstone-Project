@@ -17,4 +17,4 @@ MonoBehaviour:
   maxEnemyCount: 70
   spawnInterval: 1.2
   rangedProjectileSpeed: 9
-  enemyHealthMultiplier: 2.2
+  enemyHealthMultiplier: 6
