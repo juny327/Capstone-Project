@@ -130,6 +130,12 @@ MonoBehaviour:
     volume: 0.8
     pitchRange: {x: 0.96, y: 1.04}
     minInterval: 0
+  stageRewardSelect:
+    clips:
+    - {fileID: 8300000, guid: 8ea5d9f3e6577b948a8d24873f84a20a, type: 3}
+    volume: 0.7
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0
   bossSpawn:
     clips:
     - {fileID: 8300000, guid: 7464c16cdf354f94a9d16d5aea57efa6, type: 3}

@@ -61,3 +61,11 @@ MonoBehaviour:
     volume: 0.4
     pitchRange: {x: 1, y: 1}
     minInterval: 0
+  hurt:
+    clips:
+    - {fileID: 8300000, guid: e74641c6bdaa492686c1d02f1f5e9b9d, type: 3}
+    - {fileID: 8300000, guid: c2a20577b79a47ca8b3b5332318d9aae, type: 3}
+    - {fileID: 8300000, guid: 447e5e028878411086fff73392529741, type: 3}
+    volume: 1
+    pitchRange: {x: 0.95, y: 1.05}
+    minInterval: 0.25

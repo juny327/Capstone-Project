@@ -16,3 +16,9 @@ MonoBehaviour:
   damageRatio: 1
   material: {fileID: 2100000, guid: b6310812509a3ab46bf4e098541a27ab, type: 2}
   color: {r: 1, g: 0.95, b: 0.8, a: 0.9}
+  bounceSound:
+    clips:
+    - {fileID: 8300000, guid: 72c93d9b7201eaa4bb4cbab689495bb5, type: 3}
+    volume: 0.3
+    pitchRange: {x: 1.4, y: 1.6}
+    minInterval: 0.08

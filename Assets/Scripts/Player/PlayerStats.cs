@@ -32,6 +32,9 @@ public class PlayerStats : MonoBehaviour, IDamageable
 
     public event Action<int, int> OnHpChanged;
     public event Action<int> OnExpChanged;
+
+    /// <summary>피해를 받아 체력이 줄었을 때 (깎인 양). 죽는 한 방 · 막힌 피해 · 무적 중에는 오지 않는다.</summary>
+    public event Action<int> OnDamaged;
     private Animator anim;
 
     // 사망 가드 - 사망 후 추가 피격으로 Die()가 반복 호출되는 것을 막는다
@@ -163,6 +166,9 @@ public class PlayerStats : MonoBehaviour, IDamageable
             currentHp = 0;
 
         OnHpChanged?.Invoke(currentHp, maxHp);
+
+        // 피격 소리 (PlayerMove) — 죽는 한 방은 사망 소리가 따로 난다
+        if (amount > 0 && currentHp > 0) OnDamaged?.Invoke(amount);
 
         if (info.cameraShake > 0f)
         {

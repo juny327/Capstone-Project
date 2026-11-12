@@ -15,6 +15,9 @@ public class BounceOnHitEffect : AttachmentEffect
     public Material material;
     public Color color = new Color(1f, 0.95f, 0.8f, 0.9f);
 
+    [Tooltip("튕겨 갈 때 작은 종 '팅' (2026-11-12) — 기관단총이면 초당 여러 번이라 최소 간격을 둔다")]
+    public GameSoundSet.Entry bounceSound = new GameSoundSet.Entry();
+
     public override AttachmentRuntime CreateRuntime() => new Runtime(this);
 
     class Runtime : AttachmentRuntime
@@ -34,6 +37,7 @@ public class BounceOnHitEffect : AttachmentEffect
 
             CombatFx.Damage(next, hit.Damage * cfg.damageRatio, to, (to - from).normalized, hit.IsCritical);
             FxLine.Line(cfg.material, from, to, cfg.color, 0.06f, 0.1f);
+            CombatFx.PlaySound(cfg.bounceSound);
         }
     }
 }

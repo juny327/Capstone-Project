@@ -551,6 +551,8 @@ public class MeleeWeapon : WeaponBase
         Transform owner = Owner != null ? Owner.transform : transform;
         Transform mountT = mount.transform;
         Vector3 start = mountT.position;
+
+        if (Owner != null) Owner.PlaySupportLaunch();   // 뛰쳐나가는 '슝' (2026-11-12)
         Quaternion startRot = mountT.rotation;
         float len = Mathf.Max(0.6f, BladeWorldLength());
         float sweepSign = supportStrikes % 2 == 0 ? 1f : -1f;   // 검은 좌우를 번갈아
@@ -638,6 +640,7 @@ public class MeleeWeapon : WeaponBase
             yield return null;
         }
 
+        if (Owner != null) Owner.PlaySupportReturn();   // 돌아오는 '슈욱'
         mount.ReleasePose();
         supportRoutine = null;
     }

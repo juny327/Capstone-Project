@@ -97,7 +97,7 @@ public static partial class EvolutionSetup
         SetPrefab(swarm, missile);
 
         // 회전 기관포 — 기관단총 + 이중 탄창
-        var spin = Effect<SpinUpEffect>("AE_EVO_SpinUp", reset, e => { e.maxBoost = 3f; e.spinUpTime = 2f; e.spinDownTime = 1f; });
+        var spin = Effect<SpinUpEffect>("AE_EVO_SpinUp", reset, e => { e.maxBoost = 3f; e.spinUpTime = 2f; e.spinDownTime = 1f; SpinSounds(e); });
         GameObject tracer = BulletVariant("Bullet_EVO_Tracer", 1.4f, reset);
         var minigun = EvolvedData<ProjectileWeaponData>("WD_SMG", "WD_EVO_Minigun", reset,
             GunVariant("W_SMG", "W_EVO_Minigun", GunGlowMaterial("EVO_Glow_Amber", Amber, reset), Amber, false, null, null, reset, GunPart.SpinBarrels),

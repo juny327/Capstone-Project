@@ -399,7 +399,18 @@ public class PlayerMove : MonoBehaviour
         GameEvents.OnCameraReady += SetCamera;
         GameEvents.OnPlayerDeadStart += StopPlayer;
 
+        if (stats != null) stats.OnDamaged += OnDamaged;
+
         playerInput.Enable();
+    }
+
+    /// <summary>
+    /// 맞았다 — 낮은 '쿵' + 슈트 지직 (PlayerSoundSet.hurt · 최소 간격으로 연속 피격을 솎는다).
+    /// 전용 칸으로 내고 잠깐 총소리를 줄인다 — 총소리에 묻혀 안 들렸다 (2026-11-12 사용자 피드백).
+    /// </summary>
+    void OnDamaged(int amount)
+    {
+        if (sounds != null && SoundManager.Instance != null) SoundManager.Instance.PlayPlayerHurt(sounds.hurt);
     }
 
     void OnDisable()
@@ -419,6 +430,8 @@ public class PlayerMove : MonoBehaviour
 
         GameEvents.OnCameraReady -= SetCamera;
         GameEvents.OnPlayerDeadStart -= StopPlayer;
+
+        if (stats != null) stats.OnDamaged -= OnDamaged;
 
         playerInput.Disable();
     }

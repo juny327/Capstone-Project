@@ -22,6 +22,8 @@
 | `AUDIO/Melee` | 근접 휘두름 `Swing_Light/Heavy/Thrust_01~03.wav` ('휙' — 대역 통과 잡음의 중심이 위 → 아래로 쓸려 내려감, 대검은 낮은 바람 몸통) | **직접 합성** — Python 표준 라이브러리 | 자체 제작 (제약 없음) | 없음 | 2026-11-02 |
 | `AUDIO/Electric` | 전격 소총 발사 `ElectricZap_01~03.wav` · 뇌운 낙뢰 `ThunderStrike_01~03.wav` · 전기 맞힘 `ArcHit_01~03.wav` (임펄스 · 잡음 알갱이 · 톱니파 · 사인 하강 · 갈색 잡음 · 잔향을 쌓음, 합성 스크립트 `Logs/evo_resume/kept_synth_electric.py`) | **직접 합성** — Python (numpy · scipy) | 자체 제작 (제약 없음) | 없음 | 2026-11-02 |
 | `AUDIO/Laser` | 레이저 지속음 `LaserHum_Low/Deep/Wide.wav`(4초 이음매 없는 반복 — 55 · 45 · 65Hz 바탕음 + '우' 모음 배음 + 울렁임) · 레이저 맞힘 `LaserSizzle_01~03.wav`(걸러 낸 잡음 '치익') | **직접 합성** — Python 표준 라이브러리 | 자체 제작 (제약 없음) | 없음 | 2026-11-02 |
+| `AUDIO/Player` · `Fire` · `Support` · `UI` · `Evolution` | 피격 `PlayerHurt_01~03` (Kenney impactWood_heavy + glitch 섞음) · 화상 `FireIgnite_01~03` (걸러 낸 잡음 · 탁탁 튐) · 보조 무기 `SupportLaunch_01~02` · `SupportReturn_01` (쓸려 올라가는 잡음 + 처프) · `SupportParryLink_01` (Kenney impactBell_heavy · impactMetal_heavy + ParryRing 섞음) · 게임 시작 `GameStart` (Kenney maximize_006 + impactMetal_001 섞음) · 회전 기관포 `SpinUpHum` (Kenney spaceEngineSmall_004 의 이음매를 지운 반복) — 스크립트 `Logs/evo_resume/kept_synth_sound_1112.py` | **직접 합성 · 편집** — Python (numpy · soundfile). 섞은 재료는 Kenney CC0 | 자체 제작 + CC0 (제약 없음) | 없음 | 2026-11-12 |
+| `AUDIO/SFX/Monsters` | 몬스터 공격음 `monsterA~E` · freesound 파일 2개 (팀원, 11-04 몬스터 병합) | ⚠ **기록 없음 — 팀원에게 확인할 것** | ⚠ 모름 | ⚠ 모름 | 2026-11-04 |
 | `AUDIO/Parry` | 패링 "팅" 여운 `ParryRing_01~03.wav` | **직접 합성** — 금속 막대 배음(1 : 2.756 : 5.404 : 8.933)을 Python(numpy)으로 합성 | 자체 제작 (제약 없음) | 없음 | 2026-09-26 |
 
 **효과음은 전부 CC0 또는 직접 만든 소리다.** 상업 이용 가능하고 크레딧 표기 의무가 없다.

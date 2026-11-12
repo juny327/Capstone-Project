@@ -29,4 +29,9 @@ public class PlayerSoundSet : ScriptableObject
 
     [Tooltip("다시 달릴 수 있게 됐을 때")]
     public GameSoundSet.Entry staminaReady = new GameSoundSet.Entry();
+
+    [Header("피격")]
+    [Tooltip("내가 맞았을 때 — 적을 맞히는 '퍽'과 결이 달라야 한다 (낮은 '쿵' + 슈트 지직, 2026-11-12). " +
+             "죽는 순간은 GameSoundSet.playerDead 가 낸다")]
+    public GameSoundSet.Entry hurt = new GameSoundSet.Entry();
 }

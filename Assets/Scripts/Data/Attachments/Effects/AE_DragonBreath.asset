@@ -15,3 +15,11 @@ MonoBehaviour:
   duration: 2
   dpsRatio: 0.35
   chance: 1
+  igniteSound:
+    clips:
+    - {fileID: 8300000, guid: 08df0f3b3ce34110a5e1b2d0f021696c, type: 3}
+    - {fileID: 8300000, guid: b0be3748af6d47e7b6828a8ae1cc721f, type: 3}
+    - {fileID: 8300000, guid: 49a63e77e59d454aa0a50129ff889950, type: 3}
+    volume: 0.35
+    pitchRange: {x: 0.94, y: 1.06}
+    minInterval: 0.12

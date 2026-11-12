@@ -2944,6 +2944,25 @@ MonoBehaviour:
   meleeLunge: 3.5
   meleeTilt: 12
   parryCritWindow: 0.5
+  supportLaunchSound:
+    clips:
+    - {fileID: 8300000, guid: 99c95ae0575d4e24ab3de6fb47e82646, type: 3}
+    - {fileID: 8300000, guid: d4206e36c54e4bd58008f93a026b2670, type: 3}
+    volume: 0.3
+    pitchRange: {x: 0.95, y: 1.08}
+    minInterval: 0.1
+  supportReturnSound:
+    clips:
+    - {fileID: 8300000, guid: 63cfb799d3b6487386006b6e232c44dd, type: 3}
+    volume: 0.2
+    pitchRange: {x: 0.95, y: 1.05}
+    minInterval: 0.1
+  parryCounterSound:
+    clips:
+    - {fileID: 8300000, guid: 6424551f0b8f404ea05ee63164d77c01, type: 3}
+    volume: 0.55
+    pitchRange: {x: 0.97, y: 1.03}
+    minInterval: 0.2
   starterWeapon: {fileID: 11400000, guid: e61cedaa53406ed4f8ea56c742ecc880, type: 2}
   detector: {fileID: 1129838663952604652}
   sockets:

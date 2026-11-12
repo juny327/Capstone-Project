@@ -415,7 +415,7 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
     }
 
     /// <summary>보조 무기 소리 크기 — 주무기와 보조 셋이 한꺼번에 쏘면 시끄럽다. 주무기 소리가 앞에 선다.</summary>
-    protected float SoundScale => IsSupport ? 0.5f : 1f;
+    public float SoundScale => IsSupport ? 0.5f : 1f;
 
     /// <summary>
     /// 손에 든 무기의 탄약 변화를 HUD 에 알린다.

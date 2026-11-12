@@ -908,6 +908,17 @@ public static partial class EvolutionSetup
         s.beamLoopPitch = new Vector2(0.75f, 1f);
     }
 
+    /// <summary>회전 기관포 회전음 — 낮은 모터 험 (spaceEngineSmall_004 의 이음매를 지운 반복, 2026-11-12 사용자가 고름).</summary>
+    public const string SpinHumPath = "Assets/AUDIO/Evolution/SpinUpHum.wav";
+
+    /// <summary>회전 기관포 — 쏘는 동안 반복 · 회전에 따라 피치 0.75 → 1.25.</summary>
+    static void SpinSounds(SpinUpEffect e)
+    {
+        e.spinLoop = Load<AudioClip>(SpinHumPath);
+        e.spinLoopVolume = 0.45f;
+        e.spinLoopPitch = new Vector2(0.75f, 1.25f);
+    }
+
     /// <summary>혈검 — 혈풍 베기 칼바람 · 피.</summary>
     static void BloodSounds(BloodFrenzyEffect e)
     {
@@ -939,8 +950,10 @@ public static partial class EvolutionSetup
         if (gale != null) { GaleSounds(gale); EditorUtility.SetDirty(gale); n++; }
         var achilles = Load<AchillesSpearEffect>($"{EffectDir}/AE_EVO_AchillesSpear.asset");
         if (achilles != null) { AchillesSounds(achilles); EditorUtility.SetDirty(achilles); n++; }
+        var spin = Load<SpinUpEffect>($"{EffectDir}/AE_EVO_SpinUp.asset");
+        if (spin != null) { SpinSounds(spin); EditorUtility.SetDirty(spin); n++; }
         AssetDatabase.SaveAssets();
-        Debug.Log($"{Tag} 소리 다시 넣기 — {n}개 (거울칼날 · 중력 대검 · 혈검 · 프리즘 노바 · 태양창 · 돌풍 저격총 · 아킬레우스의 창)");
+        Debug.Log($"{Tag} 소리 다시 넣기 — {n}개 (거울칼날 · 중력 대검 · 혈검 · 프리즘 노바 · 태양창 · 돌풍 저격총 · 아킬레우스의 창 · 회전 기관포)");
     }
 
     static GameSoundSet.Entry Sound(float volume, float minInterval, params string[] paths)

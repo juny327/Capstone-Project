@@ -19,6 +19,13 @@ public class SpinUpEffect : AttachmentEffect
     [Tooltip("최고 연사일 때 도는 속도 (도/초)")]
     public float barrelMaxSpeed = 1440f;
 
+    [Header("회전음 (2026-11-12)")]
+    [Tooltip("쏘는 동안 반복하는 낮은 모터 험 — 회전이 오를수록 피치가 오르고, 다 멈추면 빠진다. 비우면 소리 없음")]
+    public AudioClip spinLoop;
+    [Range(0f, 1f)] public float spinLoopVolume = 0.45f;
+    [Tooltip("회전 0 → 최고일 때 피치")]
+    public Vector2 spinLoopPitch = new Vector2(0.75f, 1.25f);
+
     /// <summary>마지막으로 걸린 연사 배율 (테스트).</summary>
     public static float LastBoost { get; private set; } = 1f;
 
@@ -33,8 +40,12 @@ public class SpinUpEffect : AttachmentEffect
         float spin;
         float sinceAttack = 99f;
         Transform barrels;
+        LoopVoice hum;
 
         public Runtime(SpinUpEffect cfg) => this.cfg = cfg;
+
+        /// <summary>회전음 (테스트).</summary>
+        public LoopVoice Hum => hum;
 
         protected override void OnBind() => barrels = FindDeep(Weapon.transform, cfg.barrelName);
 
@@ -52,6 +63,26 @@ public class SpinUpEffect : AttachmentEffect
             if (Weapon.IsActive) LastBoost = boost;
 
             if (barrels != null) barrels.Rotate(Vector3.forward, (90f + cfg.barrelMaxSpeed * spin) * deltaTime, Space.Self);
+
+            UpdateHum(firing);
+        }
+
+        /// <summary>쏘기 시작하면 들어오고 · 회전에 따라 피치가 오르내리고 · 회전이 다 멈추면 빠진다 (보조 무기는 ×0.5).</summary>
+        void UpdateHum(bool firing)
+        {
+            if (cfg.spinLoop == null || Weapon == null) return;
+
+            // 쏘는 동안은 매 프레임 '켜 둠' — 빠지는 중에 다시 쏘면 그 자리에서 다시 들어온다 (이미 재생 중이면 처음부터 다시 틀지 않는다)
+            if (firing)
+            {
+                if (hum == null) hum = LoopVoice.On(Weapon.transform, "SpinHum");
+                hum.Play(cfg.spinLoop, cfg.spinLoopVolume * Weapon.SoundScale, cfg.spinLoopPitch.x, 0.3f);
+            }
+
+            if (hum == null || !hum.Playing) return;
+
+            hum.SetPitch(Mathf.Lerp(cfg.spinLoopPitch.x, cfg.spinLoopPitch.y, spin));
+            if (!firing && spin <= 0f) hum.Stop(0.4f);
         }
 
         public override void OnActiveChanged(bool active)
@@ -59,6 +90,13 @@ public class SpinUpEffect : AttachmentEffect
             if (active) return;
             spin = 0f;
             Weapon.FireRateBoost = 1f;
+            if (hum != null) hum.Stop(0.2f);
+        }
+
+        public override void Dispose()
+        {
+            if (hum != null) Object.Destroy(hum.gameObject);
+            hum = null;
         }
 
         static Transform FindDeep(Transform parent, string name)

@@ -100,6 +100,27 @@ public class WeaponController : MonoBehaviour
     [Tooltip("패링 연계 — 패링 모션이 끝난 뒤 이 시간(초) 안의 주무기 다음 한 방은 확정 치명")]
     [SerializeField] private float parryCritWindow = 0.5f;
 
+    [Header("Support Weapon Sounds (보조 무기 소리, 2026-11-12)")]
+    [Tooltip("떠 있는 근접 무기가 뛰쳐나갈 때 '슝' — 여럿이 같이 나가도 최소 간격으로 한 번")]
+    [SerializeField] private GameSoundSet.Entry supportLaunchSound = new GameSoundSet.Entry();
+
+    [Tooltip("떠 있는 근접 무기가 제자리로 돌아올 때 '슈욱'")]
+    [SerializeField] private GameSoundSet.Entry supportReturnSound = new GameSoundSet.Entry();
+
+    [Tooltip("패링 연계 일제 찌르기 — 큰 '챙' + 패링 여운. 여러 개가 찔러도 한 번")]
+    [SerializeField] private GameSoundSet.Entry parryCounterSound = new GameSoundSet.Entry();
+
+    /// <summary>떠 있는 근접 무기가 뛰쳐나간다 (MeleeWeapon 이 부른다).</summary>
+    public void PlaySupportLaunch() => PlaySupportSound(supportLaunchSound);
+
+    /// <summary>떠 있는 근접 무기가 돌아온다.</summary>
+    public void PlaySupportReturn() => PlaySupportSound(supportReturnSound);
+
+    static void PlaySupportSound(GameSoundSet.Entry entry)
+    {
+        if (entry != null && SoundManager.Instance != null) SoundManager.Instance.Play(entry, SoundManager.Instance.SfxGroup);
+    }
+
     [Header("Start")]
     [Tooltip("게임 시작 시 장착할 무기. 비워두면 무기 없이 시작한다")]
     [SerializeField] private WeaponData starterWeapon;
@@ -1050,8 +1071,11 @@ public class WeaponController : MonoBehaviour
         Vector3 dir = transform.forward;
         dir.y = 0f;
 
+        int thrusts = 0;
         for (int i = 0; i < held.Count; i++)
-            if (held[i].IsSupport && held[i] is MeleeWeapon melee && melee.CounterThrust(dir)) ParryCounters++;
+            if (held[i].IsSupport && held[i] is MeleeWeapon melee && melee.CounterThrust(dir)) { ParryCounters++; thrusts++; }
+
+        if (thrusts > 0) PlaySupportSound(parryCounterSound);   // 한 번만 — 찌르는 수만큼 겹치지 않게
 
         if (activeHeldIndex >= 0 && activeHeldIndex < held.Count)
             held[activeHeldIndex].GrantForcedCrit(Mathf.Max(0f, suppressFireUntil - Time.time) + parryCritWindow);

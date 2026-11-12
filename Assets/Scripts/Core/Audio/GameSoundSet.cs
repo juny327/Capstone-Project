@@ -91,5 +91,9 @@ public class GameSoundSet : ScriptableObject
     [Header("진행")]
     public Entry stageClear = new Entry();
     public Entry stageRewardOpen = new Entry();
+
+    [Tooltip("보상 카드를 골랐을 때 (2026-11-12). 카드(StageRewardCard)의 AudioSource 가 비어 있어 여기서 낸다 — 팀원 씬을 고치지 않는다")]
+    public Entry stageRewardSelect = new Entry();
+
     public Entry bossSpawn = new Entry();
 }

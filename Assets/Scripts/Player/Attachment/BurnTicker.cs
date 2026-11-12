@@ -34,9 +34,10 @@ public class BurnTicker : MonoBehaviour
         return false;
     }
 
-    public static void Apply(Transform target, float dps, float duration)
+    /// <returns>새로 불붙었으면 true (이미 타던 적을 갱신했으면 false) — 소이탄 '화륵' 소리를 새로 붙을 때만 낸다.</returns>
+    public static bool Apply(Transform target, float dps, float duration)
     {
-        if (target == null || dps <= 0f || duration <= 0f || !CombatFx.IsAlive(target)) return;
+        if (target == null || dps <= 0f || duration <= 0f || !CombatFx.IsAlive(target)) return false;
 
         if (instance == null)
         {
@@ -49,10 +50,11 @@ public class BurnTicker : MonoBehaviour
             if (b.Target != target) continue;
             b.Dps = Mathf.Max(b.Dps, dps);
             b.Remaining = Mathf.Max(b.Remaining, duration);
-            return;
+            return false;
         }
 
         instance.burns.Add(new Burn { Target = target, Dps = dps, Remaining = duration, NextTick = TickInterval });
+        return true;
     }
 
     void Update()

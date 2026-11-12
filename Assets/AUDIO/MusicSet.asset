@@ -25,6 +25,9 @@ MonoBehaviour:
   - sceneName: Stage3
     clip: {fileID: 8300000, guid: cd62a4715201096479d8b171701b60f2, type: 3}
     volume: 0.4
+  - sceneName: IntroScene
+    clip: {fileID: 8300000, guid: 94e5b2c3b58ef38478d3e8318ad41a8c, type: 3}
+    volume: 0.42
   - sceneName: StageBoss
     clip: {fileID: 8300000, guid: 94e5b2c3b58ef38478d3e8318ad41a8c, type: 3}
     volume: 0.42
