@@ -35,6 +35,7 @@ public class ElectricShotSkill : MonoBehaviour
         GameObject obj = Instantiate(projectilePrefab, transform.position + spawnOffset, Quaternion.identity);
         obj.GetComponent<ElectricShotProjectile>().Initialize(target, projectileSpeed, shockDuration);
 
+        SoundManager.Instance?.ReportSkillCast(SkillCastSound.ElectricShot);
         timer = fireInterval;
     }
 }

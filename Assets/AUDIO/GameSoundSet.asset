@@ -86,6 +86,80 @@ MonoBehaviour:
     volume: 0.35
     pitchRange: {x: 0.96, y: 1.04}
     minInterval: 0.05
+  fireBallHit:
+    clips:
+    - {fileID: 8300000, guid: c11a85a2014670a41b7eb5d74283dfda, type: 3}
+    volume: 1
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0
+  chainLightningHit:
+    clips:
+    - {fileID: 8300000, guid: f8d63b0a35736da4a8c130ca653ba2d8, type: 3}
+    volume: 1
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0
+  blackHoleHit:
+    clips:
+    - {fileID: 0}
+    volume: 1
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0
+  tornadoHit:
+    clips: []
+    volume: 1
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0
+  shurikenHit:
+    clips:
+    - {fileID: 8300000, guid: d8e7350367160344baa52b7e8b656e32, type: 3}
+    volume: 1
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0
+  electricShotHit:
+    clips:
+    - {fileID: 8300000, guid: 907967d654b094a469f68754e71bf535, type: 3}
+    volume: 1
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0
+  fireBallCast:
+    clips:
+    - {fileID: 8300000, guid: d8677c93bf7c6b7408cf40f1fa950460, type: 3}
+    volume: 1
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0
+  chainLightningCast:
+    clips: []
+    volume: 1
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0
+  blackHoleCast:
+    clips:
+    - {fileID: 8300000, guid: 8b0ae6f03d2bf95408c00bdbaf9b026f, type: 3}
+    volume: 1
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0
+  tornadoCast:
+    clips:
+    - {fileID: 8300000, guid: 714894bb663fda348a47fcbe5dd258a2, type: 3}
+    volume: 1
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0
+  shurikenCast:
+    clips: []
+    volume: 1
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0
+  electricShotCast:
+    clips:
+    - {fileID: 8300000, guid: 0ac9f93855da78b47843f6e13e94fac2, type: 3}
+    volume: 1
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0
+  drainHeal:
+    clips: []
+    volume: 1
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0
   obstacleHit:
     clips:
     - {fileID: 8300000, guid: 41d69101215b99b4c9044f9569f43d6a, type: 3}

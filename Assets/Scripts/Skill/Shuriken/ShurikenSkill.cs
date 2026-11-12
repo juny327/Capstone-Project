@@ -89,6 +89,7 @@ public class ShurikenSkill : MonoBehaviour
 
         ClearProjectiles();
         SpawnProjectiles();
+        SoundManager.Instance?.ReportSkillCast(SkillCastSound.Shuriken);
     }
 
     void Deactivate()

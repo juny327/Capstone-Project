@@ -59,6 +59,7 @@ public class ChainLightningSkill : MonoBehaviour
             return;
 
         timer = fireInterval;
+        SoundManager.Instance?.ReportSkillCast(SkillCastSound.ChainLightning);
         StartCoroutine(ChainRoutine(firstTarget));
     }
 
@@ -90,6 +91,7 @@ public class ChainLightningSkill : MonoBehaviour
             };
 
             current.TakeDamage(info);
+            SoundManager.Instance?.ReportHit(false, HitSound.ChainLightning);
 
             // 마지막 연쇄가 아니면 다음 적을 찾는다.
             if (i >= maxChains - 1)

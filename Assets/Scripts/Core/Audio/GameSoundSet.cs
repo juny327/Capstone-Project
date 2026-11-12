@@ -5,7 +5,36 @@ using UnityEngine;
 /// 레이저 계열(충전 레이저 · 프리즘 노바 · 태양창)은 금속 '띵' 대신 '치익', 총알은 둔탁한 '퍽', 근접은 몸에 닿는 '퍽'.
 /// 그 밖(부착물 효과 · 범위 공격 · 전격 소총 · 반사 탄)은 Normal — 공용 적중음.
 /// </summary>
-public enum HitSound { Normal, Laser, Bullet, Melee, Electric }
+public enum HitSound
+{
+    Normal,
+    Laser,
+    Bullet,
+    Melee,
+    Electric,
+
+    // Skill hit sounds. Existing values above are intentionally preserved.
+    FireBall,
+    ChainLightning,
+    BlackHole,
+    Tornado,
+    Shuriken,
+    ElectricShot
+}
+
+/// <summary>
+/// 스킬이 발동될 때 재생할 시전 사운드 종류.
+/// 피격 사운드(HitSound)와 분리해서 시전/착탄의 역할을 명확하게 구분한다.
+/// </summary>
+public enum SkillCastSound
+{
+    FireBall,
+    ChainLightning,
+    BlackHole,
+    Tornado,
+    Shuriken,
+    ElectricShot
+}
 
 /// <summary>
 /// 게임 이벤트에 붙일 소리 묶음.
@@ -78,6 +107,47 @@ public class GameSoundSet : ScriptableObject
 
     [Tooltip("전기 계열(전격 소총 · 퍼지는 전기 · 낙뢰)이 적을 맞혔을 때 '치직' (치명타 · 일반 모두 — 치명타면 조금 크게). 비우면 일반 적중음")]
     public Entry electricHit = new Entry();
+
+    [Header("스킬 - 피격")]
+    [Tooltip("파이어볼이 적에게 명중했을 때")]
+    public Entry fireBallHit = new Entry();
+
+    [Tooltip("연쇄 번개가 적에게 명중했을 때")]
+    public Entry chainLightningHit = new Entry();
+
+    [Tooltip("블랙홀이 적에게 피해를 줄 때. minInterval 권장")]
+    public Entry blackHoleHit = new Entry();
+
+    [Tooltip("토네이도가 적에게 피해를 줄 때. minInterval 권장")]
+    public Entry tornadoHit = new Entry();
+
+    [Tooltip("표창이 적에게 명중했을 때. minInterval 권장")]
+    public Entry shurikenHit = new Entry();
+
+    [Tooltip("전격 샷이 적에게 적중해 경직을 걸 때")]
+    public Entry electricShotHit = new Entry();
+
+    [Header("스킬 - 시전")]
+    [Tooltip("파이어볼 발사 시")]
+    public Entry fireBallCast = new Entry();
+
+    [Tooltip("연쇄 번개 발동 시. 연쇄 전이마다 재생하지 않고 1회")]
+    public Entry chainLightningCast = new Entry();
+
+    [Tooltip("블랙홀 생성 시")]
+    public Entry blackHoleCast = new Entry();
+
+    [Tooltip("토네이도 생성 시")]
+    public Entry tornadoCast = new Entry();
+
+    [Tooltip("표창 공전 시작 시")]
+    public Entry shurikenCast = new Entry();
+
+    [Tooltip("전격 샷 발사 시")]
+    public Entry electricShotCast = new Entry();
+
+    [Tooltip("흡혈 성공 시. Drain은 피격음 대신 회복 성공음으로 처리")]
+    public Entry drainHeal = new Entry();
 
     [Tooltip("총알 · 광선이 벽 · 엄폐물에 막혔을 때. 산탄은 여러 알이 한꺼번에 막히므로 minInterval 을 꼭 둘 것")]
     public Entry obstacleHit = new Entry();

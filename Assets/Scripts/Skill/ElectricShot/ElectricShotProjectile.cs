@@ -36,6 +36,7 @@ public class ElectricShotProjectile : MonoBehaviour
         if (Vector3.Distance(transform.position, target.transform.position) <= hitDistance)
         {
             target.ApplyShock(shockDuration);
+            SoundManager.Instance?.ReportHit(false, HitSound.ElectricShot);
             Destroy(gameObject);
         }
     }

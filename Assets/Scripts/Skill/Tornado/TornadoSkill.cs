@@ -48,6 +48,7 @@ public class TornadoSkill : MonoBehaviour
         obj.GetComponent<TornadoProjectile>()
             .Initialize(target, projectileSpeed, duration, damage, attackInterval, radius);
 
+        SoundManager.Instance?.ReportSkillCast(SkillCastSound.Tornado);
         timer = fireInterval;
     }
 }

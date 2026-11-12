@@ -77,6 +77,7 @@ public class ShurikenProjectile : MonoBehaviour
             };
 
             enemy.TakeDamage(info);
+            SoundManager.Instance?.ReportHit(false, HitSound.Shuriken);
             hitTimers[enemy] = Time.time + hitInterval;
         }
 
