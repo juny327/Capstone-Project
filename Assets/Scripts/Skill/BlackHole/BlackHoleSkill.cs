@@ -121,6 +121,7 @@ public class BlackHoleSkill : MonoBehaviour
         hitTimers.Clear();
         pulledEnemies.Clear();
 
+        SoundManager.Instance?.ReportSkillCast(SkillCastSound.BlackHole);
         Debug.Log($"[BlackHole] 생성 | 위치={position}");
     }
 
@@ -220,6 +221,7 @@ public class BlackHoleSkill : MonoBehaviour
         };
 
         enemy.TakeDamage(info);
+        SoundManager.Instance?.ReportHit(false, HitSound.BlackHole);
 
         hitTimers[enemy] = Time.time + damageInterval;
     }
@@ -277,6 +279,7 @@ public class BlackHoleSkill : MonoBehaviour
             };
 
             enemy.TakeDamage(info);
+            SoundManager.Instance?.ReportHit(false, HitSound.BlackHole);
         }
     }
 

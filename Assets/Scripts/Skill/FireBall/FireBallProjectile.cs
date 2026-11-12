@@ -79,6 +79,7 @@ public class FireBallProjectile : MonoBehaviour
         };
 
         target.TakeDamage(info);
+        SoundManager.Instance?.ReportHit(false, HitSound.FireBall);
 
         Destroy(gameObject);
     }

@@ -89,6 +89,7 @@ public class DrainSkill : MonoBehaviour
         }
 
         playerStats.AddHP(healAmount);
+        SoundManager.Instance?.PlayDrainHeal();
 
         int afterHp = playerStats.currentHp;
 

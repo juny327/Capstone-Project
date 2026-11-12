@@ -118,6 +118,8 @@ public class TornadoProjectile : MonoBehaviour
                 damage = damage,
                 isCritical = false
             });
+
+            SoundManager.Instance?.ReportHit(false, HitSound.Tornado);
         }
     }
 
