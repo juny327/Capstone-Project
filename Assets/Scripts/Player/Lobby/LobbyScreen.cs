@@ -162,14 +162,34 @@ public class LobbyScreen : MonoBehaviour
     {
         if (manager == null) return;
 
-        manager.OnSelectionChanged += Refresh;
+        manager.OnSelectionChanged += OnSelected;
         Refresh(manager.SelectedIndex);
+
+        // 처음 몇 프레임의 선택(LobyManager 기본 0번 · 돌아왔을 때 이전 선택 되살리기)은 소리 없이
+        soundFromFrame = Time.frameCount + 3;
+        soundCharacter = FindCharacter(manager.Selected);
     }
 
     void OnDisable()
     {
         if (manager != null)
-            manager.OnSelectionChanged -= Refresh;
+            manager.OnSelectionChanged -= OnSelected;
+    }
+
+    int soundFromFrame;
+    int soundCharacter = -1;   // 지난번 선택의 캐릭터 (소리 고르기용 — 화면 갱신의 shownCharacter 와 따로)
+
+    /// <summary>
+    /// 무기 버튼을 눌렀다 — 캐릭터가 바뀌면(사수 ↔ 검사) 묵직한 스위치, 같은 캐릭터 안이면 '딸깍' (2026-11-12).
+    /// 무기 버튼에는 UISoundBinder 가 누름 소리를 붙이지 않는다 — 여기서 한 번만 낸다.
+    /// </summary>
+    void OnSelected(int weaponIndex)
+    {
+        int character = FindCharacter(manager != null ? manager.Selected : null);
+        if (Time.frameCount >= soundFromFrame)
+            UISound.Play(soundCharacter >= 0 && character >= 0 && soundCharacter != character ? UISoundKind.CharacterSwitch : UISoundKind.Click);
+        soundCharacter = character;
+        Refresh(weaponIndex);
     }
 
     IEnumerator Start()

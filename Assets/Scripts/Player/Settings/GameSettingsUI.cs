@@ -87,6 +87,11 @@ public class GameSettingsUI : MonoBehaviour
         lobbyButton.onClick.AddListener(Open);
         if (toLobbyButton != null) toLobbyButton.onClick.AddListener(OnToLobby);
 
+        // UI 소리 (2026-11-12) — 닫기는 낮은 '톡', 나머지 버튼은 '딸깍', 슬라이더는 밀 때 값만큼 높아지는 틱
+        if (!closeButton.TryGetComponent(out UISoundRole closeRole)) closeRole = closeButton.gameObject.AddComponent<UISoundRole>();
+        closeRole.kind = UISoundKind.Back;
+        if (!TryGetComponent(out UISoundBinder _)) gameObject.AddComponent<UISoundBinder>();
+
         window.SetActive(false);
         UpdateLobbyButton(SceneManager.GetActiveScene());
     }
