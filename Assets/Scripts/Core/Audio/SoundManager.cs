@@ -191,18 +191,63 @@ public class SoundManager : MonoBehaviour
     /// <summary>총알 · 광선이 벽에 막혔다. 산탄처럼 몰려 와도 minInterval 로 한 번만 난다.</summary>
     public void PlayObstacleHit() => Play(sounds != null ? sounds.obstacleHit : null, sfxGroup);
 
-    /// <summary>그 종류의 소리 (없으면 공용 적중음).</summary>
+    /// <summary>
+    /// 무기/기존 계열은 공용 적중음으로 fallback 하고, 스킬은 전용 슬롯이 비어 있으면 무음으로 둔다.
+    /// 오디오 클립은 나중에 Inspector에서 연결할 수 있다.
+    /// </summary>
     GameSoundSet.Entry HitEntry(HitSound kind)
     {
-        GameSoundSet.Entry e = kind switch
+        if (sounds == null) return null;
+
+        switch (kind)
         {
-            HitSound.Laser => sounds.laserHit,
-            HitSound.Bullet => sounds.bulletHit,
-            HitSound.Melee => sounds.meleeHit,
-            HitSound.Electric => sounds.electricHit,
-            _ => null,
+            case HitSound.Laser:
+                return sounds.laserHit != null && sounds.laserHit.HasClip ? sounds.laserHit : sounds.hit;
+            case HitSound.Bullet:
+                return sounds.bulletHit != null && sounds.bulletHit.HasClip ? sounds.bulletHit : sounds.hit;
+            case HitSound.Melee:
+                return sounds.meleeHit != null && sounds.meleeHit.HasClip ? sounds.meleeHit : sounds.hit;
+            case HitSound.Electric:
+                return sounds.electricHit != null && sounds.electricHit.HasClip ? sounds.electricHit : sounds.hit;
+
+            // Skill hit sounds intentionally do NOT fallback to the generic hit sound.
+            // This keeps cast/hit identity clean until the dedicated clips are assigned.
+            case HitSound.FireBall: return sounds.fireBallHit;
+            case HitSound.ChainLightning: return sounds.chainLightningHit;
+            case HitSound.BlackHole: return sounds.blackHoleHit;
+            case HitSound.Tornado: return sounds.tornadoHit;
+            case HitSound.Shuriken: return sounds.shurikenHit;
+            case HitSound.ElectricShot: return sounds.electricShotHit;
+
+            default:
+                return sounds.hit;
+        }
+    }
+
+    /// <summary>스킬 발동 사운드. 피격 사운드와 별도의 데이터 슬롯을 사용한다.</summary>
+    public void ReportSkillCast(SkillCastSound kind)
+    {
+        if (sounds == null) return;
+
+        GameSoundSet.Entry entry = kind switch
+        {
+            SkillCastSound.FireBall => sounds.fireBallCast,
+            SkillCastSound.ChainLightning => sounds.chainLightningCast,
+            SkillCastSound.BlackHole => sounds.blackHoleCast,
+            SkillCastSound.Tornado => sounds.tornadoCast,
+            SkillCastSound.Shuriken => sounds.shurikenCast,
+            SkillCastSound.ElectricShot => sounds.electricShotCast,
+            _ => null
         };
-        return e != null && e.HasClip ? e : sounds.hit;
+
+        Play(entry, sfxGroup);
+    }
+
+    /// <summary>Drain의 실제 HP 회복 성공 사운드.</summary>
+    public void PlayDrainHeal()
+    {
+        if (sounds == null) return;
+        Play(sounds.drainHeal, sfxGroup);
     }
 
     void LateUpdate()
