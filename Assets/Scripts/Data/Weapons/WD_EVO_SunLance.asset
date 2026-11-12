@@ -46,11 +46,11 @@ MonoBehaviour:
   themeColor: {r: 1, g: 0.86, b: 0.45, a: 1}
   fireSounds:
   - {fileID: 8300000, guid: dadd291a9954d8d4789092de4813473f, type: 3}
-  fireVolume: 0.8
+  fireVolume: 0.48
   firePitchRange: {x: 0.96, y: 1.04}
   reloadStartSound: {fileID: 8300000, guid: 36381054e71469145833f1167c65ffa4, type: 3}
   reloadEndSound: {fileID: 8300000, guid: 156334c5cbcdce44b8c384027a7d8f99, type: 3}
-  reloadVolume: 0.8
+  reloadVolume: 0.6
   range: 18
   beamRadius: 0.25
   beamDuration: 0.15
@@ -160,6 +160,6 @@ MonoBehaviour:
     beamLoopVolume: 0.5
     beamLoopPitch: {x: 0.75, y: 1}
   chargeSound: {fileID: 8300000, guid: 3ca2d41d3f7d72a42a124c6debd80346, type: 3}
-  chargeVolume: 0.55
+  chargeVolume: 0.41
   muzzleFlashPrefab: {fileID: 2916273817513264348, guid: 95044fb3908b36c46bc62060360f7ba6, type: 3}
   hitEffectPrefab: {fileID: 4324968127605537629, guid: c694cdd4158a7394bb9c62a42fc6bd6b, type: 3}

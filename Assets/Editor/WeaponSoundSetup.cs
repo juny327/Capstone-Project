@@ -44,7 +44,7 @@ public static class WeaponSoundSetup
             Fire = new[] { Snake1 + "/Isolated/5.56/WAV/556 Single Isolated WAV.wav" },
             ReloadStart = Reloads + "/AR Reload Full WAV.wav",
             ReloadEnd = Reloads + "/AR Bolt Release WAV.wav",
-            FireVolume = 0.6f,
+            FireVolume = 0.36f,
         },
         new Spec
         {
@@ -54,7 +54,7 @@ public static class WeaponSoundSetup
             Fire = new[] { Snake1 + "/Isolated/22LR/WAV/22LR Single Isolated WAV.wav" },
             ReloadStart = Reloads + "/Semi 22LR Reload Full WAV.wav",
             ReloadEnd = Reloads + "/Semi 22LR Rack WAV.wav",
-            FireVolume = 0.38f,
+            FireVolume = 0.22f,
         },
         new Spec
         {
@@ -64,7 +64,7 @@ public static class WeaponSoundSetup
             Fire = new[] { Snake1 + "/Full Sound/7.62x54R/WAV/762x54r Single WAV.wav" },
             ReloadStart = Reloads + "/308 Magazine Full WAV.wav",
             ReloadEnd = Reloads + "/Mosin Bolt Cycle WAV.wav",
-            FireVolume = 0.8f,
+            FireVolume = 0.48f,
         },
         new Spec
         {
@@ -72,7 +72,7 @@ public static class WeaponSoundSetup
             Fire = new[] { Snake2 + "/Isolated/20 Gauge/WAV/20 Gauge Single Isolated.wav" },
             ReloadStart = Reloads + "/Pump Reload Full WAV.wav",
             ReloadEnd = Reloads + "/Pump Shell Load WAV.wav",
-            FireVolume = 0.75f,
+            FireVolume = 0.45f,
         },
 
         // ───── 전자음 계열 ─────
@@ -84,7 +84,7 @@ public static class WeaponSoundSetup
             Fire = new[] { Zap + "_01.wav", Zap + "_02.wav", Zap + "_03.wav" },
             ReloadStart = Interface + "/switch_002.ogg",
             ReloadEnd = Interface + "/confirmation_002.ogg",
-            FireVolume = 0.45f,
+            FireVolume = 0.27f,
         },
         new Spec
         {
@@ -93,7 +93,7 @@ public static class WeaponSoundSetup
             Fire = new[] { Zap + "_01.wav", Zap + "_02.wav", Zap + "_03.wav" },
             ReloadStart = Interface + "/switch_002.ogg",
             ReloadEnd = Interface + "/confirmation_002.ogg",
-            FireVolume = 0.45f,
+            FireVolume = 0.27f,
         },
         new Spec
         {
@@ -102,14 +102,14 @@ public static class WeaponSoundSetup
             Fire = new[] { Elec + "/hit.wav" },
             ReloadStart = Interface + "/switch_003.ogg",
             ReloadEnd = Interface + "/confirmation_002.ogg",
-            FireVolume = 0.8f,
+            FireVolume = 0.48f,
         },
         new Spec
         {
             // 서브유닛이라 탄창이 없다. 발사음만.
             Weapon = "WD_Drone",
             Fire = new[] { SciFi + "/laserSmall_004.ogg" },
-            FireVolume = 0.3f,
+            FireVolume = 0.18f,
         },
 
         new Spec
@@ -121,6 +121,8 @@ public static class WeaponSoundSetup
             FireVolume = 0.65f,
         },
     };
+
+    // 총 계열 발사 음량은 2026-11-12 처음 값의 ×0.6 (×0.8 → ×0.75 두 번, 사용자 — 총소리에 다른 소리가 묻힘) · 장전 0.8 → 0.6 · 충전 0.55 → 0.41
 
     // ───── 근접 휘두름 '휙' (2026-11-02) — 직접 합성 Assets/AUDIO/Melee. 베는 소리(fireSounds)는 맞힌 순간에 난다 ─────
     const string MeleeDir = "Assets/AUDIO/Melee";
@@ -188,11 +190,11 @@ public static class WeaponSoundSetup
             if (charge != null)
             {
                 charge.objectReferenceValue = Clip($"{Elec}/chargestart.wav", ref missing);
-                so.FindProperty("chargeVolume").floatValue = 0.55f;
+                so.FindProperty("chargeVolume").floatValue = 0.41f;
             }
 
             so.FindProperty("fireVolume").floatValue = spec.FireVolume;
-            so.FindProperty("reloadVolume").floatValue = 0.8f;
+            so.FindProperty("reloadVolume").floatValue = 0.6f;
             so.FindProperty("firePitchRange").vector2Value = new Vector2(0.96f, 1.04f);
 
             so.ApplyModifiedPropertiesWithoutUndo();

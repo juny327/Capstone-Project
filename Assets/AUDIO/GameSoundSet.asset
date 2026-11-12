@@ -37,7 +37,7 @@ MonoBehaviour:
     - {fileID: 8300000, guid: 16d1118492a9f294383160f8e3ca9a37, type: 3}
     - {fileID: 8300000, guid: d5bb80e18d1c85e458aae1a2b0ae1848, type: 3}
     - {fileID: 8300000, guid: b8c8c1931eb111545abda9695c6fa112, type: 3}
-    volume: 0.4
+    volume: 0.3
     pitchRange: {x: 0.96, y: 1.04}
     minInterval: 0.04
   criticalHit:
@@ -47,7 +47,7 @@ MonoBehaviour:
     - {fileID: 8300000, guid: 7f9eeeb584a40d246b77d3661e8a0980, type: 3}
     - {fileID: 8300000, guid: 65d738db04ec62a4098dc88f201c409e, type: 3}
     - {fileID: 8300000, guid: e3a91b4174b044d45afaae0f2415356e, type: 3}
-    volume: 0.6
+    volume: 0.45
     pitchRange: {x: 0.96, y: 1.04}
     minInterval: 0.04
   laserHit:
@@ -55,7 +55,7 @@ MonoBehaviour:
     - {fileID: 8300000, guid: e885179ae27a2bc4c995ed0fcb3c0bb0, type: 3}
     - {fileID: 8300000, guid: 57463db61bce6364b92c05352d5f65c4, type: 3}
     - {fileID: 8300000, guid: 4e5a4f5dac886f1468c4ba662481afc3, type: 3}
-    volume: 0.35
+    volume: 0.26
     pitchRange: {x: 0.96, y: 1.04}
     minInterval: 0.05
   bulletHit:
@@ -65,7 +65,7 @@ MonoBehaviour:
     - {fileID: 8300000, guid: 9be9be90340c1634298356822b1c3353, type: 3}
     - {fileID: 8300000, guid: 1e984c547d7bd934eb54789d566b24db, type: 3}
     - {fileID: 8300000, guid: 6aca925f691e0874b852c8781c164b61, type: 3}
-    volume: 0.45
+    volume: 0.34
     pitchRange: {x: 0.96, y: 1.04}
     minInterval: 0.04
   meleeHit:
@@ -83,7 +83,7 @@ MonoBehaviour:
     - {fileID: 8300000, guid: 469d4d3886edf4a4aad9c7c24d8a634a, type: 3}
     - {fileID: 8300000, guid: 3e0ee23367a8a534aaed1119ac513835, type: 3}
     - {fileID: 8300000, guid: b1c34f331d94b524e914a9aa00d5c4d0, type: 3}
-    volume: 0.35
+    volume: 0.26
     pitchRange: {x: 0.96, y: 1.04}
     minInterval: 0.05
   obstacleHit:
@@ -93,7 +93,7 @@ MonoBehaviour:
     - {fileID: 8300000, guid: 72acd4d054d72264593b768f793c63d1, type: 3}
     - {fileID: 8300000, guid: ea8d153fc39680f4182fbf0a72ecacd4, type: 3}
     - {fileID: 8300000, guid: 20e2bbb35df941e4f9884e62132247e9, type: 3}
-    volume: 0.28
+    volume: 0.21
     pitchRange: {x: 0.96, y: 1.04}
     minInterval: 0.07
   enemyKilled:
@@ -103,7 +103,7 @@ MonoBehaviour:
     - {fileID: 8300000, guid: 81a1a13688f232044ac80c6810ba0440, type: 3}
     - {fileID: 8300000, guid: 24415c45c1cb4ce47bc4f0830252fac2, type: 3}
     - {fileID: 8300000, guid: accad34b3033bfe409a1702656ac3b0c, type: 3}
-    volume: 0.45
+    volume: 0.34
     pitchRange: {x: 0.96, y: 1.04}
     minInterval: 0.06
   weaponSwap:
