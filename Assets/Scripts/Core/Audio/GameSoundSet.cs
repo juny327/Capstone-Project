@@ -112,7 +112,7 @@ public class GameSoundSet : ScriptableObject
     [Tooltip("파이어볼이 적에게 명중했을 때")]
     public Entry fireBallHit = new Entry();
 
-    [Tooltip("체인라이트닝가 적에게 명중했을 때")]
+    [Tooltip("체인라이트닝이 적에게 명중했을 때")]
     public Entry chainLightningHit = new Entry();
 
     [Tooltip("블랙홀이 적에게 피해를 줄 때. minInterval 권장")]
