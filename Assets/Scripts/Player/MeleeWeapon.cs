@@ -704,6 +704,15 @@ public class MeleeWeapon : WeaponBase
         return leftGripNear.sqrMagnitude >= 0.0001f || leftGripFar.sqrMagnitude >= 0.0001f;
     }
 
+    /// <summary>
+    /// 대기 자세(MeleeStyle)를 다시 넣는다 — 플레이어가 꺼졌다 켜져 애니메이터가 처음 값으로 돌아갔을 때 WeaponController 가 부른다.
+    /// (휘두를 때마다 다시 넣기는 하지만, 그 전까지 대기 자세가 한손검으로 보인다)
+    /// </summary>
+    public void RefreshStance()
+    {
+        if (IsActive && !IsSupport) ApplyStyle();
+    }
+
     public override void SetActive(bool active)
     {
         base.SetActive(active);

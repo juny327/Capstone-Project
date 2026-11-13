@@ -1009,9 +1009,23 @@ public class WeaponController : MonoBehaviour
         }
     }
 
+    // 플레이어를 껐다 켜면 애니메이터가 처음 값으로 돌아간다 — 사격 레이어 1 · 근접 레이어 0 · MeleeStyle 0.
+    // 보스 인트로 · 엔딩 씬과 테스트 룸 → 보스 이동이 플레이어를 껐다 켜는데, 그 뒤 근접 무기를 들고 있으면
+    // 휘두르는 모션이 소총 자세에 덮여 보이지 않았다 (2026-11-14 — 테스트 룸에서 창을 들고 보스전에 갔을 때 발견).
+    // 켜진 뒤 두 프레임 동안 들고 있는 무기에 맞는 자세로 되돌린다.
+    int stanceRestoreFrames;
+
     void OnEnable()
     {
         GameEvents.OnPlayerDeadStart += OnPlayerDead;
+        stanceRestoreFrames = 2;
+    }
+
+    void RestoreStance()
+    {
+        stanceRestoreFrames--;
+        ApplyUpperBodyLayers();
+        if (ActiveWeapon is MeleeWeapon melee) melee.RefreshStance();
     }
 
     void OnDisable()
@@ -1109,6 +1123,8 @@ public class WeaponController : MonoBehaviour
     void Update()
     {
         if (isDead) return;
+
+        if (stanceRestoreFrames > 0) RestoreStance();
 
         HandleSwapInput();
         HandleReloadInput();
