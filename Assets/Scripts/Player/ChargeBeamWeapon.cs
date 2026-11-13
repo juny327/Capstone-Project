@@ -328,7 +328,17 @@ public class ChargeBeamWeapon : WeaponBase
             if (SoundManager.Instance != null)
                 SoundManager.Instance.ReportHit(isCritical, HitSound.Laser);
         }
+
+        // 맞히면 한 발에 한 번 흔든다 (2026-11-12 — 피해 정보의 cameraShake 는 적이 쓰지 않아 한 번도 흔들리지 않았다).
+        // 프리즘처럼 한 번에 빔이 여러 줄이어도 한 프레임에 한 번
+        if (struck.Count > 0 && Time.frameCount != lastShakeFrame)
+        {
+            lastShakeFrame = Time.frameCount;
+            ShakeCamera(this, cfg.cameraShake);
+        }
     }
+
+    int lastShakeFrame = -1;
 
     protected override void OnTick(float deltaTime)
     {

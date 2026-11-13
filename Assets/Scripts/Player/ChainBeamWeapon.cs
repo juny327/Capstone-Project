@@ -233,6 +233,9 @@ public class ChainBeamWeapon : WeaponBase
             cameraShake = isFirst ? cfg.cameraShake : 0f,
         });
 
+        // 조준해서 맞힌 첫 적에서 한 번 흔든다 (2026-11-12 — 피해 정보의 cameraShake 는 적이 쓰지 않아 흔들린 적이 없었다)
+        if (isFirst) ShakeCamera(this, cfg.cameraShake);
+
         // 퍼진 전기도 전격 소총의 직접 공격 — 쓰러뜨리면 Drain
         bool killed = CheckDirectKill(target, wasAlive);
 

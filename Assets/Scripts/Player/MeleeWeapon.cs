@@ -341,7 +341,7 @@ public class MeleeWeapon : WeaponBase
                 isCritical = isCritical,
                 hitPoint = point,
                 hitDirection = dir,
-                cameraShake = IsSupport ? 0f : cfg.cameraShake,   // 근접은 흔들어야 타격감이 난다 — 떠 있는 무기는 스스로 자주 베므로 흔들지 않는다
+                cameraShake = 0f,   // 흔들림은 휘두름이 끝날 때 한 번 (아래 ShakeCamera) — 적은 이 값을 쓰지 않는다
             });
 
             // Drain: 직접 근접 공격으로 적을 처치했을 때만 고정 HP 회복 (이미 쓰러진 적을 다시 벤 것은 세지 않는다)
@@ -373,6 +373,10 @@ public class MeleeWeapon : WeaponBase
 
         // 베는 소리는 칼이 적에게 닿은 순간에 (2026-11-02 — 예전엔 휘두르기 시작에 나서 0.24 ~ 0.58초 먼저 들렸다)
         if (applied > 0) PlayFireSound();
+
+        // 맞히면 한 번 흔든다 (2026-11-12) — 데이터의 cameraShake 는 피해 정보에 실려 적에게 넘어가기만 하고 아무도 쓰지 않아, 근접은 한 번도 흔들리지 않았다.
+        // 적 수만큼이 아니라 한 번 휘두름에 한 번
+        if (applied > 0) ShakeCamera(this, cfg.cameraShake);
 
         if (HasHitEffects)
         {
