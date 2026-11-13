@@ -104,6 +104,16 @@ public class EconomySystem : MonoBehaviour
         if (found != null) OnPlayerSpawned(found.transform);
     }
 
+    /// <summary>
+    /// UI가 지갑을 요청할 때 플레이어 생성 이벤트를 놓쳤다면 다시 연결한다.
+    /// 지갑 생성 책임은 EconomySystem에 두고, UI는 이 메서드만 사용한다.
+    /// </summary>
+    public Wallet EnsureCurrentWallet()
+    {
+        ResolvePlayer();
+        return Wallet;
+    }
+
     public bool HasLivePlayer => player != null && player.gameObject.activeInHierarchy && (playerStats == null || !playerStats.IsDead);
 
     public Vector3 PlayerCenter => player != null ? player.position + Vector3.up : Vector3.zero;
