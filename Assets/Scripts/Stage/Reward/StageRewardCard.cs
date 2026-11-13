@@ -43,10 +43,11 @@ public class StageRewardCard : MonoBehaviour
             icon.enabled = data.Icon != null;
         }
 
-        if (title != null) title.text = data.Title;
-        if (description != null) description.text = data.Description;
+        if (title != null) { UiTextFit.Line(title); title.text = data.Title; }   // 긴 제목이 두 줄로 꺾여 설명을 덮지 않게
+        if (description != null) { UiTextFit.Box(description); description.text = data.Description; }   // 긴 설명이 아래 종류 표시를 덮지 않게
 
         UpdateTag(data, player);
+        if (description != null && tagLabel != null) UiTextFit.KeepAbove(description, tagLabel.rectTransform);   // 설명 칸이 종류 표시 자리까지 내려와 있다
     }
 
     /// <summary>

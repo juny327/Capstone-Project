@@ -65,8 +65,8 @@ public class ShopCardView : MonoBehaviour
         }
 
         if (tagText != null) { tagText.text = offer.Tag; tagText.color = kindColor; }
-        if (title != null) title.text = offer.Title;
-        if (description != null) description.text = offer.Description;
+        if (title != null) { UiTextFit.Line(title); title.text = offer.Title; }
+        if (description != null) { UiTextFit.Box(description); description.text = offer.Description; }   // 긴 설명이 가격을 덮지 않게
 
         if (priceIcon != null)
         {
@@ -82,6 +82,7 @@ public class ShopCardView : MonoBehaviour
         }
 
         if (soldOverlay != null) soldOverlay.SetActive(offer.Sold);
+        if (description != null && price != null) UiTextFit.KeepAbove(description, price.rectTransform);   // 설명이 가격 위에서 끝나게
 
         // 구매함은 덮개가 알려 주므로, 그 밖의 이유(슬롯 가득 등)만 글로
         bool showReason = !canBuy && !offer.Sold && !poor && !string.IsNullOrEmpty(reason);
