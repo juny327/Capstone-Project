@@ -69,6 +69,21 @@ internal static class TestRoomLayout
     public const float SupportStartX = -5f;
     public const float SupportStepX = 4.5f;
 
+    // ── 보스 바로 가기 (서남쪽, 2026-11-13) — 무기 선반 근접 묶음과 상위 무기 구역 사이, 무리 자리 위 ──
+    public static readonly Vector3 BossLabel = new Vector3(-19f, 0.1f, -5.6f);
+    public static readonly Vector3 BossDirectPad = new Vector3(-19f, 0f, -8.5f);
+    public static readonly Vector3 BossIntroPad = new Vector3(-19f, 0f, -12.5f);
+
+    // ── 드래곤 동작 보기 (북쪽 가운데, 2026-11-13) — 부착물 구역(x ≤ −8.7)과 개조 구역(x ≥ 6) 사이 빈자리 ──
+    //    드래곤은 남쪽(발판 · 카메라 쪽)을 본다. 발판은 그 앞 한 줄
+    public static readonly Vector3 DragonShowcase = new Vector3(-3f, 0f, 15f);
+    public const float DragonDaisRadius = 4.5f;
+    public static readonly Vector3 DragonShowcaseLabel = new Vector3(-3f, 0.1f, 10.4f);
+    public static readonly Vector3 DragonStatusLabel = new Vector3(-3f, 0.1f, 9.3f);
+    public const float DragonPadZ = 5f;
+    public const float DragonPadStartX = -11f;
+    public const float DragonPadStepX = 4f;
+
     // ── 무리 표적 (남쪽) ──
     public static readonly Vector3 ClusterPoint = new Vector3(14f, 0f, -16f);
     public static readonly Vector3[] CrowdPads = { new Vector3(-14f, 0f, -18f), new Vector3(-9f, 0f, -18f) };

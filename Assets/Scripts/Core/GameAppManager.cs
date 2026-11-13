@@ -104,6 +104,20 @@ public class GameAppManager : MonoBehaviour
         GameEvents.OnPlayerSpawned?.Invoke(Player.transform);
     }
 
+    /// <summary>
+    /// 테스트 룸 보스 바로 가기 (2026-11-13) — 테스트 룸에서 꾸린 플레이어(무기 · 진화 · 보조 칸 · 서브 능력)를
+    /// 이번 판 플레이어로 넘겨받는다. 다음 Stage 씬이 열리면 SetupPlayer 가 새로 만들지 않고 이 플레이어를 쓴다.
+    /// </summary>
+    public void AdoptPlayer(GameObject player)
+    {
+        if (player == null || player == Player) return;
+        if (Player != null) Destroy(Player);
+
+        Player = player;
+        PlayerStats = player.GetComponent<PlayerStats>();
+        DontDestroyOnLoad(player);
+    }
+
     void OnPlayerDead()
     {
         Destroy(Player);

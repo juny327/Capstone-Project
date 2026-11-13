@@ -159,6 +159,13 @@ public class TestRoomManager : MonoBehaviour
             EvolutionService.PrepareForTest(Player, evolution, true, out string message);
             OnNotice?.Invoke(message);
         }
+        if (pendingBossJump != 0)
+        {
+            bool fromIntro = pendingBossJump == 2;
+            pendingBossJump = 0;
+            JumpToBoss(fromIntro);
+            return;
+        }
         if (pendingCustomization != null)
         {
             Func<string> apply = pendingCustomization;
@@ -224,6 +231,61 @@ public class TestRoomManager : MonoBehaviour
     public void ResetRoom() => TransitionTo(SceneName);
     public void ReturnToLobby() => TransitionTo("Loby");
 
+    // ───────── 보스 바로 가기 (2026-11-13) ─────────
+
+    [Header("Boss Jump")]
+    [Tooltip("있으면 바로 가기로 갈 때 골렘 대신 이 드래곤을 만난다 (DragonBossRoute) — 본 게임 보스는 그대로. TestRoomBossSetup 이 연결한다")]
+    [SerializeField] GameObject dragonBossPrefab;
+
+    int pendingBossJump;   // 0 없음 · 1 보스 스테이지 · 2 인트로부터
+    bool handedOver;       // 플레이어를 이번 판으로 넘겼다 — OnDestroy 가 참조를 되돌리지 않는다
+
+    /// <summary>보스 바로 가기 구역 — LateUpdate 에서 한 번에 (진화 · 선택과 같은 규칙).</summary>
+    public void QueueBossJump(bool fromIntro)
+    {
+        if (!IsReady) return;
+        pendingBossJump = fromIntro ? 2 : 1;
+    }
+
+    /// <summary>
+    /// 지금 플레이어를 그대로 이번 판 플레이어로 넘기고 보스전으로 간다.
+    /// 테스트 룸 규칙(짧은 쿨타임 · 무한 스태미나)은 장면이 닫히며 풀린다 (OnDestroy → PracticeRules.End).
+    /// 돌아올 때는 설정창(ESC) → 로비로 → 로비의 테스트 룸 버튼.
+    /// </summary>
+    void JumpToBoss(bool fromIntro)
+    {
+        if (transitioning || Player == null) return;
+
+        GameAppManager app = GameAppManager.Instance;
+        if (app == null)
+        {
+            // 테스트 룸 씬을 에디터에서 바로 재생했다 — 로비를 거치지 않아 판 관리자가 없다
+            app = new GameObject("GameAppManager").AddComponent<GameAppManager>();
+            app.playerPrefab = playerPrefab;
+        }
+
+        // 숨겨 둔 지난 판 플레이어가 남아 있으면 플레이어가 둘이 된다
+        if (previousRunPlayer != null && previousRunPlayer != Player) Destroy(previousRunPlayer);
+        previousRunPlayer = null;
+
+        // 이 장면에서만 껐던 옛 HUD 스크립트를 되살린다 (스테이지 플레이어와 같게)
+        Gun legacy = Player.GetComponentInChildren<Gun>(true);
+        if (legacy != null) legacy.enabled = true;
+
+        app.AdoptPlayer(Player);
+        handedOver = true;
+        if (dragonBossPrefab != null)
+        {
+            // 드래곤 — 인트로 씬 대신 보스 스테이지 안 등장 연출 (인트로 A안)
+            DragonBossRoute.Begin(dragonBossPrefab, fromIntro);
+            OnNotice?.Invoke(fromIntro ? "등장 연출부터 드래곤 보스전으로 — 지금 장비 그대로" : "드래곤 보스전으로 — 지금 장비 그대로");
+            TransitionTo("StageBoss");
+            return;
+        }
+        OnNotice?.Invoke(fromIntro ? "인트로부터 보스전으로 — 지금 장비 그대로" : "보스전으로 — 지금 장비 그대로");
+        TransitionTo(fromIntro ? "IntroScene" : "StageBoss");
+    }
+
     void TransitionTo(string sceneName)
     {
         if (transitioning) return;
@@ -252,6 +314,7 @@ public class TestRoomManager : MonoBehaviour
     {
         if (Instance == this) Instance = null;
         PracticeRules.End();
+        if (handedOver) return;   // 보스 바로 가기 — 플레이어는 이번 판 플레이어가 됐다
         if (GameEvents.Player == null || (Player != null && GameEvents.Player == Player.transform))
             GameEvents.Player = previousPlayerReference;
         if (previousRunPlayer != null) previousRunPlayer.SetActive(previousRunWasActive);
