@@ -23,10 +23,10 @@ public static class SkillPairs
     {
         new Entry { Effect = typeof(DrainEffect), Skill = typeof(DrainSkill), Name = "흡혈" },
         new Entry { Effect = typeof(FireBallEffect), Skill = typeof(FireBallSkill), Name = "파이어볼" },
-        new Entry { Effect = typeof(ElectricShotEffect), Skill = typeof(ElectricShotSkill), Name = "전격 샷", NeedsEnemyManager = true },
+        new Entry { Effect = typeof(ElectricShotEffect), Skill = typeof(ElectricShotSkill), Name = "일렉트릭 샷", NeedsEnemyManager = true },
         new Entry { Effect = typeof(TornadoEffect), Skill = typeof(TornadoSkill), Name = "토네이도", NeedsEnemyManager = true },
-        new Entry { Effect = typeof(ShurikenEffect), Skill = typeof(ShurikenSkill), Name = "표창" },
-        new Entry { Effect = typeof(ChainLightningEffect), Skill = typeof(ChainLightningSkill), Name = "연쇄 번개" },
+        new Entry { Effect = typeof(ShurikenEffect), Skill = typeof(ShurikenSkill), Name = "슈리켄" },
+        new Entry { Effect = typeof(ChainLightningEffect), Skill = typeof(ChainLightningSkill), Name = "체인라이트닝" },
         new Entry { Effect = typeof(BlackHoleEffect), Skill = typeof(BlackHoleSkill), Name = "블랙홀" },
     };
 
@@ -55,12 +55,17 @@ public static class SkillPairs
         return player != null && TryFind(card, out Entry e) && player.GetComponent(e.Skill) != null;
     }
 
-    /// <summary>화면에 쓰는 이름 — 카드 이름이 영어라 우리 쪽 이름을 쓴다 (모르는 카드는 카드 설명 · 이름).</summary>
+    /// <summary>
+    /// 화면에 쓰는 이름 — 레벨업 카드에 적힌 이름(팀원 카드 데이터) 그대로 (2026-11-13: 카드가 체인라이트닝 · 슈리켄 ·
+    /// 일렉트릭 샷으로 바뀌었는데 스킬 HUD · 조합식 · 정비 창은 옛 이름이었다 — 이제 카드 한 곳만 고치면 모두 따라간다).
+    /// 카드 이름이 비었으면 위 표의 이름, 모르는 카드는 카드 설명.
+    /// </summary>
     public static string NameOf(UpgradeData card)
     {
         if (card == null) return "";
+        if (!string.IsNullOrWhiteSpace(card.upgradeName)) return card.upgradeName.Trim();
         if (TryFind(card, out Entry e)) return e.Name;
-        return !string.IsNullOrEmpty(card.description) ? card.description : card.upgradeName;
+        return card.description ?? "";
     }
 
     /// <summary>

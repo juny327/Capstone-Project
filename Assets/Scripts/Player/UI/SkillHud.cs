@@ -27,7 +27,7 @@ public class SkillHud : MonoBehaviour
         public Image icon;
         public TMP_Text title;
         public TMP_Text level;
-        [Tooltip("레벨 칸 — 카드 최대 레벨만큼 켠다 (스킬 5 · 표창 3)")]
+        [Tooltip("레벨 칸 — 카드 최대 레벨만큼 켠다 (스킬 5 · 슈리켄 3)")]
         public Image[] pips;
         public Image flash;
     }

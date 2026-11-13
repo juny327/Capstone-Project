@@ -12,7 +12,7 @@ public class UpgradeData : ScriptableObject
     public int costExp;   // 필요 경험치
 
     [Header("Upgrade Level")]
-    [Tooltip("이 레벨이 되면 카드 풀에서 빠진다. 0 = 제한 없음 (회복 · HP 같은 능력치 카드). 2026-11-04 — 스킬 5 · 표창 3 · 능력치 0")]
+    [Tooltip("이 레벨이 되면 카드 풀에서 빠진다. 0 = 제한 없음 (회복 · HP 같은 능력치 카드). 2026-11-04 — 스킬 5 · 슈리켄 3 · 능력치 0")]
     [Min(0)]
     public int maxLevel = 5;
 

@@ -13987,7 +13987,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7642812587014717294, guid: 5e715f0d1e39c3e45ac2226e98f10e1d, type: 3}
       propertyPath: m_text
-      value: "\uC804\uACA9 \uC18C\uCD1D + \uC5F0\uC1C4 \uBC88\uAC1C"
+      value: "\uC804\uACA9 \uC18C\uCD1D + \uCCB4\uC778\uB77C\uC774\uD2B8\uB2DD"
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -22512,7 +22512,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7642812587014717294, guid: 5e715f0d1e39c3e45ac2226e98f10e1d, type: 3}
       propertyPath: m_text
-      value: "\uCC3D + \uD45C\uCC3D"
+      value: "\uCC3D + \uC288\uB9AC\uCF04"
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

@@ -112,7 +112,7 @@ public class GameSoundSet : ScriptableObject
     [Tooltip("파이어볼이 적에게 명중했을 때")]
     public Entry fireBallHit = new Entry();
 
-    [Tooltip("연쇄 번개가 적에게 명중했을 때")]
+    [Tooltip("체인라이트닝가 적에게 명중했을 때")]
     public Entry chainLightningHit = new Entry();
 
     [Tooltip("블랙홀이 적에게 피해를 줄 때. minInterval 권장")]
@@ -121,17 +121,17 @@ public class GameSoundSet : ScriptableObject
     [Tooltip("토네이도가 적에게 피해를 줄 때. minInterval 권장")]
     public Entry tornadoHit = new Entry();
 
-    [Tooltip("표창이 적에게 명중했을 때. minInterval 권장")]
+    [Tooltip("슈리켄이 적에게 명중했을 때. minInterval 권장")]
     public Entry shurikenHit = new Entry();
 
-    [Tooltip("전격 샷이 적에게 적중해 경직을 걸 때")]
+    [Tooltip("일렉트릭 샷이 적에게 적중해 경직을 걸 때")]
     public Entry electricShotHit = new Entry();
 
     [Header("스킬 - 시전")]
     [Tooltip("파이어볼 발사 시")]
     public Entry fireBallCast = new Entry();
 
-    [Tooltip("연쇄 번개 발동 시. 연쇄 전이마다 재생하지 않고 1회")]
+    [Tooltip("체인라이트닝 발동 시. 연쇄 전이마다 재생하지 않고 1회")]
     public Entry chainLightningCast = new Entry();
 
     [Tooltip("블랙홀 생성 시")]
@@ -140,10 +140,10 @@ public class GameSoundSet : ScriptableObject
     [Tooltip("토네이도 생성 시")]
     public Entry tornadoCast = new Entry();
 
-    [Tooltip("표창 공전 시작 시")]
+    [Tooltip("슈리켄 공전 시작 시")]
     public Entry shurikenCast = new Entry();
 
-    [Tooltip("전격 샷 발사 시")]
+    [Tooltip("일렉트릭 샷 발사 시")]
     public Entry electricShotCast = new Entry();
 
     [Tooltip("흡혈 성공 시. Drain은 피격음 대신 회복 성공음으로 처리")]

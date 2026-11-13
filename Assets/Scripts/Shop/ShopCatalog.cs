@@ -49,7 +49,7 @@ public class ShopCatalog : ScriptableObject
     [Min(0)] public int rerollStepPerUse = 2;
 
     [Header("상위 무기")]
-    [Tooltip("상위 무기 짝인 스킬(레벨업 카드 — 흡혈 · 연쇄 번개 등)을 정비 창에서 살 때 Stage1 가격 (2026-11-04)")]
+    [Tooltip("상위 무기 짝인 스킬(레벨업 카드 — 흡혈 · 체인라이트닝 등)을 정비 창에서 살 때 Stage1 가격 (2026-11-04)")]
     [Min(0)] public int skillPairPrice = 30;
 
     [Header("진열")]
