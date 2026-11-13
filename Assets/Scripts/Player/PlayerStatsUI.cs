@@ -265,7 +265,8 @@ public class PlayerStatsUI : MonoBehaviour
     {
         if (expText == null) return;
 
-        expText.text = "EXP : " + exp;
+        // 2026-11-14 — 영어 수치 창을 없애고 경험치만 체력바 위(왼쪽 아래)에 남겼다. 카드를 경험치로 사므로 늘 보여야 한다
+        expText.text = "경험치 " + exp;
     }
     void UpdateMoveSpeed(float speed)
     {
