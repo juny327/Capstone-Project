@@ -85,6 +85,9 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
     /// </summary>
     public bool IsSupport { get; private set; }
 
+    /// <summary>화면 흔들림 배율 — 주무기 1, 보조 무기는 WeaponController.SupportShakeMul (약하게).</summary>
+    public float ShakeScale => !IsSupport ? 1f : (Owner != null ? Owner.SupportShakeMul : 0.4f);
+
     /// <summary>한 발이 여러 단계로 이어지는 중인가 (프리즘 노바 빔 · 태양창 모으기) — 보조 무기는 그동안 노린 적을 계속 본다.</summary>
     public bool InSequence => IsBusy;
 
@@ -140,11 +143,47 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
         return true;
     }
 
-    /// <summary>카메라를 흔든다 — 보조 무기는 스스로 자주 쏘므로 흔들지 않는다 (화면이 계속 떨린다).</summary>
+    /// <summary>
+    /// 카메라를 흔든다. 보조 무기는 약하게 (2026-11-12 사용자 요청 — 예전엔 아예 안 흔들었다) —
+    /// 세기 × SupportShakeMul, 그리고 보조 무기끼리는 SupportShakeInterval 안에 더 센 것만 (셋이 같이 쏴도 화면이 계속 떨리지 않게).
+    /// 테스트 룸도 같은 규칙이다.
+    /// </summary>
     public static void ShakeCamera(WeaponBase source, float amount)
     {
-        if (amount <= 0f || (source != null && source.IsSupport)) return;
-        if (CameraShakeManager.Instance != null) CameraShakeManager.Instance.Shake(amount);
+        if (amount <= 0f) return;
+
+        if (source != null && source.IsSupport)
+        {
+            amount *= source.ShakeScale;
+            if (amount <= 0f) return;
+
+            float now = Time.time;
+            float interval = source.Owner != null ? source.Owner.SupportShakeInterval : 0.2f;
+            if (now - lastSupportShakeAt < interval && amount <= lastSupportShakeAmount) return;
+            lastSupportShakeAt = now;
+            lastSupportShakeAmount = amount;
+        }
+
+        if (CameraShakeManager.Instance == null) return;
+        CameraShakeManager.Instance.Shake(amount);
+        ShakeCount++;
+        LastShake = amount;
+    }
+
+    static float lastSupportShakeAt = -999f;
+    static float lastSupportShakeAmount;
+
+    /// <summary>무기가 흔든 횟수 · 마지막 세기 (테스트).</summary>
+    public static int ShakeCount { get; private set; }
+    public static float LastShake { get; private set; }
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetShakeStatics()
+    {
+        lastSupportShakeAt = -999f;
+        lastSupportShakeAmount = 0f;
+        ShakeCount = 0;
+        LastShake = 0f;
     }
 
     // ───────── 탄창 ─────────

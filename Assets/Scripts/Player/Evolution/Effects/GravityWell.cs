@@ -15,10 +15,10 @@ public class GravityWell : MonoBehaviour
     readonly HashSet<Transform> pulled = new HashSet<Transform>();
     readonly List<Transform> found = new List<Transform>();
 
-    // 보조 칸의 중력 대검이 연 중력장은 흔들지 않는다 (스스로 자주 내려찍는다)
-    bool shake = true;
+    // 연 무기 — 붕괴 흔들림 세기를 정한다 (보조 칸의 중력 대검은 약하게, 2026-11-12. 예전엔 안 흔들었다)
+    WeaponBase source;
 
-    public static GravityWell Spawn(GravityWellEffect cfg, Vector3 at, float collapseDamage, bool shakeCamera = true)
+    public static GravityWell Spawn(GravityWellEffect cfg, Vector3 at, float collapseDamage, WeaponBase source = null)
     {
         var go = new GameObject("GravityWell");
         go.transform.position = at;
@@ -26,7 +26,7 @@ public class GravityWell : MonoBehaviour
         var well = go.AddComponent<GravityWell>();
         well.cfg = cfg;
         well.damage = collapseDamage;
-        well.shake = shakeCamera;
+        well.source = source;
         well.BuildBlackHole();
         if (well.hole == null) well.BuildDisc();
         well.StartCoroutine(well.Run());
@@ -195,7 +195,6 @@ public class GravityWell : MonoBehaviour
 
         CombatFx.PlaySound(cfg.collapseSound);
         CombatFx.PlaySound(cfg.collapseBassSound);
-        if (shake && cfg.cameraShake > 0f && CameraShakeManager.Instance != null)
-            CameraShakeManager.Instance.Shake(cfg.cameraShake);
+        WeaponBase.ShakeCamera(source, cfg.cameraShake);   // 보조 칸이면 약하게
     }
 }

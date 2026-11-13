@@ -321,7 +321,7 @@ public class PrismNovaBurst : MonoBehaviour
         CombatFx.PlaySound(cfg.beamBassSound);
         CombatFx.PlaySound(cfg.beamHumSound);
         if (cfg.beamLoop != null) Hum().Play(cfg.beamLoop, cfg.beamLoopVolume, cfg.beamLoopPitch, 0.08f);
-        WeaponBase.ShakeCamera(weapon, cfg.cameraShake);   // 보조 무기는 흔들지 않는다
+        WeaponBase.ShakeCamera(weapon, cfg.cameraShake);   // 보조 무기는 약하게 (WeaponBase.ShakeCamera)
 
         phase = Phase.Sustain;
         phaseTime = 0f;
@@ -378,7 +378,9 @@ public class PrismNovaBurst : MonoBehaviour
     /// </summary>
     void Rumble(float dt)
     {
-        if (cfg.sustainShake <= 0f || dt <= 0f || (weapon != null && weapon.IsSupport)) return;   // 보조 무기는 흔들지 않는다
+        if (cfg.sustainShake <= 0f || dt <= 0f) return;
+        float scale = weapon != null ? weapon.ShakeScale : 1f;   // 보조 무기는 약하게 (2026-11-12 — 예전엔 안 흔들었다)
+        if (scale <= 0f) return;
         CameraShakeManager shake = CameraShakeManager.Instance;
         if (shake == null || shake.impulseSource == null) return;
 
@@ -388,7 +390,7 @@ public class PrismNovaBurst : MonoBehaviour
 
         Vector2 flat = UnityEngine.Random.insideUnitCircle.normalized;
         Vector3 v = new Vector3(flat.x, UnityEngine.Random.Range(-0.4f, 0.4f), flat.y);
-        shake.impulseSource.GenerateImpulseWithVelocity(v * cfg.sustainShake);
+        shake.impulseSource.GenerateImpulseWithVelocity(v * (cfg.sustainShake * scale));
     }
 
     LoopVoice hum;

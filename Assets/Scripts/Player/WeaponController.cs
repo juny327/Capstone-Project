@@ -100,6 +100,15 @@ public class WeaponController : MonoBehaviour
     [Tooltip("패링 연계 — 패링 모션이 끝난 뒤 이 시간(초) 안의 주무기 다음 한 방은 확정 치명")]
     [SerializeField] private float parryCritWindow = 0.5f;
 
+    [Tooltip("보조 무기 화면 흔들림 배율 — 같은 무기를 손에 들 때보다 약하게 (2026-11-12, 예전엔 0 — 아예 안 흔들었다)")]
+    [Range(0f, 1f)] [SerializeField] private float supportShakeMul = 0.4f;
+
+    [Tooltip("보조 무기끼리 흔들림 간격(초) — 이 안에 다시 오면 더 센 것만 (셋이 같이 쏴도 화면이 계속 떨리지 않게)")]
+    [Min(0f)] [SerializeField] private float supportShakeInterval = 0.2f;
+
+    public float SupportShakeMul => supportShakeMul;
+    public float SupportShakeInterval => supportShakeInterval;
+
     [Header("Support Weapon Sounds (보조 무기 소리, 2026-11-12)")]
     [Tooltip("떠 있는 근접 무기가 뛰쳐나갈 때 '슝' — 여럿이 같이 나가도 최소 간격으로 한 번")]
     [SerializeField] private GameSoundSet.Entry supportLaunchSound = new GameSoundSet.Entry();

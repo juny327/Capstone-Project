@@ -107,7 +107,7 @@ public class KillChainExplosionEffect : AttachmentEffect
                 CombatFx.PlaySound(cfg.sound);
             }
 
-            if (depth == 1) WeaponBase.ShakeCamera(Weapon, cfg.cameraShake);   // 보조 무기는 흔들지 않는다
+            if (depth == 1) WeaponBase.ShakeCamera(Weapon, cfg.cameraShake);   // 보조 무기는 약하게 (WeaponBase.ShakeCamera)
 
             if (depth >= cfg.maxDepth || Weapon == null) yield break;
 
