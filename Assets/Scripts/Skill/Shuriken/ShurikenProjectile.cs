@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public class ShurikenProjectile : MonoBehaviour
@@ -10,6 +10,7 @@ public class ShurikenProjectile : MonoBehaviour
     float rotationSpeed;
     float damage;
     float hitInterval;
+    Vector3 orbitOffset;
 
     readonly Dictionary<Enemy, float> hitTimers = new();
 
@@ -19,7 +20,8 @@ public class ShurikenProjectile : MonoBehaviour
         float radius,
         float speed,
         float damageAmount,
-        float interval)
+        float interval,
+        Vector3 offset)
     {
         this.owner = owner;
         angle = startAngle;
@@ -27,6 +29,7 @@ public class ShurikenProjectile : MonoBehaviour
         rotationSpeed = speed;
         damage = Mathf.Max(0f, damageAmount);
         hitInterval = Mathf.Max(0.05f, interval);
+        orbitOffset = offset;
 
         UpdatePosition();
     }
@@ -47,7 +50,7 @@ public class ShurikenProjectile : MonoBehaviour
     void UpdatePosition()
     {
         Vector3 direction = Quaternion.Euler(0f, angle, 0f) * Vector3.forward;
-        transform.position = owner.position + direction * orbitRadius;
+        transform.position = owner.position + orbitOffset + direction * orbitRadius;
 
         // 슈리켄 자체도 공전 방향을 바라보게 함.
         transform.rotation = Quaternion.Euler(0f, -angle, 0f);
