@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public class ShurikenSkill : MonoBehaviour
@@ -196,7 +196,8 @@ public class ShurikenSkill : MonoBehaviour
             orbitRadius,
             rotationSpeed,
             damage,
-            hitInterval);
+            hitInterval,
+            spawnOffset);
 
         while (projectiles.Count <= index)
             projectiles.Add(null);
