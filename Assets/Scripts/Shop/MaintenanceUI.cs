@@ -174,6 +174,7 @@ public class MaintenanceUI : MonoBehaviour
     void OnEnable()
     {
         GameEvents.OnMaintenanceOpen += Open;
+        GameEvents.OnPlayerDeadStart += HideHudOnDeath;
         Wallet.OnCurrentChanged += OnWalletChanged;
         SceneManager.sceneLoaded += OnSceneLoaded;
         shop.OnChanged += Refresh;
@@ -182,6 +183,7 @@ public class MaintenanceUI : MonoBehaviour
     void OnDisable()
     {
         GameEvents.OnMaintenanceOpen -= Open;
+        GameEvents.OnPlayerDeadStart -= HideHudOnDeath;
         Wallet.OnCurrentChanged -= OnWalletChanged;
         SceneManager.sceneLoaded -= OnSceneLoaded;
         shop.OnChanged -= Refresh;
@@ -574,6 +576,12 @@ public class MaintenanceUI : MonoBehaviour
         if (shortcutPanel != null) shortcutPanel.SetActive(false);
         if (window != null) window.SetActive(false);
         UpdateHud(scene);
+    }
+
+    /// <summary>죽으면 코인 표시를 숨긴다 — 게임오버 화면 위에 남았다 (2026-11-13 화면 점검). 다음 씬이 열리면 UpdateHud 가 다시 정한다.</summary>
+    void HideHudOnDeath()
+    {
+        if (hud != null) hud.SetActive(false);
     }
 
     void UpdateHud(Scene scene)
