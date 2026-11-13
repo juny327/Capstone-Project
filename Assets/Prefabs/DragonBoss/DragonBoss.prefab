@@ -169,6 +169,7 @@ MonoBehaviour:
   animator: {fileID: 6734227914733468208}
   introModel: {fileID: 1959509546339929216, guid: 8ca712c654d87174fb986179c24b408e, type: 3}
   entrancePrefab: {fileID: 5497582844890096465, guid: 9d1b3fd3fc85fb1449e3ea8330637226, type: 3}
+  portrait: {fileID: 21300000, guid: ab92e0e22553adb4a865a34568744746, type: 3}
   telegraphMaterial: {fileID: 2100000, guid: 395337d866bf4a7d9f7daff205ba1621, type: 2}
   fireMaterial: {fileID: 2100000, guid: 1ca4fd79f720fa44fa8ad1ba23d2f723, type: 2}
   smokeMaterial: {fileID: 2100000, guid: 34344ea80e234d84eb0e7a92d1b29673, type: 2}

@@ -31,6 +31,8 @@ public partial class DragonBoss : MonoBehaviour
     [SerializeField] GameObject introModel;
     [Tooltip("보스 스테이지 안 등장 연출 (테스트 룸 '인트로부터')")]
     [SerializeField] DragonEntrance entrancePrefab;
+    [Tooltip("보스 체력바 옆 얼굴 그림 — 골렘 그림 대신 (프리팹 도구가 모델을 찍어 만든다)")]
+    [SerializeField] Sprite portrait;
 
     [Header("재질 · 프리팹 (프리팹 도구가 연결)")]
     [Tooltip("바닥 예고 — 몬스터 B 돌진 예고와 같은 반투명 단색 재질")]
@@ -90,6 +92,7 @@ public partial class DragonBoss : MonoBehaviour
 
     public GameObject IntroModel => introModel;
     public DragonEntrance EntrancePrefab => entrancePrefab;
+    public Sprite Portrait => portrait;
     public bool IsDead => state == State.Dead;
     public Pattern Current => current;
     public Pattern Last => lastPattern;

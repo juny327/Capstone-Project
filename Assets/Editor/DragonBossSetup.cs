@@ -78,7 +78,8 @@ public static class DragonBossSetup
         GameObject fireball = MakeFireball(fire);
         GameObject modelPrefab = MakeModelPrefab(material, controller, m);
         DragonEntrance entrance = MakeEntrance(modelPrefab, fire);
-        GameObject bossPrefab = MakeBossPrefab(modelPrefab, controller, m, fire, fireball, entrance);
+        Sprite portrait = MakePortrait(modelPrefab, clips[DragonBoss.AttackState]);
+        GameObject bossPrefab = MakeBossPrefab(modelPrefab, controller, m, fire, fireball, entrance, portrait);
         AssetDatabase.SaveAssets();
         Debug.Log($"{Tag} 드래곤 프리팹 — {m}");
         Debug.Log($"{Tag} 헛도는 뼈 바로잡음 {SpinReport.Count}곳" + (SpinReport.Count > 0 ? ":\n  " + string.Join("\n  ", SpinReport) : ""));
@@ -635,7 +636,87 @@ public static class DragonBossSetup
         }
     }
 
-    static GameObject MakeBossPrefab(GameObject modelPrefab, AnimatorController controller, Measure m, Material fire, GameObject fireball, DragonEntrance entrance)
+    // ───────── 체력바 얼굴 그림 (11-13 화면 점검 — 골렘 그림이 남아 있었다) ─────────
+
+    const string PortraitPath = OutDir + "/DragonPortrait.png";
+    const int PortraitLayer = 31;
+
+    /// <summary>드래곤 머리를 앞 3/4 에서 찍어 투명 바탕 256×256 그림으로 — 입을 벌린 위협 자세(공격 0.58초).</summary>
+    static Sprite MakePortrait(GameObject modelPrefab, AnimationClip pose)
+    {
+        GameObject model = Object.Instantiate(modelPrefab, new Vector3(0f, -500f, 0f), Quaternion.identity);
+        var camGo = new GameObject("PortraitCam");
+        var lightGo = new GameObject("PortraitLight");
+        var rt = new RenderTexture(256, 256, 24, RenderTextureFormat.ARGB32);
+        try
+        {
+            foreach (Transform t in model.GetComponentsInChildren<Transform>(true)) t.gameObject.layer = PortraitLayer;
+            Animator animator = model.GetComponentInChildren<Animator>(true);
+            if (pose != null && animator != null) pose.SampleAnimation(animator.gameObject, 0.58f);
+            Transform jaw = model.GetComponentsInChildren<Transform>(true).FirstOrDefault(t => t.name == "jaw_upper");
+            // 위턱 뼈는 머리 아래쪽 뿌리에 있다 — 뿔 · 눈 · 벌린 입이 한가운데 오게 조금 앞 · 아래를 본다
+            Vector3 head = jaw != null ? jaw.position + Vector3.forward * 0.5f - Vector3.up * 0.35f : model.transform.position + Vector3.up * 3f;
+            foreach (SkinnedMeshRenderer smr in model.GetComponentsInChildren<SkinnedMeshRenderer>(true)) smr.updateWhenOffscreen = true;
+
+            var cam = camGo.AddComponent<Camera>();
+            var data = camGo.AddComponent<UnityEngine.Rendering.Universal.UniversalAdditionalCameraData>();
+            data.renderPostProcessing = false;
+            cam.cullingMask = 1 << PortraitLayer;
+            cam.clearFlags = CameraClearFlags.SolidColor;
+            cam.backgroundColor = new Color(0f, 0f, 0f, 0f);
+            cam.fieldOfView = 26f;
+            cam.nearClipPlane = 0.1f;
+            cam.farClipPlane = 60f;
+            cam.transform.position = head + new Vector3(2.8f, 0.4f, 6.2f);   // 드래곤은 +z 를 본다 — 앞 오른쪽에서
+            cam.transform.LookAt(head);
+            cam.targetTexture = rt;
+
+            var light = lightGo.AddComponent<Light>();
+            light.type = LightType.Directional;
+            light.intensity = 1.5f;
+            light.cullingMask = 1 << PortraitLayer;
+            light.transform.rotation = Quaternion.Euler(35f, 200f, 0f);
+
+            cam.Render();
+            RenderTexture.active = rt;
+            var tex = new Texture2D(256, 256, TextureFormat.RGBA32, false);
+            tex.ReadPixels(new Rect(0, 0, 256, 256), 0, 0);
+            tex.Apply();
+            RenderTexture.active = null;
+            System.IO.File.WriteAllBytes(PortraitPath, tex.EncodeToPNG());
+            Object.DestroyImmediate(tex);
+        }
+        finally
+        {
+            Object.DestroyImmediate(model);
+            Object.DestroyImmediate(camGo);
+            Object.DestroyImmediate(lightGo);
+            rt.Release();
+            Object.DestroyImmediate(rt);
+        }
+
+        AssetDatabase.ImportAsset(PortraitPath, ImportAssetOptions.ForceUpdate);
+        var importer = (TextureImporter)AssetImporter.GetAtPath(PortraitPath);
+        importer.textureType = TextureImporterType.Sprite;
+        importer.spriteImportMode = SpriteImportMode.Single;
+        importer.alphaIsTransparency = true;
+        importer.mipmapEnabled = false;
+        importer.SaveAndReimport();
+        return AssetDatabase.LoadAssetAtPath<Sprite>(PortraitPath);
+    }
+
+    /// <summary>배치 — 프리팹만 다시 만든다 (테스트 룸 장면은 그대로).</summary>
+    public static void BuildBatch() => Build();
+
+    /// <summary>배치 — 얼굴 그림만 다시 찍는다 (같은 자리라 보스 프리팹 연결은 그대로).</summary>
+    public static void PortraitBatch()
+    {
+        var model = AssetDatabase.LoadAssetAtPath<GameObject>(ModelPrefabPath);
+        var attack = AssetDatabase.LoadAssetAtPath<AnimationClip>($"{ClipDir}/Dragon_{DragonBoss.AttackState}.anim");
+        Debug.Log($"{Tag} 얼굴 그림 — {(MakePortrait(model, attack) != null ? "만듦" : "실패")}");
+    }
+
+    static GameObject MakeBossPrefab(GameObject modelPrefab, AnimatorController controller, Measure m, Material fire, GameObject fireball, DragonEntrance entrance, Sprite portrait)
     {
         var root = new GameObject("DragonBoss") { tag = "Boss" };
         try
@@ -697,6 +778,7 @@ public static class DragonBossSetup
             so.FindProperty("fireMaterial").objectReferenceValue = fire;
             so.FindProperty("fireballPrefab").objectReferenceValue = fireball;
             so.FindProperty("entrancePrefab").objectReferenceValue = entrance;
+            so.FindProperty("portrait").objectReferenceValue = portrait;
             so.ApplyModifiedPropertiesWithoutUndo();
 
             return PrefabUtility.SaveAsPrefabAsset(root, BossPrefabPath);

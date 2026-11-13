@@ -154,8 +154,12 @@ public class DragonEntrance : MonoBehaviour
             if (Vector3.Dot(a.position - core, toPlayer) < 0f) beamFrom.Add(a.position + Vector3.up * 7f);
 
         LockPlayer();
-        foreach (Canvas c in scene.GetRootGameObjects().SelectMany(r => r.GetComponentsInChildren<Canvas>(true)))
-            if (c.isRootCanvas && c.enabled && c.renderMode != RenderMode.WorldSpace) { c.enabled = false; hiddenHud.Add(c); }
+        // HUD 를 모두 숨긴다 — 이 장면 것 + 씬을 넘어 남는 것(코인 · 스킬 · 조합식 · 장비, 11-13 화면 점검에서 코인이 연출 위에 남았다).
+        // 설정창(ESC)은 남긴다
+        foreach (Canvas c in FindObjectsByType<Canvas>(FindObjectsSortMode.None))
+            if (c.isRootCanvas && c.enabled && c.renderMode != RenderMode.WorldSpace
+                && c.GetComponentInChildren<GameSettingsUI>(true) == null && c.GetComponentInParent<GameSettingsUI>(true) == null)
+            { c.enabled = false; hiddenHud.Add(c); }
         hpUi = scene.GetRootGameObjects().SelectMany(r => r.GetComponentsInChildren<BossHPUI>(true)).FirstOrDefault();
 
         SetupCamera();
@@ -330,8 +334,7 @@ public class DragonEntrance : MonoBehaviour
             {
                 cardIn = true;
                 CopyPose(DragonBoss.AttackState, 0.58f, 0f);
-                foreach (Canvas c in hiddenHud) if (c != null) c.enabled = true;
-                hiddenHud.Clear();
+                ShowBossBarOnly();   // 이름 카드 동안은 보스 체력바만 — 나머지 HUD 는 전투 시작 때
                 if (hpUi != null && hpUi.root != null) hpUi.root.SetActive(true);
             }
             if (cardIn)
@@ -357,8 +360,7 @@ public class DragonEntrance : MonoBehaviour
         Elapsed = TStart;
         SwapToBoss();
         if (sun != null) { sun.color = sunColor; sun.intensity = sunIntensity; }
-        foreach (Canvas c in hiddenHud) if (c != null) c.enabled = true;
-        hiddenHud.Clear();
+        RestoreHud();
         if (hpUi != null && hpUi.root != null) hpUi.root.SetActive(true);
         FillBossBar(1f);
         ReleaseCamera(skipped ? 0.8f : 1.0f);
@@ -815,14 +817,53 @@ public class DragonEntrance : MonoBehaviour
         {
             UnlockPlayer();
             if (sun != null) { sun.color = sunColor; sun.intensity = sunIntensity; }
-            foreach (Canvas c in hiddenHud) if (c != null) c.enabled = true;
-            hiddenHud.Clear();
+            RestoreHud();
             if (brain != null) brain.DefaultBlend = savedBlend;
         }
         foreach (GameObject g in temp) if (g != null) Destroy(g);
         temp.Clear();
         if (profile != null) Destroy(profile);
         beams.Clear();
+    }
+
+    // ───────── HUD ─────────
+
+    readonly List<CanvasGroup> addedGroups = new List<CanvasGroup>();
+    readonly Dictionary<CanvasGroup, float> savedAlpha = new Dictionary<CanvasGroup, float>();
+
+    /// <summary>
+    /// 이름 카드 — 보스 체력바가 든 캔버스만 켜고, 그 안의 다른 HUD(체력 · 수치 창 · 무기 칸 …)는 잠깐 투명하게 둔다.
+    /// 팀원 HUD 의 켜짐 상태는 건드리지 않는다 (CanvasGroup 알파만, 끝나면 되돌림).
+    /// </summary>
+    void ShowBossBarOnly()
+    {
+        if (hpUi == null) { RestoreHud(); return; }
+        Canvas canvas = hpUi.GetComponentInParent<Canvas>(true);
+        canvas = canvas != null ? canvas.rootCanvas : null;
+        if (canvas == null) { RestoreHud(); return; }
+
+        Transform keep = hpUi.transform;
+        while (keep.parent != null && keep.parent != canvas.transform) keep = keep.parent;
+        foreach (Transform child in canvas.transform)
+        {
+            if (child == keep || !child.gameObject.activeSelf) continue;
+            CanvasGroup group = child.GetComponent<CanvasGroup>();
+            if (group == null) { group = child.gameObject.AddComponent<CanvasGroup>(); addedGroups.Add(group); }
+            else if (!savedAlpha.ContainsKey(group)) savedAlpha[group] = group.alpha;
+            group.alpha = 0f;
+        }
+        canvas.enabled = true;
+        hiddenHud.Remove(canvas);
+    }
+
+    void RestoreHud()
+    {
+        foreach (Canvas c in hiddenHud) if (c != null) c.enabled = true;
+        hiddenHud.Clear();
+        foreach (CanvasGroup g in addedGroups) if (g != null) Destroy(g);
+        addedGroups.Clear();
+        foreach (var kv in savedAlpha) if (kv.Key != null) kv.Key.alpha = kv.Value;
+        savedAlpha.Clear();
     }
 }
 

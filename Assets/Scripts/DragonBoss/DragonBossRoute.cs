@@ -64,6 +64,7 @@ public static class DragonBossRoute
         var boss = dragon.GetComponent<DragonBoss>();
         if (boss != null) boss.EnableTestKeys();   // 테스트 룸 경로 — F1 ~ F6 시험 키
         if (golem != null && golem != dragon) golem.SetActive(false);
+        if (boss != null) SetBossPortrait(scene, boss.Portrait);
 
         DragonEntrance entrance = boss != null ? boss.EntrancePrefab : null;
         if (playIntro && !introPlayed && entrance != null)
@@ -106,6 +107,24 @@ public static class DragonBossRoute
         actor.AddComponent<DragonIntroActor>().Init(golem.transform, director);
         actor.SetActive(true);
         Debug.Log("[DragonBossRoute] 인트로 — 골렘 대신 드래곤");
+    }
+
+    /// <summary>
+    /// 보스 체력바 옆 얼굴 그림을 드래곤으로 (2026-11-13 화면 점검 — 골렘 그림이 남아 있었다).
+    /// 체력바(BossHPUI) 아래에서 세 칸(빨강 · 주황 · 초록)과 바탕이 아닌 그림 하나가 얼굴이다. 팀원 씬은 고치지 않는다.
+    /// </summary>
+    static void SetBossPortrait(Scene scene, Sprite portrait)
+    {
+        if (portrait == null) return;
+        BossHPUI ui = scene.GetRootGameObjects().SelectMany(r => r.GetComponentsInChildren<BossHPUI>(true)).FirstOrDefault();
+        if (ui == null || ui.root == null) return;
+        foreach (UnityEngine.UI.Image image in ui.root.GetComponentsInChildren<UnityEngine.UI.Image>(true))
+        {
+            if (image.gameObject == ui.root || image == ui.redBar || image == ui.orangeBar || image == ui.greenBar || image.sprite == null) continue;
+            image.sprite = portrait;
+            image.preserveAspect = true;
+            return;
+        }
     }
 
     /// <summary>꺼진 채로 만든다 — Awake(보스 체력의 등장 알림 등)는 스포너가 깨울 때 돈다.</summary>
