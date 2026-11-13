@@ -1,0 +1,7 @@
+Cethiel's Dragon 3D
+Source: https://opengameart.org/content/cethiels-dragon-3d (dragon_oga.zip)
+License: CC0 (public domain). Credit requested (not required):
+  - 2D original: Cethiel
+  - 3D model / rig / animations: Drummyfish
+Imported 2026-11-13: model dragon.dae (1262 triangles, 32 bones), animations Attack 1.71s / Die 2.5s / Idle 4.25s / Walk 1.67s (separate .dae files), textures dragon.png + dragon_black.png (472x420).
+The .blend originals (Blender 2.79 / 2.80) are left out on purpose: Unity needs Blender installed to import .blend and would log errors without it. They stay in dragon_oga.zip.
