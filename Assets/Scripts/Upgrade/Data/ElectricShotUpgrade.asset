@@ -12,9 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84bc2621c547cb84c86833668e594c86, type: 3}
   m_Name: ElectricShotUpgrade
   m_EditorClassIdentifier: Assembly-CSharp::UpgradeData
-  upgradeName: "\uC804\uACA9 \uC0F7"
-  description: "4\uCD08\uB9C8\uB2E4 \uC801 1\uBA85\uC744 2\uCD08\uAC04 \uACBD\uC9C1\n\uB808\uBCA8\uB9C8\uB2E4 \uACBD\uC9C1 +1\uCD08"
+  upgradeName: "\uC77C\uB809\uD2B8\uB9AD \uC0F7"
+  description: "4\uCD08\uB9C8\uB2E4 \uC801 1\uBA85\uC744 2\uCD08\uAC04 \uACBD\uC9C1\n\uB808\uBCA8\uB9C8\uB2E4
+    \uACBD\uC9C1 +1\uCD08"
   icon: {fileID: 21300000, guid: 2467fd7f0af6c4e42a5ff3cdcb943bef, type: 3}
   costExp: 10
   maxLevel: 5
+  fixedCost: 0
   effect: {fileID: 11400000, guid: eca0e97fb95dd92418d794efbf6cf3ab, type: 2}

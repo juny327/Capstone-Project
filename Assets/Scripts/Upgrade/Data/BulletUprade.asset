@@ -12,9 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84bc2621c547cb84c86833668e594c86, type: 3}
   m_Name: BulletUprade
   m_EditorClassIdentifier: Assembly-CSharp::UpgradeData
-  upgradeName: "\uACF5\uACA9\uB825"
+  upgradeName: "\uACF5\uACA9\uB825 \uC99D\uAC00"
   description: "\uBAA8\uB4E0 \uBB34\uAE30 \uD53C\uD574 +10%"
   icon: {fileID: 2947914709021185861, guid: 44f8c69802068264599809705c4b512c, type: 3}
   costExp: 2
   maxLevel: 0
+  fixedCost: 0
   effect: {fileID: 11400000, guid: 6d1fc9d9d5b5732458e2e746dabd74c5, type: 2}
