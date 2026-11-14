@@ -5,7 +5,8 @@ using UnityEngine.AI;
 using UnityEngine.InputSystem;
 
 /// <summary>
-/// 드래곤 보스 (Cethiel's Dragon 3D, 2026-11-13) — 테스트 룸 보스 바로 가기로만 나온다 (DragonBossRoute), 본 게임 보스(골렘)는 그대로.
+/// 드래곤 보스 (Cethiel's Dragon 3D, 2026-11-13) — 본 게임 보스 (11-14, 3스테이지 다음 · DragonBossSettings 스위치) + 테스트 룸 보스 바로 가기.
+/// 보스 스테이지의 골렘 자리에 DragonBossRoute 가 바꿔 넣는다.
 ///   1페이즈: 물기 · 지연 물기 · 불 브레스 · 불덩이 3발 · 돌진 + 추적 (DragonBoss.Patterns.cs)
 ///   2페이즈 (체력 2/3 아래, 2026-11-14): + 불비 · 꼬리 휩쓸기 · 물러나서 브레스 · 부하 소환 (DragonBoss.Phases.cs)
 ///   3페이즈 (체력 1/3 아래): + 땅 물어뜯기 충격파 · 휩쓸기 브레스 · 연속 물기 · 불 장판 · 연계

@@ -282,6 +282,13 @@ public class GameManager : MonoBehaviour
 
         int nextScene = SceneManager.GetActiveScene().buildIndex + 1;
 
+        // 드래곤 보스 (2026-11-14) — 골렘 인트로 씬 대신 보스 스테이지 안에서 등장 연출을 한다 (DragonBossRoute)
+        if (DragonBossRoute.SkipsIntro(nextScene))
+        {
+            SceneManager.LoadScene("StageBoss");
+            return;
+        }
+
         SceneManager.LoadScene(nextScene);
     }
 

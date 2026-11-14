@@ -714,6 +714,34 @@ public static class DragonBossSetup
     /// <summary>배치 — 프리팹만 다시 만든다 (테스트 룸 장면은 그대로).</summary>
     public static void BuildBatch() => Build();
 
+    // ───────── 본 게임 보스로 연결 (2026-11-14) ─────────
+
+    const string SettingsPath = "Assets/Resources/" + DragonBossSettings.ResourcePath + ".asset";
+
+    /// <summary>
+    /// 본 게임 보스 설정 에셋(Resources/Dragon/DragonBossSettings)을 만들고 드래곤 프리팹을 연결한다.
+    /// 이미 있으면 스위치(useInMainGame · playEntrance)는 건드리지 않고 빈 프리팹 칸만 채운다 — 골렘으로 되돌리려면 인스펙터에서 useInMainGame 을 끈다.
+    /// </summary>
+    [MenuItem("Tools/Dragon Boss/본 게임 보스로 연결")]
+    public static void LinkMainGame()
+    {
+        var boss = AssetDatabase.LoadAssetAtPath<GameObject>(BossPrefabPath);
+        if (boss == null) { Debug.LogError($"{Tag} 드래곤 프리팹이 없습니다 — 먼저 '드래곤 보스 프리팹 만들기': {BossPrefabPath}"); return; }
+
+        var settings = AssetDatabase.LoadAssetAtPath<DragonBossSettings>(SettingsPath);
+        bool created = settings == null;
+        if (created)
+        {
+            TestRoomSetup.EnsureFolder(System.IO.Path.GetDirectoryName(SettingsPath).Replace('\\', '/'));
+            settings = ScriptableObject.CreateInstance<DragonBossSettings>();
+            AssetDatabase.CreateAsset(settings, SettingsPath);
+        }
+        if (settings.bossPrefab == null) settings.bossPrefab = boss;
+        EditorUtility.SetDirty(settings);
+        AssetDatabase.SaveAssets();
+        Debug.Log($"{Tag} 본 게임 보스 설정 {(created ? "만듦" : "있음")} — 드래곤 {(settings.useInMainGame ? "켜짐" : "꺼짐 (골렘)")} · 등장 연출 {(settings.playEntrance ? "켜짐" : "꺼짐")} · 프리팹 {AssetDatabase.GetAssetPath(settings.bossPrefab)} → {SettingsPath}");
+    }
+
     /// <summary>배치 — 얼굴 그림만 다시 찍는다 (같은 자리라 보스 프리팹 연결은 그대로).</summary>
     public static void PortraitBatch()
     {

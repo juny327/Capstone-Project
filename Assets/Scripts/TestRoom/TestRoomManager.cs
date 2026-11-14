@@ -234,7 +234,7 @@ public class TestRoomManager : MonoBehaviour
     // ───────── 보스 바로 가기 (2026-11-13) ─────────
 
     [Header("Boss Jump")]
-    [Tooltip("있으면 바로 가기로 갈 때 골렘 대신 이 드래곤을 만난다 (DragonBossRoute) — 본 게임 보스는 그대로. TestRoomBossSetup 이 연결한다")]
+    [Tooltip("있으면 바로 가기로 갈 때 골렘 대신 이 드래곤을 만난다 (DragonBossRoute) — 본 게임 보스 설정(DragonBossSettings)과는 따로. TestRoomBossSetup 이 연결한다")]
     [SerializeField] GameObject dragonBossPrefab;
 
     int pendingBossJump;   // 0 없음 · 1 보스 스테이지 · 2 인트로부터

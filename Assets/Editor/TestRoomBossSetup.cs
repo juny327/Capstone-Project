@@ -13,7 +13,7 @@ using Object = UnityEngine.Object;
 ///  · 보스 바로 가기 — 서남쪽 (무기 선반 근접 묶음과 상위 무기 구역 사이) 발판 두 개
 ///      "보스전 바로" — 인트로 없이 보스 스테이지로 · "인트로부터" — 보스 스테이지 안 등장 연출(DragonEntrance) → 그대로 전투
 ///      들어가면 지금 장비(무기 · 진화 · 보조 칸 · 서브 능력)를 그대로 들고 간다 (TestBossPad → TestRoomManager.QueueBossJump)
-///      만나는 보스는 <b>드래곤</b> (만드는 중) — TestRoomManager.dragonBossPrefab → DragonBossRoute. 본 게임 보스(골렘)는 그대로
+///      만나는 보스는 <b>드래곤</b> (만드는 중) — TestRoomManager.dragonBossPrefab → DragonBossRoute. 본 게임 보스도 드래곤 (11-14, DragonBossSettings)
 ///  · 드래곤 동작 보기 — 북쪽 가운데. 보스 크기 드래곤 한 마리 + 발판 5개 (대기 · 걷기 · 공격 · 죽음 · 느리게)
 ///
 /// 먼저 드래곤 프리팹을 만든다 (DragonBossSetup). TestRoomSetup 은 장면을 처음부터 다시 짓는다 —
