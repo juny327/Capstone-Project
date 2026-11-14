@@ -12,8 +12,8 @@ using Object = UnityEngine.Object;
 ///
 ///  · 동작 4개(대기 · 걷기 · 공격 · 죽음)를 이름 붙여 가져온다 — 대기 · 걷기는 반복. 동작 파일은 '계층 유지'여야 모델 뼈 경로와 맞는다
 ///  · URP 재질 (dragon.png) · 애니메이터 (상태 Idle · Walk · Attack · Die, 전환은 코드가 한다)
-///  · DragonModel.prefab — 몸만 (인트로 · 테스트 룸 동작 보기). 크기 ×6, 발이 바닥(y 0)에 닿게
-///  · DragonBoss.prefab — 몸 + 보스 부품 (BossHealth 1000 · 꺼 둔 BossBrain · NavMeshAgent · 콜라이더, 태그 Boss) + DragonBoss
+///  · DragonModel.prefab — 몸만 (등장 연출 · 테스트 룸 동작 보기). 발이 바닥(y 0)에 닿게
+///  · DragonBoss.prefab — 몸 + 보스 부품 (BossHealth 1000 · NavMeshAgent · 콜라이더, 태그 Boss) + DragonBoss
 ///  · 모델을 재서 넣는 값: 발 높이 · 몸 크기(콜라이더 · 길 찾기 반경) · 물기 거리 · 입이 가장 앞으로 나오는 순간 · 걷기 동작 속도
 /// 몇 번 돌려도 결과가 같다 (프리팹 · 재질 · 애니메이터는 같은 자리에 덮어쓴다 — 장면의 참조는 그대로).
 /// </summary>
@@ -26,13 +26,13 @@ public static class DragonBossSetup
     public const string ModelPrefabPath = OutDir + "/DragonModel.prefab";
     const string ControllerPath = OutDir + "/DragonBoss.controller";
     const string MaterialPath = OutDir + "/Dragon.mat";
-    // 실제 몸(정점 기준)은 폭 0.4 × 높이 0.7 × 길이 1.1m — ×6 이면 길이 약 6.6m · 높이 4.2m, 지금 보스(골렘, 약 7m)와 비슷하다
+    // 실제 몸(정점 기준)은 폭 0.4 × 높이 0.7 × 길이 1.1m — ×6 이면 길이 약 6.6m · 높이 4.2m
     /// <summary>보스 크기 (모델 배율). 2026-11-14 사용자 요청으로 6 → 9 — 몸길이 약 10m · 높이 약 6.6m.
     /// 패턴 거리 값은 BaseScale(6) 기준으로 적혀 있고, 프리팹에 넣는 sizeFactor(= Scale ÷ BaseScale)에 맞춰 스스로 늘어난다.</summary>
     public const float Scale = 9f;
     public const float BaseScale = 6f;
     public const float SizeFactor = Scale / BaseScale;
-    const int BossHp = 1000;   // 지금 보스(골렘)와 같게 — 패턴이 생기면 다시 정한다
+    const int BossHp = 1000;   // 옛 보스(골렘)와 같은 값 그대로 — 수치는 아직 안 맞췄다
 
     static readonly (string file, string state, bool loop)[] ClipFiles =
     {
@@ -720,7 +720,7 @@ public static class DragonBossSetup
 
     /// <summary>
     /// 본 게임 보스 설정 에셋(Resources/Dragon/DragonBossSettings)을 만들고 드래곤 프리팹을 연결한다.
-    /// 이미 있으면 스위치(useInMainGame · playEntrance)는 건드리지 않고 빈 프리팹 칸만 채운다 — 골렘으로 되돌리려면 인스펙터에서 useInMainGame 을 끈다.
+    /// 이미 있으면 등장 연출 스위치(playEntrance)는 건드리지 않고 빈 프리팹 칸만 채운다.
     /// </summary>
     [MenuItem("Tools/Dragon Boss/본 게임 보스로 연결")]
     public static void LinkMainGame()
@@ -739,7 +739,7 @@ public static class DragonBossSetup
         if (settings.bossPrefab == null) settings.bossPrefab = boss;
         EditorUtility.SetDirty(settings);
         AssetDatabase.SaveAssets();
-        Debug.Log($"{Tag} 본 게임 보스 설정 {(created ? "만듦" : "있음")} — 드래곤 {(settings.useInMainGame ? "켜짐" : "꺼짐 (골렘)")} · 등장 연출 {(settings.playEntrance ? "켜짐" : "꺼짐")} · 프리팹 {AssetDatabase.GetAssetPath(settings.bossPrefab)} → {SettingsPath}");
+        Debug.Log($"{Tag} 본 게임 보스 설정 {(created ? "만듦" : "있음")} — 등장 연출 {(settings.playEntrance ? "켜짐" : "꺼짐")} · 프리팹 {AssetDatabase.GetAssetPath(settings.bossPrefab)} → {SettingsPath}");
     }
 
     /// <summary>배치 — 얼굴 그림만 다시 찍는다 (같은 자리라 보스 프리팹 연결은 그대로).</summary>
@@ -759,12 +759,6 @@ public static class DragonBossSetup
             model.name = "Model";
             model.transform.SetParent(root.transform, false);
             Animator animator = model.GetComponentInChildren<Animator>(true);
-
-            // BossBrain 의 애니메이터 자리 — 아무 뼈도 없는 대역 (죽은 뒤 계속 맞아도 쓰러짐이 다시 돌지 않게)
-            var proxy = new GameObject("BrainAnimatorProxy");
-            proxy.transform.SetParent(root.transform, false);
-            var proxyAnimator = proxy.AddComponent<Animator>();
-            proxyAnimator.runtimeAnimatorController = controller;
 
             float width = m.max.x - m.min.x, length = m.max.z - m.min.z;
             float radius = Mathf.Clamp(width * 0.5f, 0.8f, 1.8f * SizeFactor);
@@ -791,16 +785,10 @@ public static class DragonBossSetup
 
             var health = root.AddComponent<BossHealth>();
             health.maxHp = BossHp;
-            var movement = root.AddComponent<BossMovement>();
-            var brain = root.AddComponent<BossBrain>();
-            brain.animator = proxyAnimator;
-            brain.movement = movement;
-            brain.enabled = false;   // 옛 AI(골렘 상태 기계)는 돌지 않는다 — 죽음 처리에만 쓰인다
 
             var dragon = root.AddComponent<DragonBoss>();
             var so = new SerializedObject(dragon);
             so.FindProperty("animator").objectReferenceValue = animator;
-            so.FindProperty("introModel").objectReferenceValue = modelPrefab;
             so.FindProperty("sizeFactor").floatValue = SizeFactor;
             so.FindProperty("walkCycleSpeed").floatValue = Round(m.walkCycleSpeed);
             so.FindProperty("attackLength").floatValue = Round(m.lengths[DragonBoss.AttackState]);

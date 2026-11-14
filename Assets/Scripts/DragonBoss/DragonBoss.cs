@@ -5,8 +5,8 @@ using UnityEngine.AI;
 using UnityEngine.InputSystem;
 
 /// <summary>
-/// 드래곤 보스 (Cethiel's Dragon 3D, 2026-11-13) — 본 게임 보스 (11-14, 3스테이지 다음 · DragonBossSettings 스위치) + 테스트 룸 보스 바로 가기.
-/// 보스 스테이지의 골렘 자리에 DragonBossRoute 가 바꿔 넣는다.
+/// 드래곤 보스 (Cethiel's Dragon 3D, 2026-11-13) — 본 게임 보스 (3스테이지 다음) · 테스트 룸 보스 바로 가기.
+/// 보스 스테이지가 열리면 DragonBossRoute 가 세운다 (프리팹은 DragonBossSettings).
 ///   1페이즈: 물기 · 지연 물기 · 불 브레스 · 불덩이 3발 · 돌진 + 추적 (DragonBoss.Patterns.cs)
 ///   2페이즈 (체력 2/3 아래, 2026-11-14): + 불비 · 꼬리 휩쓸기 · 물러나서 브레스 · 부하 소환 (DragonBoss.Phases.cs)
 ///   3페이즈 (체력 1/3 아래): + 땅 물어뜯기 충격파 · 휩쓸기 브레스 · 연속 물기 · 불 장판 · 연계
@@ -21,12 +21,11 @@ using UnityEngine.InputSystem;
 ///                                F7 불비 · F8 꼬리 휩쓸기 · F9 물러나서 브레스 · F10 땅 물어뜯기 · F11 휩쓸기 브레스 · F12 연속 물기
 ///                                Home 부하 소환 · PageUp 다음 페이즈(포효) · PageDown 앞 페이즈로
 ///
-/// 보스 판정은 기존 보스 부품을 그대로 쓴다:
+/// 보스 판정 부품:
 ///  · BossHealth — 체력바(BossHPUI) · 보스 등장음 · 플레이어 무기의 보스 처리(조준 · 갈고리 · 패링)가 이걸 본다
-///  · BossBrain — BossHealth 가 죽을 때 부른다. 꺼 둔 채로 두고(옛 AI 가 돌지 않게), 애니메이터 자리에는 빈 대역을 넣는다
-///    → 죽은 뒤 화상 같은 지속 피해가 들어와도 쓰러지는 동작이 처음부터 다시 돌지 않는다. 쓰러짐이 끝나면 OnDieAnimationEnd → 승리
+///    체력이 0 이 되면 한 번 알린다 (OnBossDead) → 쓰러지는 동작 → 끝나면 승리 (GameEvents.OnGameWin)
 /// </summary>
-[RequireComponent(typeof(NavMeshAgent), typeof(BossHealth), typeof(BossBrain))]
+[RequireComponent(typeof(NavMeshAgent), typeof(BossHealth))]
 public partial class DragonBoss : MonoBehaviour
 {
     public const string IdleState = "Idle", WalkState = "Walk", AttackState = "Attack", DieState = "Die";
@@ -43,11 +42,9 @@ public partial class DragonBoss : MonoBehaviour
     }
 
     [SerializeField] Animator animator;
-    [Tooltip("인트로 씬에서 골렘 대신 세우는 몸 (AI 없음)")]
-    [SerializeField] GameObject introModel;
     [Tooltip("보스 스테이지 안 등장 연출 (테스트 룸 '인트로부터')")]
     [SerializeField] DragonEntrance entrancePrefab;
-    [Tooltip("보스 체력바 옆 얼굴 그림 — 골렘 그림 대신 (프리팹 도구가 모델을 찍어 만든다)")]
+    [Tooltip("보스 체력바 옆 얼굴 그림 (프리팹 도구가 모델을 찍어 만든다)")]
     [SerializeField] Sprite portrait;
 
     [Header("재질 · 프리팹 (프리팹 도구가 연결)")]
@@ -100,7 +97,6 @@ public partial class DragonBoss : MonoBehaviour
 
     NavMeshAgent agent;
     BossHealth health;
-    BossBrain brain;
     State state;
     float stateTime;
     bool placed;
@@ -126,7 +122,6 @@ public partial class DragonBoss : MonoBehaviour
     float nextGrowl = 5f, stepPhase;
     AudioSource breathVoice;
 
-    public GameObject IntroModel => introModel;
     public DragonEntrance EntrancePrefab => entrancePrefab;
     public Sprite Portrait => portrait;
     public bool IsDead => state == State.Dead;
@@ -147,7 +142,6 @@ public partial class DragonBoss : MonoBehaviour
     {
         agent = GetComponent<NavMeshAgent>();
         health = GetComponent<BossHealth>();
-        brain = GetComponent<BossBrain>();
         // 몸통과 플레이어는 물리로 부딪히지 않는다 — 수평으로만 막고 밀어낸다 (바닥으로 꺼지던 버그, DragonBodyBlock)
         if (GetComponent<DragonBodyBlock>() == null) gameObject.AddComponent<DragonBodyBlock>();
         ApplySize();
@@ -491,7 +485,7 @@ public partial class DragonBoss : MonoBehaviour
         targetDamage = player != null ? player.GetComponentInParent<IDamageable>() : null;
     }
 
-    /// <summary>원래 자리(골렘 자리)는 플레이어 시작점 바로 옆이다 — 길 위에서 spawnDistance 만큼 떨어진 곳으로 옮긴다.</summary>
+    /// <summary>세워진 자리가 플레이어와 너무 가까우면 길 위에서 spawnDistance 만큼 떨어진 곳으로 옮긴다.</summary>
     bool PlaceAwayFromPlayer()
     {
         if (!agent.isActiveAndEnabled) return false;
@@ -541,7 +535,7 @@ public partial class DragonBoss : MonoBehaviour
     IEnumerator FinishDeath()
     {
         yield return new WaitForSeconds(dieLength + winDelay);
-        brain.OnDieAnimationEnd();   // BossDieState 일 때만 승리 (BossHealth 가 그 상태로 바꿔 둔다)
+        GameEvents.OnGameWin?.Invoke();   // 플레이어가 먼저 죽었으면 GameManager 가 무시한다
     }
 
     void OnPlayerDead()

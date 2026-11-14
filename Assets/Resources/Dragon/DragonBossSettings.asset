@@ -12,6 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6033ae9ca653f8f46adff8cfcda96336, type: 3}
   m_Name: DragonBossSettings
   m_EditorClassIdentifier: Assembly-CSharp::DragonBossSettings
-  useInMainGame: 1
   playEntrance: 1
   bossPrefab: {fileID: 3586289985083865050, guid: 1e2dae8277c81da458a6f1d732855388, type: 3}

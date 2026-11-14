@@ -234,7 +234,7 @@ public class TestRoomManager : MonoBehaviour
     // ───────── 보스 바로 가기 (2026-11-13) ─────────
 
     [Header("Boss Jump")]
-    [Tooltip("있으면 바로 가기로 갈 때 골렘 대신 이 드래곤을 만난다 (DragonBossRoute) — 본 게임 보스 설정(DragonBossSettings)과는 따로. TestRoomBossSetup 이 연결한다")]
+    [Tooltip("바로 가기로 갈 때 만나는 보스 (DragonBossRoute, 시험 키가 켜진다). 비어 있으면 본 게임 설정(DragonBossSettings)의 보스가 나온다. TestRoomBossSetup 이 연결한다")]
     [SerializeField] GameObject dragonBossPrefab;
 
     int pendingBossJump;   // 0 없음 · 1 보스 스테이지 · 2 인트로부터
@@ -274,16 +274,10 @@ public class TestRoomManager : MonoBehaviour
 
         app.AdoptPlayer(Player);
         handedOver = true;
-        if (dragonBossPrefab != null)
-        {
-            // 드래곤 — 인트로 씬 대신 보스 스테이지 안 등장 연출 (인트로 A안)
-            DragonBossRoute.Begin(dragonBossPrefab, fromIntro);
-            OnNotice?.Invoke(fromIntro ? "등장 연출부터 드래곤 보스전으로 — 지금 장비 그대로" : "드래곤 보스전으로 — 지금 장비 그대로");
-            TransitionTo("StageBoss");
-            return;
-        }
-        OnNotice?.Invoke(fromIntro ? "인트로부터 보스전으로 — 지금 장비 그대로" : "보스전으로 — 지금 장비 그대로");
-        TransitionTo(fromIntro ? "IntroScene" : "StageBoss");
+        // 드래곤 — 보스 스테이지 안 등장 연출 (인트로 A안). 프리팹이 비어 있으면 본 게임 설정의 보스가 나온다
+        if (dragonBossPrefab != null) DragonBossRoute.Begin(dragonBossPrefab, fromIntro);
+        OnNotice?.Invoke(fromIntro ? "등장 연출부터 드래곤 보스전으로 — 지금 장비 그대로" : "드래곤 보스전으로 — 지금 장비 그대로");
+        TransitionTo("StageBoss");
     }
 
     void TransitionTo(string sceneName)

@@ -22,7 +22,7 @@ using UnityEngine.UI;
 ///   8.5 ~ 9.5  전투   카메라가 게임 시점으로 · 진짜 보스로 바꿔 깨움 · "전투 시작" · 조작이 풀림
 /// 스페이스 · 클릭을 길게(0.6초) 누르면 건너뛴다.
 ///
-/// 팀원 씬 · 코드는 고치지 않는다: DragonBossRoute 가 장면이 열린 직후 이 연출을 세우고, 골렘 스포너가 깨우는 자리에는 빈 대역을 넣는다.
+/// DragonBossRoute 가 장면이 열린 직후 이 연출을 세우고, 장면의 스포너(2초 뒤 보스를 깨움)에는 빈 대역을 넣는다.
 /// 연출용 몸(DragonModel)이 내려앉고 포효한 뒤, 같은 자리 · 같은 대기 자세에서 진짜 보스(DragonBoss)와 바꾼다.
 /// </summary>
 public class DragonEntrance : MonoBehaviour

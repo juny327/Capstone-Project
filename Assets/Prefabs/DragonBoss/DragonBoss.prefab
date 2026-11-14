@@ -13,8 +13,6 @@ GameObject:
   - component: {fileID: 4450472775148235019}
   - component: {fileID: 3318190055904205156}
   - component: {fileID: 6631725690779810906}
-  - component: {fileID: 6063874110076414713}
-  - component: {fileID: 982220909379539124}
   - component: {fileID: 7450916075404352390}
   m_Layer: 0
   m_Name: DragonBoss
@@ -37,7 +35,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3626675562115874829}
-  - {fileID: 7384740267961947963}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!195 &2179656660271652373
@@ -125,35 +122,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossHealth
   maxHp: 1000
---- !u!114 &6063874110076414713
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3586289985083865050}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 77b6d94e2e92b8447b0372fd16da33e3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BossMovement
---- !u!114 &982220909379539124
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3586289985083865050}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 603c870bbe8b5ac48b5cb47eefa974b6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BossBrain
-  player: {fileID: 0}
-  movement: {fileID: 6063874110076414713}
-  attack: {fileID: 0}
-  animator: {fileID: 6459424140247645333}
-  tickInterval: 0.2
 --- !u!114 &7450916075404352390
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -167,7 +135,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DragonBoss
   animator: {fileID: 6734227914733468208}
-  introModel: {fileID: 1959509546339929216, guid: 8ca712c654d87174fb986179c24b408e, type: 3}
   entrancePrefab: {fileID: 5497582844890096465, guid: 9d1b3fd3fc85fb1449e3ea8330637226, type: 3}
   portrait: {fileID: 21300000, guid: ab92e0e22553adb4a865a34568744746, type: 3}
   telegraphMaterial: {fileID: 2100000, guid: 395337d866bf4a7d9f7daff205ba1621, type: 2}
@@ -253,60 +220,6 @@ MonoBehaviour:
   firePatchSpacing: 3.2
   firePatchMax: 14
   comboChance: 0.55
---- !u!1 &3761768322681966769
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 7384740267961947963}
-  - component: {fileID: 6459424140247645333}
-  m_Layer: 0
-  m_Name: BrainAnimatorProxy
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &7384740267961947963
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3761768322681966769}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 2663822041611697558}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!95 &6459424140247645333
-Animator:
-  serializedVersion: 7
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3761768322681966769}
-  m_Enabled: 1
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 96273ca6128f6334bb2733cce13b6718, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
-  m_AnimatePhysics: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
 --- !u!1001 &952870755912336564
 PrefabInstance:
   m_ObjectHideFlags: 0
