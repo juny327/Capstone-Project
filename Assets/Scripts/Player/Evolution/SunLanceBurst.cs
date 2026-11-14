@@ -197,7 +197,7 @@ public class SunLanceBurst : MonoBehaviour
         FlashLight.Flash(ground, cfg.color, 7f, 0.22f, 1.2f);
         FlashLight.Flash(Ground(beamTo), cfg.color, 6f, 0.25f);
 
-        WeaponBase.ShakeCamera(weapon, cfg.cameraShake);   // 보조 무기는 약하게 (WeaponBase.ShakeCamera)
+        ImpactFx.Play(ImpactMoment.SunLanceFire, weapon, cfg.color, cfg.cameraShake, aim);   // 쿵 + 쏘는 반대쪽 밀림 + 줌 + 번쩍 (보조는 흔들림만)
         CombatFx.PlaySound(cfg.fireSound);
         if (hum != null) { hum.SetExtra(1f); hum.SetPitch(cfg.beamLoopPitch.y * 0.92f); }   // 기둥 — 가장 크게, 살짝 내려 묵직하게
 

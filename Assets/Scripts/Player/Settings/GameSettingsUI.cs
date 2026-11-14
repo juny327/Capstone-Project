@@ -30,6 +30,10 @@ public class GameSettingsUI : MonoBehaviour
     [SerializeField] private TMP_Text musicValue;
     [SerializeField] private TMP_Text sfxValue;
 
+    // 화면 흔들림 세기 (2026-11-14) — 예전 프리팹에는 없을 수 있다 (없으면 그 줄만 빠진다)
+    [SerializeField] private Slider shakeSlider;
+    [SerializeField] private TMP_Text shakeValue;
+
     [SerializeField] private Button closeButton;
     [SerializeField] private Button resetButton;
 
@@ -81,6 +85,7 @@ public class GameSettingsUI : MonoBehaviour
         masterSlider.onValueChanged.AddListener(v => { if (!syncing) GameSettings.SetMaster(v); ShowValues(); });
         musicSlider.onValueChanged.AddListener(v => { if (!syncing) GameSettings.SetMusic(v); ShowValues(); });
         sfxSlider.onValueChanged.AddListener(v => { if (!syncing) GameSettings.SetSfx(v); ShowValues(); });
+        if (shakeSlider != null) shakeSlider.onValueChanged.AddListener(v => { if (!syncing) GameSettings.SetShake(v); ShowValues(); });
 
         closeButton.onClick.AddListener(Close);
         resetButton.onClick.AddListener(() => { GameSettings.ResetToDefaults(); SyncSliders(); });
@@ -196,6 +201,7 @@ public class GameSettingsUI : MonoBehaviour
         masterSlider.value = GameSettings.Master;
         musicSlider.value = GameSettings.Music;
         sfxSlider.value = GameSettings.Sfx;
+        if (shakeSlider != null) shakeSlider.value = GameSettings.Shake;
         syncing = false;
         ShowValues();
     }
@@ -205,6 +211,7 @@ public class GameSettingsUI : MonoBehaviour
         masterValue.text = Percent(masterSlider.value);
         musicValue.text = Percent(musicSlider.value);
         sfxValue.text = Percent(sfxSlider.value);
+        if (shakeSlider != null && shakeValue != null) shakeValue.text = Percent(shakeSlider.value);
     }
 
     static string Percent(float v) => $"{Mathf.RoundToInt(v * 100f)}%";

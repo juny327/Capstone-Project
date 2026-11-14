@@ -36,3 +36,5 @@ MonoBehaviour:
   flameLines: 6
   smokeAlpha: 0.45
   smokeLife: 0.6
+  finaleKills: 3
+  finaleCooldown: 1.5

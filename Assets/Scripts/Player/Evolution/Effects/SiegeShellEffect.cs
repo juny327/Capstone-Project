@@ -57,7 +57,8 @@ public class SiegeShellEffect : AttachmentEffect
             blastShaken = false;
             Vector3 at = attack.Origin;
             FxLine.Ring(cfg.material, at, 0.2f, 1.6f, cfg.color, 0.22f, 0.22f);
-            WeaponBase.ShakeCamera(Weapon, cfg.cameraShake * 0.5f);   // 보조 무기는 약하게 (WeaponBase.ShakeCamera)
+            GroundGlow.Flash(new Vector3(at.x, Weapon != null && Weapon.Controller != null ? Weapon.Controller.transform.position.y : at.y - 1.2f, at.z), 2.4f, cfg.color, 0.16f);
+            ImpactFx.Play(ImpactMoment.SiegeFire, Weapon, cfg.color, cfg.cameraShake * 0.5f, attack.Direction);   // 쏘는 반대쪽으로 밀린다 (보조는 예전처럼 약한 흔들림만)
         }
 
         public override void OnHit(in WeaponHit hit)
@@ -92,7 +93,8 @@ public class SiegeShellEffect : AttachmentEffect
             }
 
             EvoStrikes.Blast(Weapon, cfg.material, cfg.color, at, cfg.blastRadius, Weapon.Stats.Damage * cfg.blastRatio, cfg.push,
-                struck, cfg.explosionPrefab, 1.4f, cfg.cameraShake);
+                struck, cfg.explosionPrefab, 1.4f, 0f);
+            if (shake > 0f) ImpactFx.Play(ImpactMoment.SiegeBlast, Weapon, cfg.color, shake);   // 한 번 쏠 때 한 번 — 쿵 · 줌 · 가장자리 번쩍
             CombatFx.PlaySound(cfg.blastSound);
         }
     }

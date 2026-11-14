@@ -302,6 +302,7 @@ public class MeleeWeapon : WeaponBase
             origin, stats.Range, hits, cfg.hitLayers, QueryTriggerInteraction.Collide);
 
         int applied = 0;
+        int crits = 0;
         float halfArc = arcAngle * 0.5f;
 
         for (int i = 0; i < count && applied < stats.MaxTargets; i++)
@@ -369,6 +370,7 @@ public class MeleeWeapon : WeaponBase
             SpawnHitSpark(cfg, origin, point, dir, isCritical);
 
             applied++;
+            if (isCritical) crits++;
         }
 
         SpawnSlashEffect(cfg, origin, forward, stats.Range, arcAngle, vertical);
@@ -379,6 +381,10 @@ public class MeleeWeapon : WeaponBase
         // 맞히면 한 번 흔든다 (2026-11-12) — 데이터의 cameraShake 는 피해 정보에 실려 적에게 넘어가기만 하고 아무도 쓰지 않아, 근접은 한 번도 흔들리지 않았다.
         // 적 수만큼이 아니라 한 번 휘두름에 한 번
         if (applied > 0) ShakeCamera(this, cfg.cameraShake);
+
+        // 치명타가 들어간 휘두름 — 큰 순간 (히트 스톱 · 줌 · 무기 색 번쩍). 흔들림은 위의 것 그대로. 보조 칸은 없음
+        if (crits > 0 && !IsSupport)
+            ImpactFx.Play(ImpactMoment.MeleeCrit, this, data != null && data.HasThemeColor ? data.themeColor : cfg.slashColor);
 
         if (HasHitEffects)
         {

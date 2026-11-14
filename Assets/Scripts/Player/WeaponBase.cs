@@ -173,6 +173,13 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
         LastShake = amount;
     }
 
+    /// <summary>ImpactFx 가 직접 낸 흔들림(쿵 · 밀림)도 같이 센다 (시험 집계).</summary>
+    internal static void CountShake(float amount)
+    {
+        ShakeCount++;
+        LastShake = amount;
+    }
+
     static float lastSupportShakeAt = -999f;
     static float lastSupportShakeAmount;
 

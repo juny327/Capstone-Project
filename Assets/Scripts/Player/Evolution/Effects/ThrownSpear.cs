@@ -328,6 +328,16 @@ public class ThrownSpear : MonoBehaviour
         Destroy(gameObject);
     }
 
+    /// <summary>손에 받는 순간 — 손으로 모이는 금색 고리 + 발밑 빛 + 흔들림.</summary>
+    void CatchFx()
+    {
+        Vector3 feet = owner.position;
+        FxLine.Ring(cfg.material, feet, 1.7f, 0.3f, cfg.goldColor, 0.14f, 0.2f);
+        FxLine.Ring(cfg.material, feet, 1.1f, 0.2f, Color.white, 0.07f, 0.16f);
+        GroundGlow.Flash(feet, 1.6f, cfg.goldColor, 0.2f);
+        ImpactFx.Play(ImpactMoment.SpearCatch, weapon, cfg.goldColor, cfg.catchShake);   // 쿵 · 살짝 줌 · 금색 번쩍 (보조 무기는 약한 흔들림만)
+    }
+
     /// <summary>지나간 구간의 적을 한 번씩 벤다 (stage 0 날아감 · 1 궤도 · 2 돌아옴 — 테스트 집계).</summary>
     void Sweep(Vector3 from, Vector3 to, float damageMul, int stage)
     {

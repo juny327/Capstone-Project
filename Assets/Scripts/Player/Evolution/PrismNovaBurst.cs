@@ -324,7 +324,8 @@ public class PrismNovaBurst : MonoBehaviour
         CombatFx.PlaySound(cfg.beamBassSound);
         CombatFx.PlaySound(cfg.beamHumSound);
         if (cfg.beamLoop != null) Hum().Play(cfg.beamLoop, cfg.beamLoopVolume, cfg.beamLoopPitch, 0.08f);
-        WeaponBase.ShakeCamera(weapon, cfg.cameraShake);   // 보조 무기는 약하게 (WeaponBase.ShakeCamera)
+        ImpactFx.Play(ImpactMoment.PrismConverge, weapon, weapon != null && weapon.Data != null && weapon.Data.HasThemeColor ? weapon.Data.themeColor : Color.white,
+            cfg.cameraShake);   // 쿵 · 줌 · 번쩍 (보조 무기는 약한 흔들림만)
 
         phase = Phase.Sustain;
         phaseTime = 0f;
@@ -388,6 +389,12 @@ public class PrismNovaBurst : MonoBehaviour
         rumbleTimer -= dt;
         if (rumbleTimer > 0f) return;
         rumbleTimer += cfg.sustainShakeInterval;
+
+        // 덜덜 — 길고 작은 흔들림 모양으로 (2026-11-14 ImpactFx). 설정 에셋이 없으면 아래 예전 방식
+        if (ImpactFx.Rumble(weapon, cfg.sustainShake)) return;
+
+        CameraShakeManager shake = CameraShakeManager.Instance;
+        if (shake == null || shake.impulseSource == null) return;
 
         Vector2 flat = UnityEngine.Random.insideUnitCircle.normalized;
         Vector3 v = new Vector3(flat.x, UnityEngine.Random.Range(-0.4f, 0.4f), flat.y);

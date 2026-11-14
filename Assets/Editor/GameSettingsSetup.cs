@@ -83,7 +83,7 @@ public static class GameSettingsSetup
 
             var frame = new GameObject("Frame", typeof(RectTransform), typeof(Image));
             frame.transform.SetParent(window.transform, false);
-            Place(frame, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(760, 500));
+            Place(frame, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(760, 640));   // 화면 흔들림 줄이 늘어 500 → 640 (2026-11-14)
             frame.GetComponent<Image>().color = Accent;
 
             var panel = new GameObject("Panel", typeof(RectTransform), typeof(Image));
@@ -103,6 +103,11 @@ public static class GameSettingsSetup
             (Slider masterSlider, TMP_Text masterValue) = Row(panel.transform, "Master", "전체 음량", -170, font, resources);
             (Slider musicSlider, TMP_Text musicValue) = Row(panel.transform, "Music", "배경음", -250, font, resources);
             (Slider sfxSlider, TMP_Text sfxValue) = Row(panel.transform, "Sfx", "효과음", -330, font, resources);
+
+            // 화면 (2026-11-14) — 흔들림 세기: 어지러움을 타는 사람을 위한 값. 0% 면 어떤 흔들림도 없다
+            Text(panel.transform, "ScreenSection", "화면", font, 26, Muted, TextAlignmentOptions.Left,
+                new Vector2(0.5f, 1), new Vector2(-260, -396), new Vector2(160, 36));
+            (Slider shakeSlider, TMP_Text shakeValue) = Row(panel.transform, "Shake", "화면 흔들림", -454, font, resources);
 
             // 왼쪽 아래는 "로비로" 버튼 자리 (2026-11-02) — 안내는 "소리" 줄 오른쪽 끝으로
             Text(panel.transform, "Hint", "ESC 로 열고 닫기", font, 22, Muted, TextAlignmentOptions.Right,
@@ -134,6 +139,8 @@ public static class GameSettingsSetup
             so.FindProperty("masterValue").objectReferenceValue = masterValue;
             so.FindProperty("musicValue").objectReferenceValue = musicValue;
             so.FindProperty("sfxValue").objectReferenceValue = sfxValue;
+            so.FindProperty("shakeSlider").objectReferenceValue = shakeSlider;
+            so.FindProperty("shakeValue").objectReferenceValue = shakeValue;
             so.FindProperty("closeButton").objectReferenceValue = close;
             so.FindProperty("resetButton").objectReferenceValue = reset;
             so.FindProperty("title").objectReferenceValue = title;

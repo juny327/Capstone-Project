@@ -323,6 +323,7 @@ public class BloodFrenzyEffect : AttachmentEffect
             frenzySwings = 0;
 
             CombatFx.PlaySound(cfg.frenzySound);
+            ImpactFx.Play(ImpactMoment.BloodFrenzyStart, Weapon, cfg.color);   // 히트 스톱 · 쿵 · 줌 · 붉은 번쩍 (보조 칸은 없음)
             FrenzyTrail(true);
             Transform owner = OwnerRoot;
             if (owner != null && cfg.material != null)

@@ -197,6 +197,6 @@ public class GravityWell : MonoBehaviour
 
         CombatFx.PlaySound(cfg.collapseSound);
         CombatFx.PlaySound(cfg.collapseBassSound);
-        WeaponBase.ShakeCamera(source, cfg.cameraShake);   // 보조 칸이면 약하게
+        ImpactFx.Play(ImpactMoment.GravityCollapse, source, cfg.color, cfg.cameraShake);   // 히트 스톱 · 쿵 · 줌 · 번쩍 (보조 칸이면 약한 흔들림만)
     }
 }
