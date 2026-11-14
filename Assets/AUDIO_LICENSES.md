@@ -25,6 +25,7 @@
 | `AUDIO/Player` · `Fire` · `Support` · `UI` · `Evolution` | 피격 `PlayerHurt_01~03` (Kenney impactWood_heavy + glitch 섞음) · 화상 `FireIgnite_01~03` (걸러 낸 잡음 · 탁탁 튐) · 보조 무기 `SupportLaunch_01~02` · `SupportReturn_01` (쓸려 올라가는 잡음 + 처프) · `SupportParryLink_01` (Kenney impactBell_heavy · impactMetal_heavy + ParryRing 섞음) · 게임 시작 `GameStart` (Kenney maximize_006 + impactMetal_001 섞음) · 회전 기관포 `SpinUpHum` (Kenney spaceEngineSmall_004 의 이음매를 지운 반복) — 스크립트 `Logs/evo_resume/kept_synth_sound_1112.py` | **직접 합성 · 편집** — Python (numpy · soundfile). 섞은 재료는 Kenney CC0 | 자체 제작 + CC0 (제약 없음) | 없음 | 2026-11-12 |
 | `AUDIO/SFX/Monsters` | 몬스터 공격음 `monsterA~E` · freesound 파일 2개 (팀원, 11-04 몬스터 병합) | ⚠ **기록 없음 — 팀원에게 확인할 것** | ⚠ 모름 | ⚠ 모름 | 2026-11-04 |
 | `AUDIO/Parry` | 패링 "팅" 여운 `ParryRing_01~03.wav` | **직접 합성** — 금속 막대 배음(1 : 2.756 : 5.404 : 8.933)을 Python(numpy)으로 합성 | 자체 제작 (제약 없음) | 없음 | 2026-09-26 |
+| `AUDIO/Dragon` | 드래곤 보스 소리 23개 — 포효 · 준비음 · 물기 · 대기 · 발소리 · 죽음 · 브레스 · 불덩이 · 불비 · 타는 소리 · 돌진 · 벽 충돌 · 꼬리 · 날개 · 내려찍기 · 경보 · 균열 · 착지 · 이름 카드 (2026-11-14 사용자가 미리듣기 페이지에서 고름). Freesound 녹음을 자르고 겹친 것 + Kenney Sci-Fi · Impact · RPG + 합성(바람 · 저음 · 경보). 다시 만들기: `Logs/dragon_snd/dragon_snd.py` → `install_picks.py` | Freesound — [Bikkit99 〈Sea Creature Roar〉](https://freesound.org/people/Bikkit99/sounds/837799/) (포효 · 죽음) · [Breviceps 〈Dragon: Several roars, growls and snarls〉](https://freesound.org/people/Breviceps/sounds/479380/) (준비음 · 물기 · 대기 · 브레스 · 불덩이에 섞은 목소리) · [RobHorror240 〈GiantStompFootsteps.mp3〉](https://freesound.org/people/RobHorror240/sounds/622737/) (발소리) · [SamsterBirdies 〈Flamethrower〉](https://freesound.org/people/SamsterBirdies/sounds/490166/) (브레스) · [LilMati 〈Flamethrower〉](https://freesound.org/people/LilMati/sounds/459884/) (브레스) · [sidequesting 〈Flamethrower.wav〉](https://freesound.org/people/sidequesting/sounds/494085/) (타는 소리) · [_stubb 〈Wing Flap 1.wav〉](https://freesound.org/people/_stubb/sounds/389634/) (날개) · [_stubb 〈Wing Flap 2.wav〉](https://freesound.org/people/_stubb/sounds/389633/) (날개) | **CC0** (받을 때 각 페이지에서 확인) · 나머지는 Kenney CC0 · 자체 제작 | 없음 | 2026-11-14 |
 
 **효과음은 전부 CC0 또는 직접 만든 소리다.** 상업 이용 가능하고 크레딧 표기 의무가 없다.
 
@@ -43,6 +44,9 @@ Music
 
 Electricity SFX
   Brian MacIntosh, faxcorp (opengameart.org) — CC0
+
+Dragon boss SFX
+  Bikkit99, Breviceps, RobHorror240, SamsterBirdies, LilMati, sidequesting, _stubb (freesound.org) — CC0
 ```
 
 > Abstraction 제작자는 **NFT · AI 학습 · 원본 재판매**에 쓰지 말 것을 명시했다.

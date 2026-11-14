@@ -159,6 +159,7 @@ public partial class DragonBoss
     IEnumerator Bite(bool delayed, bool ground = false)
     {
         yield return TurnToTarget(0.35f);
+        Sfx(DragonSfx.Windup);
         Vector3 origin = transform.position, forward = transform.forward;
         float hold = delayed ? Random.Range(delayedHold.x, delayedHold.y) : ground ? groundBiteHold : 0f;
         float hitAt = Motion.BiteClose + hold;
@@ -181,6 +182,8 @@ public partial class DragonBoss
                     hit = true;
                     warning.Flash();
                     Shake(ground ? 0.7f : 0.25f);
+                    Sfx(DragonSfx.Bite);
+                    if (ground) Sfx(DragonSfx.Slam);
                     bool bitten = PlayerInRect(origin, forward, biteWidth, biteNear, biteFar);
                     if (bitten) HitPlayer(ground ? groundBiteDamage : delayed ? delayedBiteDamage : biteDamage, origin, 0.5f);
                     if (ring != null)
@@ -206,6 +209,7 @@ public partial class DragonBoss
     IEnumerator Breath(float clipStart = 0f, float sweep = 0f)
     {
         yield return TurnToTarget(0.35f, clipStart > 0f);
+        if (clipStart <= 0f) Sfx(DragonSfx.Windup);   // 물러난 뒤에는 날개 소리가 방금 났다
         bool sweeping = sweep > 0f;
         float half = sweeping ? sweepHalfAngle : breathHalfAngle;
         Vector3 aim = Flat(transform.forward).normalized;
@@ -248,6 +252,7 @@ public partial class DragonBoss
         breathing = true;
         LateUpdate();
         if (breathFx != null) breathFx.Play(true);
+        breathVoice = Sfx(DragonSfx.Breath);
         float duration = sweeping ? sweepDuration : breathDuration;
         float tick = 0f;
         for (float t = 0f; t < duration; t += Time.deltaTime)
@@ -269,6 +274,7 @@ public partial class DragonBoss
         }
         if (breathFx != null) breathFx.Stop(true, ParticleSystemStopBehavior.StopEmitting);
         breathing = false;
+        StopBreathSound(0.3f);
         SetBreathCone(breathHalfAngle);
         warning.Remove();
         if (area != null) area.Remove();
@@ -288,6 +294,7 @@ public partial class DragonBoss
     IEnumerator Fireballs(bool fromWindup = false)
     {
         yield return TurnToTarget(0.35f, fromWindup);
+        if (!fromWindup) Sfx(DragonSfx.Windup);
         for (float t = fromWindup ? Motion.WindupEnd : 0f; t < Motion.WindupEnd; t += Time.deltaTime)
         {
             Scrub(AttackState, t);
@@ -347,6 +354,7 @@ public partial class DragonBoss
         if (projectile == null) { Destroy(go); return; }
         projectile.Initialize(mouth, dir, fireballSpeed, fireballDamage, new VolleyHitGroup());
         Shake(0.12f);
+        Sfx(DragonSfx.Fireball);
     }
 
     // ───────── 돌진 ─────────
@@ -372,6 +380,7 @@ public partial class DragonBoss
         }
 
         DragonTelegraph warning = Track(DragonTelegraph.Rect(telegraphMaterial, start, forward, chargeWidth, -1f, travel + chargeFront));
+        Sfx(DragonSfx.Windup);
         for (float t = 0f; t < chargeWindup; t += Time.deltaTime)
         {
             Scrub(AttackState, Mathf.Min(t, Motion.WindupEnd));
@@ -380,6 +389,7 @@ public partial class DragonBoss
         }
         warning.Hold();
         Shake(0.4f);
+        Sfx(DragonSfx.Charge);
         if (dustFx != null) dustFx.Play(true);
         agent.isStopped = true;
         agent.ResetPath();
@@ -417,7 +427,11 @@ public partial class DragonBoss
         warning.Remove();
         agent.updateRotation = true;
 
-        if (wall) Shake(0.9f);
+        if (wall)
+        {
+            Shake(0.9f);
+            Sfx(DragonSfx.Crash);
+        }
         chargeBlocked = wall;
         // 머리를 거둬들이며 멈춘다 (④ 회수)
         for (float r = 0f; r < 0.45f; r += Time.deltaTime)

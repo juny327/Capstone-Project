@@ -148,6 +148,7 @@ public partial class DragonBoss
         int next = Mathf.Clamp(Mathf.Min(pendingPhase, phase + 1), 1, 3);
         yield return TurnToTarget(0.3f);
         const float rise = 0.7f;
+        Sfx(DragonSfx.Roar);
         bool roared = false, echoed = false;
         float total = rise + roarHold;
         for (float t = 0f; t < total; t += Time.deltaTime)
@@ -195,6 +196,7 @@ public partial class DragonBoss
     {
         yield return TurnToTarget(0.25f);
         const float rise = 0.6f;
+        Sfx(DragonSfx.Roar, 0.8f);
         for (float t = 0f; t < rise; t += Time.deltaTime)
         {
             Scrub(DieState, RoarClip(t, rise));
@@ -223,6 +225,7 @@ public partial class DragonBoss
             foreach (DragonTelegraph m in marks) m.SetProgress(t / summonDelay);
             yield return null;
         }
+        if (points.Count > 0) Sfx(DragonSfx.Ignite);
         for (int i = 0; i < points.Count; i++)
         {
             marks[i].Flash();
@@ -303,7 +306,8 @@ public partial class DragonBoss
     IEnumerator FireRain()
     {
         yield return TurnToTarget(0.25f);
-        const float rise = 0.6f, fall = 0.4f;
+        const float rise = 0.6f, fall = 0.4f;   // fall — 불비 소리(DragonRainDrop)의 휘익 길이와 같다
+        Sfx(DragonSfx.Roar, 0.85f);
         List<Vector3> points = RainPoints();
         var marks = new List<DragonTelegraph>();
         var falling = new bool[points.Count];
@@ -329,6 +333,7 @@ public partial class DragonBoss
                 {
                     falling[i] = true;
                     if (fireMaterial != null) DragonMeteor.Drop(fireMaterial, points[i], fall, rainRadius);
+                    Sfx(DragonSfx.Rain);
                 }
                 if (u < 1f) continue;
                 landed[i] = true;
@@ -389,6 +394,7 @@ public partial class DragonBoss
         agent.updateRotation = false;
 
         // 몸을 반대로 틀며 웅크린다
+        Sfx(DragonSfx.Windup);
         float crouch = Motion.WindupEnd * 0.8f;
         for (float t = 0f; t < tailWindup; t += Time.deltaTime)
         {
@@ -401,6 +407,7 @@ public partial class DragonBoss
 
         warning.Flash();
         Shake(0.55f);
+        Sfx(DragonSfx.Tail);
         Ring(center, tailRadius, 0.35f);
         if (dustFx != null) dustFx.Play(true);
         bool hit = false;
@@ -454,6 +461,7 @@ public partial class DragonBoss
             agent.updateRotation = false;
             if (dustFx != null) dustFx.Play(true);
             Shake(0.2f);
+            Sfx(DragonSfx.Wing);
             float moved = 0f;
             for (float t = 0f; t < retreatTime; t += Time.deltaTime)
             {
@@ -481,6 +489,7 @@ public partial class DragonBoss
     IEnumerator BiteChain()
     {
         yield return TurnToTarget(0.3f);
+        Sfx(DragonSfx.Windup);
         int count = Random.Range(chainBites.x, chainBites.y + 1);
         for (int i = 0; i < count; i++)
         {
@@ -507,6 +516,7 @@ public partial class DragonBoss
             }
             warning.Flash();
             Shake(0.25f);
+            Sfx(DragonSfx.Bite);
             if (PlayerInRect(origin, forward, biteWidth, biteNear, biteFar)) HitPlayer(chainDamage, origin, 0.45f);
             for (float h = 0f; h < 0.08f; h += Time.deltaTime)
             {
@@ -530,6 +540,7 @@ public partial class DragonBoss
         if (phase < 3 || DragonFirePatch.Count >= firePatchMax) return;
         if (!NavMesh.SamplePosition(at, out NavMeshHit hit, 1.5f, NavMesh.AllAreas)) return;   // 길 밖(벽 너머)에는 남기지 않는다
         DragonFirePatch.Spawn(this, telegraphMaterial, fireMaterial, hit.position, radius, firePatchLife, firePatchTick, firePatchDamage);
+        Sfx(DragonSfx.Ignite);   // 여러 개가 한꺼번에 생겨도 최소 간격으로 한 번만 난다
     }
 
     /// <summary>보통 브레스가 지나간 부채꼴 — 가운데 앞 · 좌우 · 끝.</summary>

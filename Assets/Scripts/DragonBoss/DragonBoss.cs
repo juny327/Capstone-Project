@@ -113,6 +113,8 @@ public partial class DragonBoss : MonoBehaviour
     readonly List<DragonTelegraph> telegraphs = new List<DragonTelegraph>();
     readonly List<(Pattern p, float w)> candidates = new List<(Pattern, float)>();
     int phase = 1, pendingPhase = 1;
+    float nextGrowl = 5f, stepPhase;
+    AudioSource breathVoice;
 
     public GameObject IntroModel => introModel;
     public DragonEntrance EntrancePrefab => entrancePrefab;
@@ -203,6 +205,7 @@ public partial class DragonBoss : MonoBehaviour
         if (state == State.Dead) return;
         ResolveTarget();
         ReadTestKeys();
+        TickGrowl();
 
         switch (state)
         {
@@ -278,7 +281,12 @@ public partial class DragonBoss : MonoBehaviour
             agent.SetDestination(target.position);
         }
         float speed = agent.velocity.magnitude;
-        if (speed > 0.25f) Animate(WalkState, Mathf.Clamp(speed / Mathf.Max(0.1f, walkCycleSpeed), 0.6f, 2.6f));
+        if (speed > 0.25f)
+        {
+            float rate = Mathf.Clamp(speed / Mathf.Max(0.1f, walkCycleSpeed), 0.6f, 2.6f);
+            Animate(WalkState, rate);
+            Footsteps(rate);
+        }
         else Animate(IdleState);
     }
 
@@ -431,6 +439,7 @@ public partial class DragonBoss : MonoBehaviour
         if (breathFx != null) breathFx.Stop(true, ParticleSystemStopBehavior.StopEmitting);
         if (dustFx != null) dustFx.Stop(true, ParticleSystemStopBehavior.StopEmitting);
         breathing = false;
+        StopBreathSound(0.2f);
         SetBreathCone(breathHalfAngle);
         if (agent != null) agent.updateRotation = true;
         if (animator != null && state != State.Dead) animator.speed = 1f;
@@ -504,6 +513,8 @@ public partial class DragonBoss : MonoBehaviour
         if (state == State.Dead) return;
         CancelPattern();
         StopAllCoroutines();
+        DragonSound.StopAll(0.15f);
+        Sfx(DragonSfx.Death);
         DragonFirePatch.ClearAll();
         DismissMinions();   // 부하도 같이 쓰러진다 — 승리 처리까지 몇 초 동안 플레이어를 때리지 않게
         Enter(State.Dead);
@@ -590,6 +601,36 @@ public partial class DragonBoss : MonoBehaviour
     }
 
     static Vector3 Flat(Vector3 v) => new Vector3(v.x, 0f, v.z);
+
+    // ───────── 소리 (DragonSound · 2026-11-14) ─────────
+
+    static AudioSource Sfx(DragonSfx sfx, float volume = 1f) => DragonSound.Play(sfx, volume);
+
+    void StopBreathSound(float fade)
+    {
+        if (breathVoice != null) DragonSound.Fade(breathVoice, fade);
+        breathVoice = null;
+    }
+
+    /// <summary>대기 · 추적 중 8 ~ 12초에 한 번 낮게 그르렁거린다.</summary>
+    void TickGrowl()
+    {
+        if (state != State.Chase && state != State.Recover && state != State.Idle) return;
+        nextGrowl -= Time.deltaTime;
+        if (nextGrowl > 0f) return;
+        nextGrowl = Random.Range(8f, 12f);
+        Sfx(DragonSfx.Idle);
+    }
+
+    /// <summary>걷기 동작 한 바퀴에 두 번 발소리 — 동작 빠르기를 따라간다.</summary>
+    void Footsteps(float animationRate)
+    {
+        float length = clipLengths.TryGetValue(WalkState, out float l) ? l : 1.63f;
+        stepPhase += Time.deltaTime * animationRate / length * 2f;
+        if (stepPhase < 1f) return;
+        stepPhase -= 1f;
+        Sfx(DragonSfx.Step);
+    }
 
     static void Shake(float force)
     {

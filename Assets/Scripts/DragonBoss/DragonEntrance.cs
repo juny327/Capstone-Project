@@ -252,10 +252,14 @@ public class DragonEntrance : MonoBehaviour
     IEnumerator Run()
     {
         bool crack = false, drop = false, land = false, top = false, roar = false, wave1 = false, wave2 = false, roarHold = false, cardIn = false, cardOut = false, preIdle = false;
+        // 소리 (2026-11-14) — 경보 0 · 1.4초 / 균열 1.2 / 낙하 · 착지 3.0(0.6초 뒤 착지음) / 포효 4.3 / 이름 카드 6.2
+        bool alarmAgain = false;
+        DragonSound.Play(DragonSfx.Alarm);
         for (float t = 0f; t < TStart; t += Time.deltaTime)
         {
             Elapsed = t;
             float dt = Time.deltaTime;
+            if (!alarmAgain && t >= 1.4f) { alarmAgain = true; DragonSound.Play(DragonSfx.Alarm, 0.8f); }
 
             // 경보 — 0 ~ 6.2 (붉은 맥동 · 조명)
             float alarm = t < TCard ? Mathf.Clamp01(t / 0.6f) : Mathf.Clamp01(1f - (t - TCard) / 0.8f);
@@ -280,6 +284,7 @@ public class DragonEntrance : MonoBehaviour
             if (!crack && t >= TCrack)
             {
                 crack = true;
+                DragonSound.Play(DragonSfx.Crack);
                 coreRing = DragonTelegraph.Circle(telegraphMaterial, core, 4.5f);
                 temp.Add(coreRing.gameObject);
                 foreach (Vector3 from in beamFrom) beams.Add(Beam(from));
@@ -302,6 +307,7 @@ public class DragonEntrance : MonoBehaviour
             if (!drop && t >= TDrop)
             {
                 drop = true;
+                DragonSound.Play(DragonSfx.Land);
                 ShowPillar(true);
                 SpawnCopy();
                 CopyPose(DragonBoss.AttackState, 0.58f, 0f);
@@ -324,7 +330,7 @@ public class DragonEntrance : MonoBehaviour
             if (!top && t >= TTop) { top = true; ShowPillar(false); }
 
             // 포효 — 죽음 동작 0 ~ 1.7 (머리 들고 입 47°)
-            if (!roar && t >= TRoar) { roar = true; CopyPose(DragonBoss.DieState, 0f, 1f); }
+            if (!roar && t >= TRoar) { roar = true; CopyPose(DragonBoss.DieState, 0f, 1f); DragonSound.Play(DragonSfx.Roar); }
             if (!wave1 && t >= 4.85f) { wave1 = true; Ring(core, 12f, 0.55f, new Color(1f, 0.55f, 0.45f, 0.75f)); shake = 0.6f; pulse = 0.8f; }
             if (!wave2 && t >= 5.5f) { wave2 = true; Ring(core, 14f, 0.6f, new Color(1f, 0.45f, 0.4f, 0.7f)); shake = 0.7f; pulse = 0.9f; }
             if (!roarHold && t >= TRoar + 1.7f) { roarHold = true; CopyPose(DragonBoss.DieState, 1.7f, 0f); }
@@ -333,6 +339,7 @@ public class DragonEntrance : MonoBehaviour
             if (!cardIn && t >= TCard)
             {
                 cardIn = true;
+                DragonSound.Play(DragonSfx.Card);
                 CopyPose(DragonBoss.AttackState, 0.58f, 0f);
                 ShowBossBarOnly();   // 이름 카드 동안은 보스 체력바만 — 나머지 HUD 는 전투 시작 때
                 if (hpUi != null && hpUi.root != null) hpUi.root.SetActive(true);
@@ -400,6 +407,7 @@ public class DragonEntrance : MonoBehaviour
     {
         if (Finished || Skipped || run == null) return;
         Skipped = true;
+        DragonSound.StopAll(0.2f);   // 연출 소리를 끊는다
         StopCoroutine(run);
         if (copy != null) copy.SetActive(false);
         ShowPillar(false);
