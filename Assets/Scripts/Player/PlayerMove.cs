@@ -459,9 +459,47 @@ public class PlayerMove : MonoBehaviour
         }
     }
 
+    // ───────── 떨어짐 복구 (2026-11-14) ─────────
+    // 바닥 아래로 빠지면 끝없이 떨어져 판이 멈춘다 (보스 몸에 밀려 바닥을 뚫던 버그 — 원인은 DragonBodyBlock 이 고쳤다).
+    // 이건 다른 원인으로 빠져도 판이 멈추지 않게 하는 안전망: 서 있던 자리를 기억해 두었다가
+    // 거기서 FallRecoverDepth 넘게 내려가면 그 자리(길 위)로 되돌린다.
+    const float FallRecoverDepth = 6f;
+    Vector3 lastSafePosition, lastFixedPosition;
+    bool hasSafePosition;
+
+    /// <summary>바닥 아래로 떨어졌으면 서 있던 자리로 되돌린다 (되돌렸으면 true).</summary>
+    bool RecoverFromFall()
+    {
+        if (rb == null) return false;
+        Vector3 p = rb.position;
+
+        // 한 걸음에 5m 넘게 움직였으면 순간 이동(씬 이동 · 시작 자리로 옮김)이다 — 기억을 새로 잡는다
+        bool teleported = hasSafePosition && (p - lastFixedPosition).sqrMagnitude > 25f;
+        lastFixedPosition = p;
+
+        // 거의 안 떨어지고 있을 때만 '서 있던 자리'로 친다 (떨어지기 시작하면 더 갱신하지 않는다)
+        if (!hasSafePosition || teleported || (rb.linearVelocity.y > -1.5f && p.y > lastSafePosition.y - 1f))
+        {
+            lastSafePosition = p;
+            hasSafePosition = true;
+            return false;
+        }
+        if (p.y > lastSafePosition.y - FallRecoverDepth) return false;
+
+        Vector3 back = lastSafePosition;
+        if (UnityEngine.AI.NavMesh.SamplePosition(back, out UnityEngine.AI.NavMeshHit hit, 6f, UnityEngine.AI.NavMesh.AllAreas))
+            back = hit.position;
+        back.y += 0.1f;
+        Debug.LogWarning($"[PlayerMove] 바닥 아래로 떨어져 서 있던 자리로 되돌립니다 — {p} → {back}");
+        ReturnToSafePosition(back);
+        return true;
+    }
+
     void FixedUpdate()
     {
         if (isDead) return;
+
+        if (RecoverFromFall()) return;
 
         // 2026-11-04 — 구르다 적 · 벽에 부딪히면 물리가 몸에 Y축 회전 속도를 준다 (Rigidbody 는 X · Z 회전만 잠겨 있고
         // 회전 감쇠도 0.05 로 거의 없다). 구르는 동안은 바라보는 방향을 잡지 않아 그대로 팽이처럼 돌았다.
@@ -912,6 +950,7 @@ public class PlayerMove : MonoBehaviour
         rb.linearVelocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
         transform.position = position;
+        hasSafePosition = false;   // 옮긴 자리부터 다시 기억한다 (떨어짐 복구)
     }
 
     // 무기 시스템이 있으면 들고 있는 무기에 맞는 상체 레이어를 WeaponController 가 고른다.

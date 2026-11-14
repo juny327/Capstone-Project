@@ -147,6 +147,8 @@ public partial class DragonBoss : MonoBehaviour
         agent = GetComponent<NavMeshAgent>();
         health = GetComponent<BossHealth>();
         brain = GetComponent<BossBrain>();
+        // 몸통과 플레이어는 물리로 부딪히지 않는다 — 수평으로만 막고 밀어낸다 (바닥으로 꺼지던 버그, DragonBodyBlock)
+        if (GetComponent<DragonBodyBlock>() == null) gameObject.AddComponent<DragonBodyBlock>();
         ApplySize();
         agent.speed = moveSpeed;
         agent.angularSpeed = turnSpeed;
