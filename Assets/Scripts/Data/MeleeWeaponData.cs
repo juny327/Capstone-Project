@@ -32,6 +32,26 @@ public class MeleeWeaponData : WeaponData
     [Header("Effects")]
     public GameObject slashEffectPrefab;
 
+    [Header("베기 궤적 (2026-11-14) — slashEffectPrefab 이 비어 있을 때 코드가 그린다")]
+    [Tooltip("궤적 재질 (더하기 선 재질 — Assets/Prefabs/Attachment/FxLine.mat). 비우면 궤적 · 불꽃 없음")]
+    public Material slashMaterial;
+    [Tooltip("궤적 몸통 색 (알파 = 세기)")]
+    public Color slashColor = new Color(1f, 0.8f, 0.45f, 0.9f);
+    [Tooltip("바깥 날을 따라 도는 가는 심지 색")]
+    public Color slashCoreColor = Color.white;
+    [Tooltip("가장 두꺼운 곳의 두께(m). 찌르기는 줄기 굵기")]
+    [Min(0.02f)] public float slashWidth = 0.45f;
+    [Tooltip("궤적 반경 = 사거리 × 이 값")]
+    [Range(0.3f, 1.2f)] public float slashReach = 0.9f;
+    [Tooltip("그어지는 시간(초)")]
+    [Min(0.01f)] public float slashSweep = 0.07f;
+    [Tooltip("걷히는 시간(초)")]
+    [Min(0.01f)] public float slashFade = 0.2f;
+    [Tooltip("켜면 호 대신 앞으로 뻗는 줄기 (창 찌르기)")]
+    public bool slashThrust;
+    [Tooltip("맞은 자리에 짧은 베인 자국 + 고리")]
+    public bool hitSpark = true;
+
     [Header("Sound")]
     [Tooltip("휘두르기 시작 '휙' — 허공을 쳐도 난다 (2026-11-02). 베는 소리(fireSounds)는 판정이 적에게 들어간 순간에 난다. 비우면 휘두를 때 소리 없음")]
     public AudioClip[] swingSounds;

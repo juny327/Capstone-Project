@@ -62,6 +62,15 @@ MonoBehaviour:
     m_Bits: 129
   cameraShake: 0.15
   slashEffectPrefab: {fileID: 0}
+  slashMaterial: {fileID: 2100000, guid: b6310812509a3ab46bf4e098541a27ab, type: 2}
+  slashColor: {r: 1.0, g: 0.62, b: 0.28, a: 0.9}
+  slashCoreColor: {r: 1.0, g: 0.95, b: 0.8, a: 1}
+  slashWidth: 0.32
+  slashReach: 1.0
+  slashSweep: 0.07
+  slashFade: 0.18
+  slashThrust: 1
+  hitSpark: 1
   swingSounds:
   - {fileID: 8300000, guid: 67c69691c8035ee4a9464daaa716d7f0, type: 3}
   - {fileID: 8300000, guid: f79a37ff8ffa3194091418ec4479d979, type: 3}

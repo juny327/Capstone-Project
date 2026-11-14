@@ -366,10 +366,12 @@ public class MeleeWeapon : WeaponBase
             if (SoundManager.Instance != null)
                 SoundManager.Instance.ReportHit(isCritical, HitSound.Melee);
 
+            SpawnHitSpark(cfg, origin, point, dir, isCritical);
+
             applied++;
         }
 
-        SpawnSlashEffect(cfg, origin, forward);
+        SpawnSlashEffect(cfg, origin, forward, stats.Range, arcAngle, vertical);
 
         // 베는 소리는 칼이 적에게 닿은 순간에 (2026-11-02 — 예전엔 휘두르기 시작에 나서 0.24 ~ 0.58초 먼저 들렸다)
         if (applied > 0) PlayFireSound();
@@ -410,13 +412,34 @@ public class MeleeWeapon : WeaponBase
         PlaySound(clip, cfg.swingVolume, Random.Range(min > 0f ? min : 1f, max > 0f ? max : 1f));
     }
 
-    void SpawnSlashEffect(MeleeWeaponData cfg, Vector3 origin, Vector3 forward)
-    {
-        if (cfg.slashEffectPrefab == null) return;
-        if (PoolManager.Instance == null) return;
+    /// <summary>시험용 — 그린 베기 궤적 · 맞은 자리 불꽃 수.</summary>
+    public static int SlashFxCount { get; private set; }
+    public static int HitSparkCount { get; private set; }
 
-        GameObject fx = PoolManager.Instance.Get(cfg.slashEffectPrefab);
-        if (fx == null) return;
+    const float SlashHeight = 1.0f;   // 궤적을 그리는 높이 (허리 ~ 가슴)
+
+    /// <summary>
+    /// 판정 순간의 베기 궤적 (2026-11-14 — 기본 근접 무기는 휘둘러도 아무것도 보이지 않았다).
+    /// 프리팹이 있으면 그걸 쓰고, 없으면 데이터의 궤적 값으로 그린다:
+    ///  · 가로베기 — 초승달 검격(BloodSlash)이 오른쪽에서 왼쪽으로 그어진다. 살짝 기운 면 (번갈아)
+    ///  · 내려찍기 — 세로로 선 초승달이 위에서 아래로
+    ///  · 찌르기(slashThrust) — 앞으로 뻗는 줄기 두 겹 + 끝의 고리
+    /// 떠 있는 보조 무기는 무기가 직접 날아가 치므로 궤적은 그리지 않는다 (맞은 자리 불꽃만).
+    /// </summary>
+    void SpawnSlashEffect(MeleeWeaponData cfg, Vector3 origin, Vector3 forward, float range, float arcAngle, bool vertical)
+    {
+        if (cfg.slashEffectPrefab != null)
+        {
+            if (PoolManager.Instance == null) return;
+            GameObject fx = PoolManager.Instance.Get(cfg.slashEffectPrefab);
+            if (fx != null) fx.transform.SetPositionAndRotation(origin, Quaternion.LookRotation(forward));
+            return;
+        }
+        if (cfg.slashMaterial == null || IsSupport) return;
+
+        Vector3 center = origin + Vector3.up * SlashHeight;
+        float reach = range * cfg.slashReach;
+        Color glow = new Color(cfg.slashColor.r, cfg.slashColor.g, cfg.slashColor.b, cfg.slashColor.a * 0.45f);
 
         fx.transform.SetPositionAndRotation(origin, Quaternion.LookRotation(forward));
     }
@@ -467,7 +490,7 @@ public class MeleeWeapon : WeaponBase
     public static int CounterThrustCount { get; private set; }
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-    static void ResetStatics() { SupportStrikeCount = 0; CounterThrustCount = 0; }
+    static void ResetStatics() { SupportStrikeCount = 0; CounterThrustCount = 0; SlashFxCount = 0; HitSparkCount = 0; }
 
     /// <summary>떠 있는 무기가 지금 뛰쳐나가 공격하는 중인가.</summary>
     public bool IsSupportStriking => supportRoutine != null;

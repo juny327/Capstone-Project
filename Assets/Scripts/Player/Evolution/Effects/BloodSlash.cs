@@ -8,6 +8,8 @@ using UnityEngine;
 ///  · 움직임 — 칼이 지나가듯 sweepTime 동안 호를 따라 순식간에 그어지고(머리가 달려 나감), 그 뒤 꼬리부터 머리 쪽으로 걷히며 사라진다
 ///  · 겹 — 넓은 검붉은 빛무리 · 붉은 몸통 · 바깥 날을 따라 흰빛이 도는 가는 심지 (날이 서 보이게)
 /// 메시 하나에 세 겹을 정점 색으로 담는다 (FxLine 과 같은 더하기 재질 — 정점 색을 곱한다). 다 사라지면 스스로 지운다.
+///
+/// 2026-11-14 — 기본 근접 무기(검 · 대검)의 베기 궤적도 이 검격을 쓴다 (MeleeWeapon.SpawnSlashEffect, 빛무리 색을 무기 색으로 넘긴다).
 /// </summary>
 public class BloodSlash : MonoBehaviour
 {
@@ -32,7 +34,8 @@ public class BloodSlash : MonoBehaviour
     /// width 는 가장 두꺼운 곳의 몸통 두께(m). reverse 면 반대쪽에서 그어진다.
     /// </summary>
     public static BloodSlash Spawn(Material material, Vector3 center, Vector3 forward, float radius, float halfAngle, float tilt,
-                                   float width, Color color, Color coreColor, float sweepTime, float fadeTime, bool reverse)
+                                   float width, Color color, Color coreColor, float sweepTime, float fadeTime, bool reverse,
+                                   Color? glowColor = null)
     {
         if (material == null) return null;
 
@@ -51,7 +54,7 @@ public class BloodSlash : MonoBehaviour
         slash.reverse = reverse;
         slash.body = color;
         slash.core = coreColor;
-        slash.glow = new Color(color.r * 0.75f, color.g * 0.3f, color.b * 0.35f, 0.5f);   // 몸통보다 검붉게 · 옅게
+        slash.glow = glowColor ?? new Color(color.r * 0.75f, color.g * 0.3f, color.b * 0.35f, 0.5f);   // 따로 안 주면 몸통보다 검붉게 · 옅게 (혈검)
         slash.Build(material);
         Alive++;
         return slash;
