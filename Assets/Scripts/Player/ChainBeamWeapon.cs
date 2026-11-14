@@ -37,6 +37,18 @@ public class ChainBeamWeapon : WeaponBase
     private float hideAt = -1f;
     private bool visible;
 
+    // 이번 발의 줄기들 — 보이는 동안 다시 흔들어 그린다 (rejitterInterval)
+    struct BoltSpec { public Vector3 from, to; public Color color; public float width; }
+    private readonly List<BoltSpec> bolts = new List<BoltSpec>();
+    private Vector3[] boltPoints = new Vector3[9];
+    private float nextJitterAt;
+
+    /// <summary>시험용 — 연쇄가 옮겨 붙은 자리에 번쩍임을 그린 횟수.</summary>
+    public static int ChainFlashes { get; private set; }
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetChainFlashes() => ChainFlashes = 0;
+
     /// <summary>
     /// 사거리 안에 적이 있을 때만 쏜다.
     ///
@@ -258,6 +270,35 @@ public class ChainBeamWeapon : WeaponBase
         }
 
         SpawnFx(cfg.hitEffectPrefab, point, Quaternion.identity);
+
+        // 맞은 자리 바닥에 번쩍
+        if (cfg.coreWidth > 0f) GroundGlow.Flash(new Vector3(point.x, target.position.y, point.z), isFirst ? 1.5f : 1.1f, cfg.beamColor, 0.16f);
+
+        // 맞은 자리에서 튀는 짧은 전기 가지
+        if (cfg.hitBranches > 0 && cfg.beamMaterial != null)
+        {
+            for (int i = 0; i < cfg.hitBranches; i++)
+            {
+                Vector3 d = Random.onUnitSphere;
+                d.y = Mathf.Abs(d.y) * 0.4f;
+                FxLine.Bolt(cfg.beamMaterial, point, point + d.normalized * Random.Range(0.45f, 0.9f), cfg.beamColor,
+                            Mathf.Max(0.04f, cfg.beamWidth * 0.35f), 0.11f, 0.1f);
+            }
+        }
+
+        // 연쇄가 옮겨 붙은 자리 — 적 머리 위에서 짧게 번쩍 (뇌운)
+        if (!isFirst && cfg.chainFlash > 0f && cfg.beamMaterial != null)
+        {
+            Vector3 top = point + Vector3.up * 0.9f;
+            float turn = Random.Range(0f, 90f);
+            for (int i = 0; i < 2; i++)
+            {
+                Vector3 d = Quaternion.AngleAxis(turn + i * 90f, Vector3.up) * Vector3.forward * cfg.chainFlash * 0.5f;
+                FxLine.Line(cfg.beamMaterial, top - d, top + d, cfg.coreColor, 0.09f, 0.1f);
+            }
+            FxLine.Bolt(cfg.beamMaterial, top + Vector3.up * cfg.chainFlash, point, cfg.beamColor, Mathf.Max(0.05f, cfg.arcWidth * 0.6f), 0.1f, 0.12f);
+            ChainFlashes++;
+        }
 
         // 조준한 적 + 퍼진 적이 한 프레임에 들어온다. 소리는 프레임 끝에 한 번만.
         if (SoundManager.Instance != null)

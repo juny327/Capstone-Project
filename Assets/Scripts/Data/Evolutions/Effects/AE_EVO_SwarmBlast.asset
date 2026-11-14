@@ -23,3 +23,7 @@ MonoBehaviour:
     volume: 0.3
     pitchRange: {x: 0.96, y: 1.04}
     minInterval: 0.06
+  fireball: 1.1
+  innerRing: 1
+  shards: 6
+  cameraShake: 0.08

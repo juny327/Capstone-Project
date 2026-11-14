@@ -138,6 +138,11 @@ public class ProjectileWeapon : WeaponBase
         SpawnEffect(cfg.muzzleFlashPrefab, Muzzle);
         if (!IsSupport) SpawnEffect(cfg.casingPrefab, casingPoint);   // 보조 무기는 탄피를 흘리지 않는다 (셋이 쏘면 바닥이 탄피로 덮인다)
 
+        ShotFx fx = cfg.shotFx;
+        float fxScale = IsSupport ? ShotFxDraw.SupportScale : 1f;
+        float groundY = Owner != null ? Owner.transform.position.y : float.NaN;
+        ShotFxDraw.MuzzleFlash(fx, Muzzle.position, baseDir, fxScale, groundY, ShotHeat);
+
         Color tint = AmmoTint;
 
         for (int i = 0; i < stats.ProjectileCount; i++)

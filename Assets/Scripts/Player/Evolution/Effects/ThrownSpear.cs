@@ -17,6 +17,8 @@ public class ThrownSpear : MonoBehaviour
     Vector3 target;
     float timer;
     Transform model;
+    TrailRenderer trail;
+    TrailRenderer coreTrail;
     readonly HashSet<Transform> hit = new HashSet<Transform>();
     readonly List<Transform> found = new List<Transform>();
     readonly List<Renderer> hidden = new List<Renderer>();
@@ -53,8 +55,23 @@ public class ThrownSpear : MonoBehaviour
         spear.BuildCore();
         spear.BuildTrail();
         spear.HideHand();
+        spear.ThrowFx(start, dir);
         CombatFx.PlaySound(cfg.throwSound);
         return spear;
+    }
+
+    /// <summary>손에서 떠나는 순간 — 굵은 찌르기 줄기 한 번 + 발밑 섬광.</summary>
+    void ThrowFx(Vector3 start, Vector3 dir)
+    {
+        if (cfg.material == null || cfg.throwStreak <= 0f) return;
+
+        float reach = Mathf.Min(3.2f, (target - start).magnitude);
+        FxLine.Line(cfg.material, start, start + dir * reach, cfg.color, cfg.throwStreak, 0.2f);
+        FxLine.Line(cfg.material, start, start + dir * reach * 0.8f, Color.white, cfg.throwStreak * 0.3f, 0.14f);
+
+        Vector3 feet = owner.position;
+        FxLine.Ring(cfg.material, feet, 0.25f, 1.2f, cfg.goldColor, 0.1f, 0.18f);
+        GroundGlow.Flash(feet, 1.8f, cfg.goldColor, 0.16f);
     }
 
     /// <summary>손의 창을 숨기고 공격을 막는다 — 받을 때 · 지워질 때 되돌린다.</summary>
@@ -138,6 +155,7 @@ public class ThrownSpear : MonoBehaviour
         var core = coreGo.AddComponent<LineRenderer>();
         core.useWorldSpace = false;
         core.sharedMaterial = cfg.material;
+        FxGlow.Apply(core, FxGlow.Core);
         core.positionCount = 2;
         core.SetPosition(0, new Vector3(0f, 0f, back));
         core.SetPosition(1, new Vector3(0f, 0f, tip));
@@ -155,8 +173,9 @@ public class ThrownSpear : MonoBehaviour
     {
         if (cfg.material == null) return;
 
-        var trail = gameObject.AddComponent<TrailRenderer>();
+        trail = gameObject.AddComponent<TrailRenderer>();
         trail.sharedMaterial = cfg.material;
+        FxGlow.Apply(trail, FxGlow.Body);
         trail.time = 0.24f;
         trail.minVertexDistance = 0.05f;
         trail.widthCurve = new AnimationCurve(new Keyframe(0f, 0.6f), new Keyframe(1f, 0f));
@@ -167,6 +186,49 @@ public class ThrownSpear : MonoBehaviour
             new[] { new GradientColorKey(Color.Lerp(cfg.color, Color.white, 0.4f), 0f), new GradientColorKey(cfg.color, 1f) },
             new[] { new GradientAlphaKey(0.9f, 0f), new GradientAlphaKey(0f, 1f) });
         trail.colorGradient = gradient;
+
+        // 둘째 바퀴부터 켜는 흰 심지 — 한 오브젝트에 궤적 둘을 둘 수 없어 자식에 둔다
+        var coreGo = new GameObject("TrailCore");
+        coreGo.transform.SetParent(transform, false);
+        coreTrail = coreGo.AddComponent<TrailRenderer>();
+        coreTrail.sharedMaterial = cfg.material;
+        FxGlow.Apply(coreTrail, FxGlow.Core);
+        coreTrail.minVertexDistance = 0.05f;
+        coreTrail.widthCurve = new AnimationCurve(new Keyframe(0f, 0.2f), new Keyframe(1f, 0f));
+        coreTrail.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        coreTrail.receiveShadows = false;
+        coreTrail.sortingOrder = 1;
+        var white = new Gradient();
+        white.SetKeys(
+            new[] { new GradientColorKey(Color.white, 0f), new GradientColorKey(cfg.goldColor, 1f) },
+            new[] { new GradientAlphaKey(0.95f, 0f), new GradientAlphaKey(0f, 1f) });
+        coreTrail.colorGradient = white;
+        coreTrail.emitting = false;
+    }
+
+    /// <summary>
+    /// 궤도에 들어서면 궤적을 넓은 띠로 — 머리는 금색, 꼬리는 청동색, 한 바퀴의 orbitTrailLap 만큼 남는다.
+    /// 둘째 바퀴(lapIndex 1)부터는 더 넓어지고 흰 심지가 켜진다.
+    /// </summary>
+    void SetOrbitTrail(int lapIndex)
+    {
+        if (trail == null) return;
+
+        float width = lapIndex == 0 ? cfg.orbitTrailWidth.x : cfg.orbitTrailWidth.y;
+        float time = cfg.orbitDuration / Mathf.Max(0.5f, cfg.orbitLaps) * cfg.orbitTrailLap;
+
+        trail.time = time;
+        trail.widthCurve = new AnimationCurve(new Keyframe(0f, width), new Keyframe(0.6f, width * 0.8f), new Keyframe(1f, 0f));
+        FxGlow.Apply(trail, 1f);   // 넓은 띠는 밝기 배율을 걸지 않는다 — 걸면 색이 하얗게 날아간다
+        var gradient = new Gradient();
+        gradient.SetKeys(
+            new[] { new GradientColorKey(cfg.goldColor, 0f), new GradientColorKey(cfg.color, 0.55f), new GradientColorKey(cfg.color, 1f) },
+            new[] { new GradientAlphaKey(0.9f, 0f), new GradientAlphaKey(0.55f, 0.55f), new GradientAlphaKey(0f, 1f) });
+        trail.colorGradient = gradient;
+
+        if (coreTrail == null) return;
+        coreTrail.time = time * 0.8f;
+        coreTrail.emitting = lapIndex >= 1;
     }
 
     void Update()
@@ -205,6 +267,7 @@ public class ThrownSpear : MonoBehaviour
         halfLap = 0;
         hit.Clear();
         phase = Phase.Orbit;
+        SetOrbitTrail(0);
         CombatFx.PlaySound(cfg.landSound);
         FxLine.Ring(cfg.material, owner.position, radius * 0.9f, radius, cfg.color, 0.12f, 0.35f);
     }
@@ -230,7 +293,7 @@ public class ThrownSpear : MonoBehaviour
 
         // 바퀴마다 원 위의 적을 한 번씩
         int nowLap = Mathf.FloorToInt(travelled / (Mathf.PI * 2f) + 0.0001f);
-        if (nowLap != lap) { lap = nowLap; hit.Clear(); }
+        if (nowLap != lap) { lap = nowLap; hit.Clear(); SetOrbitTrail(lap); }
         Sweep(from, to, cfg.orbitDamageMul, 1);
 
         int nowHalf = Mathf.FloorToInt(travelled / Mathf.PI + 0.0001f);
@@ -261,6 +324,7 @@ public class ThrownSpear : MonoBehaviour
 
         AchillesSpearEffect.Caught++;
         CombatFx.PlaySound(cfg.catchSound);
+        CatchFx();
         Destroy(gameObject);
     }
 
@@ -274,11 +338,27 @@ public class ThrownSpear : MonoBehaviour
             if (!hit.Add(enemy)) continue;
 
             CombatFx.Damage(enemy, baseDamage * damageMul, CombatFx.Body(enemy), dir);
-            FxLine.Ring(cfg.material, enemy.position, 0.1f, 0.7f, cfg.color, 0.1f, 0.14f);
+            HitFx(enemy, dir, stage);
             if (stage == 0) AchillesSpearEffect.ThrowHits++;
             else if (stage == 1) AchillesSpearEffect.OrbitHits++;
             else AchillesSpearEffect.ReturnHits++;
         }
+    }
+
+    /// <summary>지나가며 맞힌 자리 — 창이 간 쪽으로 튀는 금색 불꽃 + 바닥 빛. 던질 때 꿰뚫은 적은 고리도 하나.</summary>
+    void HitFx(Transform enemy, Vector3 dir, int stage)
+    {
+        if (cfg.material == null) return;
+
+        Vector3 p = CombatFx.Body(enemy);
+        for (int i = 0; i < 3; i++)
+        {
+            Vector3 d = Quaternion.AngleAxis(Random.Range(-55f, 55f), Vector3.up) * dir;
+            FxLine.Line(cfg.material, p, p + d * Random.Range(0.6f, 1.1f) + Vector3.up * Random.Range(0f, 0.3f), cfg.goldColor, 0.12f, 0.15f);
+        }
+        FxLine.Line(cfg.material, p - dir * 0.2f, p + dir * 0.5f, Color.white, 0.08f, 0.1f);
+        GroundGlow.Flash(enemy.position, 1.2f, cfg.goldColor, 0.14f, 0.8f);
+        if (stage == 0) FxLine.Ring(cfg.material, enemy.position, 0.1f, 0.7f, cfg.color, 0.1f, 0.14f);
     }
 
     Vector3 Ground(Vector3 p) => p - Vector3.up * cfg.flyHeight;

@@ -32,3 +32,10 @@ MonoBehaviour:
     volume: 0.42
     pitchRange: {x: 0.96, y: 1.04}
     minInterval: 0.3
+  strikeWidth: 0.3
+  strikeHeight: 8
+  strikeLean: 0.25
+  strikeBranches: 4
+  strikeGlowRadius: 1.5
+  strikeShake: 0.05
+  cloudFlash: 1

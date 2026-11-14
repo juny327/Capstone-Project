@@ -85,6 +85,8 @@ public class ChainBeamWeaponData : WeaponData
     [Range(0, 5)] public int hitBranches;
     [Tooltip("쏠 때 총구에 퍼지는 고리 반경(m). 0 이면 없음")]
     [Min(0f)] public float muzzleRing;
+    [Tooltip("연쇄가 옮겨 붙은 적 머리 위에서 번쩍이는 크기(m). 0 이면 없음 (뇌운)")]
+    [Min(0f)] public float chainFlash;
 
     public override WeaponKind Kind => WeaponKind.Projectile;
 

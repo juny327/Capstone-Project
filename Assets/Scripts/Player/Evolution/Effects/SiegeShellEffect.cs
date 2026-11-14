@@ -31,9 +31,11 @@ public class SiegeShellEffect : AttachmentEffect
     /// <summary>적에게 부딪혀 터진 수 · 벽 · 사거리 끝에서 터진 수 (테스트).</summary>
     public static int HitBlasts { get; private set; }
     public static int EndBlasts { get; private set; }
+    /// <summary>폭발로 흔든 횟수 (테스트) — 한 번 쏠 때 한 번.</summary>
+    public static int BlastShakes { get; private set; }
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-    static void ResetStatics() { HitBlasts = 0; EndBlasts = 0; }
+    static void ResetStatics() { HitBlasts = 0; EndBlasts = 0; BlastShakes = 0; }
 
     public override AttachmentRuntime CreateRuntime() => new Runtime(this);
 
@@ -45,8 +47,14 @@ public class SiegeShellEffect : AttachmentEffect
         // 포탄은 첫 적에서 멈춘다 (관통 무시)
         public override bool StopsProjectile => true;
 
+        // 포탄 조각(8발)이 저마다 터진다 — 폭발 흔들림은 한 번 쏠 때 한 번만 (2026-11-14: 조각마다 흔들어 4초에 41번이었다)
+        bool blastShaken = true;
+        float lastBlastShake = -99f;
+        const float BlastShakeGap = 0.15f;
+
         public override void OnAttack(in WeaponAttack attack)
         {
+            blastShaken = false;
             Vector3 at = attack.Origin;
             FxLine.Ring(cfg.material, at, 0.2f, 1.6f, cfg.color, 0.22f, 0.22f);
             WeaponBase.ShakeCamera(Weapon, cfg.cameraShake * 0.5f);   // 보조 무기는 약하게 (WeaponBase.ShakeCamera)
@@ -74,6 +82,15 @@ public class SiegeShellEffect : AttachmentEffect
 
         void Explode(Vector3 at, Transform struck)
         {
+            float shake = 0f;
+            if (!blastShaken && Time.time - lastBlastShake > BlastShakeGap)
+            {
+                blastShaken = true;
+                lastBlastShake = Time.time;
+                shake = cfg.cameraShake;
+                BlastShakes++;
+            }
+
             EvoStrikes.Blast(Weapon, cfg.material, cfg.color, at, cfg.blastRadius, Weapon.Stats.Damage * cfg.blastRatio, cfg.push,
                 struck, cfg.explosionPrefab, 1.4f, cfg.cameraShake);
             CombatFx.PlaySound(cfg.blastSound);

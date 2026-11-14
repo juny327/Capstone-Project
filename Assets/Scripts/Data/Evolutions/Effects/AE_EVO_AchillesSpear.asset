@@ -26,6 +26,11 @@ MonoBehaviour:
   material: {fileID: 2100000, guid: b6310812509a3ab46bf4e098541a27ab, type: 2}
   color: {r: 1, g: 0.62, b: 0.28, a: 1}
   flyHeight: 1
+  goldColor: {r: 1, g: 0.86, b: 0.42, a: 1}
+  throwStreak: 0.48
+  orbitTrailWidth: {x: 0.5, y: 0.8}
+  orbitTrailLap: 0.33
+  catchShake: 0.1
   throwSound:
     clips:
     - {fileID: 8300000, guid: 5c35f36c5778fd040954cc219b57c10d, type: 3}

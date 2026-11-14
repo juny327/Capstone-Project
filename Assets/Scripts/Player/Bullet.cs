@@ -38,6 +38,12 @@ public class Bullet : MonoBehaviour, IPoolable
     Rigidbody rb;
     Poolable poolable;
 
+    // 쏜 무기의 모습 (ShotFx) — 탄 궤적은 탄에 붙어 같이 돌려 쓰인다
+    BulletTracer tracer;
+    MissileTrail smoke;
+    ShotFx shotFx;
+    float fxScale = 1f;
+
     public GameObject hitEffectPrefab;
     public GameObject bossHitEffectPrefab;
     public float lifeTime = 3f;
@@ -78,6 +84,9 @@ public class Bullet : MonoBehaviour, IPoolable
         homingTarget = null;
         homingTurnRate = 0f;
         returned = true;
+        shotFx = null;
+        if (tracer != null) tracer.End();
+        if (smoke != null) { smoke.Release(); smoke = null; }   // 연기는 탄이 사라진 뒤에도 남아 흩어진다
         CancelInvoke();
     }
 
@@ -104,6 +113,33 @@ public class Bullet : MonoBehaviour, IPoolable
 
         CancelInvoke();
         Invoke(nameof(Expire), info.LifeTime > 0f ? info.LifeTime : lifeTime);
+    }
+
+    /// <summary>쏜 무기의 모습을 읽어 탄 궤적을 켠다 (값이 없는 무기는 예전 그대로 — 궤적 없음).</summary>
+    void BeginShotFx()
+    {
+        shotFx = source != null && source.Data != null ? source.Data.ShotFx : null;
+        fxScale = source != null && source.IsSupport ? ShotFxDraw.SupportScale : 1f;
+
+        // 휘어 날아가는 길에 남는 연기 (스웜 카빈 미사일) — 탄과 따로 돌려 쓴다
+        if (smoke != null) { smoke.Release(); smoke = null; }
+        if (shotFx != null && shotFx.Enabled && shotFx.HasSmoke) smoke = MissileTrail.Follow(transform, shotFx, fxScale);
+
+        bool wantTracer = shotFx != null && shotFx.Enabled && shotFx.tracerLength > 0f && shotFx.tracerWidth > 0f && !shotFx.tracerInstant;
+        if (!wantTracer)
+        {
+            if (tracer != null) tracer.End();
+            return;
+        }
+
+        if (tracer == null) tracer = BulletTracer.Attach(transform);
+
+        // 연사 열(회전 기관포) → 치명타 탄은 붉게 · 부착물 탄 색(소이탄 주황 · 전격탄 파랑)이 있으면 그 색으로
+        float heat = source != null ? source.ShotHeat : 0f;
+        Color color = shotFx.HeatColor(shotFx.tracerColor, heat);
+        if (isCritical) color = Color.Lerp(color, new Color(1f, 0.25f, 0.2f, color.a), 0.65f);
+        else if (tint.a > 0.01f) color = new Color(tint.r, tint.g, tint.b, color.a);
+        tracer.Begin(shotFx, color, fxScale, heat);
     }
 
     /// <summary>사거리 끝 — 쏜 무기에 알리고 풀로 돌아간다 (공성포의 끝 폭발).</summary>

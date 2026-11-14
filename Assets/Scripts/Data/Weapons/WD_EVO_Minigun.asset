@@ -83,3 +83,8 @@ MonoBehaviour:
     sparkLines: 1
     sparkRing: 0
     fireShake: 0
+    flashSwing: 0
+    hotFlashSize: 1.0
+    hotTracerLength: 2.4
+    hotTracerWidth: 0.15
+    hotColor: {r: 1, g: 0.95, b: 0.7, a: 1}

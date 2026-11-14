@@ -82,3 +82,4 @@ MonoBehaviour:
   rejitterInterval: 0.045
   hitBranches: 3
   muzzleRing: 0.7
+  chainFlash: 0.9

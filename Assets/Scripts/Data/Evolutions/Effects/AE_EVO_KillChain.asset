@@ -32,3 +32,7 @@ MonoBehaviour:
     volume: 0.45
     pitchRange: {x: 0.96, y: 1.04}
     minInterval: 0.06
+  depthGrow: 1.2
+  flameLines: 6
+  smokeAlpha: 0.45
+  smokeLife: 0.6

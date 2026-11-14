@@ -61,6 +61,9 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
     /// </summary>
     public float FireRateBoost { get; set; } = 1f;
 
+    /// <summary>연사 열 0~1 (회전 기관포 — SpinUpEffect 가 넣는다). 쏘는 모습(ShotFx 의 hot 값)이 이 값으로 섞인다. 판정과는 무관.</summary>
+    public float ShotHeat { get; set; }
+
     /// <summary>
     /// 무기가 손을 떠나 있다 — 아킬레우스의 창을 던진 동안 (손이 비어 공격하지 않는다). 상위 무기 동작이 켜고 끈다.
     /// </summary>

@@ -43,7 +43,7 @@ public class KillChainExplosionEffect : AttachmentEffect
     static int frameStamp = -1;
     static int frameCount;
 
-    /// <summary>터진 횟수 (테스트).</summary>
+    /// <summary>터진 횟수 · 가장 깊이 간 연쇄 단 (테스트).</summary>
     public static int Explosions { get; private set; }
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -99,7 +99,11 @@ public class KillChainExplosionEffect : AttachmentEffect
 
             FxLine.Ring(cfg.material, at, 0.3f, cfg.radius * 1.1f, cfg.color, 0.4f, 0.32f);
             FxLine.Ring(cfg.material, at, 0.1f, cfg.radius * 0.55f, Color.white, 0.14f, 0.18f);
-            SpawnExplosion(at);
+            if (depth > 1) FxLine.Ring(cfg.material, at, cfg.radius * 0.5f, cfg.radius * 1.1f * grow, Color.Lerp(cfg.color, Color.white, 0.35f), 0.1f, 0.4f);
+            GroundGlow.Flash(at, cfg.radius * 1.4f * grow, cfg.color, 0.26f, Mathf.Min(1.1f, 0.7f * grow));
+            FlashLight.Flash(at, cfg.color, Mathf.Max(4f, cfg.radius * 2.5f) * grow, 0.16f, Mathf.Min(1.5f, grow));
+            Flames(at, depth, grow);
+            SpawnExplosion(at, grow);
 
             if (Time.time - lastSound > 0.07f)
             {
@@ -113,7 +117,7 @@ public class KillChainExplosionEffect : AttachmentEffect
 
             float next = damage * cfg.chainFalloff;
             foreach (Vector3 p in killed)
-                Weapon.StartCoroutine(Explode(p, next, depth + 1, cfg.chainDelay + cfg.implodeTime * 0.5f));
+                Weapon.StartCoroutine(Explode(p, next, depth + 1, cfg.chainDelay + cfg.implodeTime * 0.5f, big));
         }
 
         void SpawnExplosion(Vector3 at)
@@ -121,13 +125,11 @@ public class KillChainExplosionEffect : AttachmentEffect
             if (cfg.explosionPrefab == null) return;
 
             GameObject fx = Object.Instantiate(cfg.explosionPrefab, at + Vector3.up * 0.3f, Quaternion.identity);
-            fx.transform.localScale = Vector3.one * cfg.explosionScale;
+            fx.transform.localScale = Vector3.one * cfg.explosionScale * grow;
 
-            foreach (ParticleSystem ps in fx.GetComponentsInChildren<ParticleSystem>(true))
-            {
-                ParticleSystem.MainModule main = ps.main;
-                main.startColor = new ParticleSystem.MinMaxGradient(Color.Lerp(cfg.color, Color.white, 0.25f));
-            }
+            // 불꽃은 붉게 · 연기는 검게 (예전에는 연기까지 밝은 색을 입혀 흰 덩어리가 됐다) — 연기는 옅고 짧게
+            EvoStrikes.Tint(fx, Color.Lerp(cfg.color, new Color(1f, 0.4f, 0.1f, 1f), 0.4f));   // 불꽃은 붉은 주황 — 테마 색 그대로면 분홍으로 보인다
+            EvoStrikes.ThinSmoke(fx, cfg.smokeAlpha, cfg.smokeLife);
 
             Object.Destroy(fx, 2.5f);
         }

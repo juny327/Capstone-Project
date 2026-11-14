@@ -45,6 +45,18 @@ public class AchillesSpearEffect : AttachmentEffect
     [Tooltip("창이 나는 높이 (바닥 기준)")]
     [Min(0f)] public float flyHeight = 1f;
 
+    [Header("연출 더하기 (2026-11-14) — 판정 · 피해와 무관")]
+    [Tooltip("궤도 띠의 머리 색 · 맞힘 불꽃 · 받는 고리 색 (금색). 꼬리는 위의 color(청동)")]
+    public Color goldColor = new Color(1f, 0.86f, 0.42f, 1f);
+    [Tooltip("던지는 순간 손에서 뻗는 줄기 굵기(m). 0 이면 없음")]
+    [Min(0f)] public float throwStreak = 0.48f;
+    [Tooltip("궤도 띠의 폭(m) — x 첫 바퀴 · y 둘째 바퀴부터")]
+    public Vector2 orbitTrailWidth = new Vector2(0.5f, 0.8f);
+    [Tooltip("궤도 띠가 남는 길이 — 한 바퀴의 이 비율")]
+    [Range(0.05f, 1f)] public float orbitTrailLap = 0.33f;
+    [Tooltip("손에 받는 순간 흔들림")]
+    [Min(0f)] public float catchShake = 0.1f;
+
     [Header("소리")]
     public GameSoundSet.Entry throwSound = new GameSoundSet.Entry();
     [Tooltip("궤도에 들어서는 순간")]
