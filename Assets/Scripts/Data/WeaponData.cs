@@ -124,6 +124,9 @@ public abstract class WeaponData : ScriptableObject
 
     public bool HasThemeColor => themeColor.a > 0.01f;
 
+    /// <summary>탄 궤적 · 총구 섬광 · 맞힘 불꽃 (탄을 쏘는 무기만 — 없으면 null). 탄이 쏜 무기에게서 읽는다.</summary>
+    public virtual ShotFx ShotFx => null;
+
     // 보조 무기 (무기-개편-개발-계획). 주무기 하나만 손에 들고, 나머지는 몸 둘레에 떠서 스스로 싸운다
     [Header("Support (보조 무기)")]
     [Tooltip("드론 전용 — 주무기(손)로 고를 수 없고, 얻으면 드론에 실려 보조 무기가 된다 (전격 · 충전 레이저 · 샷건)")]

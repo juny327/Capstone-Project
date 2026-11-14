@@ -86,6 +86,17 @@ public class ChargeBeamWeaponData : WeaponData
     public GameObject muzzleFlashPrefab;
     public GameObject hitEffectPrefab;
 
+    [Header("광선 두 겹 (2026-11-14) — 값이 0 이면 예전 모습 그대로")]
+    [Tooltip("안쪽 흰 심지 굵기(m). 바깥 광선(beamWidth) 위에 겹쳐 그린다. 0 이면 한 겹. 켜면 광선이 끝에서 옅어지며 사라진다")]
+    [Min(0f)] public float coreWidth;
+    public Color coreColor = Color.white;
+    [Tooltip("쏘는 순간 굵기 배율 — 여기서 시작해 원래 굵기로 줄어든다. 1 이면 그대로")]
+    [Min(1f)] public float firePunch = 1f;
+    [Tooltip("쏠 때 총구에 퍼지는 고리 반경(m). 0 이면 없음")]
+    [Min(0f)] public float fireRing;
+    [Tooltip("관통한 적마다 바닥에 퍼지는 고리 반경(m). 0 이면 없음")]
+    [Min(0f)] public float hitRing;
+
     public override WeaponKind Kind => WeaponKind.Projectile;
 
     public override WeaponRuntimeStats Compose(in WeaponModifier modifier)

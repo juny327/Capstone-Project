@@ -115,6 +115,7 @@ public class DroneUnit : MonoBehaviour
             if (flash != null)
                 flash.transform.SetPositionAndRotation(Muzzle.position, Quaternion.LookRotation(dir));
         }
+        ShotFxDraw.MuzzleFlash(config.shotFx, Muzzle.position, dir, ShotFxDraw.SupportScale, owner != null ? owner.position.y : float.NaN);
 
         GameObject obj = PoolManager.Instance.Get(config.projectilePrefab);
         if (obj == null) return false;

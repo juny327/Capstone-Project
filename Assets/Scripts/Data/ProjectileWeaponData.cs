@@ -52,6 +52,11 @@ public class ProjectileWeaponData : WeaponData
     public GameObject muzzleFlashPrefab;
     public GameObject casingPrefab;
 
+    [Header("쏘는 모습 (2026-11-14) — 프리팹 위에 코드가 얹어 그린다")]
+    public ShotFx shotFx = new ShotFx();
+
+    public override ShotFx ShotFx => shotFx;
+
     public override WeaponKind Kind => WeaponKind.Projectile;
 
     public override WeaponRuntimeStats Compose(in WeaponModifier modifier)

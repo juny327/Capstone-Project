@@ -98,6 +98,9 @@ public class ProjectileWeapon : WeaponBase
 
         SpawnVolley(cfg, in stats, baseDir);
 
+        // 쏘는 순간 흔들림 (스나이퍼 · 샷건처럼 한 발이 무거운 총) — 점사의 이어지는 발은 흔들지 않는다
+        if (cfg.shotFx != null && cfg.shotFx.fireShake > 0f) ShakeCamera(this, cfg.shotFx.fireShake);
+
         // 점사 — 남은 발은 짧은 간격으로 이어서 (그사이 돌아보면 그쪽으로 나간다)
         burstRemaining = Mathf.Max(0, stats.BurstCount - 1);
         burstTimer = BurstGap;
@@ -163,6 +166,28 @@ public class ProjectileWeapon : WeaponBase
                 tint: tint,
                 homingTurnRate: cfg.homingTurnRate));
         }
+    }
+
+    const float InstantTracerMax = 40f;
+    static readonly List<Transform> tracerTargets = new List<Transform>();
+
+    /// <summary>
+    /// 한 줄 궤적이 끝나는 곳 — 벽 · 사거리 끝, 또는 관통이 다하는 적 (관통 3 이면 네 번째 적). 화면 밖까지 긋지 않게 40m 에서 끊는다.
+    /// 그림만 정한다 — 판정은 탄이 한다.
+    /// </summary>
+    Vector3 InstantTracerEnd(Vector3 origin, Vector3 dir, in WeaponRuntimeStats stats)
+    {
+        float reach = Mathf.Min(InstantTracerMax, stats.ProjectileSpeed * Mathf.Max(0.1f, stats.ProjectileLifeTime));
+        reach = CombatFx.ObstacleDistance(origin, dir, reach);
+
+        CombatFx.FindEnemiesAlong(origin, origin + dir * reach, 0.35f, tracerTargets);
+        if (tracerTargets.Count > stats.PierceCount)
+        {
+            tracerTargets.Sort((a, b) => Vector3.Dot(a.position - origin, dir).CompareTo(Vector3.Dot(b.position - origin, dir)));
+            float last = Vector3.Dot(tracerTargets[stats.PierceCount].position - origin, dir);
+            if (last > 0.5f) reach = Mathf.Min(reach, last + 0.3f);
+        }
+        return origin + dir * reach;
     }
 
     // 유도탄 목표 — 가까운 적부터 돌려 가며 고른다 (점사 세 발이 서로 다른 적을 쫓게)

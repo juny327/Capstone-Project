@@ -100,6 +100,7 @@ public class Bullet : MonoBehaviour, IPoolable
         rb.linearVelocity = transform.forward * speed;
 
         ApplyDamageVisual();
+        BeginShotFx();
 
         CancelInvoke();
         Invoke(nameof(Expire), info.LifeTime > 0f ? info.LifeTime : lifeTime);
@@ -224,6 +225,7 @@ public class Bullet : MonoBehaviour, IPoolable
             return;
 
         SpawnHitEffect(other);
+        ShotFxDraw.HitSpark(shotFx, transform.position, transform.forward, isCritical, fxScale, root.position.y);
 
         if (d != null)
         {
@@ -283,6 +285,7 @@ public class Bullet : MonoBehaviour, IPoolable
     void HitObstacle()
     {
         SpawnEffectAt(hitEffectPrefab, transform.position + new Vector3(0f, -1f, 0f), Quaternion.identity);
+        ShotFxDraw.HitSpark(shotFx, transform.position, transform.forward, false, fxScale * 0.8f);
         CombatFx.ObstacleHitSound();
 
         if (source != null && source.HasHitEffects)

@@ -48,7 +48,7 @@ MonoBehaviour:
   reloadVolume: 0.6
   range: 18
   beamRadius: 0.25
-  beamDuration: 0.15
+  beamDuration: 0.22
   hitLayers:
     serializedVersion: 2
     m_Bits: 4294967295
@@ -57,10 +57,15 @@ MonoBehaviour:
   reloadTime: 2.5
   autoReload: 1
   beamMaterial: {fileID: 2100000, guid: 5d90de9dbfa086c47b0889319c447945, type: 2}
-  beamColor: {r: 0.35, g: 0.95, b: 1, a: 1}
+  beamColor: {r: 0.35, g: 0.95, b: 1, a: 0.85}
   beamWidth: 0.35
   chargeWidth: 0.3
   chargeSound: {fileID: 8300000, guid: 3ca2d41d3f7d72a42a124c6debd80346, type: 3}
   chargeVolume: 0.41
   muzzleFlashPrefab: {fileID: 2916273817513264348, guid: 95044fb3908b36c46bc62060360f7ba6, type: 3}
   hitEffectPrefab: {fileID: 4324968127605537629, guid: c694cdd4158a7394bb9c62a42fc6bd6b, type: 3}
+  coreWidth: 0.12
+  coreColor: {r: 1, g: 1, b: 1, a: 1}
+  firePunch: 1.4
+  fireRing: 1.4
+  hitRing: 0.9

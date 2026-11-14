@@ -67,3 +67,19 @@ MonoBehaviour:
   autoReload: 1
   muzzleFlashPrefab: {fileID: 2916273817513264348, guid: 95044fb3908b36c46bc62060360f7ba6, type: 3}
   casingPrefab: {fileID: 8464276986609709168, guid: 4aa9530848b0025449ef44e32d3f9a41, type: 3}
+  shotFx:
+    material: {fileID: 2100000, guid: b6310812509a3ab46bf4e098541a27ab, type: 2}
+    tracerColor: {r: 1, g: 0.6, b: 0.2, a: 0.9}
+    tracerWidth: 0.1
+    tracerLength: 1.1
+    tracerInstant: 0
+    tracerInstantFade: 0.15
+    flashColor: {r: 1, g: 0.65, b: 0.25, a: 1}
+    flashSize: 0.45
+    flashFan: 0
+    flashRing: 0
+    sparkColor: {r: 1, g: 0.85, b: 0.3, a: 1}
+    sparkSize: 0.45
+    sparkLines: 1
+    sparkRing: 0
+    fireShake: 0

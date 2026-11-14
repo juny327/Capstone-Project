@@ -63,6 +63,7 @@ public class ChainBeamWeapon : WeaponBase
 
         struck.Clear();
         ResetLines();
+        bolts.Clear();
 
         Vector3 origin = Muzzle.position;
         Vector3 dir = context.AimDirection;   // 마우스 커서 방향
@@ -76,6 +77,8 @@ public class ChainBeamWeapon : WeaponBase
 
         DrawBolt(cfg, origin, beamEnd, cfg.beamColor, cfg.beamWidth);
         SpawnFx(cfg.muzzleFlashPrefab, origin, Quaternion.LookRotation(dir));
+        if (cfg.muzzleRing > 0f && cfg.beamMaterial != null)
+            FxLine.Ring(cfg.beamMaterial, origin - Vector3.up * 0.15f, 0.05f, cfg.muzzleRing, cfg.beamColor, 0.07f, 0.12f);
 
         if (first == null)
         {
@@ -265,20 +268,46 @@ public class ChainBeamWeapon : WeaponBase
 
     protected override void OnTick(float deltaTime)
     {
-        if (!visible || Time.time < hideAt) return;
+        if (!visible) return;
 
+        if (Time.time >= hideAt)
+        {
+            ResetLines();
+            visible = false;
+            return;
+        }
+
+        // 보이는 동안 줄기 모양을 다시 흔든다 — 한 모양으로 멈춰 있으면 전기가 아니라 철사로 보인다
+        ChainBeamWeaponData cfg = Config;
+        if (cfg == null || cfg.rejitterInterval <= 0f || Time.time < nextJitterAt) return;
+
+        nextJitterAt = Time.time + cfg.rejitterInterval;
         ResetLines();
-        visible = false;
+        for (int i = 0; i < bolts.Count; i++) RenderBolt(cfg, bolts[i]);
     }
 
     /// <summary>두 점 사이를 지그재그로 잇는다. 곧은 선은 전기로 보이지 않는다.</summary>
     void DrawBolt(ChainBeamWeaponData cfg, Vector3 from, Vector3 to, Color color, float width)
     {
+        var spec = new BoltSpec { from = from, to = to, color = color, width = width };
+        bolts.Add(spec);
+        RenderBolt(cfg, spec);
+    }
+
+    /// <summary>줄기 하나를 그린다 — 바깥 줄기 + (coreWidth 가 있으면) 같은 모양의 안쪽 흰 심지.</summary>
+    void RenderBolt(ChainBeamWeaponData cfg, BoltSpec spec)
+    {
+        Vector3 from = spec.from, to = spec.to;
+        Color color = spec.color;
+        float width = spec.width;
+
         LineRenderer line = NextLine(cfg);
 
         if (line == null) return;
 
-        int segments = Mathf.Max(2, cfg.segments);
+        // 긴 줄기는 마디를 늘린다 — 마디 8개로 14m 를 그리면 곧은 레이저처럼 보인다 (마디 하나 약 0.7m)
+        int segments = Mathf.Clamp(Mathf.CeilToInt((to - from).magnitude / 0.7f), Mathf.Max(2, cfg.segments), 28);
+        if (boltPoints.Length < segments + 1) boltPoints = new Vector3[segments + 1];
 
         line.positionCount = segments + 1;
         line.startWidth = width;
@@ -305,12 +334,13 @@ public class ChainBeamWeapon : WeaponBase
             // 양 끝은 정확히 맞물려야 하므로 가운데만 흔든다
             if (i != 0 && i != segments)
             {
-                float amount = cfg.jitter * Mathf.Sin(t * Mathf.PI);
+                float amount = cfg.jitter * Mathf.Max(0.35f, Mathf.Sin(t * Mathf.PI));   // 긴 줄기는 양 끝 가까이도 조금은 흔든다
 
                 point += side * Random.Range(-amount, amount);
                 point += up * Random.Range(-amount, amount);
             }
 
+            boltPoints[i] = point;
             line.SetPosition(i, point);
         }
 
@@ -321,6 +351,7 @@ public class ChainBeamWeapon : WeaponBase
     {
         visible = true;
         hideAt = Time.time + cfg.beamDuration;
+        nextJitterAt = Time.time + cfg.rejitterInterval;
     }
 
     LineRenderer NextLine(ChainBeamWeaponData cfg)

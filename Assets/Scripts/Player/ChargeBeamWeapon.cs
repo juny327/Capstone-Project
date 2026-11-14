@@ -23,6 +23,8 @@ public class ChargeBeamWeapon : WeaponBase
     private readonly HashSet<Transform> struck = new HashSet<Transform>();
 
     private readonly List<LineRenderer> beams = new List<LineRenderer>();   // 발사된 빔 (분광 프리즘이면 여러 갈래)
+    private readonly List<LineRenderer> cores = new List<LineRenderer>();   // 빔 안쪽 흰 심지 (coreWidth — beams 와 같은 번호)
+    private readonly List<Color> beamColors = new List<Color>();            // 빔마다 처음 색 (끝에서 옅어질 때 기준)
     private LineRenderer charge;    // 총구에 모이는 빛
     private Material runtimeMaterial;
 
@@ -118,7 +120,10 @@ public class ChargeBeamWeapon : WeaponBase
         HideTelegraphs();
 
         for (int i = count; i < beams.Count; i++)
+        {
             if (beams[i] != null) beams[i].enabled = false;
+            if (i < cores.Count && cores[i] != null) cores[i].enabled = false;
+        }
 
         SpawnFx(cfg.muzzleFlashPrefab, origin, Quaternion.LookRotation(dir));
 
@@ -323,6 +328,9 @@ public class ChargeBeamWeapon : WeaponBase
             }
 
             SpawnFx(cfg.hitEffectPrefab, point, Quaternion.LookRotation(-dir));
+            if (cfg.hitRing > 0f && cfg.beamMaterial != null)
+                FxLine.Ring(cfg.beamMaterial, new Vector3(point.x, Owner != null ? Owner.transform.position.y : point.y - 0.9f, point.z),
+                            0.1f, cfg.hitRing, cfg.beamColor, 0.08f, 0.22f);
 
             // 관통이라 한 프레임에 여러 명이 들어온다. 소리는 프레임 끝에 한 번만.
             if (SoundManager.Instance != null)
@@ -351,18 +359,40 @@ public class ChargeBeamWeapon : WeaponBase
         {
             for (int i = 0; i < beams.Count; i++)
                 if (beams[i] != null && beams[i].enabled) beams[i].enabled = false;
+            for (int i = 0; i < cores.Count; i++)
+                if (cores[i] != null && cores[i].enabled) cores[i].enabled = false;
         }
-        else if (cfg.beamFadeOut)
+        else if (cfg.beamFadeOut || cfg.firePunch > 1f || cfg.coreWidth > 0f)
         {
-            // 가늘어지며 사라진다 (프리즘 노바) — 앞 40% 는 굵게 두고 나머지 동안 줄인다
-            float left = Mathf.Clamp01((beamHideAt - Time.time) / Mathf.Max(0.01f, cfg.beamDuration));
-            float width = cfg.beamWidth * Mathf.Clamp01(left / 0.6f);
+            float left = Mathf.Clamp01((beamHideAt - Time.time) / Mathf.Max(0.01f, cfg.beamDuration));   // 1 → 0
 
+            // 가늘어지며 사라진다 (프리즘 노바) — 앞 40% 는 굵게 두고 나머지 동안 줄인다
+            float mul = cfg.beamFadeOut ? Mathf.Clamp01(left / 0.6f) : 1f;
+            // 쏘는 순간 굵게 — 앞 절반 동안 원래 굵기로 줄어든다
+            if (cfg.firePunch > 1f) mul *= Mathf.Lerp(1f, cfg.firePunch, Mathf.Clamp01((left - 0.5f) / 0.5f));
+            // 두 겹 광선은 끝 35% 동안 옅어진다 (뚝 끊기지 않게)
+            float alpha = cfg.coreWidth > 0f ? Mathf.Clamp01(left / 0.35f) : 1f;
+
+            float width = cfg.beamWidth * mul;
             for (int i = 0; i < beams.Count; i++)
             {
                 if (beams[i] == null || !beams[i].enabled) continue;
                 beams[i].startWidth = width;
                 beams[i].endWidth = width * 0.6f;
+
+                if (cfg.coreWidth <= 0f) continue;
+                Color bc = i < beamColors.Count ? beamColors[i] : cfg.beamColor;
+                bc.a *= alpha;
+                beams[i].startColor = bc;
+                beams[i].endColor = bc;
+
+                if (i >= cores.Count || cores[i] == null || !cores[i].enabled) continue;
+                Color cc = cfg.coreColor;
+                cc.a *= alpha;
+                cores[i].startWidth = cfg.coreWidth * mul;
+                cores[i].endWidth = cfg.coreWidth * mul * 0.6f;
+                cores[i].startColor = cc;
+                cores[i].endColor = cc;
             }
         }
 
@@ -476,6 +506,7 @@ public class ChargeBeamWeapon : WeaponBase
         beam.endWidth = cfg.beamWidth * 0.6f;
         beam.startColor = color;
         beam.endColor = color;
+        beam.sortingOrder = 0;
         beam.enabled = true;
 
         beamHideAt = Time.time + cfg.beamDuration;
@@ -560,6 +591,9 @@ public class ChargeBeamWeapon : WeaponBase
 
         for (int i = 0; i < beams.Count; i++)
             if (beams[i] != null) beams[i].enabled = false;
+
+        for (int i = 0; i < cores.Count; i++)
+            if (cores[i] != null) cores[i].enabled = false;
         if (charge != null) charge.enabled = false;
         HideTelegraphs();
         if (burst != null) burst.Cancel();
