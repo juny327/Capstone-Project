@@ -79,11 +79,12 @@ public partial class DragonBoss
 
     void BuildFx()
     {
-        if (fireMaterial != null) breathFx = DragonFx.Breath(transform, fireMaterial, breathRadius + breathApex - 3.5f, breathHalfAngle);
+        // 입은 몸 기준점에서 약 3.5m 앞(×6 크기 기준)에 있다
+        if (fireMaterial != null) breathFx = DragonFx.Breath(transform, fireMaterial, breathRadius + breathApex - 3.5f * bodyScale, breathHalfAngle, bodyScale);
         if (smokeMaterial != null)
         {
             dustFx = DragonFx.Dust(transform, smokeMaterial, chargeWidth);
-            dustFx.transform.localPosition = new Vector3(0f, 0.4f, -1f);
+            dustFx.transform.localPosition = new Vector3(0f, 0.4f, -1f) * bodyScale;
         }
     }
 
@@ -96,7 +97,8 @@ public partial class DragonBoss
     }
 
     /// <summary>입 끝 — 위턱 뼈에서 앞으로 조금.</summary>
-    Vector3 Mouth() => jawUpper != null ? jawUpper.position + transform.forward * 0.9f : transform.position + transform.forward * 3f + Vector3.up * 3f;
+    Vector3 Mouth() => jawUpper != null ? jawUpper.position + transform.forward * (0.9f * bodyScale)
+                                        : transform.position + (transform.forward * 3f + Vector3.up * 3f) * bodyScale;
 
     DragonTelegraph Track(DragonTelegraph t)
     {
@@ -379,7 +381,7 @@ public partial class DragonBoss
             yield break;
         }
 
-        DragonTelegraph warning = Track(DragonTelegraph.Rect(telegraphMaterial, start, forward, chargeWidth, -1f, travel + chargeFront));
+        DragonTelegraph warning = Track(DragonTelegraph.Rect(telegraphMaterial, start, forward, chargeWidth, -1f * bodyScale, travel + chargeFront));
         Sfx(DragonSfx.Windup);
         for (float t = 0f; t < chargeWindup; t += Time.deltaTime)
         {
@@ -413,9 +415,9 @@ public partial class DragonBoss
             if (sinceFire >= firePatchSpacing)
             {
                 sinceFire = 0f;
-                LeaveFire(transform.position - forward * 1.2f, firePatchRadius * 0.85f);
+                LeaveFire(transform.position - forward * (1.2f * bodyScale), firePatchRadius * 0.85f);
             }
-            if (!hitDone && PlayerInRect(transform.position, forward, chargeWidth, -2.5f, chargeFront))
+            if (!hitDone && PlayerInRect(transform.position, forward, chargeWidth, -2.5f * bodyScale, chargeFront))
             {
                 hitDone = true;
                 HitPlayer(chargeDamage, transform.position, 0.6f);

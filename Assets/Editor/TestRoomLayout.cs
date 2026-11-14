@@ -76,8 +76,9 @@ internal static class TestRoomLayout
 
     // ── 드래곤 동작 보기 (북쪽 가운데, 2026-11-13) — 부착물 구역(x ≤ −8.7)과 개조 구역(x ≥ 6) 사이 빈자리 ──
     //    드래곤은 남쪽(발판 · 카메라 쪽)을 본다. 발판은 그 앞 한 줄
-    public static readonly Vector3 DragonShowcase = new Vector3(-3f, 0f, 15f);
-    public const float DragonDaisRadius = 4.5f;
+    //    2026-11-14 보스 크기 ×9 — 머리가 안내 글자를 덮지 않게 2m 뒤로, 받침은 4.5 → 5.6
+    public static readonly Vector3 DragonShowcase = new Vector3(-3f, 0f, 17f);
+    public const float DragonDaisRadius = 5.6f;
     public static readonly Vector3 DragonShowcaseLabel = new Vector3(-3f, 0.1f, 10.4f);
     public static readonly Vector3 DragonStatusLabel = new Vector3(-3f, 0.1f, 9.3f);
     public const float DragonPadZ = 5f;

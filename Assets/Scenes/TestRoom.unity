@@ -1346,7 +1346,7 @@ GameObject:
   m_Layer: 0
   m_Name: "Label_\uB4DC\uB798\uACE4 \uB3D9\uC791 \uBCF4\uAE30 \u2014 \uBC1C\uD310\uC744
     \uBC1F\uC73C\uBA74 \uADF8 \uB3D9\uC791\uC744 \uB418\uD480\uC774 (\uBCF4\uC2A4
-    \uD06C\uAE30 \xD76)"
+    \uD06C\uAE30 \xD79)"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10512,8 +10512,8 @@ Transform:
   m_GameObject: {fileID: 980984707}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -3, y: 0.012, z: 15}
-  m_LocalScale: {x: 9, y: 0.01, z: 9}
+  m_LocalPosition: {x: -3, y: 0.012, z: 17}
+  m_LocalScale: {x: 11.2, y: 0.01, z: 11.2}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 251422302}
@@ -17277,7 +17277,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4570534399577326777, guid: 8ca712c654d87174fb986179c24b408e, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 15
+      value: 17
       objectReference: {fileID: 0}
     - target: {fileID: 4570534399577326777, guid: 8ca712c654d87174fb986179c24b408e, type: 3}
       propertyPath: m_LocalRotation.w
@@ -18327,7 +18327,7 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\uB4DC\uB798\uACE4 \uB3D9\uC791 \uBCF4\uAE30 \u2014 \uBC1C\uD310\uC744
     \uBC1F\uC73C\uBA74 \uADF8 \uB3D9\uC791\uC744 \uB418\uD480\uC774 (\uBCF4\uC2A4
-    \uD06C\uAE30 \xD76)"
+    \uD06C\uAE30 \xD79)"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: b142b49dad0aa7747857b5917f44e1e7, type: 2}
   m_sharedMaterial: {fileID: 2100000, guid: 68b62dcb0ada78f4c9b17f3889061c17, type: 2}

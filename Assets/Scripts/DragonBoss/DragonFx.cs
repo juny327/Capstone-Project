@@ -8,7 +8,7 @@ using UnityEngine;
 public static class DragonFx
 {
     /// <summary>불 브레스 — reach(m) 까지 닿고 ±halfAngle 로 퍼진다. 위치 · 방향은 매 프레임 입에 맞춰 옮긴다.</summary>
-    public static ParticleSystem Breath(Transform parent, Material fire, float reach, float halfAngle)
+    public static ParticleSystem Breath(Transform parent, Material fire, float reach, float halfAngle, float scale = 1f)
     {
         var go = new GameObject("BreathFx");
         go.transform.SetParent(parent, false);
@@ -24,7 +24,7 @@ public static class DragonFx
         main.startLifetime = new ParticleSystem.MinMaxCurve(life * 0.85f, life);
         // 끝에선 거의 투명해지므로 보이는 길이가 예고 끝에 닿게 조금 더 빨리
         main.startSpeed = new ParticleSystem.MinMaxCurve(reach / life * 1.15f, reach / life * 1.35f);
-        main.startSize = new ParticleSystem.MinMaxCurve(0.7f, 1.3f);
+        main.startSize = new ParticleSystem.MinMaxCurve(0.7f * scale, 1.3f * scale);   // 몸 크기에 맞춰 불도 굵어진다
         main.startRotation = new ParticleSystem.MinMaxCurve(0f, Mathf.PI * 2f);
         main.startColor = new ParticleSystem.MinMaxGradient(new Color(1f, 0.85f, 0.45f), new Color(1f, 0.55f, 0.15f));
         main.maxParticles = 600;
@@ -36,7 +36,7 @@ public static class DragonFx
         var shape = ps.shape;
         shape.shapeType = ParticleSystemShapeType.Cone;
         shape.angle = halfAngle * 0.8f;   // 가장자리 입자는 예고 끝보다 조금 안쪽
-        shape.radius = 0.35f;
+        shape.radius = 0.35f * scale;
         shape.scale = new Vector3(1f, 0.35f, 1f);   // 위아래로 납작하게 — 바닥 부채꼴처럼 옆으로 퍼진다
 
         var size = ps.sizeOverLifetime;

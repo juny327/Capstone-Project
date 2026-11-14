@@ -41,6 +41,8 @@ public class DragonEntrance : MonoBehaviour
     [SerializeField] string bossSubtitle = "공허를 삼키는 용";
 
     [Header("연출")]
+    [Tooltip("몸 크기 배율 = 모델 크기 ÷ 6 (프리팹 도구가 넣는다) — 카메라 거리 · 빛 기둥 · 충격파가 이만큼 물러나고 커진다")]
+    [Min(0.1f)] [SerializeField] float sizeFactor = 1f;
     [SerializeField] float landHeight = 18f;
     [Tooltip("이만큼 누르고 있으면 건너뛴다 (초)")]
     [SerializeField] float skipHold = 0.6f;
@@ -331,8 +333,8 @@ public class DragonEntrance : MonoBehaviour
 
             // 포효 — 죽음 동작 0 ~ 1.7 (머리 들고 입 47°)
             if (!roar && t >= TRoar) { roar = true; CopyPose(DragonBoss.DieState, 0f, 1f); DragonSound.Play(DragonSfx.Roar); }
-            if (!wave1 && t >= 4.85f) { wave1 = true; Ring(core, 12f, 0.55f, new Color(1f, 0.55f, 0.45f, 0.75f)); shake = 0.6f; pulse = 0.8f; }
-            if (!wave2 && t >= 5.5f) { wave2 = true; Ring(core, 14f, 0.6f, new Color(1f, 0.45f, 0.4f, 0.7f)); shake = 0.7f; pulse = 0.9f; }
+            if (!wave1 && t >= 4.85f) { wave1 = true; Ring(core, 12f * Mathf.Lerp(1f, sizeFactor, 0.6f), 0.55f, new Color(1f, 0.55f, 0.45f, 0.75f)); shake = 0.6f; pulse = 0.8f; }
+            if (!wave2 && t >= 5.5f) { wave2 = true; Ring(core, 14f * Mathf.Lerp(1f, sizeFactor, 0.6f), 0.6f, new Color(1f, 0.45f, 0.4f, 0.7f)); shake = 0.7f; pulse = 0.9f; }
             if (!roarHold && t >= TRoar + 1.7f) { roarHold = true; CopyPose(DragonBoss.DieState, 1.7f, 0f); }
 
             // 이름 카드 — 준비 자세 · 체력바 차오름
@@ -435,7 +437,8 @@ public class DragonEntrance : MonoBehaviour
         Vector3 pos, look;
         float fov;
         Vector3 p = player != null ? player.position : core + toPlayer * 15f;
-        Vector3 wide = p + toPlayer * 7f + Vector3.up * 6f, wideLook = core + Vector3.up * 3f;
+        float S = sizeFactor, A = Mathf.Lerp(1f, sizeFactor, 0.6f);   // 몸 기준 / 전장 기준
+        Vector3 wide = p + toPlayer * 7f + Vector3.up * 6f, wideLook = core + Vector3.up * 3f * S;
         if (t < TCrack)
         {
             float u = Mathf.SmoothStep(0f, 1f, t / TCrack);
@@ -447,28 +450,28 @@ public class DragonEntrance : MonoBehaviour
         {
             float u = Mathf.SmoothStep(0f, 1f, (t - TCrack) / (TDrop - TCrack));
             pos = Vector3.Lerp(wide, p + toPlayer * 1.5f + Vector3.up * 4.2f, u);
-            look = Vector3.Lerp(wideLook, core + Vector3.up * 2f, u);
+            look = Vector3.Lerp(wideLook, core + Vector3.up * 2f * S, u);
             fov = Mathf.Lerp(50f, 46f, u);
         }
         else if (t < TTop)
         {
             float u = (t - TDrop) / (TTop - TDrop);
-            pos = core + toPlayer * 9f + Vector3.up * Mathf.Lerp(27f, 23f, u);
+            pos = core + toPlayer * 9f * A + Vector3.up * Mathf.Lerp(27f, 23f, u) * A;
             look = core;
             fov = 55f;
         }
         else if (t < TCard)
         {
             float u = Mathf.SmoothStep(0f, 1f, (t - TTop) / (TCard - TTop));
-            pos = Vector3.Lerp(core + toPlayer * 9.5f + right * 3.5f + Vector3.up * 1.0f, core + toPlayer * 7.6f + right * 3f + Vector3.up * 1.15f, u);
-            look = core + Vector3.up * 3.6f;
+            pos = Vector3.Lerp(core + (toPlayer * 9.5f + right * 3.5f + Vector3.up * 1.0f) * S, core + (toPlayer * 7.6f + right * 3f + Vector3.up * 1.15f) * S, u);
+            look = core + Vector3.up * 3.6f * S;
             fov = 48f;
         }
         else
         {
             float u = Mathf.SmoothStep(0f, 1f, (t - TCard) / (TStart - TCard));
-            pos = Vector3.Lerp(core - right * 13f + toPlayer * 4f + Vector3.up * 4f, core - right * 12f + toPlayer * 5.2f + Vector3.up * 4.3f, u);
-            look = core + Vector3.up * 2.4f - right * 3.5f;
+            pos = Vector3.Lerp(core + (-right * 13f + toPlayer * 4f + Vector3.up * 4f) * S, core + (-right * 12f + toPlayer * 5.2f + Vector3.up * 4.3f) * S, u);
+            look = core + (Vector3.up * 2.4f - right * 3.5f) * S;
             fov = 42f;
         }
         shake = Mathf.MoveTowards(shake, 0f, dt * 1.6f);
@@ -625,7 +628,7 @@ public class DragonEntrance : MonoBehaviour
             SceneManager.MoveGameObjectToScene(pillar, gameObject.scene);
             temp.Add(pillar);
             pillar.transform.position = core;
-            Cylinder(pillar.transform, 4.6f, new Color(1f, 0.3f, 0.22f, 0.22f), "Outer");
+            Cylinder(pillar.transform, 4.6f * sizeFactor, new Color(1f, 0.3f, 0.22f, 0.22f), "Outer");
             Cylinder(pillar.transform, 0.9f, new Color(1f, 0.85f, 0.7f, 0.4f), "Inner");
         }
         pillar.SetActive(true);
@@ -664,8 +667,9 @@ public class DragonEntrance : MonoBehaviour
     {
         shake = 1.0f;
         pulse = 1f;
-        Ring(core, 16f, 0.7f, new Color(1f, 0.85f, 0.7f, 0.85f));
-        Ring(core, 9f, 0.45f, new Color(1f, 0.4f, 0.3f, 0.8f));
+        float area = Mathf.Lerp(1f, sizeFactor, 0.6f);
+        Ring(core, 16f * area, 0.7f, new Color(1f, 0.85f, 0.7f, 0.85f));
+        Ring(core, 9f * area, 0.45f, new Color(1f, 0.4f, 0.3f, 0.8f));
         if (burst != null) burst.Emit(160);
         if (dust != null) dust.Emit(70);
         if (embers != null) embers.Stop(true, ParticleSystemStopBehavior.StopEmitting);

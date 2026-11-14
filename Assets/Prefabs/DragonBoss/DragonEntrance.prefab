@@ -52,5 +52,6 @@ MonoBehaviour:
   bossName: "\uB179\uC2A4"
   bossTag: "\uACA9\uB9AC \uAC1C\uCCB4 V-04"
   bossSubtitle: "\uACF5\uD5C8\uB97C \uC0BC\uD0A4\uB294 \uC6A9"
+  sizeFactor: 1.5
   landHeight: 18
   skipHold: 0.6

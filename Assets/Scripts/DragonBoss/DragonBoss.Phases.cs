@@ -50,8 +50,8 @@ public partial class DragonBoss
 
     [Header("꼬리 휩쓸기 (2페이즈)")]
     [Tooltip("몸 둘레 범위 (m) — 머리 · 꼬리 끝이 닿는 곳")]
-    [SerializeField] float tailRadius = 5.8f;
-    [SerializeField] float tailWindup = 0.8f;
+    [SerializeField] float tailRadius = 4.4f;   // ×6 크기 기준 — ×9 에서 6.6m (몸 절반 5m + 여유)
+    [SerializeField] float tailWindup = 0.9f;
     [Tooltip("한 바퀴 도는 시간 (초)")]
     [SerializeField] float tailSpin = 0.45f;
     [Tooltip("돌기 전에 반대로 트는 각도")]
@@ -65,7 +65,7 @@ public partial class DragonBoss
     [Header("땅 물어뜯기 (3페이즈)")]
     [Tooltip("충격파 중심 — 몸 기준점 앞으로 m (머리가 땅에 닿는 곳)")]
     [SerializeField] float groundBiteCenter = 4.4f;
-    [SerializeField] float groundBiteRadius = 4.2f;
+    [SerializeField] float groundBiteRadius = 3.6f;   // ×6 크기 기준 — ×9 에서 5.4m
     [Tooltip("목을 당긴 채 더 멈추는 시간 — 큰 한 방이라 예고가 길다")]
     [SerializeField] float groundBiteHold = 0.3f;
     [SerializeField] float groundBiteDamage = 25f;
@@ -160,13 +160,13 @@ public partial class DragonBoss
                 phase = next;
                 OnPhaseChanged?.Invoke(phase);
                 Shake(1.0f);
-                Ring(transform.position, 14f, 0.8f);
+                Ring(transform.position, 14f * areaScale, 0.8f);
             }
             if (roared && !echoed && t >= rise + 0.3f)
             {
                 echoed = true;
                 Shake(0.5f);
-                Ring(transform.position, 10f, 0.6f);
+                Ring(transform.position, 10f * areaScale, 0.6f);
             }
             yield return null;
         }
@@ -203,7 +203,7 @@ public partial class DragonBoss
             yield return null;
         }
         Shake(0.5f);
-        Ring(transform.position, 8f, 0.6f);
+        Ring(transform.position, 8f * areaScale, 0.6f);
         if (CanSummon()) yield return SummonCore(rise, rise);
         BackToIdle(0.4f);
         nextRecover = 0.8f;
@@ -321,7 +321,7 @@ public partial class DragonBoss
             {
                 begin = t;
                 Shake(0.5f);
-                Ring(transform.position, 7f, 0.5f);
+                Ring(transform.position, 7f * areaScale, 0.5f);
                 foreach (Vector3 p in points) marks.Add(Track(DragonTelegraph.Circle(telegraphMaterial, p, rainRadius)));
             }
             for (int i = 0; i < marks.Count; i++)
@@ -444,8 +444,8 @@ public partial class DragonBoss
         yield return TurnToTarget(0.25f);
         Vector3 back = -Flat(transform.forward).normalized, start = transform.position;
         float travel = retreatDistance;
-        if (agent.isOnNavMesh && NavMesh.Raycast(start, start + back * (retreatDistance + 2f), out NavMeshHit edge, NavMesh.AllAreas))
-            travel = Mathf.Min(retreatDistance, edge.distance - 2f);
+        if (agent.isOnNavMesh && NavMesh.Raycast(start, start + back * (retreatDistance + 2f * bodyScale), out NavMeshHit edge, NavMesh.AllAreas))
+            travel = Mathf.Min(retreatDistance, edge.distance - 2f * bodyScale);
 
         // 웅크림 — 목을 당기고 날개를 편다 (공격 ①)
         for (float t = 0f; t < 0.22f; t += Time.deltaTime)

@@ -57,6 +57,11 @@ public partial class DragonBoss : MonoBehaviour
     [Tooltip("불덩이 — 몬스터 투사체(RangedProjectile)라 검사 패링으로 되받아칠 수 있다")]
     [SerializeField] GameObject fireballPrefab;
 
+    [Header("크기")]
+    [Tooltip("몸 크기 배율 = 모델 크기 ÷ 6 (프리팹 도구가 넣는다). 아래 거리 값들은 '×6 크기 기준'으로 적혀 있고, 깨어날 때 이 배율에 맞춰 늘어난다 — "
+             + "몸에 붙은 것(물기 · 꼬리 · 돌진 폭)은 그대로, 전장에 깔리는 것(브레스 길이 · 돌진 거리)은 그보다 조금만")]
+    [Min(0.1f)] [SerializeField] float sizeFactor = 1f;
+
     [Header("등장")]
     [Tooltip("나타날 때 플레이어에게서 이만큼 떨어진 길 위에 선다 (원래 자리가 이보다 가까울 때만)")]
     [SerializeField] float spawnDistance = 14f;
@@ -113,6 +118,10 @@ public partial class DragonBoss : MonoBehaviour
     readonly List<DragonTelegraph> telegraphs = new List<DragonTelegraph>();
     readonly List<(Pattern p, float w)> candidates = new List<(Pattern, float)>();
     int phase = 1, pendingPhase = 1;
+    float bodyScale = 1f, areaScale = 1f;   // 크기 배율 — 몸에 붙은 것 / 전장에 깔리는 것
+
+    /// <summary>몸 크기 배율 (모델 크기 ÷ 6).</summary>
+    public float SizeFactor => bodyScale;
     float nextGrowl = 5f, stepPhase;
     AudioSource breathVoice;
 
@@ -138,6 +147,7 @@ public partial class DragonBoss : MonoBehaviour
         agent = GetComponent<NavMeshAgent>();
         health = GetComponent<BossHealth>();
         brain = GetComponent<BossBrain>();
+        ApplySize();
         agent.speed = moveSpeed;
         agent.angularSpeed = turnSpeed;
         agent.acceleration = 12f;
@@ -601,6 +611,46 @@ public partial class DragonBoss : MonoBehaviour
     }
 
     static Vector3 Flat(Vector3 v) => new Vector3(v.x, 0f, v.z);
+
+    // ───────── 크기 (2026-11-14) ─────────
+
+    /// <summary>
+    /// 거리 값들을 몸 크기에 맞춘다 (한 번, 깨어날 때). biteFar · chargeFront · walkCycleSpeed 는 프리팹 도구가 실제 크기로 재 넣으므로 건드리지 않는다.
+    /// </summary>
+    void ApplySize()
+    {
+        bodyScale = Mathf.Max(0.1f, sizeFactor);
+        areaScale = Mathf.Lerp(1f, bodyScale, 0.6f);
+        float slight = Mathf.Lerp(1f, bodyScale, 0.35f);
+
+        // 몸에 붙은 것 — 몸과 같이 커진다
+        biteWidth *= bodyScale;
+        biteNear *= bodyScale;
+        breathApex *= bodyScale;
+        chargeWidth *= bodyScale;
+        tailRadius *= bodyScale;
+        groundBiteCenter *= bodyScale;
+        groundBiteRadius *= bodyScale;
+        nearRange = Mathf.Min(nearRange * bodyScale, biteFar + 0.5f);   // '가까이' 는 물기가 닿는 곳까지
+
+        // 전장에 깔리는 것 — 몸보다 덜 커진다 (전장 크기는 그대로라서)
+        breathRadius *= areaScale;
+        chargeMaxLength *= areaScale;
+        chargeSpeed *= areaScale;
+        midRange *= areaScale;
+        spawnDistance *= areaScale;
+        summonRadius *= areaScale;
+        retreatDistance *= areaScale;
+        rainSpread *= areaScale;
+        fireballLineLength *= areaScale;
+
+        // 조금만 — 피하는 쪽 속도는 그대로라서
+        moveSpeed *= slight;
+        fireballSpeed *= slight;
+        rainRadius *= slight;
+        firePatchRadius *= slight;
+        firePatchSpacing *= slight;
+    }
 
     // ───────── 소리 (DragonSound · 2026-11-14) ─────────
 

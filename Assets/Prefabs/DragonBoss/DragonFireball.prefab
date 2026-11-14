@@ -104,8 +104,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e9de876a8c374b9c903387d0c4e7bcdd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RangedProjectile
-  radius: 0.5
-  visualRadius: 0.7
+  radius: 0.7
+  visualRadius: 0.97999996
   lifeTime: 3
   projectileMaterial: {fileID: 2100000, guid: 1460a241f2ef4940877922c607e5a713, type: 2}
 --- !u!1 &7849948363326969923
@@ -395,8 +395,8 @@ ParticleSystem:
     startSize:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 2
-      minScalar: 1.2
+      scalar: 2.8
+      minScalar: 1.6800001
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -859,7 +859,7 @@ ParticleSystem:
     sphericalDirectionAmount: 0
     randomPositionAmount: 0
     radius:
-      value: 0.25
+      value: 0.35
       mode: 0
       spread: 0
       speed:

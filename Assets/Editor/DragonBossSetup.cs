@@ -27,7 +27,11 @@ public static class DragonBossSetup
     const string ControllerPath = OutDir + "/DragonBoss.controller";
     const string MaterialPath = OutDir + "/Dragon.mat";
     // 실제 몸(정점 기준)은 폭 0.4 × 높이 0.7 × 길이 1.1m — ×6 이면 길이 약 6.6m · 높이 4.2m, 지금 보스(골렘, 약 7m)와 비슷하다
-    public const float Scale = 6f;
+    /// <summary>보스 크기 (모델 배율). 2026-11-14 사용자 요청으로 6 → 9 — 몸길이 약 10m · 높이 약 6.6m.
+    /// 패턴 거리 값은 BaseScale(6) 기준으로 적혀 있고, 프리팹에 넣는 sizeFactor(= Scale ÷ BaseScale)에 맞춰 스스로 늘어난다.</summary>
+    public const float Scale = 9f;
+    public const float BaseScale = 6f;
+    public const float SizeFactor = Scale / BaseScale;
     const int BossHp = 1000;   // 지금 보스(골렘)와 같게 — 패턴이 생기면 다시 정한다
 
     static readonly (string file, string state, bool loop)[] ClipFiles =
@@ -562,8 +566,9 @@ public static class DragonBossSetup
             PrefabUtility.UnpackPrefabInstance(go, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
             go.name = "DragonFireball";
             var projectile = go.GetComponent<RangedProjectile>();
-            projectile.radius = 0.5f;
-            projectile.visualRadius = 0.7f;
+            float ballSize = Mathf.Lerp(1f, SizeFactor, 0.8f);   // 불덩이도 몸에 맞춰 커진다
+            projectile.radius = 0.5f * ballSize;
+            projectile.visualRadius = 0.7f * ballSize;
             projectile.lifeTime = 3f;
 
             var flame = new GameObject("Flame");
@@ -577,14 +582,14 @@ public static class DragonBossSetup
             main.scalingMode = ParticleSystemScalingMode.Local;
             main.startLifetime = new ParticleSystem.MinMaxCurve(0.25f, 0.4f);
             main.startSpeed = new ParticleSystem.MinMaxCurve(0.2f, 1f);
-            main.startSize = new ParticleSystem.MinMaxCurve(1.2f, 2f);
+            main.startSize = new ParticleSystem.MinMaxCurve(1.2f * ballSize, 2f * ballSize);
             main.startColor = new ParticleSystem.MinMaxGradient(new Color(1f, 0.8f, 0.4f), new Color(1f, 0.45f, 0.12f));
             main.maxParticles = 120;
             var emission = ps.emission;
             emission.rateOverTime = 70f;
             var shape = ps.shape;
             shape.shapeType = ParticleSystemShapeType.Sphere;
-            shape.radius = 0.25f;
+            shape.radius = 0.25f * ballSize;
             var color = ps.colorOverLifetime;
             color.enabled = true;
             var gradient = new Gradient();
@@ -626,6 +631,7 @@ public static class DragonBossSetup
             so.FindProperty("fireMaterial").objectReferenceValue = fire;
             so.FindProperty("smokeMaterial").objectReferenceValue = Require<Material>(SmokeMaterialPath);
             so.FindProperty("font").objectReferenceValue = Require<TMPro.TMP_FontAsset>(TestRoomSetup.FontPath);
+            so.FindProperty("sizeFactor").floatValue = SizeFactor;
             so.ApplyModifiedPropertiesWithoutUndo();
             return PrefabUtility.SaveAsPrefabAsset(go, EntrancePath).GetComponent<DragonEntrance>();
         }
@@ -655,7 +661,7 @@ public static class DragonBossSetup
             if (pose != null && animator != null) pose.SampleAnimation(animator.gameObject, 0.58f);
             Transform jaw = model.GetComponentsInChildren<Transform>(true).FirstOrDefault(t => t.name == "jaw_upper");
             // 위턱 뼈는 머리 아래쪽 뿌리에 있다 — 뿔 · 눈 · 벌린 입이 한가운데 오게 조금 앞 · 아래를 본다
-            Vector3 head = jaw != null ? jaw.position + Vector3.forward * 0.5f - Vector3.up * 0.35f : model.transform.position + Vector3.up * 3f;
+            Vector3 head = jaw != null ? jaw.position + (Vector3.forward * 0.5f - Vector3.up * 0.35f) * SizeFactor : model.transform.position + Vector3.up * 3f * SizeFactor;
             foreach (SkinnedMeshRenderer smr in model.GetComponentsInChildren<SkinnedMeshRenderer>(true)) smr.updateWhenOffscreen = true;
 
             var cam = camGo.AddComponent<Camera>();
@@ -667,7 +673,7 @@ public static class DragonBossSetup
             cam.fieldOfView = 26f;
             cam.nearClipPlane = 0.1f;
             cam.farClipPlane = 60f;
-            cam.transform.position = head + new Vector3(2.8f, 0.4f, 6.2f);   // 드래곤은 +z 를 본다 — 앞 오른쪽에서
+            cam.transform.position = head + new Vector3(2.8f, 0.4f, 6.2f) * SizeFactor;   // 드래곤은 +z 를 본다 — 앞 오른쪽에서 (크기에 맞춰 물러난다)
             cam.transform.LookAt(head);
             cam.targetTexture = rt;
 
@@ -733,7 +739,7 @@ public static class DragonBossSetup
             proxyAnimator.runtimeAnimatorController = controller;
 
             float width = m.max.x - m.min.x, length = m.max.z - m.min.z;
-            float radius = Mathf.Clamp(width * 0.5f, 0.8f, 1.8f);
+            float radius = Mathf.Clamp(width * 0.5f, 0.8f, 1.8f * SizeFactor);
 
             var agent = root.AddComponent<NavMeshAgent>();
             agent.radius = radius;
@@ -767,6 +773,7 @@ public static class DragonBossSetup
             var so = new SerializedObject(dragon);
             so.FindProperty("animator").objectReferenceValue = animator;
             so.FindProperty("introModel").objectReferenceValue = modelPrefab;
+            so.FindProperty("sizeFactor").floatValue = SizeFactor;
             so.FindProperty("walkCycleSpeed").floatValue = Round(m.walkCycleSpeed);
             so.FindProperty("attackLength").floatValue = Round(m.lengths[DragonBoss.AttackState]);
             so.FindProperty("dieLength").floatValue = Round(m.lengths[DragonBoss.DieState]);
