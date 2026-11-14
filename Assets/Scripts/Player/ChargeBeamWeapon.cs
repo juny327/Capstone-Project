@@ -341,6 +341,7 @@ public class ChargeBeamWeapon : WeaponBase
             // 관통이라 한 프레임에 여러 명이 들어온다. 소리는 프레임 끝에 한 번만.
             if (SoundManager.Instance != null)
                 SoundManager.Instance.ReportHit(isCritical, HitSound.Laser);
+            PlayHitLayer();   // 상위 무기 전용 적중음 (최소 간격으로 한 번)
         }
 
         // 맞히면 한 발에 한 번 흔든다 (2026-11-12 — 피해 정보의 cameraShake 는 적이 쓰지 않아 한 번도 흔들리지 않았다).

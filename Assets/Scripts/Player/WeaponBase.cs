@@ -430,6 +430,48 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
         if (max <= 0f) max = 1f;
 
         PlaySound(clip, data.fireVolume, Random.Range(min, max));
+        PlayFireLayer();
+    }
+
+    float lastFireLayerAt = -99f;
+    float lastHitLayerAt = -99f;
+    int fireLayerTurn, hitLayerTurn;
+
+    /// <summary>시험용 — 덧소리 · 전용 적중음을 낸 횟수.</summary>
+    public static int FireLayersPlayed { get; private set; }
+    public static int HitLayersPlayed { get; private set; }
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetLayerCounts() { FireLayersPlayed = 0; HitLayersPlayed = 0; }
+
+    /// <summary>발사음 덧소리 (상위 무기) — 원래 발사음과 같은 순간에 한 겹 더. 보조 무기는 PlaySound 가 줄인다.</summary>
+    void PlayFireLayer()
+    {
+        if (data == null || !data.HasFireLayer) return;
+        if (Time.unscaledTime - lastFireLayerAt < data.fireLayerMinInterval) return;
+
+        AudioClip clip = data.fireLayerSounds[fireLayerTurn++ % data.fireLayerSounds.Length];
+        if (clip == null) return;
+
+        lastFireLayerAt = Time.unscaledTime;
+        float min = Mathf.Min(data.fireLayerPitchRange.x, data.fireLayerPitchRange.y);
+        float max = Mathf.Max(data.fireLayerPitchRange.x, data.fireLayerPitchRange.y);
+        PlaySound(clip, data.fireLayerVolume, min > 0f ? Random.Range(min, max) : 1f);
+        FireLayersPlayed++;
+    }
+
+    /// <summary>전용 적중음 (상위 무기) — 맞힌 쪽(탄 · 줄기 · 칼)이 부른다. 공용 적중음은 그대로 나고 그 위에 얹힌다.</summary>
+    public void PlayHitLayer()
+    {
+        if (data == null || !data.HasHitLayer) return;
+        if (Time.unscaledTime - lastHitLayerAt < data.hitLayerMinInterval) return;
+
+        AudioClip clip = data.hitLayerSounds[hitLayerTurn++ % data.hitLayerSounds.Length];
+        if (clip == null) return;
+
+        lastHitLayerAt = Time.unscaledTime;
+        PlaySound(clip, data.hitLayerVolume, Random.Range(0.96f, 1.04f));
+        HitLayersPlayed++;
     }
 
     /// <summary>

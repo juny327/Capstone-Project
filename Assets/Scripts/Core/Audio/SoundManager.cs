@@ -168,6 +168,59 @@ public class SoundManager : MonoBehaviour
     /// <summary>지금 무기 · 맞힘 소리에 곱하는 배율 (맞은 직후 잠깐 작게).</summary>
     public float WeaponDuck => Time.unscaledTime < duckUntil ? hurtDuckLevel : 1f;
 
+    // ───────── 큰 순간 (2026-11-14 연출 개선 5) ─────────
+    // 큰 소리가 묻히지 않게, 그 순간부터 잠깐 배경음과 다른 효과음을 낮춘다.
+    //  · 같은 프레임에 낸 소리(= 그 큰 소리 자신)는 그대로 둔다
+    //  · 그 전부터 울리던 효과음은 프레임 끝에 한 번 줄이고, 그 뒤 seconds 동안 새로 나는 효과음도 줄여서 낸다
+    //  · 배경음은 빠르게 내려갔다가 천천히 돌아온다
+    private float impactDuckUntil = -999f;
+    private float impactSfxLevel = 1f;
+    private float impactMusicLevel = 1f;
+    private int impactDuckFrame = -1;
+    private bool impactPending;
+    private float musicDuck = 1f;
+    private int[] voiceFrame;
+
+    /// <summary>시험용 — 낮춘 횟수 · 지금 배경음에 곱해진 배율.</summary>
+    public static int ImpactDucks { get; private set; }
+    public float MusicDuck => musicDuck;
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetImpactDucks() => ImpactDucks = 0;
+
+    /// <summary>큰 순간 — seconds 동안 배경음을 musicLevel 배, 다른 효과음을 sfxLevel 배로 낮춘다.</summary>
+    public void DuckForImpact(float seconds, float musicLevel, float sfxLevel)
+    {
+        if (seconds <= 0f) return;
+        impactDuckUntil = Time.unscaledTime + seconds;
+        impactMusicLevel = Mathf.Clamp01(musicLevel);
+        impactSfxLevel = Mathf.Clamp01(sfxLevel);
+        impactDuckFrame = Time.frameCount;
+        impactPending = true;
+        ImpactDucks++;
+    }
+
+    /// <summary>지금 새로 내는 효과음에 곱하는 배율 — 큰 순간과 같은 프레임의 소리는 그대로.</summary>
+    float ImpactDuck => Time.unscaledTime < impactDuckUntil && Time.frameCount > impactDuckFrame ? impactSfxLevel : 1f;
+
+    void ApplyImpactDuck()
+    {
+        // 그 전부터 울리던 효과음을 한 번 줄인다 (이번 프레임에 낸 것은 빼고)
+        if (impactPending)
+        {
+            impactPending = false;
+            for (int i = 0; i < voices.Length; i++)
+                if (voices[i].isPlaying && voiceFrame[i] < impactDuckFrame) voices[i].volume *= impactSfxLevel;
+        }
+
+        // 배경음 — 0.06초에 내려가고 0.35초에 돌아온다
+        float target = Time.unscaledTime < impactDuckUntil ? impactMusicLevel : 1f;
+        if (Mathf.Approximately(musicDuck, target)) return;
+        musicDuck = Mathf.MoveTowards(musicDuck, target, Time.unscaledDeltaTime / (target < musicDuck ? 0.06f : 0.35f));
+        if (musicSource != null && currentTrack != null && musicRoutine == null)
+            musicSource.volume = currentTrack.volume * musicVolume * musicDuck;
+    }
+
     private AudioSource priorityVoice;
     private float duckUntil = -999f;
 
@@ -192,7 +245,7 @@ public class SoundManager : MonoBehaviour
 
         voice.Stop();
         voice.clip = clip;
-        voice.volume = Mathf.Clamp01(entry.volume * volumeScale) * masterVolume;
+        voice.volume = Mathf.Clamp01(entry.volume * volumeScale) * masterVolume * (fixedVoice != null ? 1f : ImpactDuck);
         voice.pitch = Mathf.Clamp(entry.PickPitch() * pitchScale, 0.1f, 3f);   // pitchScale — 설정 슬라이더 틱이 값만큼 높아진다
         voice.outputAudioMixerGroup = group;
         voice.Play();
@@ -288,6 +341,8 @@ public class SoundManager : MonoBehaviour
 
     void LateUpdate()
     {
+        ApplyImpactDuck();
+
         for (int k = 0; k < pendingHit.Length; k++)
         {
             if (!pendingHit[k]) continue;
@@ -325,7 +380,7 @@ public class SoundManager : MonoBehaviour
 
         voice.Stop();
         voice.clip = clip;
-        voice.volume = Mathf.Clamp01(volume) * masterVolume * WeaponDuck;   // 무기 소리 — 내가 맞은 직후에는 작게
+        voice.volume = Mathf.Clamp01(volume) * masterVolume * WeaponDuck * ImpactDuck;   // 무기 소리 — 내가 맞은 직후 · 큰 순간 직후에는 작게
 
         // 피치가 0 이면 소리가 멈춘 것처럼 들린다. 음수는 역재생이라 사고다.
         voice.pitch = Mathf.Clamp(pitch, 0.1f, 3f);
@@ -343,11 +398,13 @@ public class SoundManager : MonoBehaviour
             if (voices[index].isPlaying) continue;
 
             next = (index + 1) % voices.Length;
+            voiceFrame[index] = Time.frameCount;
 
             return voices[index];
         }
 
         AudioSource oldest = voices[next];
+        voiceFrame[next] = Time.frameCount;
         next = (next + 1) % voices.Length;
 
         return oldest;
@@ -464,7 +521,7 @@ public class SoundManager : MonoBehaviour
 
         // 페이드 중이면 그쪽이 끝나면서 새 값으로 맞춰진다
         if (musicRoutine == null)
-            musicSource.volume = currentTrack.volume * musicVolume;
+            musicSource.volume = currentTrack.volume * musicVolume * musicDuck;
     }
 
     /// <summary>옵션 메뉴에서 부를 효과음 볼륨. 0~1.</summary>
@@ -476,6 +533,7 @@ public class SoundManager : MonoBehaviour
     void CreateVoices()
     {
         voices = new AudioSource[Mathf.Max(1, voiceCount)];
+        voiceFrame = new int[voices.Length];
 
         for (int i = 0; i < voices.Length; i++)
         {

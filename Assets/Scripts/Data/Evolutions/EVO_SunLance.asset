@@ -27,4 +27,8 @@ MonoBehaviour:
   color: {r: 1, g: 0.86, b: 0.45, a: 1}
   sound: {fileID: 8300000, guid: f595650ca3f17154e8de61ccc64e6a00, type: 3}
   soundVolume: 0.9
+  bodySound: {fileID: 8300000, guid: e8ab32037f6be7d99c0495cdab4c7d5f, type: 3}
+  bodyVolume: 0.5
+  bassSound: {fileID: 8300000, guid: 2bd40c3a143abb620af165da2924b0da, type: 3}
+  bassVolume: 0.6
   shopPrice: 0

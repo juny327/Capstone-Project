@@ -53,6 +53,15 @@ MonoBehaviour:
   reloadStartSound: {fileID: 0}
   reloadEndSound: {fileID: 0}
   reloadVolume: 0.8
+  fireLayerSounds:
+  - {fileID: 8300000, guid: a36e49049eee6139356d9078874066a5, type: 3}
+  fireLayerVolume: 0.24
+  fireLayerPitchRange: {x: 0.97, y: 1.03}
+  fireLayerMinInterval: 0
+  hitLayerSounds:
+  - {fileID: 8300000, guid: c15ea2e34cca60310580574ac96589e1, type: 3}
+  hitLayerVolume: 0.18
+  hitLayerMinInterval: 0.09
   range: 5
   arcAngle: 40
   maxTargets: 4

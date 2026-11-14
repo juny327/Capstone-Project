@@ -51,6 +51,14 @@ public class WeaponEvolutionData : ScriptableObject
 
     [Range(0f, 1f)] public float soundVolume = 0.9f;
 
+    [Tooltip("무기별 몸통 소리 (2026-11-14 연출 개선 5) — 공통 소리 위에 얹는다. 비우면 없음")]
+    public AudioClip bodySound;
+    [Range(0f, 1f)] public float bodyVolume = 0.6f;
+
+    [Tooltip("저음 '쿵' — 진화가 사건으로 들리게. 비우면 없음")]
+    public AudioClip bassSound;
+    [Range(0f, 1f)] public float bassVolume = 0.7f;
+
     [Header("정비 창")]
     [Tooltip("Stage1 가격 (스테이지 배율이 곱해진다). 0 이면 무료")]
     [Min(0)] public int shopPrice = 0;

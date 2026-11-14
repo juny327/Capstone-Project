@@ -115,8 +115,14 @@ public class EvolutionPresenter : MonoBehaviour
 
         Shockwave(color);
 
-        if (evolution.sound != null && SoundManager.Instance != null)
-            SoundManager.Instance.PlayClip(evolution.sound, evolution.soundVolume, 1f);
+        if (SoundManager.Instance != null)
+        {
+            // 공통 '번쩍' + 무기별 몸통 + 저음 '쿵' (2026-11-14) — 그동안 배경음 · 다른 효과음을 잠깐 낮춘다
+            if (evolution.sound != null) SoundManager.Instance.PlayClip(evolution.sound, evolution.soundVolume, 1f);
+            if (evolution.bodySound != null) SoundManager.Instance.PlayClip(evolution.bodySound, evolution.bodyVolume, 1f);
+            if (evolution.bassSound != null) SoundManager.Instance.PlayClip(evolution.bassSound, evolution.bassVolume, 1f);
+            if (evolution.bodySound != null || evolution.bassSound != null) SoundManager.Instance.DuckForImpact(0.45f, 0.5f, 0.6f);
+        }
 
         // 번쩍 → 배너가 커졌다 줄어들며 자리 잡는다 → 잠깐 머문다 → 흐려진다
         float t = 0f;

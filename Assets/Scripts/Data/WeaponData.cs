@@ -172,6 +172,23 @@ public abstract class WeaponData : ScriptableObject
     /// 같은 클립이 반복되면 기계음처럼 들린다. 변형이 여러 개면 돌려 쓰고,
     /// 하나뿐이면 `firePitchRange` 의 피치 흔들기로 버틴다.
     /// </summary>
+    [Header("소리 층 (2026-11-14 연출 개선 5 — 상위 무기) · 비우면 예전 그대로")]
+    [Tooltip("발사음 덧소리 — 원래 발사음과 함께 한 겹 더 낸다 (여러 개면 돌려 가며). 쥐는 순간부터 원래 무기와 다르게 들린다")]
+    public AudioClip[] fireLayerSounds;
+    [Range(0f, 1f)] public float fireLayerVolume = 0.3f;
+    public Vector2 fireLayerPitchRange = new Vector2(0.97f, 1.03f);
+    [Tooltip("덧소리를 다시 내기까지의 최소 간격(초) — 연사가 빠른 무기는 발마다 내지 않는다")]
+    [Min(0f)] public float fireLayerMinInterval;
+
+    [Tooltip("전용 적중음 — 이 무기로 맞힐 때 공용 적중음 위에 한 겹 더")]
+    public AudioClip[] hitLayerSounds;
+    [Range(0f, 1f)] public float hitLayerVolume = 0.25f;
+    [Tooltip("적중음을 다시 내기까지의 최소 간격(초) — 여러 명을 한꺼번에 맞혀도 한 번")]
+    [Min(0f)] public float hitLayerMinInterval = 0.09f;
+
+    public bool HasFireLayer => fireLayerSounds != null && fireLayerSounds.Length > 0;
+    public bool HasHitLayer => hitLayerSounds != null && hitLayerSounds.Length > 0;
+
     public AudioClip PickFireSound()
     {
         if (fireSounds == null || fireSounds.Length == 0) return null;

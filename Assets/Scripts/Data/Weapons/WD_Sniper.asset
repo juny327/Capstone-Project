@@ -46,6 +46,14 @@ MonoBehaviour:
   reloadStartSound: {fileID: 8300000, guid: 50283517cd3efba4fa3d7b82df3bd149, type: 3}
   reloadEndSound: {fileID: 8300000, guid: 29d9b00ccbf65794ca266d7557044b8f, type: 3}
   reloadVolume: 0.6
+  fireLayerSounds:
+  - {fileID: 8300000, guid: 8a312bfb6774b9213fff81665ffdf273, type: 3}
+  fireLayerVolume: 0.3
+  fireLayerPitchRange: {x: 0.97, y: 1.03}
+  fireLayerMinInterval: 0
+  hitLayerSounds: []
+  hitLayerVolume: 0.18
+  hitLayerMinInterval: 0.09
   aimMode: 0
   projectilePrefab: {fileID: 5875018044698817663, guid: 47d42afc0830c50448915274e6d3e535, type: 3}
   projectileSpeed: 60

@@ -377,6 +377,7 @@ public class MeleeWeapon : WeaponBase
 
         // 베는 소리는 칼이 적에게 닿은 순간에 (2026-11-02 — 예전엔 휘두르기 시작에 나서 0.24 ~ 0.58초 먼저 들렸다)
         if (applied > 0) PlayFireSound();
+        if (applied > 0) PlayHitLayer();   // 상위 무기 전용 적중음 (있을 때만)
 
         // 맞히면 한 번 흔든다 (2026-11-12) — 데이터의 cameraShake 는 피해 정보에 실려 적에게 넘어가기만 하고 아무도 쓰지 않아, 근접은 한 번도 흔들리지 않았다.
         // 적 수만큼이 아니라 한 번 휘두름에 한 번
