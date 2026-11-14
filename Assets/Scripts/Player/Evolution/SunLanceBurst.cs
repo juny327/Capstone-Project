@@ -192,6 +192,10 @@ public class SunLanceBurst : MonoBehaviour
         // 총구 섬광 · 끝 폭발 고리
         FxLine.Ring(cfg.lineMaterial, origin - Vector3.up * 0.3f, 0.3f, 2.4f, Color.white, 0.35f, 0.3f);
         FxLine.Ring(cfg.lineMaterial, Ground(beamTo), 0.4f, 2.2f, cfg.color, 0.3f, 0.35f);
+        GroundGlow.Flash(ground, 2.8f, cfg.color, 0.3f);
+        GroundGlow.Flash(Ground(beamTo), 2.6f, cfg.color, 0.35f);
+        FlashLight.Flash(ground, cfg.color, 7f, 0.22f, 1.2f);
+        FlashLight.Flash(Ground(beamTo), cfg.color, 6f, 0.25f);
 
         WeaponBase.ShakeCamera(weapon, cfg.cameraShake);   // 보조 무기는 약하게 (WeaponBase.ShakeCamera)
         CombatFx.PlaySound(cfg.fireSound);
@@ -233,6 +237,7 @@ public class SunLanceBurst : MonoBehaviour
         if (outer == null) outer = MakeLine("SunBeam");
         if (inner == null) inner = MakeLine("SunCore");
         telegraph.sharedMaterial = outer.sharedMaterial = inner.sharedMaterial = cfg.lineMaterial;
+        FxGlow.Apply(inner, FxGlow.Body);   // 넓은 바깥 광선은 그대로 — 올리면 금색이 하얗게 날아간다
     }
 
     LineRenderer MakeLine(string name)

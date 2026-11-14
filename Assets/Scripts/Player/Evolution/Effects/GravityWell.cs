@@ -180,6 +180,8 @@ public class GravityWell : MonoBehaviour
 
         FxLine.Ring(cfg.ringMaterial, at, 0.3f, cfg.collapseRadius * 1.2f, cfg.color, 0.4f, 0.35f);
         FxLine.Ring(cfg.ringMaterial, at, 0.2f, cfg.collapseRadius * 0.7f, Color.white, 0.2f, 0.22f);
+        GroundGlow.Flash(at, cfg.collapseRadius * 1.6f, cfg.color, 0.32f);
+        FlashLight.Flash(at, cfg.color, Mathf.Max(5f, cfg.collapseRadius * 3f), 0.22f, 1.3f);
 
         if (cfg.collapsePrefab != null)
         {

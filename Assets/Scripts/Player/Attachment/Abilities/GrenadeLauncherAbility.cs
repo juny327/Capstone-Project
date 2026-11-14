@@ -154,6 +154,8 @@ public class GrenadeLauncherAbility : SubAbility
 
         FxLine.Ring(fxMaterial, to, radius * 0.2f, radius, blastColor, 0.4f, 0.45f);
         FxLine.Ring(fxMaterial, to, radius * 0.1f, radius * 0.6f, new Color(1f, 0.9f, 0.6f, 0.9f), 0.6f, 0.25f);
+        GroundGlow.Flash(to, radius * 1.3f, blastColor, 0.35f);
+        FlashLight.Flash(to, blastColor, Mathf.Max(5f, radius * 2.2f), 0.2f);
         EvoStrikes.Spawn(explosionPrefab, to, blastColor, explosionScale);
 
         if (sparkPrefab != null)

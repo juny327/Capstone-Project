@@ -11,6 +11,9 @@ public class FxLine : MonoBehaviour
 
     static readonly List<FxLine> pool = new List<FxLine>();
 
+    /// <summary>켜 두면 이어서 그리는 선은 밝기 배율을 걸지 않는다 (바닥 빛 띠 — GroundGlow.Strip). 쓰고 나서 바로 끈다.</summary>
+    public static bool Glowless;
+
     LineRenderer line;
     Mode mode;
     float age;
@@ -159,6 +162,9 @@ public class FxLine : MonoBehaviour
         duration = Mathf.Max(0.02f, d);
         age = 0f;
         Apply(1f);
+
+        // 빛 번짐 (FxGlow) — 흰 심지는 세게, 무기 색 몸통은 조금. 넓게 퍼지는 고리는 그대로 둔다
+        FxGlow.Apply(line, Glowless || m == Mode.Ring ? 1f : FxGlow.For(c));
     }
 
     void Update()

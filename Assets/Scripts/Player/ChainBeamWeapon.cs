@@ -314,6 +314,8 @@ public class ChainBeamWeapon : WeaponBase
         line.endWidth = width;
         line.startColor = color;
         line.endColor = color;
+        line.sortingOrder = 0;
+        FxGlow.Apply(line, cfg.coreWidth > 0f ? FxGlow.Body : 1f);
 
         Vector3 axis = to - from;
 
@@ -345,6 +347,25 @@ public class ChainBeamWeapon : WeaponBase
         }
 
         line.enabled = true;
+
+        if (cfg.coreWidth <= 0f) return;
+
+        // 안쪽 심지 — 같은 점들을 그대로, 굵기는 바깥 줄기에 비례해서 (연쇄 가지는 더 가늘다)
+        LineRenderer core = NextLine(cfg);
+        if (core == null) return;
+
+        float coreWidth = cfg.coreWidth * (cfg.beamWidth > 0.0001f ? width / cfg.beamWidth : 1f);
+        Color coreColor = cfg.coreColor;
+        coreColor.a *= color.a;
+        core.positionCount = segments + 1;
+        core.startWidth = coreWidth;
+        core.endWidth = coreWidth;
+        core.startColor = coreColor;
+        core.endColor = coreColor;
+        core.sortingOrder = 1;
+        FxGlow.Apply(core, FxGlow.Core);
+        for (int i = 0; i <= segments; i++) core.SetPosition(i, boltPoints[i]);
+        core.enabled = true;
     }
 
     void Show(ChainBeamWeaponData cfg)

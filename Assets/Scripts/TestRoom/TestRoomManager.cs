@@ -52,6 +52,9 @@ public class TestRoomManager : MonoBehaviour
     {
         Instance = this;
         PracticeRules.Begin(practiceCooldown, infiniteStamina);
+
+        // 빛 · 색을 스테이지와 같게 (2026-11-14) — 테스트 룸은 블룸이 스테이지의 약 10배라 연출이 실제 게임과 다르게 보였다
+        FxGlow.ApplyStageLook(gameObject.scene);
     }
 
     IEnumerator Start()

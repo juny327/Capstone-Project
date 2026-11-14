@@ -535,6 +535,7 @@ public class BloodFrenzyEffect : AttachmentEffect
             line.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             line.receiveShadows = false;
             line.sharedMaterial = cfg.material;
+            FxGlow.Apply(line, FxGlow.Body);
             return line;
         }
 

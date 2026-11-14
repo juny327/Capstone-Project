@@ -126,6 +126,12 @@ public class ChargeBeamWeapon : WeaponBase
         }
 
         SpawnFx(cfg.muzzleFlashPrefab, origin, Quaternion.LookRotation(dir));
+        if (cfg.fireRing > 0f && cfg.beamMaterial != null)
+        {
+            FxLine.Ring(cfg.beamMaterial, origin - Vector3.up * 0.15f, 0.1f, cfg.fireRing, cfg.beamColor, 0.1f, 0.2f);
+            FxLine.Ring(cfg.beamMaterial, origin - Vector3.up * 0.15f, 0.05f, cfg.fireRing * 0.55f, cfg.coreColor, 0.06f, 0.14f);
+            GroundGlow.Flash(new Vector3(origin.x, Owner != null ? Owner.transform.position.y : origin.y - 1.2f, origin.z), cfg.fireRing * 1.5f, cfg.beamColor, 0.2f);
+        }
 
         // 다음 발을 위한 충전이 곧바로 시작된다.
         // 적이 있을 때만 쏘므로, 이 소리도 전투 중에만 난다.
@@ -508,6 +514,38 @@ public class ChargeBeamWeapon : WeaponBase
         beam.endColor = color;
         beam.sortingOrder = 0;
         beam.enabled = true;
+        FxGlow.Apply(beam, cfg.coreWidth > 0f ? FxGlow.Body : 1f);
+
+        while (beamColors.Count <= index) beamColors.Add(color);
+        beamColors[index] = color;
+
+        // 안쪽 흰 심지 — 같은 자리에 가늘게
+        if (cfg.coreWidth > 0f)
+        {
+            while (cores.Count <= index) cores.Add(CreateLine($"BeamCore{cores.Count + 1}", cfg));
+            LineRenderer core = cores[index];
+            if (core != null)
+            {
+                core.SetPosition(0, from);
+                core.SetPosition(1, to);
+                core.startWidth = cfg.coreWidth * cfg.firePunch;
+                core.endWidth = cfg.coreWidth * cfg.firePunch * 0.6f;
+                core.startColor = cfg.coreColor;
+                core.endColor = cfg.coreColor;
+                core.sortingOrder = 1;
+                core.enabled = true;
+                FxGlow.Apply(core, FxGlow.Core);
+            }
+
+            // 광선 아래 바닥에 깔리는 빛
+            float groundY = Owner != null ? Owner.transform.position.y : from.y - 1.2f;
+            GroundGlow.Strip(new Vector3(from.x, groundY, from.z), new Vector3(to.x, groundY, to.z), cfg.beamWidth * 5f, color, cfg.beamDuration);
+        }
+        if (cfg.firePunch > 1f)
+        {
+            beam.startWidth = cfg.beamWidth * cfg.firePunch;
+            beam.endWidth = cfg.beamWidth * cfg.firePunch * 0.6f;
+        }
 
         beamHideAt = Time.time + cfg.beamDuration;
 

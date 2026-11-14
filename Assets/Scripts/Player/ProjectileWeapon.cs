@@ -149,6 +149,10 @@ public class ProjectileWeapon : WeaponBase
 
             obj.transform.SetPositionAndRotation(Muzzle.position, Quaternion.LookRotation(dir));
 
+            // 아주 빠른 탄(스나이퍼)은 쏘는 순간 총구에서 끝까지 한 줄을 그린다
+            if (fx != null && fx.Enabled && fx.tracerInstant)
+                ShotFxDraw.InstantTracer(fx, Muzzle.position, InstantTracerEnd(Muzzle.position, dir, in stats), fxScale, groundY);
+
             Bullet bullet = obj.GetComponent<Bullet>();
             if (bullet == null) continue;
 

@@ -317,6 +317,9 @@ public class PrismNovaBurst : MonoBehaviour
         Vector3 at = muzzle != null ? muzzle.position : OwnerPosition();
         FxLine.Ring(cfg.lineMaterial, at, 0.1f, 1.4f, Color.white, 0.3f, 0.25f);
         FxLine.Ring(cfg.lineMaterial, at, 1.6f, 0.1f, Color.white, 0.15f, 0.2f);
+        Vector3 floor = new Vector3(at.x, OwnerPosition().y, at.z);
+        GroundGlow.Flash(floor, 2.6f, Color.white, 0.3f);
+        FlashLight.Flash(floor, Color.white, 6f, 0.2f);
         CombatFx.PlaySound(cfg.beamSound);
         CombatFx.PlaySound(cfg.beamBassSound);
         CombatFx.PlaySound(cfg.beamHumSound);
@@ -381,8 +384,6 @@ public class PrismNovaBurst : MonoBehaviour
         if (cfg.sustainShake <= 0f || dt <= 0f) return;
         float scale = weapon != null ? weapon.ShakeScale : 1f;   // 보조 무기는 약하게 (2026-11-12 — 예전엔 안 흔들었다)
         if (scale <= 0f) return;
-        CameraShakeManager shake = CameraShakeManager.Instance;
-        if (shake == null || shake.impulseSource == null) return;
 
         rumbleTimer -= dt;
         if (rumbleTimer > 0f) return;
