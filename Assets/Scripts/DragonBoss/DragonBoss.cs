@@ -5,14 +5,20 @@ using UnityEngine.AI;
 using UnityEngine.InputSystem;
 
 /// <summary>
-/// 드래곤 보스 (Cethiel's Dragon 3D, 2026-11-13) — 1페이즈: 물기 · 지연 물기 · 불 브레스 · 불덩이 3발 · 돌진 + 추적.
-/// 패턴 자체는 DragonBoss.Patterns.cs. 테스트 룸 보스 바로 가기로만 나온다 (DragonBossRoute) — 본 게임 보스(골렘)는 그대로.
+/// 드래곤 보스 (Cethiel's Dragon 3D, 2026-11-13) — 테스트 룸 보스 바로 가기로만 나온다 (DragonBossRoute), 본 게임 보스(골렘)는 그대로.
+///   1페이즈: 물기 · 지연 물기 · 불 브레스 · 불덩이 3발 · 돌진 + 추적 (DragonBoss.Patterns.cs)
+///   2페이즈 (체력 2/3 아래, 2026-11-14): + 불비 · 꼬리 휩쓸기 · 물러나서 브레스 · 부하 소환 (DragonBoss.Phases.cs)
+///   3페이즈 (체력 1/3 아래): + 땅 물어뜯기 충격파 · 휩쓸기 브레스 · 연속 물기 · 불 장판 · 연계
+///   체력바(BossHPUI)의 빨강 · 주황 · 초록 세 칸이 곧 페이즈다. 넘어갈 때 포효한다.
 ///
 /// 패턴 고르기 — 거리와 직전 패턴을 본다 (고정 순서 아님):
 ///   가까이(≤ nearRange) 물기 · 지연 물기 · 브레스 / 중간(≤ midRange) 브레스 · 불덩이 · 돌진 / 멀리 돌진 · 불덩이
 ///   같은 패턴 연속 금지 · 패턴마다 쿨타임 · 끝나면 빈틈(대기). 고를 게 없으면 걸어서 다가간다
+///   앞 페이즈 패턴도 계속 쓴다 — 그 페이즈에 새로 생긴 패턴은 고를 확률이 newPatternBoost 배
 /// 시험 키 (테스트 룸 경로에서만): F1 물기 · F2 지연 물기 · F3 브레스 · F4 불덩이 · F5 돌진 — 지금 패턴이 끝나면 바로 그 패턴
 ///                                F6 가만히 켜고 끄기 — 스스로 공격 · 추적하지 않는다 (고른 패턴만 쓴다)
+///                                F7 불비 · F8 꼬리 휩쓸기 · F9 물러나서 브레스 · F10 땅 물어뜯기 · F11 휩쓸기 브레스 · F12 연속 물기
+///                                Home 부하 소환 · PageUp 다음 페이즈(포효) · PageDown 앞 페이즈로
 ///
 /// 보스 판정은 기존 보스 부품을 그대로 쓴다:
 ///  · BossHealth — 체력바(BossHPUI) · 보스 등장음 · 플레이어 무기의 보스 처리(조준 · 갈고리 · 패링)가 이걸 본다
@@ -24,7 +30,16 @@ public partial class DragonBoss : MonoBehaviour
 {
     public const string IdleState = "Idle", WalkState = "Walk", AttackState = "Attack", DieState = "Die";
 
-    public enum Pattern { None, Bite, DelayedBite, Breath, Fireball, Charge }
+    public enum Pattern
+    {
+        None, Bite, DelayedBite, Breath, Fireball, Charge,
+        // 2페이즈
+        FireRain, TailSweep, Retreat, Summon,
+        // 3페이즈
+        GroundBite, SweepBreath, BiteChain,
+        // 고르지 않는 것 — 페이즈 전환 포효 · 불 장판 피해(알림용)
+        Roar, FirePatch,
+    }
 
     [SerializeField] Animator animator;
     [Tooltip("인트로 씬에서 골렘 대신 세우는 몸 (AI 없음)")]
@@ -61,6 +76,14 @@ public partial class DragonBoss : MonoBehaviour
     [Tooltip("이 거리 안이면 '중간' (브레스 · 불덩이 · 돌진), 밖이면 '멀리' (돌진 · 불덩이)")]
     [SerializeField] float midRange = 11f;
 
+    [Header("페이즈")]
+    [Tooltip("체력이 이 비율 아래로 내려가면 2페이즈 — 체력바 빨강 칸이 다 닳는 곳")]
+    [Range(0f, 1f)] [SerializeField] float phase2At = 2f / 3f;
+    [Tooltip("이 비율 아래로 내려가면 3페이즈 — 체력바 주황 칸이 다 닳는 곳")]
+    [Range(0f, 1f)] [SerializeField] float phase3At = 1f / 3f;
+    [Tooltip("그 페이즈에 새로 생긴 패턴을 고를 확률 배율 — 앞 페이즈 패턴도 계속 쓰되 새 패턴이 더 자주 나온다")]
+    [Min(1f)] [SerializeField] float newPatternBoost = 2f;
+
     [Header("동작 길이 (프리팹 도구가 잰다)")]
     [SerializeField] float attackLength = 1.67f;
     [SerializeField] float dieLength = 2.47f;
@@ -89,6 +112,7 @@ public partial class DragonBoss : MonoBehaviour
     bool testKeys;
     readonly List<DragonTelegraph> telegraphs = new List<DragonTelegraph>();
     readonly List<(Pattern p, float w)> candidates = new List<(Pattern, float)>();
+    int phase = 1, pendingPhase = 1;
 
     public GameObject IntroModel => introModel;
     public DragonEntrance EntrancePrefab => entrancePrefab;
@@ -96,8 +120,14 @@ public partial class DragonBoss : MonoBehaviour
     public bool IsDead => state == State.Dead;
     public Pattern Current => current;
     public Pattern Last => lastPattern;
+    /// <summary>지금 페이즈 (1 ~ 3).</summary>
+    public int Phase => phase;
     /// <summary>패턴이 시작될 때 (시험 · 소리용).</summary>
     public event System.Action<Pattern> OnPatternStart;
+    /// <summary>페이즈가 바뀌었을 때 (새 페이즈).</summary>
+    public event System.Action<int> OnPhaseChanged;
+    /// <summary>연계 — 앞 패턴이 끝나자마자 빈틈 없이 다음 패턴으로 (앞, 뒤).</summary>
+    public event System.Action<Pattern, Pattern> OnCombo;
     /// <summary>플레이어에게 피해를 넣었을 때 (패턴, 피해).</summary>
     public event System.Action<Pattern, float> OnPlayerHit;
 
@@ -127,6 +157,7 @@ public partial class DragonBoss : MonoBehaviour
     void OnEnable()
     {
         health.OnBossDead += OnDead;
+        health.OnHpChanged += OnHpChanged;
         GameEvents.OnPlayerDeadStart += OnPlayerDead;
         Enter(State.Waiting);
     }
@@ -134,6 +165,7 @@ public partial class DragonBoss : MonoBehaviour
     void OnDisable()
     {
         health.OnBossDead -= OnDead;
+        health.OnHpChanged -= OnHpChanged;
         GameEvents.OnPlayerDeadStart -= OnPlayerDead;
         CleanupPattern();
     }
@@ -144,8 +176,26 @@ public partial class DragonBoss : MonoBehaviour
     /// <summary>가만히 — 스스로 패턴을 고르거나 다가오지 않고 플레이어 쪽만 본다. 고른 패턴(F1 ~ F5)은 쓴다. 시험 키 F6.</summary>
     public bool Passive { get; set; }
 
-    /// <summary>다음 패턴을 이것으로 (지금 패턴이 끝난 뒤, 거리 · 쿨타임 무시). 시험 키 · 배치 시험용.</summary>
+    /// <summary>다음 패턴을 이것으로 (지금 패턴이 끝난 뒤, 거리 · 쿨타임 · 페이즈 무시). 시험 키 · 배치 시험용.</summary>
     public void ForcePattern(Pattern pattern) => forced = pattern;
+
+    /// <summary>페이즈를 바로 바꾼다 (포효 없이). 시험 키 PageDown · 배치 시험용.</summary>
+    public void SetPhase(int value)
+    {
+        phase = pendingPhase = Mathf.Clamp(value, 1, 3);
+        OnPhaseChanged?.Invoke(phase);
+    }
+
+    /// <summary>다음 페이즈로 — 지금 패턴이 끝나면 포효하고 넘어간다. 시험 키 PageUp.</summary>
+    public void AdvancePhase() => pendingPhase = Mathf.Min(3, Mathf.Max(pendingPhase, phase + 1));
+
+    void OnHpChanged(int hp, int max)
+    {
+        if (max <= 0 || hp <= 0) return;
+        float left = hp / (float)max;
+        int reached = left <= phase3At ? 3 : left <= phase2At ? 2 : 1;
+        if (reached > pendingPhase) pendingPhase = reached;   // 회복해도 되돌아가지 않는다
+    }
 
     void Update()
     {
@@ -170,6 +220,7 @@ public partial class DragonBoss : MonoBehaviour
             case State.Recover:
                 Animate(IdleState);
                 if (target != null && stateTime < recoverTime * 0.5f) Face(target.position, turnSpeed * 0.4f);
+                if (pendingPhase > phase && target != null) { StartPattern(Pattern.Roar); break; }
                 if (forced != Pattern.None && target != null) { StartPattern(forced); break; }
                 if (stateTime >= recoverTime) Enter(target != null ? State.Chase : State.Idle);
                 break;
@@ -194,6 +245,7 @@ public partial class DragonBoss : MonoBehaviour
     void ChaseOrDecide()
     {
         if (target == null) { StopAgent(); Animate(IdleState); return; }
+        if (pendingPhase > phase) { StartPattern(Pattern.Roar); return; }   // 페이즈 전환 포효가 먼저
         if (forced != Pattern.None) { StartPattern(forced); return; }
         if (Passive)
         {
@@ -233,9 +285,28 @@ public partial class DragonBoss : MonoBehaviour
     Pattern Choose(float distance)
     {
         candidates.Clear();
-        if (distance <= nearRange) { Add(Pattern.Bite, 3f); Add(Pattern.DelayedBite, 2f); Add(Pattern.Breath, 1.5f); }
-        else if (distance <= midRange) { Add(Pattern.Breath, 3f); Add(Pattern.Fireball, 2f); Add(Pattern.Charge, 2f); }
-        else { Add(Pattern.Charge, 3f); Add(Pattern.Fireball, 3f); }
+        // 앞 페이즈 패턴도 계속 쓴다 — Add 가 아직 안 열린 페이즈의 패턴은 빼고, 이번 페이즈에 생긴 패턴은 더 자주 고른다
+        if (distance <= nearRange)
+        {
+            bool behind = target != null && AngleTo(target.position) > 110f;
+            Add(Pattern.Bite, 3f); Add(Pattern.DelayedBite, 2f); Add(Pattern.Breath, 1.5f);
+            Add(Pattern.TailSweep, behind ? 6f : 2.5f);   // 뒤에 붙어 때리면 꼬리가 나온다
+            Add(Pattern.Retreat, 2f);
+            Add(Pattern.GroundBite, 2.5f); Add(Pattern.BiteChain, 2.5f); Add(Pattern.SweepBreath, 1.5f);
+        }
+        else if (distance <= midRange)
+        {
+            Add(Pattern.Breath, 3f); Add(Pattern.Fireball, 2f); Add(Pattern.Charge, 2f);
+            Add(Pattern.FireRain, 2f);
+            Add(Pattern.SweepBreath, 2.5f);
+            if (distance <= groundBiteReach) Add(Pattern.GroundBite, 1.5f);
+        }
+        else
+        {
+            Add(Pattern.Charge, 3f); Add(Pattern.Fireball, 3f);
+            Add(Pattern.FireRain, 3f);
+        }
+        if (CanSummon()) Add(Pattern.Summon, 2f);
         if (candidates.Count == 0) return Pattern.None;
 
         // 같은 패턴 연속 금지 — 그것밖에 없으면 허용
@@ -256,9 +327,20 @@ public partial class DragonBoss : MonoBehaviour
 
     void Add(Pattern p, float weight)
     {
+        int from = IntroducedIn(p);
+        if (from > phase) return;
         if (readyAt.TryGetValue(p, out float at) && Time.time < at) return;
+        if (from == phase && phase > 1) weight *= newPatternBoost;
         candidates.Add((p, weight));
     }
+
+    /// <summary>그 패턴이 처음 나오는 페이즈.</summary>
+    public static int IntroducedIn(Pattern p) => p switch
+    {
+        Pattern.FireRain or Pattern.TailSweep or Pattern.Retreat or Pattern.Summon => 2,
+        Pattern.GroundBite or Pattern.SweepBreath or Pattern.BiteChain => 3,
+        _ => 1,
+    };
 
     static float Cooldown(Pattern p) => p switch
     {
@@ -266,6 +348,13 @@ public partial class DragonBoss : MonoBehaviour
         Pattern.Breath => 7f,
         Pattern.Fireball => 6f,
         Pattern.Charge => 6f,
+        Pattern.FireRain => 10f,
+        Pattern.TailSweep => 5f,
+        Pattern.Retreat => 9f,
+        Pattern.Summon => 22f,
+        Pattern.GroundBite => 6f,
+        Pattern.SweepBreath => 9f,
+        Pattern.BiteChain => 7f,
         _ => 0f,
     };
 
@@ -285,22 +374,47 @@ public partial class DragonBoss : MonoBehaviour
 
     IEnumerator RunPattern(Pattern p)
     {
-        IEnumerator body = p switch
-        {
-            Pattern.Bite => Bite(false),
-            Pattern.DelayedBite => Bite(true),
-            Pattern.Breath => Breath(),
-            Pattern.Fireball => Fireballs(),
-            Pattern.Charge => Charge(),
-            _ => null,
-        };
+        IEnumerator body = Body(p);
         if (body != null) yield return body;
+
+        // 연계 (3페이즈) — 빈틈 없이 한 번 더. 가만히(시험) 중이거나 시험 키로 고른 패턴이 기다리면 하지 않는다
+        Pattern follow = ComboAfter(p);
+        if (follow != Pattern.None)
+        {
+            CleanupPattern();
+            OnCombo?.Invoke(p, follow);
+            current = follow;
+            lastPattern = follow;
+            readyAt[follow] = Time.time + Cooldown(follow);
+            nextRecover = 0.8f;
+            OnPatternStart?.Invoke(follow);
+            body = Body(follow);
+            if (body != null) yield return body;
+        }
         running = null;
         CleanupPattern();
         current = Pattern.None;
         recoverTime = nextRecover;
         Enter(State.Recover);
     }
+
+    IEnumerator Body(Pattern p) => p switch
+    {
+        Pattern.Bite => Bite(false),
+        Pattern.DelayedBite => Bite(true),
+        Pattern.Breath => Breath(),
+        Pattern.Fireball => Fireballs(),
+        Pattern.Charge => Charge(),
+        Pattern.FireRain => FireRain(),
+        Pattern.TailSweep => TailSweep(),
+        Pattern.Retreat => Retreat(),
+        Pattern.Summon => Summon(),
+        Pattern.GroundBite => Bite(false, true),
+        Pattern.SweepBreath => Breath(0f, sweepAngle),
+        Pattern.BiteChain => BiteChain(),
+        Pattern.Roar => PhaseShift(),
+        _ => null,
+    };
 
     void CancelPattern()
     {
@@ -317,6 +431,7 @@ public partial class DragonBoss : MonoBehaviour
         if (breathFx != null) breathFx.Stop(true, ParticleSystemStopBehavior.StopEmitting);
         if (dustFx != null) dustFx.Stop(true, ParticleSystemStopBehavior.StopEmitting);
         breathing = false;
+        SetBreathCone(breathHalfAngle);
         if (agent != null) agent.updateRotation = true;
         if (animator != null && state != State.Dead) animator.speed = 1f;
     }
@@ -332,6 +447,15 @@ public partial class DragonBoss : MonoBehaviour
         else if (k.f4Key.wasPressedThisFrame) forced = Pattern.Fireball;
         else if (k.f5Key.wasPressedThisFrame) forced = Pattern.Charge;
         else if (k.f6Key.wasPressedThisFrame) Passive = !Passive;
+        else if (k.f7Key.wasPressedThisFrame) forced = Pattern.FireRain;
+        else if (k.f8Key.wasPressedThisFrame) forced = Pattern.TailSweep;
+        else if (k.f9Key.wasPressedThisFrame) forced = Pattern.Retreat;
+        else if (k.f10Key.wasPressedThisFrame) forced = Pattern.GroundBite;
+        else if (k.f11Key.wasPressedThisFrame) forced = Pattern.SweepBreath;
+        else if (k.f12Key.wasPressedThisFrame) forced = Pattern.BiteChain;
+        else if (k.homeKey.wasPressedThisFrame) forced = Pattern.Summon;
+        else if (k.pageUpKey.wasPressedThisFrame) AdvancePhase();
+        else if (k.pageDownKey.wasPressedThisFrame) SetPhase(phase - 1);
     }
 
     // ───────── 등장 ─────────
@@ -380,6 +504,8 @@ public partial class DragonBoss : MonoBehaviour
         if (state == State.Dead) return;
         CancelPattern();
         StopAllCoroutines();
+        DragonFirePatch.ClearAll();
+        DismissMinions();   // 부하도 같이 쓰러진다 — 승리 처리까지 몇 초 동안 플레이어를 때리지 않게
         Enter(State.Dead);
         StopAgent();
         // 더는 맞지 않게 — 조준 · 탄 · 근접 판정이 모두 콜라이더를 본다
@@ -398,6 +524,7 @@ public partial class DragonBoss : MonoBehaviour
     {
         if (state == State.Dead) return;
         CancelPattern();
+        DragonFirePatch.ClearAll();
         StopAgent();
         Enter(State.Idle);
         Animate(IdleState, 1f, true);

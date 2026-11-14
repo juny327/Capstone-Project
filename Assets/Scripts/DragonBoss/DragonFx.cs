@@ -110,4 +110,157 @@ public static class DragonFx
         renderer.receiveShadows = false;
         return ps;
     }
+
+    // ───────── 2 · 3페이즈 (2026-11-14) ─────────
+
+    static Gradient FireGradient(float peakAlpha)
+    {
+        var gradient = new Gradient();
+        gradient.SetKeys(
+            new[] { new GradientColorKey(new Color(1f, 0.95f, 0.7f), 0f), new GradientColorKey(new Color(1f, 0.55f, 0.12f), 0.4f),
+                    new GradientColorKey(new Color(0.8f, 0.16f, 0.05f), 1f) },
+            new[] { new GradientAlphaKey(0f, 0f), new GradientAlphaKey(peakAlpha, 0.12f), new GradientAlphaKey(peakAlpha * 0.6f, 0.6f), new GradientAlphaKey(0f, 1f) });
+        return gradient;
+    }
+
+    static ParticleSystemRenderer FireRenderer(GameObject go, Material fire)
+    {
+        var renderer = go.GetComponent<ParticleSystemRenderer>();
+        renderer.sharedMaterial = fire;
+        renderer.renderMode = ParticleSystemRenderMode.Billboard;
+        renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        renderer.receiveShadows = false;
+        return renderer;
+    }
+
+    /// <summary>불 장판 위로 피어오르는 불꽃 — 반지름 radius 원 안에서 계속 올라온다. 만들자마자 켜진다.</summary>
+    public static ParticleSystem Flames(Transform parent, Material fire, float radius)
+    {
+        var go = new GameObject("FlamesFx");
+        go.transform.SetParent(parent, false);
+        go.transform.localPosition = new Vector3(0f, 0.1f, 0f);
+        var ps = go.AddComponent<ParticleSystem>();
+        ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+
+        var main = ps.main;
+        main.loop = true;
+        main.playOnAwake = false;
+        main.simulationSpace = ParticleSystemSimulationSpace.World;
+        main.startLifetime = new ParticleSystem.MinMaxCurve(0.45f, 0.85f);
+        main.startSpeed = new ParticleSystem.MinMaxCurve(1.2f, 2.8f);
+        main.startSize = new ParticleSystem.MinMaxCurve(0.7f, 1.4f);
+        main.startRotation = new ParticleSystem.MinMaxCurve(0f, Mathf.PI * 2f);
+        main.startColor = new ParticleSystem.MinMaxGradient(new Color(1f, 0.85f, 0.45f), new Color(1f, 0.5f, 0.15f));
+        main.maxParticles = 160;
+
+        var emission = ps.emission;
+        emission.rateOverTime = Mathf.Clamp(radius * radius * 9f, 18f, 70f);
+
+        // 원판에서 위로 — 원뿔 각도 0 이면 밑면(반지름 radius) 전체에서 곧게 올라온다
+        var shape = ps.shape;
+        shape.shapeType = ParticleSystemShapeType.Cone;
+        shape.angle = 4f;
+        shape.radius = radius * 0.9f;
+        shape.rotation = new Vector3(-90f, 0f, 0f);
+
+        var size = ps.sizeOverLifetime;
+        size.enabled = true;
+        size.size = new ParticleSystem.MinMaxCurve(1f, new AnimationCurve(new Keyframe(0f, 0.6f), new Keyframe(0.4f, 1.2f), new Keyframe(1f, 0.5f)));
+
+        var color = ps.colorOverLifetime;
+        color.enabled = true;
+        color.color = FireGradient(0.85f);
+
+        FireRenderer(go, fire);
+        ps.Play(true);
+        return ps;
+    }
+
+    /// <summary>한 번 터지는 불 — 불비가 떨어진 자리 · 부하가 나오는 자리. 스스로 사라진다.</summary>
+    public static void Burst(Vector3 at, Material fire, float radius)
+    {
+        if (fire == null) return;
+        var go = new GameObject("BurstFx");
+        go.transform.position = at;
+        var ps = go.AddComponent<ParticleSystem>();
+        ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+
+        var main = ps.main;
+        main.duration = 0.3f;
+        main.loop = false;
+        main.playOnAwake = false;
+        main.simulationSpace = ParticleSystemSimulationSpace.World;
+        main.startLifetime = new ParticleSystem.MinMaxCurve(0.3f, 0.6f);
+        main.startSpeed = new ParticleSystem.MinMaxCurve(radius * 1.4f, radius * 3.2f);
+        main.startSize = new ParticleSystem.MinMaxCurve(0.8f, 1.7f);
+        main.startRotation = new ParticleSystem.MinMaxCurve(0f, Mathf.PI * 2f);
+        main.startColor = new ParticleSystem.MinMaxGradient(new Color(1f, 0.9f, 0.55f), new Color(1f, 0.5f, 0.15f));
+        main.gravityModifier = -0.1f;
+        main.maxParticles = 60;
+        main.stopAction = ParticleSystemStopAction.Destroy;
+
+        var emission = ps.emission;
+        emission.rateOverTime = 0f;
+        emission.SetBursts(new[] { new ParticleSystem.Burst(0f, 34) });
+
+        var shape = ps.shape;
+        shape.shapeType = ParticleSystemShapeType.Hemisphere;
+        shape.radius = 0.3f;
+        shape.rotation = new Vector3(-90f, 0f, 0f);
+
+        var limit = ps.limitVelocityOverLifetime;
+        limit.enabled = true;
+        limit.dampen = 0.2f;
+        limit.limit = radius * 2f;
+
+        var size = ps.sizeOverLifetime;
+        size.enabled = true;
+        size.size = new ParticleSystem.MinMaxCurve(1f, new AnimationCurve(new Keyframe(0f, 0.7f), new Keyframe(1f, 1.9f)));
+
+        var color = ps.colorOverLifetime;
+        color.enabled = true;
+        color.color = FireGradient(0.95f);
+
+        FireRenderer(go, fire);
+        ps.Play(true);
+    }
+
+    /// <summary>떨어지는 불덩이 꼬리 — 움직이는 물체에 달면 지나간 길에 불이 남는다.</summary>
+    public static ParticleSystem MeteorTrail(Transform parent, Material fire)
+    {
+        var go = new GameObject("MeteorFx");
+        go.transform.SetParent(parent, false);
+        var ps = go.AddComponent<ParticleSystem>();
+        ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+
+        var main = ps.main;
+        main.loop = true;
+        main.playOnAwake = false;
+        main.simulationSpace = ParticleSystemSimulationSpace.World;
+        main.startLifetime = new ParticleSystem.MinMaxCurve(0.22f, 0.4f);
+        main.startSpeed = new ParticleSystem.MinMaxCurve(0f, 0.8f);
+        main.startSize = new ParticleSystem.MinMaxCurve(1.0f, 1.8f);
+        main.startRotation = new ParticleSystem.MinMaxCurve(0f, Mathf.PI * 2f);
+        main.startColor = new ParticleSystem.MinMaxGradient(new Color(1f, 0.92f, 0.6f), new Color(1f, 0.55f, 0.15f));
+        main.maxParticles = 120;
+
+        var emission = ps.emission;
+        emission.rateOverTime = 40f;
+        emission.rateOverDistance = 3f;
+
+        var shape = ps.shape;
+        shape.shapeType = ParticleSystemShapeType.Sphere;
+        shape.radius = 0.25f;
+
+        var size = ps.sizeOverLifetime;
+        size.enabled = true;
+        size.size = new ParticleSystem.MinMaxCurve(1f, new AnimationCurve(new Keyframe(0f, 1f), new Keyframe(1f, 0.3f)));
+
+        var color = ps.colorOverLifetime;
+        color.enabled = true;
+        color.color = FireGradient(0.95f);
+
+        FireRenderer(go, fire);
+        return ps;
+    }
 }

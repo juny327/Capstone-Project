@@ -6718,10 +6718,14 @@ GameObject:
   - component: {fileID: 609116551}
   m_Layer: 0
   m_Name: "Label_\uBCF4\uC2A4 \uBC14\uB85C \uAC00\uAE30 \u2014 \uB4DC\uB798\uACE4
-    1\uD398\uC774\uC988 \xB7 \uC9C0\uAE08 \uC7A5\uBE44 \uADF8\uB300\uB85C_\uBCF4\uC2A4\uC804
+    1 ~ 3\uD398\uC774\uC988 \xB7 \uC9C0\uAE08 \uC7A5\uBE44 \uADF8\uB300\uB85C_\uBCF4\uC2A4\uC804
     F1 \uBB3C\uAE30 \xB7 F2 \uC9C0\uC5F0 \uBB3C\uAE30 \xB7 F3 \uBE0C\uB808\uC2A4
-    \xB7 F4 \uBD88\uB369\uC774 \xB7 F5 \uB3CC\uC9C4 \xB7 F6 \uAC00\uB9CC\uD788_\uB3CC\uC544\uC62C
-    \uB550 ESC \u2192 \uB85C\uBE44\uB85C"
+    \xB7 F4 \uBD88\uB369\uC774 \xB7 F5 \uB3CC\uC9C4 \xB7 F6 \uAC00\uB9CC\uD788_F7
+    \uBD88\uBE44 \xB7 F8 \uAF2C\uB9AC \xB7 F9 \uBB3C\uB7EC\uB098 \uBE0C\uB808\uC2A4
+    \xB7 F10 \uB545 \uBB3C\uC5B4\uB72F\uAE30 \xB7 F11 \uD729\uC4F8\uAE30 \uBE0C\uB808\uC2A4
+    \xB7 F12 \uC5F0\uC18D \uBB3C\uAE30_Home \uBD80\uD558 \uC18C\uD658 \xB7 PageUp
+    \uB2E4\uC74C \uD398\uC774\uC988 \xB7 PageDown \uC55E \uD398\uC774\uC988 \xB7
+    \uB3CC\uC544\uC62C \uB550 ESC \u2192 \uB85C\uBE44\uB85C"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -9580,11 +9584,14 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\uBCF4\uC2A4 \uBC14\uB85C \uAC00\uAE30 \u2014 \uB4DC\uB798\uACE4 1\uD398\uC774\uC988
+  m_text: "\uBCF4\uC2A4 \uBC14\uB85C \uAC00\uAE30 \u2014 \uB4DC\uB798\uACE4 1 ~ 3\uD398\uC774\uC988
     \xB7 \uC9C0\uAE08 \uC7A5\uBE44 \uADF8\uB300\uB85C\n\uBCF4\uC2A4\uC804 F1 \uBB3C\uAE30
     \xB7 F2 \uC9C0\uC5F0 \uBB3C\uAE30 \xB7 F3 \uBE0C\uB808\uC2A4 \xB7 F4 \uBD88\uB369\uC774
-    \xB7 F5 \uB3CC\uC9C4 \xB7 F6 \uAC00\uB9CC\uD788\n\uB3CC\uC544\uC62C \uB550 ESC
-    \u2192 \uB85C\uBE44\uB85C"
+    \xB7 F5 \uB3CC\uC9C4 \xB7 F6 \uAC00\uB9CC\uD788\nF7 \uBD88\uBE44 \xB7 F8 \uAF2C\uB9AC
+    \xB7 F9 \uBB3C\uB7EC\uB098 \uBE0C\uB808\uC2A4 \xB7 F10 \uB545 \uBB3C\uC5B4\uB72F\uAE30
+    \xB7 F11 \uD729\uC4F8\uAE30 \uBE0C\uB808\uC2A4 \xB7 F12 \uC5F0\uC18D \uBB3C\uAE30\nHome
+    \uBD80\uD558 \uC18C\uD658 \xB7 PageUp \uB2E4\uC74C \uD398\uC774\uC988 \xB7 PageDown
+    \uC55E \uD398\uC774\uC988 \xB7 \uB3CC\uC544\uC62C \uB550 ESC \u2192 \uB85C\uBE44\uB85C"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: b142b49dad0aa7747857b5917f44e1e7, type: 2}
   m_sharedMaterial: {fileID: 2100000, guid: 68b62dcb0ada78f4c9b17f3889061c17, type: 2}
