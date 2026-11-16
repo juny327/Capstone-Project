@@ -81,4 +81,10 @@ public abstract class ShopOffer
 
     /// <summary>내 장비 판에서 깜빡일 부착물 부위. 없으면 −1.</summary>
     public virtual int HighlightSlot => -1;
+
+    /// <summary>
+    /// 이 상품으로 얻는 물건 (부착물 · 서브 능력 · 스킬 카드) — 가진 무기의 상위 무기 짝이면 카드에 금색 테두리를 두른다
+    /// (EvolutionPairs, 2026-11-17). 무기 · 강화처럼 짝이 될 수 없는 상품은 null.
+    /// </summary>
+    public virtual Object PairItem => null;
 }

@@ -119,6 +119,7 @@ public class SubAbilityOffer : ShopOffer
         : $"Lv.{fromLevel} → {fromLevel + 1}";
 
     public override ShopOfferKind Kind => ShopOfferKind.SubAbility;
+    public override Object PairItem => data;
 
     public override bool IsAvailable(ShopContext ctx, out string reason)
     {

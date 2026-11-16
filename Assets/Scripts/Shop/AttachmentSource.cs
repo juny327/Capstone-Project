@@ -53,6 +53,7 @@ public class AttachmentOffer : ShopOffer
 
     public override bool NeedsTarget => true;
     public override int HighlightSlot => (int)attachment.slot;
+    public override Object PairItem => attachment;
 
     /// <summary>달 수 있고, 같은 부착물이 아직 없는 손 무기.</summary>
     public override void CollectTargets(ShopContext ctx, List<IWeapon> into)

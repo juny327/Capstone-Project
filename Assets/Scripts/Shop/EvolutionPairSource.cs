@@ -128,6 +128,7 @@ public class SkillPairOffer : ShopOffer
     public override Sprite Icon => card.icon;
     public override string Tag => $"진화 짝 · {evolution.Title}";
     public override ShopOfferKind Kind => ShopOfferKind.Skill;
+    public override Object PairItem => card;
 
     public override bool IsAvailable(ShopContext ctx, out string reason)
     {

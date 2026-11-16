@@ -26,6 +26,7 @@ using UnityEngine.UI;
 ///  · 두 줄과 내 장비 판 사이에 '상위 무기' 칸 — 무기 레벨 · 짝을 갖추면 그 자리에서 켜져 진화를 산다 (ShopService.Evolutions).
 ///    조건이 아직이면 다음 목표(주무기 · 보조의 진화 조건)를 적는다
 ///  · '상위 무기 바로 갖추기'(크레딧으로 레벨 · 짝을 한꺼번에)는 없앴다
+///  · 가진 무기의 상위 무기 짝인 상품은 금색 테두리 (EvolutionPairs)
 /// </summary>
 public class MaintenanceUI : MonoBehaviour
 {
@@ -369,6 +370,7 @@ public class MaintenanceUI : MonoBehaviour
         foreach (ShopOffer offer in offers)
             rowsBuffer[RowOf(offer)].Add(offer);
 
+        GameObject player = shop.Context.Player;
 
         int rowCount = rowCenters != null ? rowCenters.Length : 0;
         for (int r = 0; r < rowCount; r++)
@@ -387,6 +389,7 @@ public class MaintenanceUI : MonoBehaviour
                     ShopOffer offer = list[k];
                     bool canBuy = shop.CanBuy(offer, out string reason);
                     card.Show(offer, canBuy, reason, currency);
+                    card.SetPairMark(offer.Sold ? null : EvolutionPairs.LabelFor(player, offer.PairItem));   // 가진 무기의 짝이면 금색 테두리
                     card.SetSelected(offer == pending);
 
                     // 있는 카드만 그 줄 가운데로 모은다

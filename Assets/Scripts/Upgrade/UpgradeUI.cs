@@ -59,10 +59,21 @@ public class UpgradeUI : MonoBehaviour
                 continue;
 
             card.Setup(data, manager.GetNextUpgradeLevel(data), manager.GetUpgradeCost(data));
+            card.ShowPairMark(EvolutionPairs.LabelFor(Player(), data));   // 샀으면 짝을 갖춰 테두리가 꺼진다
 
             if (data.IsMaxed(manager.GetCurrentUpgradeLevel(data)))
                 card.ShowMaxed();
         }
+    }
+
+    /// <summary>지금 플레이어 — 상위 무기 짝 표시에 쓴다 (2026-11-17).</summary>
+    static GameObject Player()
+    {
+        if (GameAppManager.Instance != null && GameAppManager.Instance.Player != null)
+            return GameAppManager.Instance.Player;
+
+        PlayerStats stats = FindFirstObjectByType<PlayerStats>();
+        return stats != null ? stats.gameObject : null;
     }
 
     void Open()
@@ -185,6 +196,9 @@ public class UpgradeUI : MonoBehaviour
 
             UpgradeData data = upgrades[i];
             card.Setup(data, manager.GetNextUpgradeLevel(data), manager.GetUpgradeCost(data));
+
+            // 가진 무기의 상위 무기 짝 스킬이면 금색 테두리 (2026-11-17 밸런스 결정 6)
+            card.ShowPairMark(EvolutionPairs.LabelFor(Player(), data));
         }
     }
 
