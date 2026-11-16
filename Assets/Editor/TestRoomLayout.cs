@@ -74,6 +74,11 @@ internal static class TestRoomLayout
     public static readonly Vector3 BossDirectPad = new Vector3(-19f, 0f, -8.5f);
     public static readonly Vector3 BossIntroPad = new Vector3(-19f, 0f, -12.5f);
 
+    // ── 엔딩 화면 보기 (서남쪽 아래, 2026-11-15) — 보스 바로 가기 바로 아래 한 줄. 오른쪽 무리 발판(x −14)과 5m ──
+    public static readonly Vector3 EndingLabel = new Vector3(-19f, 0.65f, -15.3f);   // 3줄 — 아랫줄이 바닥에 묻히지 않게
+    public static readonly Vector3 EndingResultPad = new Vector3(-19f, 0f, -18f);
+    public static readonly Vector3 EndingCreditsPad = new Vector3(-19f, 0f, -21.6f);
+
     // ── 드래곤 동작 보기 (북쪽 가운데, 2026-11-13) — 부착물 구역(x ≤ −8.7)과 개조 구역(x ≥ 6) 사이 빈자리 ──
     //    드래곤은 남쪽(발판 · 카메라 쪽)을 본다. 발판은 그 앞 한 줄
     //    2026-11-14 보스 크기 ×9 — 머리가 안내 글자를 덮지 않게 2m 뒤로, 받침은 4.5 → 5.6
