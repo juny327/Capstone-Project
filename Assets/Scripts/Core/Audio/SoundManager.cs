@@ -490,6 +490,30 @@ public class SoundManager : MonoBehaviour
         musicRoutine = null;
     }
 
+    /// <summary>
+    /// 지금 곡을 seconds 에 걸쳐 줄여 끈다 (2026-11-15 — 보스가 쓰러진 뒤의 정적). 다음 씬의 곡은 PlayMusicFor 가 평소대로 켠다.
+    /// </summary>
+    public void FadeOutMusic(float seconds)
+    {
+        if (musicSource == null || seconds <= 0f) return;
+        if (musicRoutine != null) StopCoroutine(musicRoutine);
+        currentTrack = null;   // 같은 곡이라도 다음에 다시 켜지게
+        musicRoutine = StartCoroutine(FadeOutRoutine(seconds));
+    }
+
+    IEnumerator FadeOutRoutine(float seconds)
+    {
+        float from = musicSource.volume;
+        for (float t = 0f; t < seconds; t += Time.unscaledDeltaTime)
+        {
+            musicSource.volume = Mathf.Lerp(from, 0f, t / seconds);
+            yield return null;
+        }
+        musicSource.volume = 0f;
+        musicSource.Stop();
+        musicRoutine = null;
+    }
+
     IEnumerator FadeMusic(System.Func<float> target)
     {
         if (musicFade <= 0.01f)

@@ -12,6 +12,8 @@ public enum ImpactMoment
     PrismConverge,      // 프리즘 노바 수렴 광선 시작
     SpearCatch,         // 아킬레우스의 창 회수
     MeleeCrit,          // 근접 치명타 (패링 직후 한 방 포함)
+    BossKill,           // 보스 체력이 0 이 되는 마지막 한 방 (엔딩 ①)
+    BossBurst,          // 쓰러진 보스가 빛으로 터지는 순간 (엔딩 ②)
 }
 
 /// <summary>
@@ -105,6 +107,10 @@ public class ImpactFxSettings : ScriptableObject
     public Moment spearCatch = new Moment { zoom = 0.015f, flash = 0.05f, thud = 0.2f };
     public Moment meleeCrit = new Moment { hitStop = true, zoom = 0.02f, flash = 0.07f };
 
+    [Header("엔딩 (2026-11-15) — 보스를 쓰러뜨리는 순간")]
+    public Moment bossKill = new Moment { duck = true, hitStop = true, zoom = 0.05f, flash = 0.16f, thud = 0.8f };
+    public Moment bossBurst = new Moment { duck = true, zoom = 0.04f, flash = 0.2f, thud = 0.9f };
+
     public Moment Get(ImpactMoment moment)
     {
         switch (moment)
@@ -118,6 +124,8 @@ public class ImpactFxSettings : ScriptableObject
             case ImpactMoment.PrismConverge: return prismConverge;
             case ImpactMoment.SpearCatch: return spearCatch;
             case ImpactMoment.MeleeCrit: return meleeCrit;
+            case ImpactMoment.BossKill: return bossKill;
+            case ImpactMoment.BossBurst: return bossBurst;
             default: return null;
         }
     }

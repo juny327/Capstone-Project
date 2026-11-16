@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.AI;
 using UnityEngine.InputSystem;
 
@@ -472,6 +473,12 @@ public partial class DragonBoss : MonoBehaviour
         else if (k.homeKey.wasPressedThisFrame) forced = Pattern.Summon;
         else if (k.pageUpKey.wasPressedThisFrame) AdvancePhase();
         else if (k.pageDownKey.wasPressedThisFrame) SetPhase(phase - 1);
+        else if (k.endKey.wasPressedThisFrame)
+        {
+            // 바로 처치 — 엔딩 연출을 보려고 (테스트 룸 경로에서만 켜진다)
+            BossHealth health = GetComponent<BossHealth>();
+            if (health != null && state != State.Dead) health.TakeDamage(new DamageInfo { damage = 999999f });
+        }
     }
 
     // ───────── 등장 ─────────
@@ -529,13 +536,75 @@ public partial class DragonBoss : MonoBehaviour
         // 더는 맞지 않게 — 조준 · 탄 · 근접 판정이 모두 콜라이더를 본다
         foreach (Collider c in GetComponentsInChildren<Collider>()) c.enabled = false;
         Animate(DieState, 1f, true);
+
+        // 엔딩 ① 마지막 한 방 — 히트 스톱 · 줌 · 번쩍 · 쿵 (ImpactFxSettings.bossKill), 배경음은 서서히 꺼진다
+        EndingSettings ending = EndingSettings.Current;
+        if (ending != null)
+        {
+            ImpactFx.Play(ImpactMoment.BossKill, null, Color.Lerp(ending.lightColor, Color.white, 0.5f));
+            if (ending.musicFade > 0f && SoundManager.Instance != null) SoundManager.Instance.FadeOutMusic(ending.musicFade);
+
+            // 이긴 뒤의 연출 동안 남은 불덩이 · 불비에 죽지 않게 (연출이 예전보다 길다)
+            PlayerStats winner = WinnerStats();
+            if (winner != null) winner.SetInvulnerable(dieLength + ending.chargeSeconds + ending.burstHold + ending.moteSeconds + ending.fadeOut + 4f);
+        }
+
         StartCoroutine(FinishDeath());
     }
 
     IEnumerator FinishDeath()
     {
-        yield return new WaitForSeconds(dieLength + winDelay);
+        EndingSettings ending = EndingSettings.Current;
+        if (ending != null && ending.deathShow)
+        {
+            // 엔딩 ② 그 자리의 여운 — 몸에서 빛이 새다 터진다 (DragonDeathShow).
+            // 균열 엔딩(2026-11-15): 빛 조각이 방 가운데로 가서 균열을 열고, 캐릭터가 그 안으로 걸어 들어간다 (RiftEnding, 자동 재생)
+            PlayerStats winner = WinnerStats();
+            bool rift = ending.riftEnding && winner != null;
+            Vector3 anchor = rift ? RiftEnding.FindAnchor(gameObject.scene, ending, transform.position, winner.transform.position.y) : Vector3.zero;
+            yield return DragonDeathShow.Run(this, DeathShowLength(), dieLength, ending, rift ? anchor : (Vector3?)null);
+            if (rift && WinnerStats() != null) yield return RiftEnding.Run(this, ending, anchor);
+        }
+        else
+        {
+            yield return new WaitForSeconds(dieLength + winDelay);
+        }
+
+        // 화면을 덮고 (이번 판 기록도 여기서 찍는다) 엔딩 씬으로 — 플레이어가 먼저 죽은 판은 덮지 않는다 (게임 오버 화면이 떠 있다)
+        if (WinnerStats() != null) yield return EndingFlow.FadeToEnding();
+        Scene before = gameObject.scene;
         GameEvents.OnGameWin?.Invoke();   // 플레이어가 먼저 죽었으면 GameManager 가 무시한다
+
+        // 엔딩으로 넘어가지 않았으면 (무시된 경우) 덮은 화면을 걷는다
+        yield return new WaitForSecondsRealtime(1.5f);
+        if (gameObject.scene == before)
+        {
+            EndingFlow.Release();
+            DragonDeathShow.Restore();   // 카메라 · 조작을 돌려준다
+        }
+    }
+
+    /// <summary>살아서 이긴 플레이어 — 없거나 먼저 죽었으면 null.</summary>
+    static PlayerStats WinnerStats()
+    {
+        GameAppManager app = GameAppManager.Instance;
+        PlayerStats stats = app != null && app.Player != null ? app.Player.GetComponent<PlayerStats>() : null;
+        return stats != null && !stats.IsDead ? stats : null;
+    }
+
+    /// <summary>쓰러지는 연출의 크기 기준 — 몸 길이(m). 콜라이더가 꺼져 있어 렌더러 범위로 잰다.</summary>
+    float DeathShowLength()
+    {
+        Bounds? all = null;
+        foreach (Renderer r in GetComponentsInChildren<Renderer>())
+        {
+            if (r is ParticleSystemRenderer || r is LineRenderer || r is TrailRenderer) continue;
+            if (all == null) all = r.bounds;
+            else { Bounds b = all.Value; b.Encapsulate(r.bounds); all = b; }
+        }
+        if (all == null) return 6f * bodyScale;
+        Vector3 size = all.Value.size;
+        return Mathf.Clamp(Mathf.Max(size.x, size.z), 3f, 20f);
     }
 
     void OnPlayerDead()

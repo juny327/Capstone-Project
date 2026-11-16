@@ -709,6 +709,9 @@ public class PlayerMove : MonoBehaviour
         return sounds != null && !isRolling && currentGround && move != Vector2.zero && Time.timeScale > 0.01f;
     }
 
+    /// <summary>발소리 한 번 — 연출이 캐릭터를 직접 걷게 할 때 (엔딩 균열 진입, 2026-11-15). 평소 걸음과 같은 소리.</summary>
+    public void PlayStepSound() => PlaySound(sounds != null ? sounds.footstep : null);
+
     /// <summary>
     /// 예비 방식 — 발 뼈를 못 찾을 때(휴머노이드가 아닌 모델)만 이동 거리로 간격을 잡는다.
     /// </summary>
