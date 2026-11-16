@@ -123,6 +123,7 @@ public class GameSettingsUI : MonoBehaviour
         if (confirmUntil > 0f && Time.unscaledTime > confirmUntil) ResetLobbyConfirm();
 
         if (Keyboard.current == null || !Keyboard.current.escapeKey.wasPressedThisFrame) return;
+        if (GuideUI.HandlesEscape) return;   // 조작 가이드 창이 이 ESC 로 닫힌다 (2026-11-16)
 
         if (IsOpen) Close();
         else Open();
