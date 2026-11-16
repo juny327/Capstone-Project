@@ -470,10 +470,12 @@ public partial class DragonBoss : MonoBehaviour
         else if (k.f10Key.wasPressedThisFrame) forced = Pattern.GroundBite;
         else if (k.f11Key.wasPressedThisFrame) forced = Pattern.SweepBreath;
         else if (k.f12Key.wasPressedThisFrame) forced = Pattern.BiteChain;
-        else if (k.homeKey.wasPressedThisFrame) forced = Pattern.Summon;
-        else if (k.pageUpKey.wasPressedThisFrame) AdvancePhase();
-        else if (k.pageDownKey.wasPressedThisFrame) SetPhase(phase - 1);
-        else if (k.endKey.wasPressedThisFrame)
+        // Home · PageUp · PageDown · End 는 숫자패드 7 · 9 · 3 · 1 로도 받는다 — 이 키들이 따로 없는 자판은
+        // Shift + 숫자패드로 누르는데, 그러면 입력이 '숫자패드 키'로 들어와 homeKey · endKey 가 눌리지 않는다 (2026-11-16)
+        else if (k.homeKey.wasPressedThisFrame || k.numpad7Key.wasPressedThisFrame) forced = Pattern.Summon;
+        else if (k.pageUpKey.wasPressedThisFrame || k.numpad9Key.wasPressedThisFrame) AdvancePhase();
+        else if (k.pageDownKey.wasPressedThisFrame || k.numpad3Key.wasPressedThisFrame) SetPhase(phase - 1);
+        else if (k.endKey.wasPressedThisFrame || k.numpad1Key.wasPressedThisFrame || k.kKey.wasPressedThisFrame)
         {
             // 바로 처치 — 엔딩 연출을 보려고 (테스트 룸 경로에서만 켜진다)
             BossHealth health = GetComponent<BossHealth>();

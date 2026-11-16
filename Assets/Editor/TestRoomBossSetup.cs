@@ -88,9 +88,10 @@ public static class TestRoomBossSetup
     /// <summary>보스 구역 안내 — 보스전 시험 키 (DragonBoss.ReadTestKeys 와 맞춘다).</summary>
     public const string BossLabelText =
         "보스 바로 가기 — 드래곤 1 ~ 3페이즈 · 지금 장비 그대로\n" +
-        "보스전 F1 물기 · F2 지연 물기 · F3 브레스 · F4 불덩이 · F5 돌진 · F6 가만히\n" +
+        "F1 물기 · F2 지연 물기 · F3 브레스 · F4 불덩이 · F5 돌진 · F6 가만히\n" +
         "F7 불비 · F8 꼬리 · F9 물러나 브레스 · F10 땅 물어뜯기 · F11 휩쓸기 브레스 · F12 연속 물기\n" +
-        "Home 부하 소환 · PageUp 다음 페이즈 · PageDown 앞 페이즈 · 돌아올 땐 ESC → 로비로";
+        "Home 부하 소환 · PageUp 다음 페이즈 · PageDown 앞 페이즈\n" +
+        "K 또는 End 바로 처치(엔딩 보기) · 돌아올 땐 ESC → 로비로";
 
     static void BossPad(GameObject prefab, Scene scene, Transform area, string name, Vector3 position, bool fromIntro, string title, string note)
     {

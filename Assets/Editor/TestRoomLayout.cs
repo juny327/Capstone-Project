@@ -70,7 +70,7 @@ internal static class TestRoomLayout
     public const float SupportStepX = 4.5f;
 
     // ── 보스 바로 가기 (서남쪽, 2026-11-13) — 무기 선반 근접 묶음과 상위 무기 구역 사이, 무리 자리 위 ──
-    public static readonly Vector3 BossLabel = new Vector3(-19f, 0.85f, -5.6f);   // 4줄 — 0.1 이면 아래 두 줄이 바닥에 묻힌다 (11-15)
+    public static readonly Vector3 BossLabel = new Vector3(-19f, 1.1f, -5.6f);   // 5줄 — 낮으면 아랫줄이 바닥에 묻힌다 (11-15)
     public static readonly Vector3 BossDirectPad = new Vector3(-19f, 0f, -8.5f);
     public static readonly Vector3 BossIntroPad = new Vector3(-19f, 0f, -12.5f);
 
