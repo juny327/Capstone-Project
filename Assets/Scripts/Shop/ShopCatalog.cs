@@ -56,6 +56,11 @@ public class ShopCatalog : ScriptableObject
     [Tooltip("진열 공급원. 위에서부터 칸을 채운다. 새 상품 종류(부품 등)는 공급원 에셋을 하나 더 만들어 넣는다")]
     public ShopOfferSource[] sources;
 
+    [Header("상위 무기 칸 (2026-11-17)")]
+    [Tooltip("정비 창 오른쪽 '상위 무기' 칸에 올릴 진화. 진열(새로고침)과 따로 — 무기 레벨 · 짝을 갖추는 순간 그 자리에서 켜진다. " +
+             "slots = 칸 수. 위 진열 공급원 목록에는 넣지 않는다")]
+    public EvolutionSource evolutionSource;
+
     /// <summary>무기의 기본 가격 (Stage1).</summary>
     public int BasePriceOf(WeaponData weapon)
     {

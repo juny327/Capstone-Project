@@ -118,8 +118,7 @@ public class ShopCardView : MonoBehaviour
             case ShopOfferKind.Consumable: return consumableColor;
             case ShopOfferKind.SubAbility: return subAbilityColor;
             case ShopOfferKind.Evolution:
-            case ShopOfferKind.Skill:
-            case ShopOfferKind.Shortcut: return evolutionColor;
+            case ShopOfferKind.Skill: return evolutionColor;
             default: return weaponColor;
         }
     }

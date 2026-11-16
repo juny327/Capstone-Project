@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8ac7558e6b2398c48868bcc3ae02324f, type: 3}
   m_Name: ShopSource_Evolution
   m_EditorClassIdentifier: Assembly-CSharp::EvolutionSource
-  slots: 1
+  slots: 2

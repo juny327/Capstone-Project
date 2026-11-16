@@ -7,11 +7,15 @@ using UnityEngine;
 ///
 /// 지금은 상점 창(MaintenanceUI)이 쓰고, 나중에 중간 맵(정비 구역)이 생기면
 /// 받침대 · 터미널이 같은 OpenVisit · Offers · TryBuy · TryReroll 을 부르면 된다.
+///
+/// 상위 무기(진화)는 진열과 따로 <see cref="Evolutions"/> 에 있다 (2026-11-17 밸런스 결정 6) — 진열은 산 뒤에도 그대로지만
+/// 상위 무기 칸은 무엇을 살 때마다 다시 보므로, 마지막 강화나 짝을 사는 순간 바로 켜진다.
 /// </summary>
 public class ShopService
 {
     readonly List<ShopOffer> offers = new List<ShopOffer>();
     readonly List<ShopOffer> candidates = new List<ShopOffer>();
+    readonly List<ShopOffer> evolutions = new List<ShopOffer>();
 
     int rerollsThisVisit;
 
@@ -21,6 +25,9 @@ public class ShopService
     public ShopContext Context { get; private set; }
 
     public IReadOnlyList<ShopOffer> Offers => offers;
+
+    /// <summary>지금 살 수 있는 상위 무기 (정비 창 '상위 무기' 칸). 이번 정비에 산 것은 '구매함'으로 남는다.</summary>
+    public IReadOnlyList<ShopOffer> Evolutions => evolutions;
 
     public int RerollCost => Context != null && Context.Catalog != null
         ? Context.Catalog.RerollCost(Context.StageIndex, rerollsThisVisit)
@@ -43,6 +50,7 @@ public class ShopService
         };
 
         rerollsThisVisit = 0;
+        evolutions.Clear();
         BuildStock();
         return true;
     }
@@ -69,6 +77,7 @@ public class ShopService
         Context.Wallet.TrySpend(offer.Price);
         offer.Sold = true;
 
+        RefreshEvolutions();   // 마지막 강화 · 짝을 샀으면 상위 무기 칸이 켜진다
         OnChanged?.Invoke();
         return true;
     }
@@ -116,6 +125,41 @@ public class ShopService
             }
         }
 
+        RefreshEvolutions();
         OnChanged?.Invoke();
     }
+
+    /// <summary>
+    /// 상위 무기 칸을 지금 상태로 맞춘다 — 새로 조건을 채운 조합은 더하고, 조건이 풀린 것(다른 길로 진화 등)은 뺀다.
+    /// 이미 있던 카드는 그대로 둔다 (산 카드의 '구매함'이 남게).
+    /// </summary>
+    void RefreshEvolutions()
+    {
+        EvolutionSource source = Context != null && Context.Catalog != null ? Context.Catalog.evolutionSource : null;
+        if (source == null) { evolutions.Clear(); return; }
+
+        candidates.Clear();
+        source.Collect(Context, candidates);
+
+        // 아직 안 산 카드 중 더는 준비되지 않은 것은 뺀다
+        evolutions.RemoveAll(o => !o.Sold && !candidates.Exists(c => SameEvolution(c, o)));
+
+        foreach (ShopOffer c in candidates)
+        {
+            if (evolutions.Exists(o => SameEvolution(o, c))) continue;
+
+            // 칸이 차면 산 카드부터 비켜 준다
+            if (evolutions.Count >= Mathf.Max(1, source.slots))
+            {
+                int sold = evolutions.FindIndex(o => o.Sold);
+                if (sold < 0) break;
+                evolutions.RemoveAt(sold);
+            }
+
+            evolutions.Add(c);
+        }
+    }
+
+    static bool SameEvolution(ShopOffer a, ShopOffer b) =>
+        a is EvolutionOffer x && b is EvolutionOffer y && x.Evolution == y.Evolution;
 }

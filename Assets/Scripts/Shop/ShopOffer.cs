@@ -27,9 +27,8 @@ public enum ShopOfferKind
     Attachment,   // 총기 부착물
     Consumable,   // 회복 등 (나중)
     SubAbility,   // 검사 서브 능력
-    Evolution,    // 상위 무기 진화 (무기 줄)
+    Evolution,    // 상위 무기 진화 (줄 밖 — 정비 창 오른쪽 '상위 무기' 칸, 2026-11-17)
     Skill,        // 레벨업 카드 스킬 — 상위 무기 짝 (장비 줄, 2026-11-04)
-    Shortcut,     // 상위 무기 바로 갖추기 (줄 밖 — 따로 여는 창, 2026-11-04)
 }
 
 /// <summary>

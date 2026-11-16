@@ -1,23 +1,34 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>진열 공급원 — 가진 무기를 한 단계 강화 (최대 레벨이 아닌 것).</summary>
+/// <summary>
+/// 진열 공급원 — 가진 무기를 한 단계 강화 (최대 레벨이 아닌 것).
+/// 주무기 강화 카드는 정비마다 반드시 한 장 (2026-11-17 밸런스 결정 6) — 주무기가 최대 레벨이면 나머지 칸처럼 보조 무기 중에서.
+/// </summary>
 [CreateAssetMenu(menuName = "Shop/Sources/Weapon Upgrade", fileName = "ShopSource_WeaponUpgrade")]
 public class WeaponUpgradeSource : ShopOfferSource
 {
+    [Tooltip("주무기 강화 카드를 늘 한 장 놓는다 (2026-11-17) — 첫 상위 무기가 운에 걸리지 않게")]
+    public bool alwaysMainWeapon = true;
+
     [Tooltip("새 무기 칸이 비면(보조 칸이 가득 차 살 무기가 없으면) 그 칸만큼 강화 카드를 더 놓는다 — 이 수까지 (2026-11-11)")]
     [Min(0)] public int maxSlotsWhenNoNewWeapon = 3;
 
     [Tooltip("정비 창 무기 줄에 보이는 카드 수 (MaintenanceUI 의 cardsPerRow). 진화 · 새 무기 · 강화를 합쳐 이 수를 넘기지 않는다")]
     [Min(1)] public int weaponRowSize = 3;
 
-    // Collect 에서 읽어 Stock 에서 쓴다 — 새 무기 공급원이 차지하는 칸 수
+    // Collect 에서 읽어 Stock 에서 쓴다 — 새 무기 공급원이 차지하는 칸 수 · 주무기
     int purchaseSlots;
+    WeaponData mainWeapon;
 
     public override void Collect(ShopContext ctx, List<ShopOffer> into)
     {
         purchaseSlots = 0;
+        mainWeapon = null;
         if (ctx.Weapons == null || ctx.Catalog == null) return;
+
+        IWeapon main = ctx.Weapons.MainWeapon;
+        if (main != null) mainWeapon = main.Data;
 
         if (ctx.Catalog.sources != null)
             foreach (ShopOfferSource source in ctx.Catalog.sources)
@@ -37,15 +48,23 @@ public class WeaponUpgradeSource : ShopOfferSource
         foreach (ShopOffer offer in into)
         {
             if (offer is WeaponPurchaseOffer) newWeapons++;
-            if (offer.Kind == ShopOfferKind.Weapon || offer.Kind == ShopOfferKind.Upgrade || offer.Kind == ShopOfferKind.Evolution) rowUsed++;
+            if (offer.Kind == ShopOfferKind.Weapon || offer.Kind == ShopOfferKind.Upgrade) rowUsed++;
         }
 
-        // 새 무기 칸이 남으면 무기 줄의 남은 칸을 강화로 (진화 카드가 있으면 강화 2장, 없으면 3장)
+        // 새 무기 칸이 남으면 무기 줄의 남은 칸을 강화로 (최대 3장)
         int count = slots;
         if (newWeapons < purchaseSlots)
             count = Mathf.Max(slots, Mathf.Min(maxSlotsWhenNoNewWeapon, weaponRowSize - rowUsed));
 
         Shuffle(candidates);
+
+        // 주무기 강화를 맨 앞으로 — 섞은 뒤 앞에서 count 장을 고르므로 늘 들어간다
+        if (alwaysMainWeapon && mainWeapon != null)
+        {
+            int main = candidates.FindIndex(o => o is WeaponUpgradeOffer u && u.Weapon == mainWeapon);
+            if (main > 0) (candidates[0], candidates[main]) = (candidates[main], candidates[0]);
+        }
+
         count = Mathf.Min(count, candidates.Count);
         for (int i = 0; i < count; i++)
             into.Add(candidates[i]);
