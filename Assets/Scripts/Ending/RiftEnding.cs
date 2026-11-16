@@ -306,14 +306,36 @@ public static class RiftEnding
 
     // ───────── 화면 정리 ─────────
 
-    /// <summary>게임 HUD 를 끈다 (씬을 넘어 남는 것 포함). 설정창과 엔딩 화면은 남긴다. 엔딩으로 넘어가므로 되돌리지 않는다.</summary>
+    /// <summary>
+    /// 게임 HUD 를 끈다 (씬을 넘어 남는 것 포함). 설정창과 엔딩 화면은 남긴다.
+    /// 끈 캔버스는 다음 씬(로비)이 열릴 때 다시 켠다 — 2026-11-17 예전에는 되돌리지 않아, 씬을 넘어 사는 UI
+    /// (로비 조작 가이드 버튼 · 정비 창 · 장비 HUD 등)가 엔딩 뒤 로비 · 다음 판에서 계속 보이지 않았다.
+    /// </summary>
     static void HideHud()
     {
         foreach (Canvas c in Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None))
             if (c.isRootCanvas && c.enabled && c.renderMode != RenderMode.WorldSpace
                 && c.GetComponentInChildren<GameSettingsUI>(true) == null && c.GetComponentInParent<GameSettingsUI>(true) == null
                 && c.GetComponent<EndingFlow>() == null)
+            {
                 c.enabled = false;
+                hiddenCanvases.Add(c);
+            }
+
+        SceneManager.sceneLoaded -= RestoreHud;
+        SceneManager.sceneLoaded += RestoreHud;
+    }
+
+    static readonly List<Canvas> hiddenCanvases = new List<Canvas>();
+
+    /// <summary>엔딩이 끝나 다른 씬(로비 등)으로 가면 끈 캔버스를 되켠다 (씬과 함께 사라진 것은 건너뛴다). 엔딩 씬(결과 · 크레딧)에서는 그대로 꺼 둔다.</summary>
+    static void RestoreHud(Scene scene, LoadSceneMode mode)
+    {
+        if (scene.name == "EndingScene") return;
+        SceneManager.sceneLoaded -= RestoreHud;
+        foreach (Canvas c in hiddenCanvases)
+            if (c != null) c.enabled = true;
+        hiddenCanvases.Clear();
     }
 
     /// <summary>떠 있는 보조 무기 · 드론 · 궤도 무기의 그림을 끈다 — 장면에는 캐릭터와 손에 든 무기만 남긴다.</summary>
