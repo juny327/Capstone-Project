@@ -43,10 +43,10 @@ public static class EconomyShopSetup
     const string EnemyDataDir = "Assets/Scripts/Data";
     const string WeaponDataDir = "Assets/Scripts/Data/Weapons";
 
-    // 몬스터별 코인 (경험치와 같은 비율 — 원거리 C 가 가장 많다)
+    // 몬스터별 코인 (경험치와 같은 비율 — 원거리 C 가 가장 많다). E 는 2026-11-17 에 3 (체력 · 경험치가 가장 큰데 1 이었다)
     static readonly (string asset, int coins)[] DefaultDrops =
     {
-        ("EnemyA", 1), ("EnemyB", 2), ("EnemyC", 3), ("EnemyD", 2),
+        ("EnemyA", 1), ("EnemyB", 2), ("EnemyC", 3), ("EnemyD", 2), ("EnemyE", 3),
     };
 
     // 무기 가격 (Stage1 기준). 근거: 장전 포함 DPS · 광역 · 사거리 — 정비-상점-구현계획.md "구현 결과"
@@ -203,6 +203,8 @@ public static class EconomyShopSetup
                 .Where(d => d.enemy != null)
                 .ToArray();
             settings.defaultCoins = 1;
+            settings.coinMultiplier = 0.7f;
+            settings.stageCoinMultipliers = new[] { 0.6f, 0.65f, 0.8f };   // 2026-11-17 스테이지별 (한 판 약 407)
             settings.maxCoinObjects = 4;
             settings.scatterRadius = new Vector2(0.4f, 1.3f);
             settings.magnetRadius = 3.5f;

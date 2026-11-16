@@ -31,6 +31,10 @@ public class EconomySystem : MonoBehaviour
     // 클리어 보너스를 이미 준 씬 — StageManager 는 목표를 넘긴 뒤에도 처치할 때마다 클리어를 다시 보낸다
     int bonusGivenScene = -1;
 
+    // 코인 배율을 고를 스테이지 번호 — 처치마다 StageManager 를 찾지 않게 씬마다 한 번 (2026-11-17 스테이지별 배율)
+    int stageScene = -1;
+    int stageIndexCache = 1;
+
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     static void ResetStatics() => Instance = null;
 
@@ -146,8 +150,8 @@ public class EconomySystem : MonoBehaviour
         ResolvePlayer();
         if (!HasLivePlayer) return;
 
-        // 배율 (0.7) — 소수 부분은 확률로 (코인 1 × 0.7 = 70% 확률로 1)
-        float scaled = Settings.CoinsFor(enemy.data) * Settings.coinMultiplier;
+        // 스테이지별 배율 (0.6 · 0.65 · 0.8) — 소수 부분은 확률로 (코인 1 × 0.6 = 60% 확률로 1)
+        float scaled = Settings.CoinsFor(enemy.data) * Settings.CoinMultiplierFor(CurrentStageIndex());
         int total = Mathf.FloorToInt(scaled);
         if (Random.value < scaled - total) total++;
         if (total <= 0) return;
@@ -261,6 +265,22 @@ public class EconomySystem : MonoBehaviour
     {
         // 코인은 씬의 풀과 함께 사라진다
         coins.Clear();
+    }
+
+    /// <summary>지금 씬의 스테이지 번호 — 씬마다 한 번만 찾는다.</summary>
+    int CurrentStageIndex()
+    {
+        int scene = SceneManager.GetActiveScene().handle;
+        if (scene != stageScene)
+        {
+            StageManager stage = FindFirstObjectByType<StageManager>();
+            if (stage == null || stage.currentStage == null) return 1;   // 아직 준비 전 — 다음 처치에 다시 찾는다
+
+            stageScene = scene;
+            stageIndexCache = Mathf.Max(1, stage.currentStage.stageIndex);
+        }
+
+        return stageIndexCache;
     }
 
     /// <summary>지금 스테이지 번호 (1 · 2 · 3). 스테이지가 아니면 1.</summary>

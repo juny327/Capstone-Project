@@ -33,8 +33,14 @@ public class EconomySettings : ScriptableObject
 
     [Min(0)] public int defaultCoins = 1;
 
-    [Tooltip("몬스터 코인 배율 (정리/게임흐름-밸런스-변경.md, 2026-11-05 — 처치 목표가 늘어 0.7). 소수는 확률로 반올림한다 (코인 1 × 0.7 = 70% 확률로 1)")]
+    [Tooltip("몬스터 코인 배율 (정리/게임흐름-밸런스-변경.md, 2026-11-05 — 처치 목표가 늘어 0.7). 소수는 확률로 반올림한다 (코인 1 × 0.7 = 70% 확률로 1). " +
+             "아래 스테이지별 배율이 있으면 그쪽을 쓴다")]
     [Range(0f, 2f)] public float coinMultiplier = 0.7f;
+
+    // 2026-11-17 — 뒤 스테이지로 갈수록 수입을 키운다 (밸런스 결정 4 "넉넉하게"). 처치 목표 60 · 85 · 110 과
+    // 스테이지별 몬스터(1 = A · B, 2 = C · D 추가, 3 = 다섯 종)에 맞춰 한 판 약 407 (스테이지 65 · 130 · 214)이 되게 잡은 값.
+    [Tooltip("스테이지별 몬스터 코인 배율 [스테이지 1, 2, 3 …]. 표보다 큰 스테이지는 마지막 값, 비우면 coinMultiplier 하나")]
+    public float[] stageCoinMultipliers = { 0.6f, 0.65f, 0.8f };
 
     [Tooltip("한 번에 떨어뜨리는 코인 오브젝트 수의 상한. 넘으면 한 개가 여러 크레딧을 갖는다")]
     [Min(1)] public int maxCoinObjects = 4;
@@ -75,6 +81,16 @@ public class EconomySettings : ScriptableObject
         }
 
         return defaultCoins;
+    }
+
+    /// <summary>그 스테이지의 몬스터 코인 배율. 표가 비면 coinMultiplier, 표보다 큰 스테이지는 마지막 값.</summary>
+    public float CoinMultiplierFor(int stageIndex)
+    {
+        if (stageCoinMultipliers == null || stageCoinMultipliers.Length == 0)
+            return coinMultiplier;
+
+        int i = Mathf.Clamp(stageIndex - 1, 0, stageCoinMultipliers.Length - 1);
+        return Mathf.Max(0f, stageCoinMultipliers[i]);
     }
 
     /// <summary>스테이지 클리어 보너스. 표보다 큰 스테이지는 마지막 값.</summary>
