@@ -297,7 +297,8 @@ public class Enemy : MonoBehaviour, IDamageable, IPoolable
 
     public void ApplyShock(float duration)
     {
-        if (state == EnemyState.Dead)
+        // 꺼진 몬스터(자폭한 D 등 — 풀로 돌아갔다)에는 코루틴을 시작할 수 없다 — 날아오던 일렉트릭 샷 탄이 닿으면 오류가 났다 (2026-11-17)
+        if (state == EnemyState.Dead || !isActiveAndEnabled)
             return;
 
 
