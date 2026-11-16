@@ -158,6 +158,12 @@ public class AttachmentData : ScriptableObject
     /// <summary>탄 색을 쓰는가.</summary>
     public bool HasTint => tint.a > 0.01f;
 
+    /// <summary>
+    /// 비어 있으면 화면(오른쪽 아래 장비 HUD · 정비 창 내 장비 판)에서 숨기는 부위 — 상점에서 파는 부착물이 없는 총구 · 탄창 (2026-11-17).
+    /// 테스트 룸처럼 무언가 달려 있으면 보인다.
+    /// </summary>
+    public static bool HiddenWhenEmpty(AttachmentSlot slot) => slot == AttachmentSlot.Muzzle || slot == AttachmentSlot.Magazine;
+
     public static string SlotName(AttachmentSlot slot)
     {
         switch (slot)

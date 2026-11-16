@@ -246,6 +246,7 @@ public class EquipmentHud : MonoBehaviour
 
             var slot = (AttachmentSlot)i;
             AttachmentData attachment = weapon.GetAttachment(slot);
+            if (attachment == null && AttachmentData.HiddenWhenEmpty(slot)) { rows[i].Hide(); continue; }   // 파는 것이 없는 총구 · 탄창 (2026-11-17)
             rows[i].ShowAttachment(slot, attachment, detail);
 
             // 이 총에서 켜진 작은 조합의 두 부품 줄에 표시

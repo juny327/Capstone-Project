@@ -36,6 +36,9 @@ public class LoadoutPanelView : MonoBehaviour
     [SerializeField] EquipmentRowView[] abilityRows;
 
     [SerializeField] Color emptyFrame = new Color(1f, 1f, 1f, 0.18f);
+
+    // 부착물 칸 자리 (Tools / 재화 · 상점 이 만든 칸 — 첫 칸 x 92, 52 간격)
+    const float SlotX0 = 92f, SlotStep = 52f;
     [SerializeField] Color highlightColor = new Color(0.6f, 1f, 0.9f, 1f);
 
     /// <summary>대상 고르기 중 총을 클릭했을 때.</summary>
@@ -115,14 +118,20 @@ public class LoadoutPanelView : MonoBehaviour
         bool attachable = family != WeaponFamily.None && family != WeaponFamily.Melee;
         var names = new StringBuilder();
 
+        int shownSlots = 0;
         for (int s = 0; s < AttachmentData.SlotCount; s++)
         {
             AttachmentData a = attachable ? b.weapon.GetAttachment((AttachmentSlot)s) : null;
 
             if (b.slotFrames != null && s < b.slotFrames.Length && b.slotFrames[s] != null)
             {
-                // 보조 무기는 개조 칸만 보인다 (다른 부위는 달 수 없다)
-                b.slotFrames[s].transform.parent.gameObject.SetActive(attachable && (!support || s == (int)AttachmentSlot.Mod));
+                // 보조 무기는 개조 칸만 보인다 (다른 부위는 달 수 없다).
+                // 파는 것이 없는 총구 · 탄창은 비어 있으면 숨기고, 보이는 칸을 앞으로 당긴다 (2026-11-17)
+                bool show = attachable && (!support || s == (int)AttachmentSlot.Mod)
+                            && !(a == null && AttachmentData.HiddenWhenEmpty((AttachmentSlot)s));
+                var cell = (RectTransform)b.slotFrames[s].transform.parent;
+                cell.gameObject.SetActive(show);
+                if (show) cell.anchoredPosition = new Vector2(SlotX0 + shownSlots++ * SlotStep, cell.anchoredPosition.y);
                 b.slotFrames[s].color = a != null ? AttachmentData.TierColor(a.tier) : emptyFrame;
             }
 
