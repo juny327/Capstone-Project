@@ -305,7 +305,7 @@ public class ChargeBeamWeapon : WeaponBase
             if (point == Vector3.zero) point = col.ClosestPoint(origin);
 
             bool isCritical = RollCritical(in stats);
-            float dealt = ApplyCritical(in stats, isCritical) * damageScale;
+            float dealt = FloorSupportDamage(ApplyCritical(in stats, isCritical) * damageScale);   // 보조 칸은 최소 1
             bool wasAlive = CombatFx.IsAlive(root);
 
             target.TakeDamage(new DamageInfo

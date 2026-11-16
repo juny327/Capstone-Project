@@ -235,7 +235,7 @@ public class ChainBeamWeapon : WeaponBase
         // 치명타는 조준해서 맞힌 첫 적에게만 판정한다.
         // 퍼지는 전기까지 치명타를 띄우면 한 발에 숫자가 여러 번 터져 읽히지 않는다.
         bool isCritical = isFirst && RollCritical(in stats);
-        float dealt = isCritical ? ApplyCritical(in stats, true) : damage;
+        float dealt = FloorSupportDamage(isCritical ? ApplyCritical(in stats, true) : damage);   // 보조 칸은 최소 1
         bool notify = (isFirst || cfg.notifyEveryChain) && HasHitEffects;
         bool wasAlive = CombatFx.IsAlive(target);
 

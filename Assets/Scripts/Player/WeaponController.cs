@@ -70,6 +70,9 @@ public class WeaponController : MonoBehaviour
     [SerializeField] private float evolvedSupportDamageMul = 0.5f;
     [SerializeField] private float evolvedSupportIntervalMul = 1.4f;
 
+    [Tooltip("보조 무기 한 번 맞힘의 최소 피해 — 위 배율로 1 아래가 되면(기관단총 0.8 · 샷건 0.6) 피해 숫자가 0 으로 떴다. 0 이면 끈다 (2026-11-17)")]
+    [Min(0f)] [SerializeField] private float supportMinDamage = 1f;
+
     [Tooltip("보조 무기 자리 (플레이어 기준). 왼쪽 · 오른쪽 · 뒤. " +
              "높이는 주무기 총구(약 1.1m) 근처로 — 탄 · 빔은 쏜 높이 그대로 날아가므로 너무 높으면 작은 적 머리 위로 지나간다")]
     [SerializeField] private Vector3[] supportOffsets =
@@ -107,6 +110,8 @@ public class WeaponController : MonoBehaviour
     [Min(0f)] [SerializeField] private float supportShakeInterval = 0.2f;
 
     public float SupportShakeMul => supportShakeMul;
+    /// <summary>보조 무기 한 번 맞힘의 최소 피해 (0 = 없음).</summary>
+    public float SupportMinDamage => supportMinDamage;
     public float SupportShakeInterval => supportShakeInterval;
 
     [Header("Support Weapon Sounds (보조 무기 소리, 2026-11-12)")]

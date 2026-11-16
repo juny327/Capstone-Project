@@ -91,6 +91,14 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
     /// <summary>화면 흔들림 배율 — 주무기 1, 보조 무기는 WeaponController.SupportShakeMul (약하게).</summary>
     public float ShakeScale => !IsSupport ? 1f : (Owner != null ? Owner.SupportShakeMul : 0.4f);
 
+    /// <summary>보조 무기면 한 번 맞힘 피해를 최소값(WeaponController.SupportMinDamage, 기본 1)까지 올린다. 주무기는 그대로 (2026-11-17).</summary>
+    protected float FloorSupportDamage(float damage)
+    {
+        if (!IsSupport || Owner == null) return damage;
+        float min = Owner.SupportMinDamage;
+        return min > 0f && damage < min ? min : damage;
+    }
+
     /// <summary>한 발이 여러 단계로 이어지는 중인가 (프리즘 노바 빔 · 태양창 모으기) — 보조 무기는 그동안 노린 적을 계속 본다.</summary>
     public bool InSequence => IsBusy;
 
@@ -227,6 +235,7 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
         get
         {
             WeaponRuntimeStats s = WithOverrides(data.Compose(TotalModifier), projectileCountOverride);
+            s.Damage = FloorSupportDamage(s.Damage);   // 보조 칸 ×0.6 으로 1 아래가 되면 1
             if (RangeBonus != 0f) s.Range = Mathf.Max(0.1f, s.Range + RangeBonus);
 
             // 몬스터 상태 이상 (MonsterF 저주 — monster 브랜치 2026-10-11, 병합 11-04) — 발사 간격이 늘어난다
@@ -670,7 +679,9 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
         WeaponModifier total = WeaponModifier.Combine(WeaponModifier.Combine(WeaponModifier.Combine(accumulated, sum),
                                                                              data.perLevelBonus.Scaled(level - 1)),
                                                       roleModifier);
-        return WithOverrides(data.Compose(total), countOverride);
+        WeaponRuntimeStats preview = WithOverrides(data.Compose(total), countOverride);
+        preview.Damage = FloorSupportDamage(preview.Damage);
+        return preview;
     }
 
     void RebuildAttachmentModifier()
