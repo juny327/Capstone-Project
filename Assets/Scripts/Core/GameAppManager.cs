@@ -94,7 +94,20 @@ public class GameAppManager : MonoBehaviour
             PlayerStats.ClearInvulnerable();
 
         // 씬 넘어갈 때 위치 리셋
-        Player.transform.position = spawnPosition;
+        // 2026-11-17 — 플레이어 Rigidbody 는 보간(Interpolate)이 켜져 있어 transform 만 바꾸면 가끔(시험에서 12번 중 1번)
+        // 다음 프레임에 지난 스테이지 끝 자리로 되돌아갔다. 그 자리 10 ~ 40m 안에 등장 지점이 없으면 적이 하나도 안 나와
+        // 판이 멈췄다 (Stage2 처치 0 · 적 0). 몸(rb)과 transform 을 같이 옮긴다.
+        PlayerMove move = Player.GetComponent<PlayerMove>();
+        if (move != null && Player.activeInHierarchy)
+        {
+            move.ReturnToSafePosition(spawnPosition);   // 구르기 · 떨어짐 기억도 같이 지운다
+        }
+        else
+        {
+            Rigidbody body = Player.GetComponent<Rigidbody>();
+            if (body != null) { body.position = spawnPosition; body.linearVelocity = Vector3.zero; }
+            Player.transform.position = spawnPosition;
+        }
 
 
         // 테스트용 코드 꼭 지울것
