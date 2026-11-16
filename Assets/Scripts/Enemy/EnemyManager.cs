@@ -17,6 +17,10 @@ public class EnemyManager : MonoBehaviour
     [Min(0.1f)] public float rangedProjectileSpeed = 3.5f;
     [Tooltip("새로 나오는 몬스터의 체력 배율 — StageManager 가 스테이지 데이터 값으로 채운다 (2026-11-12)")]
     [Min(0.1f)] public float healthMultiplier = 1f;
+
+    // 2026-11-17 — 스테이지별 등장 비율 (StageManager 가 StageData.spawnWeights 를 넣는다).
+    // 비어 있으면 몬스터 데이터의 spawnWeight 그대로, 적혀 있으면 목록에 없는 몬스터는 나오지 않는다.
+    [System.NonSerialized] public StageData.SpawnWeight[] stageSpawnWeights;
     public int maxEnemyCount = 20;
 
     [Header("Stage Event")]
@@ -171,23 +175,33 @@ public class EnemyManager : MonoBehaviour
         int totalWeight = 0;
 
         foreach (var prefab in enemyPrefabs)
-        {
-            Enemy enemy = prefab.GetComponent<Enemy>();
-            totalWeight += enemy.data.spawnWeight;
-        }
+            totalWeight += WeightOf(prefab);
+
+        if (totalWeight <= 0)
+            return enemyPrefabs[0];
 
         int random = Random.Range(0, totalWeight);
 
         foreach (var prefab in enemyPrefabs)
         {
-            Enemy enemy = prefab.GetComponent<Enemy>();
-            random -= enemy.data.spawnWeight;
+            random -= WeightOf(prefab);
 
             if (random < 0)
                 return prefab;
         }
 
         return enemyPrefabs[0];
+    }
+
+    /// <summary>이 몬스터의 등장 비율 — 스테이지 목록이 있으면 그 값(없는 몬스터는 0), 없으면 몬스터 데이터의 값.</summary>
+    public int WeightOf(Enemy prefab)
+    {
+        if (prefab == null || prefab.data == null) return 0;
+        if (stageSpawnWeights == null || stageSpawnWeights.Length == 0) return Mathf.Max(0, prefab.data.spawnWeight);
+
+        foreach (StageData.SpawnWeight w in stageSpawnWeights)
+            if (w.enemy == prefab.data) return Mathf.Max(0, w.weight);
+        return 0;
     }
 
     public Enemy GetClosestEnemy(Vector3 from, float maxDistance)

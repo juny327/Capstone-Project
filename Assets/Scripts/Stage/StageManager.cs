@@ -22,6 +22,7 @@ public class StageManager : MonoBehaviour
         EnemyManager.Instance.spawnInterval = currentStage.spawnInterval;
         EnemyManager.Instance.rangedProjectileSpeed = currentStage.rangedProjectileSpeed;
         EnemyManager.Instance.healthMultiplier = currentStage.enemyHealthMultiplier;
+        EnemyManager.Instance.stageSpawnWeights = currentStage.spawnWeights;   // 스테이지별 등장 몬스터 (2026-11-17)
         GameEvents.OnStageProgress?.Invoke(killCount, currentStage.killTarget);
     }
 
