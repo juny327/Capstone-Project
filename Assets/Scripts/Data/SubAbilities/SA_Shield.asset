@@ -18,8 +18,8 @@ MonoBehaviour:
   icon: {fileID: 21300000, guid: aa49d417ce7607e4092c1ed4715e1e5c, type: 3}
   prefab: {fileID: 8196350990777663897, guid: c7142e69c0666714bad9ef3d42d3a7f7, type: 3}
   maxLevel: 3
-  basePrice: 25
-  levelPrices: 0f00000016000000
+  basePrice: 30
+  levelPrices: 1900000023000000
   levelNotes:
   - "\uBCC0\uD615 \u2014 \uBC18\uC0AC\uD310 / \uAC15\uD654 \uBC29\uBCBD"
   - "\uBCC0\uD615 \u2014 \uBC29\uD328 \uB3CC\uC9C4 / \uBC29\uD328 \uB358\uC9C0\uAE30"

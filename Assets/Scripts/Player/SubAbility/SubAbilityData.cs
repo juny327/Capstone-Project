@@ -22,10 +22,10 @@ public class SubAbilityData : ScriptableObject
     [Range(1, 3)] public int maxLevel = 3;
 
     [Header("상점 (Stage1 가격)")]
-    [Min(0)] public int basePrice = 25;
+    [Min(0)] public int basePrice = 30;
 
     [Tooltip("레벨업 가격 — [0] = Lv1 → 2, [1] = Lv2 → 3")]
-    public int[] levelPrices = { 15, 22 };
+    public int[] levelPrices = { 25, 35 };
 
     [Tooltip("레벨업으로 좋아지는 것 한 줄 — [0] = Lv2, [1] = Lv3. 변형이 있으면 변형 설명을 쓴다")]
     public string[] levelNotes = { "", "" };

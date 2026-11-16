@@ -15,7 +15,7 @@ MonoBehaviour:
   upgradeName: "\uACF5\uACA9\uB825 \uC99D\uAC00"
   description: "\uBAA8\uB4E0 \uBB34\uAE30 \uD53C\uD574 +10%"
   icon: {fileID: 2947914709021185861, guid: 44f8c69802068264599809705c4b512c, type: 3}
-  costExp: 2
+  costExp: 4
   maxLevel: 0
   fixedCost: 0
   effect: {fileID: 11400000, guid: 6d1fc9d9d5b5732458e2e746dabd74c5, type: 2}
