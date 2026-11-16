@@ -204,6 +204,33 @@ public class EnemyManager : MonoBehaviour
         return 0;
     }
 
+    readonly List<Enemy> visibleCandidates = new List<Enemy>();
+
+    /// <summary>
+    /// 벽에 가리지 않은 가장 가까운 적 (2026-11-17 — 파이어볼 · 일렉트릭 샷이 벽 너머 적을 노려 벽을 뚫고 날아갔다).
+    /// eye = 쏘는 자리(발밑 + 높이), 적은 몸 가운데(+1m)를 본다. 가까운 순서로 몇 개만 시선을 검사한다.
+    /// </summary>
+    public Enemy GetClosestVisibleEnemy(Vector3 from, float maxDistance, Vector3 eye, int maxChecks = 8)
+    {
+        visibleCandidates.Clear();
+        float maxSqr = maxDistance * maxDistance;
+
+        for (int i = 0; i < enemies.Count; i++)
+        {
+            Enemy enemy = enemies[i];
+            if (enemy == null || !enemy.gameObject.activeInHierarchy || enemy.state == EnemyState.Dead) continue;
+            if ((enemy.transform.position - from).sqrMagnitude < maxSqr) visibleCandidates.Add(enemy);
+        }
+
+        visibleCandidates.Sort((a, b) => (a.transform.position - from).sqrMagnitude.CompareTo((b.transform.position - from).sqrMagnitude));
+
+        for (int i = 0; i < visibleCandidates.Count && i < maxChecks; i++)
+            if (CombatFx.HasLineOfSight(eye, visibleCandidates[i].transform.position + Vector3.up))
+                return visibleCandidates[i];
+
+        return null;
+    }
+
     public Enemy GetClosestEnemy(Vector3 from, float maxDistance)
     {
         Enemy closest = null;

@@ -49,9 +49,11 @@ public class FireBallSkill : MonoBehaviour
         if (EnemyManager.Instance == null)
             return;
 
-        Enemy target = EnemyManager.Instance.GetClosestEnemy(
+        // 벽에 가린 적은 노리지 않는다 (2026-11-17 — 벽을 뚫고 날아갔다)
+        Enemy target = EnemyManager.Instance.GetClosestVisibleEnemy(
             transform.position,
-            targetRange
+            targetRange,
+            transform.position + spawnOffset
         );
 
         if (target == null)

@@ -49,6 +49,15 @@ public class FireBallProjectile : MonoBehaviour
         if (direction.sqrMagnitude > 0.001f)
             transform.rotation = Quaternion.LookRotation(direction.normalized);
 
+        // 이번 프레임에 지나갈 길에 맵 벽이 있으면 거기서 사라진다 (2026-11-17 — 벽을 뚫고 날아갔다)
+        float step = Mathf.Min(speed * Time.deltaTime, direction.magnitude);
+        if (step > 0.0001f && CombatFx.ObstacleDistance(transform.position, direction, step) < step)
+        {
+            CombatFx.ObstacleHitSound();
+            Destroy(gameObject);
+            return;
+        }
+
         transform.position = Vector3.MoveTowards(
             transform.position,
             targetPosition,

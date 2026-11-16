@@ -27,7 +27,8 @@ public class ElectricShotSkill : MonoBehaviour
         if (timer > 0 || projectilePrefab == null)
             return;
 
-        Enemy target = EnemyManager.Instance.GetClosestEnemy(transform.position, targetRange);
+        // 벽에 가린 적은 노리지 않는다 (2026-11-17 — 벽을 뚫고 날아갔다)
+        Enemy target = EnemyManager.Instance.GetClosestVisibleEnemy(transform.position, targetRange, transform.position + spawnOffset);
 
         if (target == null)
             return;
