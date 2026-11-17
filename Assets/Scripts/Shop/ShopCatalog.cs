@@ -105,4 +105,38 @@ public class ShopCatalog : ScriptableObject
 
         return cached;
     }
+
+    // ───────── 정비 창에서 얻을 수 있는 부착물 부위 (2026-11-17) ─────────
+
+    static readonly System.Collections.Generic.Dictionary<(WeaponData, AttachmentSlot), bool> sold =
+        new System.Collections.Generic.Dictionary<(WeaponData, AttachmentSlot), bool>();
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetSold() => sold.Clear();
+
+    /// <summary>
+    /// 정비 창에서 이 무기의 이 부위에 달 부착물을 파는가 — 장비 HUD · 정비 창 '내 장비'는 파는 부위만 보인다
+    /// (2026-11-17 사용자 결정 "정비 창에서 얻을 수 있는 것만 HUD 에서 보여 주기"). 달려 있는 칸은 이와 상관없이 보인다.
+    /// 예: 스나이퍼 전용 개조는 팔지 않으므로 스나이퍼에서는 개조 칸이 비어 있으면 숨는다. 총구 · 탄창은 파는 것이 없다.
+    /// </summary>
+    public static bool SellsAttachment(WeaponData weapon, AttachmentSlot slot)
+    {
+        if (weapon == null) return false;
+        if (sold.TryGetValue((weapon, slot), out bool value)) return value;
+
+        ShopCatalog catalog = Load();
+        if (catalog == null || catalog.sources == null) return !AttachmentData.HiddenWhenEmpty(slot);   // 카탈로그가 없으면 예전 규칙
+
+        value = false;
+        foreach (ShopOfferSource source in catalog.sources)
+        {
+            if (!(source is AttachmentSource shop) || shop.attachments == null) continue;
+            foreach (AttachmentData a in shop.attachments)
+                if (a != null && a.slot == slot && a.Fits(weapon)) { value = true; break; }
+            if (value) break;
+        }
+
+        sold[(weapon, slot)] = value;
+        return value;
+    }
 }

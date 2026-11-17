@@ -126,9 +126,9 @@ public class LoadoutPanelView : MonoBehaviour
             if (b.slotFrames != null && s < b.slotFrames.Length && b.slotFrames[s] != null)
             {
                 // 보조 무기는 개조 칸만 보인다 (다른 부위는 달 수 없다).
-                // 파는 것이 없는 총구 · 탄창은 비어 있으면 숨기고, 보이는 칸을 앞으로 당긴다 (2026-11-17)
+                // 정비 창에서 이 무기에 파는 부위만 보이고(비어 있을 때), 보이는 칸을 앞으로 당긴다 (2026-11-17)
                 bool show = attachable && (!support || s == (int)AttachmentSlot.Mod)
-                            && !(a == null && AttachmentData.HiddenWhenEmpty((AttachmentSlot)s));
+                            && !(a == null && !ShopCatalog.SellsAttachment(data, (AttachmentSlot)s));
                 var cell = (RectTransform)b.slotFrames[s].transform.parent;
                 cell.gameObject.SetActive(show);
                 if (show) cell.anchoredPosition = new Vector2(SlotX0 + shownSlots++ * SlotStep, cell.anchoredPosition.y);
@@ -147,7 +147,8 @@ public class LoadoutPanelView : MonoBehaviour
         if (b.parts != null)
             b.parts.text = !attachable ? "근접 무기 — 부착물 없음"
                          : names.Length > 0 ? names.ToString()
-                         : support ? "보조 무기 — 전용 개조 칸만" : "부착물 없음";
+                         : support ? (ShopCatalog.SellsAttachment(data, AttachmentSlot.Mod) ? "보조 무기 — 전용 개조 칸만" : "보조 무기 — 부착물 없음")
+                         : "부착물 없음";
     }
 
     void RefreshAbilities(ShopContext ctx)
