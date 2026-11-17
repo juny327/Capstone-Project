@@ -10,7 +10,7 @@ using UnityEngine.UI;
 ///  · 큰 피해(최대 체력의 15% 이상): 흔들림 ×1.5 + 잠깐 멈춤(무기 손맛의 히트 스톱 — ImpactFx 설정의 hitStop 을 따른다)
 ///  · 체력 30% 아래: 가장자리가 옅게(0.15) 천천히 맥박친다. 회복하면 사라진다
 ///  · 0.1초 안에 또 맞으면 붉은 빛만 이어 가고 흔들림 · 깜빡임을 새로 시작하지 않는다 (적이 많은 스테이지 3)
-///  · 죽는 한 방은 내지 않는다 (PlayerStats 가 부르지 않는다 — 피격음과 같은 규칙). 보스 등장 · 균열 엔딩 중에는 끈다
+///  · 죽는 한 방은 내지 않는다 (PlayerStats 가 부르지 않는다 — 피격음과 같은 규칙). 보스 등장 · 처치 연출 · 균열 엔딩 · 결과 화면 중에는 끈다
 ///  · 설정 창 '피격 화면 효과'를 끄면 붉은 빛 · 깜빡임 · 체력바 효과가 빠진다. 흔들림은 '화면 흔들림' 슬라이더를 따른다
 ///  · 모두 실제 시간으로 돌린다 — 히트 스톱 · 레벨업 창으로 시간이 멈춰도 사라진다
 ///
@@ -110,8 +110,13 @@ public class PlayerHurtFx : MonoBehaviour
         hudSearch = 0f;
     }
 
+    /// <summary>
+    /// 다른 연출이 화면을 쓰는 중 — 보스 등장 · 보스 처치 연출(쓰러짐 → 빛 조각) · 균열 엔딩 · 결과 / 크레딧(테스트 룸 미리보기 포함).
+    /// 처치 연출은 11-17 확인 시험에서 빠져 있던 것을 찾아 더했다 (체력이 낮으면 쓰러지는 장면 내내 붉은 빛이 맥박쳤다).
+    /// </summary>
     static bool OtherSceneFxRunning =>
-        RiftEnding.Running || (DragonEntrance.Current != null && !DragonEntrance.Current.Finished);
+        RiftEnding.Running || DragonDeathShow.Running || EndingFlow.Instance != null
+        || (DragonEntrance.Current != null && !DragonEntrance.Current.Finished);
 
     /// <summary>
     /// 피해 한 번 (죽지 않은 피해만 — PlayerStats.TakeDamage 가 부른다). requestedShake 는 공격이 정한 흔들림.
