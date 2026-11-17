@@ -34,6 +34,10 @@ public class GameSettingsUI : MonoBehaviour
     [SerializeField] private Slider shakeSlider;
     [SerializeField] private TMP_Text shakeValue;
 
+    // 피격 화면 효과 켜기 / 끄기 (2026-11-17) — 예전 프리팹에는 없을 수 있다 (없으면 그 줄만 빠진다)
+    [SerializeField] private Button hurtFxButton;
+    [SerializeField] private TMP_Text hurtFxValue;
+
     [SerializeField] private Button closeButton;
     [SerializeField] private Button resetButton;
 
@@ -86,6 +90,7 @@ public class GameSettingsUI : MonoBehaviour
         musicSlider.onValueChanged.AddListener(v => { if (!syncing) GameSettings.SetMusic(v); ShowValues(); });
         sfxSlider.onValueChanged.AddListener(v => { if (!syncing) GameSettings.SetSfx(v); ShowValues(); });
         if (shakeSlider != null) shakeSlider.onValueChanged.AddListener(v => { if (!syncing) GameSettings.SetShake(v); ShowValues(); });
+        if (hurtFxButton != null) hurtFxButton.onClick.AddListener(() => { GameSettings.SetHurtFx(!GameSettings.HurtFx); ShowValues(); });
 
         closeButton.onClick.AddListener(Close);
         resetButton.onClick.AddListener(() => { GameSettings.ResetToDefaults(); SyncSliders(); });
@@ -213,6 +218,7 @@ public class GameSettingsUI : MonoBehaviour
         musicValue.text = Percent(musicSlider.value);
         sfxValue.text = Percent(sfxSlider.value);
         if (shakeSlider != null && shakeValue != null) shakeValue.text = Percent(shakeSlider.value);
+        if (hurtFxValue != null) hurtFxValue.text = GameSettings.HurtFx ? "켜짐" : "꺼짐";
     }
 
     static string Percent(float v) => $"{Mathf.RoundToInt(v * 100f)}%";

@@ -348,8 +348,8 @@ public class ImpactHost : MonoBehaviour
         return image;
     }
 
-    /// <summary>가운데는 투명하고 가장자리로 갈수록 진해지는 그림 (한 번 만들어 쓴다).</summary>
-    static Sprite VignetteSprite()
+    /// <summary>가운데는 투명하고 가장자리로 갈수록 진해지는 그림 (부를 때마다 새로 만든다 — 쓰는 쪽이 한 번 만들어 둔다). 피격 연출(PlayerHurtFx)도 쓴다.</summary>
+    internal static Sprite VignetteSprite()
     {
         const int Size = 128;
         var tex = new Texture2D(Size, Size, TextureFormat.RGBA32, false) { wrapMode = TextureWrapMode.Clamp, hideFlags = HideFlags.HideAndDontSave };

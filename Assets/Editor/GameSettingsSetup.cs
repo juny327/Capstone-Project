@@ -83,7 +83,7 @@ public static class GameSettingsSetup
 
             var frame = new GameObject("Frame", typeof(RectTransform), typeof(Image));
             frame.transform.SetParent(window.transform, false);
-            Place(frame, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(760, 640));   // 화면 흔들림 줄이 늘어 500 → 640 (2026-11-14)
+            Place(frame, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(760, 720));   // 화면 흔들림 줄이 늘어 500 → 640 (2026-11-14), 피격 화면 효과 줄로 → 720 (2026-11-17)
             frame.GetComponent<Image>().color = Accent;
 
             var panel = new GameObject("Panel", typeof(RectTransform), typeof(Image));
@@ -108,6 +108,14 @@ public static class GameSettingsSetup
             Text(panel.transform, "ScreenSection", "화면", font, 26, Muted, TextAlignmentOptions.Left,
                 new Vector2(0.5f, 1), new Vector2(-260, -396), new Vector2(160, 36));
             (Slider shakeSlider, TMP_Text shakeValue) = Row(panel.transform, "Shake", "화면 흔들림", -454, font, resources);
+
+            // 피격 화면 효과 켜기 / 끄기 (2026-11-17) — 맞을 때 가장자리 붉은 빛 · 캐릭터 깜빡임 · 체력바 잔상. 흔들림은 위 슬라이더를 따른다
+            Text(panel.transform, "HurtFxLabel", "피격 화면 효과", font, 32, Color.white, TextAlignmentOptions.Left,
+                new Vector2(0.5f, 1), new Vector2(-190, -534), new Vector2(300, 48));   // 이름이 길어 다른 줄(폭 210)보다 넓게 — 왼쪽 끝은 같다
+            Button hurtFx = MakeButton(panel.transform, "HurtFxButton", "켜짐", font, 28,
+                new Vector2(0.5f, 1), new Vector2(250, -534), new Vector2(220, 52), new Vector2(0.5f, 0.5f));
+            hurtFx.GetComponent<Image>().color = Track;   // 판과 같은 색이면 안 보인다 — 슬라이더 홈 색
+            TMP_Text hurtFxValue = hurtFx.transform.Find("Text").GetComponent<TMP_Text>();
 
             // 왼쪽 아래는 "로비로" 버튼 자리 (2026-11-02) — 안내는 "소리" 줄 오른쪽 끝으로
             Text(panel.transform, "Hint", "ESC 로 열고 닫기", font, 22, Muted, TextAlignmentOptions.Right,
@@ -141,6 +149,8 @@ public static class GameSettingsSetup
             so.FindProperty("sfxValue").objectReferenceValue = sfxValue;
             so.FindProperty("shakeSlider").objectReferenceValue = shakeSlider;
             so.FindProperty("shakeValue").objectReferenceValue = shakeValue;
+            so.FindProperty("hurtFxButton").objectReferenceValue = hurtFx;
+            so.FindProperty("hurtFxValue").objectReferenceValue = hurtFxValue;
             so.FindProperty("closeButton").objectReferenceValue = close;
             so.FindProperty("resetButton").objectReferenceValue = reset;
             so.FindProperty("title").objectReferenceValue = title;
@@ -157,7 +167,7 @@ public static class GameSettingsSetup
             Object.DestroyImmediate(root);
         }
 
-        Debug.Log($"{Tag} 설정창: {PrefabPath} (전체 · 배경음 · 효과음, 로비 버튼 · ESC · 게임 중 로비로)");
+        Debug.Log($"{Tag} 설정창: {PrefabPath} (전체 · 배경음 · 효과음 · 화면 흔들림 · 피격 화면 효과, 로비 버튼 · ESC · 게임 중 로비로)");
         return true;
     }
 

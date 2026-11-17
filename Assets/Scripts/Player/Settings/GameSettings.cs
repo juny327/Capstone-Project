@@ -17,11 +17,13 @@ public static class GameSettings
     const string MusicKey = "Settings.MusicVolume";
     const string SfxKey = "Settings.SfxVolume";
     const string ShakeKey = "Settings.ScreenShake";
+    const string HurtFxKey = "Settings.HurtFx";
 
     public const float DefaultMaster = 1f;
     public const float DefaultMusic = 1f;
     public const float DefaultSfx = 1f;
     public const float DefaultShake = 1f;
+    public const bool DefaultHurtFx = true;
 
     public static float Master { get; private set; } = DefaultMaster;
     public static float Music { get; private set; } = DefaultMusic;
@@ -29,6 +31,12 @@ public static class GameSettings
 
     /// <summary>화면 흔들림 세기 0~1 (2026-11-14) — 카메라의 충격 수신기 세기에 곱한다 (ImpactFx). 어지러움을 타는 사람을 위한 값.</summary>
     public static float Shake { get; private set; } = DefaultShake;
+
+    /// <summary>
+    /// 피격 화면 효과 (2026-11-17, 피격 연출 개선안) — 맞을 때 화면 가장자리가 붉어지고 캐릭터 · 체력바가 깜빡이는 효과.
+    /// 눈이 피로한 사람을 위해 끌 수 있다. 흔들림은 위 Shake 를 따른다.
+    /// </summary>
+    public static bool HurtFx { get; private set; } = DefaultHurtFx;
 
     static bool hooked;
 
@@ -59,6 +67,7 @@ public static class GameSettings
         Music = Mathf.Clamp01(PlayerPrefs.GetFloat(MusicKey, DefaultMusic));
         Sfx = Mathf.Clamp01(PlayerPrefs.GetFloat(SfxKey, DefaultSfx));
         Shake = Mathf.Clamp01(PlayerPrefs.GetFloat(ShakeKey, DefaultShake));
+        HurtFx = PlayerPrefs.GetInt(HurtFxKey, DefaultHurtFx ? 1 : 0) != 0;
     }
 
     /// <summary>지금 값을 소리에 적용한다.</summary>
@@ -77,6 +86,7 @@ public static class GameSettings
     public static void SetMusic(float value) { Music = Mathf.Clamp01(value); PlayerPrefs.SetFloat(MusicKey, Music); Apply(); }
     public static void SetSfx(float value) { Sfx = Mathf.Clamp01(value); PlayerPrefs.SetFloat(SfxKey, Sfx); Apply(); }
     public static void SetShake(float value) { Shake = Mathf.Clamp01(value); PlayerPrefs.SetFloat(ShakeKey, Shake); ImpactFx.ApplyShakeScale(); }
+    public static void SetHurtFx(bool on) { HurtFx = on; PlayerPrefs.SetInt(HurtFxKey, on ? 1 : 0); }
 
     public static void ResetToDefaults()
     {
@@ -84,6 +94,7 @@ public static class GameSettings
         SetMusic(DefaultMusic);
         SetSfx(DefaultSfx);
         SetShake(DefaultShake);
+        SetHurtFx(DefaultHurtFx);
     }
 
     /// <summary>디스크에 바로 쓴다. 슬라이더를 움직일 때마다 쓰지 않고 창을 닫을 때 한 번 부른다.</summary>
