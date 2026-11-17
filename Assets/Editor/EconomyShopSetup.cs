@@ -52,9 +52,9 @@ public static class EconomyShopSetup
     // 무기 가격 (Stage1 기준). 근거: 장전 포함 DPS · 광역 · 사거리 — 정비-상점-구현계획.md "구현 결과"
     static readonly (string asset, int price)[] DefaultPrices =
     {
-        ("WD_Rifle", 20), ("WD_SMG", 24), ("WD_Shotgun", 24), ("WD_Sniper", 28),
-        ("WD_TeslaRifle", 32), ("WD_ChargeLaser", 36),
-        ("WD_Sword", 20), ("WD_Greatsword", 30), ("WD_Spear", 28),
+        ("WD_Rifle", 16), ("WD_SMG", 20), ("WD_Shotgun", 20), ("WD_Sniper", 23),
+        ("WD_TeslaRifle", 26), ("WD_ChargeLaser", 30),
+        ("WD_Sword", 16), ("WD_Greatsword", 25), ("WD_Spear", 23),   // 2026-11-17 약 18% 인하
     };
 
     // 설정창 · 테스트 룸과 같은 색
@@ -241,7 +241,7 @@ public static class EconomyShopSetup
                 .Select(p => new ShopCatalog.WeaponPrice { weapon = AssetDatabase.LoadAssetAtPath<WeaponData>($"{WeaponDataDir}/{p.asset}.asset"), price = p.price })
                 .Where(p => p.weapon != null)
                 .ToArray();
-            catalog.defaultWeaponPrice = 30;
+            catalog.defaultWeaponPrice = 25;
             catalog.upgradeBaseRate = 0.6f;
             catalog.upgradeRatePerLevel = 0.15f;
             catalog.priceStepPerStage = 0.1f;

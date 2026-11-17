@@ -21,12 +21,12 @@ MonoBehaviour:
   supportOnly: 0
   supportTarget: 1
   fireInterval: 1.6
-  damage: 9
+  damage: 9.9
   critChance: 0.25
   critMultiplier: 2.5
   maxLevel: 3
   perLevelBonus:
-    damageAdd: 1.8
+    damageAdd: 1.98
     damageMul: 1
     fireIntervalMul: 1
     critChanceAdd: 0

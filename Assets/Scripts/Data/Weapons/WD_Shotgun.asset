@@ -21,7 +21,7 @@ MonoBehaviour:
   supportTarget: 3
   supportTint: {r: 1, g: 0.85, b: 0.2, a: 1}
   fireInterval: 0.9
-  damage: 1
+  damage: 1.1
   critChance: 0.05
   critMultiplier: 2
   maxLevel: 3

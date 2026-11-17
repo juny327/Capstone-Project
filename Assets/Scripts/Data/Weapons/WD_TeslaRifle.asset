@@ -21,12 +21,12 @@ MonoBehaviour:
   supportTarget: 0
   supportTint: {r: 0.35, g: 0.8, b: 1, a: 1}
   fireInterval: 0.5
-  damage: 2.4
+  damage: 2.64
   critChance: 0.08
   critMultiplier: 2
   maxLevel: 3
   perLevelBonus:
-    damageAdd: 0.5
+    damageAdd: 0.55
     damageMul: 1
     fireIntervalMul: 1
     critChanceAdd: 0
