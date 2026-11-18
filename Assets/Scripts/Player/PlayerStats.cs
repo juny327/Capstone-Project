@@ -163,7 +163,8 @@ public class PlayerStats : MonoBehaviour, IDamageable
             if (i < damageFilters.Count && damageFilters[i] != null && damageFilters[i].Absorb(ref info)) return;
 
         // 배율 1 이면 예전과 같다. 배율로 1 미만이 되어도 1 이상의 피해는 최소 1 로 둔다
-        int amount = (int)(info.damage * damageTakenMultiplier);
+        // 난이도 (2026-11-17) — 이지는 받는 피해가 줄어든다 (하드 ×1)
+        int amount = (int)(info.damage * damageTakenMultiplier * Difficulty.Values.enemyDamage);
         if (amount < 1 && info.damage >= 1f) amount = 1;
 
         currentHp -= amount;

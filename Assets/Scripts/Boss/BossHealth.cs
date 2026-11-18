@@ -17,6 +17,8 @@ public class BossHealth : MonoBehaviour, IDamageable
 
     void Awake()
     {
+        // 난이도 (2026-11-17) — 로비에서 고른 이지 / 하드의 보스 체력 배율 (값은 DifficultySettings 에셋 — 11-18 이지 ×1.5 · 하드 ×2)
+        maxHp = Mathf.Max(1, Mathf.RoundToInt(maxHp * Difficulty.Values.bossHealth));
         currentHp = maxHp;
         GameEvents.OnBossSpawned?.Invoke(this);
     }
