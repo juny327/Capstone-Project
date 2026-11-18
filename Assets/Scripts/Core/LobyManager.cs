@@ -55,6 +55,6 @@ public class LobyManager : MonoBehaviour
             GameAppManager.Instance.SelectWeapon(Selected);
 
         Time.timeScale = 1f;
-        SceneManager.LoadScene("Stage1");
+        SceneCurtain.Load("Stage1");   // 2026-11-18 성능 — 첫 입장(2.4초 멈춤)을 가림막 아래에서
     }
 }

@@ -46,6 +46,6 @@ public class RunManager : MonoBehaviour
 
     public void OnClick()
     {
-        SceneManager.LoadScene("Stage1");
+        SceneCurtain.Load("Stage1");   // 2026-11-18 성능 — 입장 멈춤을 가림막 아래에서
     }
 }
