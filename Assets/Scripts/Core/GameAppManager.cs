@@ -98,7 +98,15 @@ public class GameAppManager : MonoBehaviour
         // 다음 프레임에 지난 스테이지 끝 자리로 되돌아갔다. 그 자리 10 ~ 40m 안에 등장 지점이 없으면 적이 하나도 안 나와
         // 판이 멈췄다 (Stage2 처치 0 · 적 0). 몸(rb)과 transform 을 같이 옮긴다.
         PlayerMove move = Player.GetComponent<PlayerMove>();
-        if (move != null && Player.activeInHierarchy)
+        if (!Player.activeInHierarchy)
+        {
+            // 꺼진 플레이어는 transform 만 옮긴다 (2026-11-18). 테스트 룸은 보스전으로 나갈 때 플레이어를 꺼 두는데,
+            // 꺼진 오브젝트의 Rigidbody 는 물리 장면에 없어서 position 을 쓰면 Unity 가 PhysX 안에서 죽었다
+            // (PhysicsCommands::PhysX::BodySetPose 크래시 — 11-17 에 몸도 같이 옮기게 고치며 생겼다).
+            // 켜지는 순간 몸은 transform 자리에서 새로 시작하므로 보간에 지난 자리가 남지 않는다
+            Player.transform.position = spawnPosition;
+        }
+        else if (move != null)
         {
             move.ReturnToSafePosition(spawnPosition);   // 구르기 · 떨어짐 기억도 같이 지운다
         }
