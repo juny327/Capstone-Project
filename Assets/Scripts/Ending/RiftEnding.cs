@@ -316,7 +316,8 @@ public static class RiftEnding
         foreach (Canvas c in Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None))
             if (c.isRootCanvas && c.enabled && c.renderMode != RenderMode.WorldSpace
                 && c.GetComponentInChildren<GameSettingsUI>(true) == null && c.GetComponentInParent<GameSettingsUI>(true) == null
-                && c.GetComponent<EndingFlow>() == null)
+                && c.GetComponent<EndingFlow>() == null
+                && c.GetComponent<SceneCurtain>() == null)   // 입장 가림막은 끄고 켜지 않는다 (2026-11-18 — 되켜면 로비 버튼을 막는다)
             {
                 c.enabled = false;
                 hiddenCanvases.Add(c);

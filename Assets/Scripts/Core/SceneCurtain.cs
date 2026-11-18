@@ -141,6 +141,19 @@ public class SceneCurtain : MonoBehaviour
         Busy = false;
     }
 
+    /// <summary>
+    /// 가림막이 켜져 있는지는 가림막만 정한다 (2026-11-18) — 바꾸는 중(Busy)이면 켜짐, 아니면 꺼짐.
+    ///
+    /// 보스 등장 연출 · 균열 엔딩은 연출 동안 '켜져 있는 화면 캔버스를 모두 껐다가 끝나면 되켠다'. 가림막이 덮여 있을 때
+    /// 그 목록에 들어가면 ① 덮는 도중 꺼져 가리던 화면이 드러나고 ② 나중에 되켜져서, 투명한(알파 0) 채로 모든 버튼 위에
+    /// 남아 클릭을 막았다 — 엔딩을 보고 돌아온 로비에서 버튼이 하나도 안 눌렸고, 보스전 중 설정 창 · 카드 창도 같았다.
+    /// 누가 건드려도 그 프레임을 그리기 전에 바로잡는다.
+    /// </summary>
+    void LateUpdate()
+    {
+        if (canvas != null && canvas.enabled != Busy) canvas.enabled = Busy;
+    }
+
     void SetAlpha(float a)
     {
         a = Mathf.Clamp01(a);

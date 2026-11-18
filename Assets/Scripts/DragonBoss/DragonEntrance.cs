@@ -160,10 +160,12 @@ public class DragonEntrance : MonoBehaviour
 
         LockPlayer();
         // HUD 를 모두 숨긴다 — 이 장면 것 + 씬을 넘어 남는 것(코인 · 스킬 · 조합식 · 장비, 11-13 화면 점검에서 코인이 연출 위에 남았다).
-        // 설정창(ESC)은 남긴다
+        // 설정창(ESC)은 남긴다. 입장 가림막도 건드리지 않는다 (2026-11-18) — 이 준비는 가림막이 덮인 동안 도는데,
+        // 가림막을 끄면 가리던 화면이 드러나고, 끝나고 되켜면 투명한 가림막이 모든 버튼 위에 남아 클릭을 막았다
         foreach (Canvas c in FindObjectsByType<Canvas>(FindObjectsSortMode.None))
             if (c.isRootCanvas && c.enabled && c.renderMode != RenderMode.WorldSpace
-                && c.GetComponentInChildren<GameSettingsUI>(true) == null && c.GetComponentInParent<GameSettingsUI>(true) == null)
+                && c.GetComponentInChildren<GameSettingsUI>(true) == null && c.GetComponentInParent<GameSettingsUI>(true) == null
+                && c.GetComponent<SceneCurtain>() == null)
             { c.enabled = false; hiddenHud.Add(c); }
         hpUi = scene.GetRootGameObjects().SelectMany(r => r.GetComponentsInChildren<BossHPUI>(true)).FirstOrDefault();
 
