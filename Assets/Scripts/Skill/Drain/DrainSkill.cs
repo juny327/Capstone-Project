@@ -55,11 +55,7 @@ public class DrainSkill : MonoBehaviour
     /// </summary>
     public void OnKill()
     {
-        Debug.Log(
-            $"[Drain] ★ 처치 감지 | 회복 시도 | HealAmount={healAmount}",
-            this
-        );
-
+        // 2026-11-18 성능 — 처치마다 찍던 로그 2 ~ 3줄을 뺐다 (한 판 약 280번, 로그마다 스택 추적 · 파일 쓰기)
         if (playerStats == null)
             playerStats = GetComponent<PlayerStats>();
 
@@ -79,24 +75,9 @@ public class DrainSkill : MonoBehaviour
         int maxHp = playerStats.maxHp;
 
         if (beforeHp >= maxHp)
-        {
-            Debug.Log(
-                $"[Drain] 처치는 정상 감지됨 | HP가 이미 최대치라 회복되지 않음 | " +
-                $"HP={beforeHp}/{maxHp}",
-                this
-            );
-            return;
-        }
+            return;   // HP 가 이미 최대치
 
         playerStats.AddHP(healAmount);
         SoundManager.Instance?.PlayDrainHeal();
-
-        int afterHp = playerStats.currentHp;
-
-        Debug.Log(
-            $"[Drain] ♥ 흡혈 성공 | HP {beforeHp} → {afterHp} / {maxHp} | " +
-            $"실제 회복={afterHp - beforeHp}",
-            this
-        );
     }
 }
