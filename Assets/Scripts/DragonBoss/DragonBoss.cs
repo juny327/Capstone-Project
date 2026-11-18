@@ -56,6 +56,16 @@ public partial class DragonBoss : MonoBehaviour
     [Tooltip("불덩이 — 몬스터 투사체(RangedProjectile)라 검사 패링으로 되받아칠 수 있다")]
     [SerializeField] GameObject fireballPrefab;
 
+    /// <summary>
+    /// 불덩이 풀을 미리 채운다 (2026-11-18 성능 2단계) — 입장 가림막 아래에서 StageWarmup 이 부른다.
+    /// 풀 설정에 불덩이가 없어, 처음 쏘는 순간 풀을 만들며 5개를 한꺼번에 생성해 끊겼다.
+    /// </summary>
+    public void PrewarmPools(int fireballs = 6)
+    {
+        if (fireballPrefab != null && PoolManager.Instance != null)
+            PoolManager.Instance.Prewarm(fireballPrefab, fireballs);
+    }
+
     [Header("크기")]
     [Tooltip("몸 크기 배율 = 모델 크기 ÷ 6 (프리팹 도구가 넣는다). 아래 거리 값들은 '×6 크기 기준'으로 적혀 있고, 깨어날 때 이 배율에 맞춰 늘어난다 — "
              + "몸에 붙은 것(물기 · 꼬리 · 돌진 폭)은 그대로, 전장에 깔리는 것(브레스 길이 · 돌진 거리)은 그보다 조금만")]

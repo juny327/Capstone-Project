@@ -97,7 +97,45 @@ public class MaintenanceUI : MonoBehaviour
     public bool IsTargeting => pending != null;
 
     /// <summary>정비 창이 열려 있는지.</summary>
-    public bool IsOpen => window != null && window.activeSelf;
+    public bool IsOpen => window != null && window.activeSelf && !prewarming;
+
+    // ───────── 미리 깨우기 (2026-11-18 성능 2단계) ─────────
+    // 처음 열 때만 창 안 UI 가 처음 깨어나며(Awake · 글자 · 레이아웃) 63ms 끊겼다 (두 번째부터 18 ~ 21ms).
+    // 입장 가림막이 덮인 동안 한 번 켰다 끈다 — 그동안 IsOpen 은 false (다른 시스템이 열린 줄 알지 않게)
+
+    bool prewarming;
+    static bool prewarmed;
+
+    /// <summary>가림막 아래에서 창을 한 프레임 켰다 끈다 (판에 한 번). StageWarmup 이 부른다.</summary>
+    public void PrewarmHidden()
+    {
+        if (prewarmed || window == null || window.activeSelf) return;
+        prewarmed = true;
+        StartCoroutine(PrewarmRoutine());
+    }
+
+    System.Collections.IEnumerator PrewarmRoutine()
+    {
+        prewarming = true;
+        window.SetActive(true);
+        try
+        {
+            // 진열 만들기 · 카드 그리기를 한 번 돈다 — 창만 켜서는 첫 열림 37ms 가 그대로였다 (처음 실행되는 코드 · 레이아웃).
+            // 진짜로 열면 OpenVisit 이 진열을 새로 만든다. 정비를 닫은 뒤처럼 이번 방문 내용(Context)만 남는다
+            GameObject player = ResolvePlayer();
+            ShopCatalog catalog = ShopCatalog.Load();
+            if (player != null && catalog != null)
+                shop.OpenVisit(player, catalog, EconomySystem.StageIndex());   // → OnChanged → Refresh
+        }
+        catch (Exception e) { Debug.LogException(e); }
+        Canvas.ForceUpdateCanvases();
+        yield return null;   // 한 번 그려진다 — 가림막 아래라 보이지 않는다
+        if (prewarming && window != null) window.SetActive(false);
+        prewarming = false;
+    }
+
+    /// <summary>창이 켜져 있다 (미리 깨우는 중 포함) — 진열 그리기용. 열려 있다고 알리는 IsOpen 과 다르다.</summary>
+    bool WindowShown => window != null && window.activeSelf;
 
     /// <summary>지금 정비의 상점 로직. 정비 중이 아니면 Context 가 null.</summary>
     public ShopService Shop => shop;
@@ -105,7 +143,11 @@ public class MaintenanceUI : MonoBehaviour
     public static MaintenanceUI Instance => instance;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-    static void ResetStatics() => instance = null;
+    static void ResetStatics()
+    {
+        instance = null;
+        prewarmed = false;
+    }
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void Spawn()
@@ -201,6 +243,8 @@ public class MaintenanceUI : MonoBehaviour
 
     void Open()
     {
+        prewarming = false;   // 미리 깨우는 중에 열리면 그쪽이 창을 끄지 않게
+
         try
         {
             // 땅에 남은 코인부터 지갑에 — 상점에서 바로 쓸 수 있게
@@ -360,7 +404,7 @@ public class MaintenanceUI : MonoBehaviour
 
     void Refresh()
     {
-        if (!IsOpen || shop.Context == null) return;
+        if (!WindowShown || shop.Context == null) return;
 
         Sprite currency = CurrencyIcon;
         var offers = shop.Offers;

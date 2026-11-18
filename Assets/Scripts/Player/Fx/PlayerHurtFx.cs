@@ -244,16 +244,31 @@ public class PlayerHurtFx : MonoBehaviour
         ApplyBlink(lit);
     }
 
+    void EnsureBodies()
+    {
+        if (bodies != null) return;
+        bodies = GetComponentsInChildren<SkinnedMeshRenderer>(true);
+        baseColors = new Color[bodies.Length][];
+        baseEmission = new Color[bodies.Length][];
+        block = new MaterialPropertyBlock();
+    }
+
+    /// <summary>
+    /// 처음 맞을 때 만들던 것을 미리 만든다 (2026-11-18 성능) — 가장자리 그림(무늬 텍스처 포함) · 몸 목록 · 체력바 잔상.
+    /// 첫 피격 프레임에 12ms 가 걸렸다. 입장 가림막 아래에서 StageWarmup 이 부른다 (씬마다 — 체력바가 새로 생긴다).
+    /// </summary>
+    public void Prewarm()
+    {
+        if (edge == null) edge = MakeEdge();
+        EnsureBodies();
+        hudSearch = 0f;
+        if (FindBar() && trail == null) trail = MakeTrail();
+    }
+
     /// <summary>몸(SkinnedMeshRenderer)만 — 손에 든 무기 · 떠 있는 보조 무기는 MeshRenderer 라 빠진다.</summary>
     void ApplyBlink(bool lit)
     {
-        if (bodies == null)
-        {
-            bodies = GetComponentsInChildren<SkinnedMeshRenderer>(true);
-            baseColors = new Color[bodies.Length][];
-            baseEmission = new Color[bodies.Length][];
-            block = new MaterialPropertyBlock();
-        }
+        EnsureBodies();
 
         for (int i = 0; i < bodies.Length; i++)
         {
