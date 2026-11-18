@@ -7,11 +7,18 @@ public class GunSpeedUp : UpgradeEffect
 
     public override void Apply(GameObject player)
     {
-        Gun gun = player.GetComponentInChildren<Gun>();
+        if (player == null) return;
 
-        if (gun != null)
+        WeaponController controller = player.GetComponent<WeaponController>();
+
+        if (controller == null)
         {
-            gun.AddSpeed(amount);
+            Debug.LogError($"[{name}] 플레이어에 WeaponController가 없습니다.");
+            return;
         }
+
+        WeaponModifier modifier = WeaponModifier.Identity;
+        modifier.projectileSpeedAdd = amount;
+        controller.ApplyGlobalModifier(modifier);
     }
 }
