@@ -332,7 +332,9 @@ public class MeleeWeapon : WeaponBase
             if (Vector3.Angle(forward, dir) > halfArc) continue;   // 부채꼴 밖
 
             bool isCritical = forceCrit || RollCritical(in stats);
-            float dealt = ApplyCritical(in stats, isCritical);
+            float effectDamage = ApplyCritical(in stats, isCritical);
+            float dealt = ResolveDirectDamage(effectDamage,
+                isCritical ? stats.CritMultiplier : 1f);
             Vector3 point = col.ClosestPoint(origin);
             bool wasAlive = CombatFx.IsAlive(root);   // 맞히기 전 — 처치 판정 (Drain · 상위 무기)
 
@@ -358,6 +360,7 @@ public class MeleeWeapon : WeaponBase
                     Point = point,
                     Direction = dir,
                     Damage = dealt,
+                    EffectDamage = effectDamage,
                     IsCritical = isCritical,
                     Killed = killed,
                 });

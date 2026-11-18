@@ -11,6 +11,15 @@ public struct WeaponHit
 
     /// <summary>치명타까지 반영된 실제 피해.</summary>
     public float Damage;
+
+    // 기존 WeaponHit 생성 경로는 Damage 를 기본값으로 쓴다.
+    private float? effectDamage;
+    /// <summary>직접 공격 카드 증가분을 제외한 파생 효과의 기준 피해.</summary>
+    public float EffectDamage
+    {
+        get => effectDamage ?? Damage;
+        set => effectDamage = value;
+    }
     public bool IsCritical;
 
     /// <summary>이 피해로 적이 죽었는가 (맞기 전에 살아 있었고 지금은 죽었다).</summary>

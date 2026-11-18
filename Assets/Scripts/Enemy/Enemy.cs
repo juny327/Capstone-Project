@@ -348,8 +348,9 @@ public class Enemy : MonoBehaviour, IDamageable, IPoolable
         ui.UpdateHealth(currentHp, MaxHp > 0f ? MaxHp : data.maxHp);
 
 
+        // 실제 체력 감소와 같은 소수 피해량을 표시한다 (기존 int 캐스팅 제거).
         DamageTextManager.Instance.ShowDamage(
-            (int)info.damage,
+            info.damage,
             transform.position + Vector3.up * 2f,
             info.isCritical
         );

@@ -107,16 +107,18 @@ public class ChainBeamWeapon : WeaponBase
         // 2. 맞은 적에게 피해
         float damage = stats.Damage;
 
-        Hit(cfg, in stats, first, hitPoint, damage, dir, isFirst: true);
+        Hit(cfg, in stats, first, hitPoint, damage, dir, isFirst: true, damageFactor: 1f);
         struck.Add(first);
 
         // 3. 거기서부터 주위로 약하게 퍼진다
         Vector3 from = hitPoint;
         Transform current = first;
 
+        float damageFactor = 1f;
         for (int i = 0; i < stats.MaxTargets; i++)
         {
             damage *= cfg.chainFalloff;
+            damageFactor *= cfg.chainFalloff;
 
             if (damage <= 0.01f) break;
 
@@ -126,7 +128,7 @@ public class ChainBeamWeapon : WeaponBase
 
             Vector3 to = next.position + Vector3.up * cfg.hitHeight;
 
-            Hit(cfg, in stats, next, to, damage, (to - from).normalized, isFirst: false);
+            Hit(cfg, in stats, next, to, damage, (to - from).normalized, isFirst: false, damageFactor: damageFactor);
             DrawBolt(cfg, from, to, cfg.arcColor, cfg.arcWidth);
 
             struck.Add(next);
@@ -226,7 +228,7 @@ public class ChainBeamWeapon : WeaponBase
     }
 
     void Hit(ChainBeamWeaponData cfg, in WeaponRuntimeStats stats, Transform target,
-        Vector3 point, float damage, Vector3 dir, bool isFirst)
+        Vector3 point, float damage, Vector3 dir, bool isFirst, float damageFactor)
     {
         IDamageable damageable = target.GetComponentInParent<IDamageable>();
 
@@ -235,7 +237,9 @@ public class ChainBeamWeapon : WeaponBase
         // 치명타는 조준해서 맞힌 첫 적에게만 판정한다.
         // 퍼지는 전기까지 치명타를 띄우면 한 발에 숫자가 여러 번 터져 읽히지 않는다.
         bool isCritical = isFirst && RollCritical(in stats);
-        float dealt = FloorSupportDamage(isCritical ? ApplyCritical(in stats, true) : damage);   // 보조 칸은 최소 1
+        float effectDamage = FloorSupportDamage(isCritical ? ApplyCritical(in stats, true) : damage);
+        float dealt = ResolveDirectDamage(effectDamage,
+            damageFactor * (isCritical ? stats.CritMultiplier : 1f));
         bool notify = (isFirst || cfg.notifyEveryChain) && HasHitEffects;
         bool wasAlive = CombatFx.IsAlive(target);
 
@@ -264,6 +268,7 @@ public class ChainBeamWeapon : WeaponBase
                 Point = point,
                 Direction = dir,
                 Damage = dealt,
+                EffectDamage = effectDamage,
                 IsCritical = isCritical,
                 Killed = killed,
             });

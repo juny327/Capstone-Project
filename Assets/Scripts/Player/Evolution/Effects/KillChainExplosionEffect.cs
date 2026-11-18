@@ -96,7 +96,7 @@ public class KillChainExplosionEffect : AttachmentEffect
             if (Weapon == null || hit.Target == null) return;
 
             Vector3 at = hit.Target.position;
-            Weapon.StartCoroutine(Explode(at, hit.Damage * cfg.damageRatio, 1, cfg.implodeTime));
+            Weapon.StartCoroutine(Explode(at, hit.EffectDamage * cfg.damageRatio, 1, cfg.implodeTime));
         }
 
         /// <param name="finale">앞 단 폭발이 여럿(finaleKills 이상)을 한꺼번에 쓰러뜨렸다 — 이 폭발이 터지는 순간이 큰 순간.</param>
