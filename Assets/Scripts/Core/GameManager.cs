@@ -282,7 +282,8 @@ public class GameManager : MonoBehaviour
 
         int nextScene = SceneManager.GetActiveScene().buildIndex + 1;
 
-        SceneManager.LoadScene(nextScene);
+        // 2026-11-18 성능 — 검은 가림막 아래에서 불러온다 (입장 멈춤 0.7 ~ 2.4초가 보이지 않게)
+        SceneCurtain.Load(nextScene);
     }
 
     void OnGameWin()
