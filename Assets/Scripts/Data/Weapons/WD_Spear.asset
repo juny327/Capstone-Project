@@ -54,6 +54,7 @@ MonoBehaviour:
   range: 5
   arcAngle: 40
   maxTargets: 4
+  extraTargetDamage: 0.7
   hitDelay: 0.42
   hitLayers:
     serializedVersion: 2

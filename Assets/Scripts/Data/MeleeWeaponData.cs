@@ -20,6 +20,9 @@ public class MeleeWeaponData : WeaponData
     [Tooltip("한 번 휘둘러 때릴 수 있는 최대 적 수")]
     [Min(1)] public int maxTargets = 5;
 
+    [Tooltip("두 번째로 맞은 적부터 곱하는 피해 (2026-11-17 총 · 근접 격차 조정). 1 = 모두 같은 피해. 가까운 적부터 맞힌다 — 맨 처음 적은 언제나 제 피해")]
+    [Range(0.1f, 1f)] public float extraTargetDamage = 1f;
+
     [Tooltip("휘두르기 시작부터 판정까지의 지연(초). 모션과 타격 시점을 맞춘다")]
     [Min(0f)] public float hitDelay = 0.25f;
 

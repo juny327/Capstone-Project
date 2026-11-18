@@ -94,6 +94,7 @@ public class MeleeWeapon : WeaponBase
     // 할당에 신경 쓰고 있으므로 근접 판정도 같은 기준을 맞춘다.
     private readonly Collider[] hits = new Collider[32];
     private readonly HashSet<Transform> struck = new HashSet<Transform>();
+    struct Candidate { public IDamageable Target; public Transform Root; public Collider Collider; public Vector3 Direction; public float Distance; }
 
     private Coroutine swingRoutine;
 
@@ -305,7 +306,10 @@ public class MeleeWeapon : WeaponBase
         int crits = 0;
         float halfArc = arcAngle * 0.5f;
 
-        for (int i = 0; i < count && applied < stats.MaxTargets; i++)
+        // 맞힐 적을 먼저 모아 가까운 순서로 친다 (2026-11-17) — 맨 처음 적은 제 피해, 두 번째부터 extraTargetDamage 를 곱한다.
+        // 예전엔 겹침 판정이 돌려준 순서대로 쳐서 최대 수를 넘으면 가까운 적이 빠지기도 했다
+        List<Candidate> candidates = UnityEngine.Pool.ListPool<Candidate>.Get();   // 호출마다 빌린다 — 맞힘 효과가 다시 판정을 불러도 섞이지 않게
+        for (int i = 0; i < count; i++)
         {
             Collider col = hits[i];
             if (col == null) continue;
@@ -325,15 +329,28 @@ public class MeleeWeapon : WeaponBase
 
             Vector3 dir = root.position - origin;
             dir.y = 0f;
+            float distance = dir.sqrMagnitude;
 
             if (dir.sqrMagnitude < 0.0001f) dir = forward;
             else dir.Normalize();
 
             if (Vector3.Angle(forward, dir) > halfArc) continue;   // 부채꼴 밖
 
+            candidates.Add(new Candidate { Target = target, Root = root, Collider = col, Direction = dir, Distance = distance });
+        }
+        candidates.Sort((a, b) => a.Distance.CompareTo(b.Distance));
+
+        for (int k = 0; k < candidates.Count && applied < stats.MaxTargets; k++)
+        {
+            Candidate c = candidates[k];
+            IDamageable target = c.Target;
+            Transform root = c.Root;
+            Vector3 dir = c.Direction;
+
             bool isCritical = forceCrit || RollCritical(in stats);
             float dealt = ApplyCritical(in stats, isCritical);
-            Vector3 point = col.ClosestPoint(origin);
+            if (applied > 0) dealt *= cfg.extraTargetDamage;   // 두 번째 대상부터
+            Vector3 point = c.Collider.ClosestPoint(origin);
             bool wasAlive = CombatFx.IsAlive(root);   // 맞히기 전 — 처치 판정 (Drain · 상위 무기)
 
             target.TakeDamage(new DamageInfo
@@ -372,6 +389,7 @@ public class MeleeWeapon : WeaponBase
             applied++;
             if (isCritical) crits++;
         }
+        UnityEngine.Pool.ListPool<Candidate>.Release(candidates);
 
         SpawnSlashEffect(cfg, origin, forward, stats.Range, arcAngle, vertical);
 
