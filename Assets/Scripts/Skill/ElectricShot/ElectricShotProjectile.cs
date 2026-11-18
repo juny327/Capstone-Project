@@ -18,7 +18,7 @@ public class ElectricShotProjectile : MonoBehaviour
     {
         if (target == null)
         {
-            Destroy(gameObject);
+            PoolManager.Despawn(gameObject);
             return;
         }
 
@@ -30,7 +30,7 @@ public class ElectricShotProjectile : MonoBehaviour
         if (step > 0.0001f && CombatFx.ObstacleDistance(transform.position, flat, step) < step)
         {
             CombatFx.ObstacleHitSound();
-            Destroy(gameObject);
+            PoolManager.Despawn(gameObject);
             return;
         }
 
@@ -44,7 +44,7 @@ public class ElectricShotProjectile : MonoBehaviour
         {
             target.ApplyShock(shockDuration);
             SoundManager.Instance?.ReportHit(false, HitSound.ElectricShot);
-            Destroy(gameObject);
+            PoolManager.Despawn(gameObject);
         }
     }
 }

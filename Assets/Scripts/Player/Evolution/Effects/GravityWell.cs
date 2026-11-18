@@ -185,14 +185,16 @@ public class GravityWell : MonoBehaviour
 
         if (cfg.collapsePrefab != null)
         {
-            GameObject fx = Instantiate(cfg.collapsePrefab, at + Vector3.up * 0.3f, Quaternion.identity);
-            fx.transform.localScale = Vector3.one * cfg.collapseScale;
-            foreach (ParticleSystem ps in fx.GetComponentsInChildren<ParticleSystem>(true))
+            // 2026-11-18 성능 — 돌려 쓴다 (FxPool, 색은 새로 만들 때 한 번)
+            GravityWellEffect c = cfg;
+            FxPool.Spawn(cfg.collapsePrefab, cfg.GetInstanceID(), at + Vector3.up * 0.3f, Quaternion.identity, cfg.collapseScale, 2.5f, fx =>
             {
-                ParticleSystem.MainModule main = ps.main;
-                main.startColor = new ParticleSystem.MinMaxGradient(Color.Lerp(cfg.color, Color.white, 0.2f));
-            }
-            Destroy(fx, 2.5f);
+                foreach (ParticleSystem ps in fx.GetComponentsInChildren<ParticleSystem>(true))
+                {
+                    ParticleSystem.MainModule main = ps.main;
+                    main.startColor = new ParticleSystem.MinMaxGradient(Color.Lerp(c.color, Color.white, 0.2f));
+                }
+            });
         }
 
         CombatFx.PlaySound(cfg.collapseSound);

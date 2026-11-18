@@ -158,7 +158,8 @@ public class ChainLightningSkill : MonoBehaviour
         if (lightningPrefab == null)
             return;
 
-        GameObject effect = Instantiate(lightningPrefab);
+        // 2026-11-18 성능 — 번개마다 만들고 지우지 않고 풀에서 돌려 쓴다
+        GameObject effect = PoolManager.Spawn(lightningPrefab, Vector3.zero, Quaternion.identity);
 
         Transform startPoint = FindChildRecursive(effect.transform, "LightningStart");
         Transform endPoint = FindChildRecursive(effect.transform, "LightningEnd");
@@ -170,14 +171,23 @@ public class ChainLightningSkill : MonoBehaviour
                 effect
             );
 
-            Destroy(effect, 0.2f);
+            PoolManager.DespawnAfter(effect, 0.2f);
             return;
         }
 
         startPoint.position = start;
         endPoint.position = end;
 
-        Destroy(
+        // 돌려 쓴 번개는 지난 자리의 줄기를 들고 있다 — 바로 새 자리로 다시 그린다.
+        // 처음 만든 것(줄기 점 0개)은 Start 가 아직 안 돌아 Trigger 를 부르면 안 된다 (Start → 첫 Update 에서 그린다)
+        LineRenderer line = effect.GetComponent<LineRenderer>();
+        if (line != null && line.positionCount > 0)
+        {
+            var bolt = effect.GetComponent<DigitalRuby.LightningBolt.LightningBoltScript>();
+            if (bolt != null) bolt.Trigger();
+        }
+
+        PoolManager.DespawnAfter(
             effect,
             Mathf.Max(0.1f, chainDelay * 2f + 0.15f)
         );

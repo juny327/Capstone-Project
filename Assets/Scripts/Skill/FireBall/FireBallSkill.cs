@@ -67,7 +67,8 @@ public class FireBallSkill : MonoBehaviour
     {
         Vector3 spawnPosition = transform.position + spawnOffset;
 
-        GameObject projectile = Instantiate(
+        // 2026-11-18 성능 — 쏠 때마다 만들고 지우지 않고 풀에서 돌려 쓴다 (입장 가림막 아래에서 미리 채운다)
+        GameObject projectile = PoolManager.Spawn(
             projectilePrefab,
             spawnPosition,
             Quaternion.identity
@@ -79,7 +80,7 @@ public class FireBallSkill : MonoBehaviour
         if (fireBall == null)
         {
             Debug.LogError("FireBall projectile prefab에 FireBallProjectile 컴포넌트가 없습니다.");
-            Destroy(projectile);
+            PoolManager.Despawn(projectile);
             return;
         }
 

@@ -83,6 +83,19 @@ public class KillChainExplosionEffect : AttachmentEffect
 
     public override AttachmentRuntime CreateRuntime() => new Runtime(this);
 
+    /// <summary>폭발 효과 색 — 새로 만들 때 한 번만 (FxPool). 불꽃은 붉게 · 연기는 검게, 옅고 짧게.</summary>
+    void SetupExplosion(GameObject fx)
+    {
+        EvoStrikes.Tint(fx, Color.Lerp(color, new Color(1f, 0.4f, 0.1f, 1f), 0.4f));   // 불꽃은 붉은 주황 — 테마 색 그대로면 분홍으로 보인다
+        EvoStrikes.ThinSmoke(fx, smokeAlpha, smokeLife);
+    }
+
+    /// <summary>폭발 효과를 미리 만들어 둔다 — 입장 가림막 아래에서 (StageWarmup, 2026-11-18). 연쇄 한 번에 여럿이 터진다.</summary>
+    public void Prewarm(int count, Vector3? wakeAt = null)
+    {
+        if (explosionPrefab != null) FxPool.Prewarm(explosionPrefab, GetInstanceID(), count, SetupExplosion, wakeAt);
+    }
+
     class Runtime : AttachmentRuntime
     {
         readonly KillChainExplosionEffect cfg;
@@ -193,15 +206,13 @@ public class KillChainExplosionEffect : AttachmentEffect
         {
             if (cfg.explosionPrefab == null) return;
 
-            GameObject fx = Object.Instantiate(cfg.explosionPrefab, at + Vector3.up * 0.3f, Quaternion.identity);
-            fx.transform.localScale = Vector3.one * cfg.explosionScale * grow;
-
-            // 불꽃은 붉게 · 연기는 검게 (예전에는 연기까지 밝은 색을 입혀 흰 덩어리가 됐다) — 연기는 옅고 짧게
-            EvoStrikes.Tint(fx, Color.Lerp(cfg.color, new Color(1f, 0.4f, 0.1f, 1f), 0.4f));   // 불꽃은 붉은 주황 — 테마 색 그대로면 분홍으로 보인다
-            EvoStrikes.ThinSmoke(fx, cfg.smokeAlpha, cfg.smokeLife);
-
-            Object.Destroy(fx, 2.5f);
+            // 2026-11-18 성능 — 처치마다 만들고 지우지 않고 돌려 쓴다 (FxPool, 색은 새로 만들 때 한 번 — SetupExplosion)
+            setupExplosion ??= cfg.SetupExplosion;
+            FxPool.Spawn(cfg.explosionPrefab, cfg.GetInstanceID(), at + Vector3.up * 0.3f, Quaternion.identity,
+                         cfg.explosionScale * grow, 2.5f, setupExplosion);
         }
+
+        System.Action<GameObject> setupExplosion;
 
         bool TakeFrameSlot()
         {

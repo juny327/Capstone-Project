@@ -106,7 +106,7 @@ public class BlackHoleSkill : MonoBehaviour
 
         if (blackHolePrefab != null)
         {
-            activeBlackHole = Instantiate(
+            activeBlackHole = PoolManager.Spawn(   // 2026-11-18 성능 — 풀에서 돌려 쓴다
                 blackHolePrefab,
                 position,
                 Quaternion.identity
@@ -236,7 +236,7 @@ public class BlackHoleSkill : MonoBehaviour
         if (explosionDamage > 0f)
             ApplyExplosionDamage(explosionPosition);
 
-        Destroy(activeBlackHole);
+        PoolManager.Despawn(activeBlackHole);
 
         activeBlackHole = null;
         activeTime = 0f;
@@ -330,7 +330,7 @@ public class BlackHoleSkill : MonoBehaviour
     {
         if (activeBlackHole != null)
         {
-            Destroy(activeBlackHole);
+            PoolManager.Despawn(activeBlackHole);
             activeBlackHole = null;
         }
 

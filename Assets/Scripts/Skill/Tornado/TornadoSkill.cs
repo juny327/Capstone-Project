@@ -41,7 +41,7 @@ public class TornadoSkill : MonoBehaviour
         if (target == null)
             return;
 
-        GameObject obj = Instantiate(projectilePrefab,
+        GameObject obj = PoolManager.Spawn(projectilePrefab,   // 2026-11-18 성능 — 풀에서 돌려 쓴다
             transform.position + spawnOffset,
             Quaternion.identity);
 

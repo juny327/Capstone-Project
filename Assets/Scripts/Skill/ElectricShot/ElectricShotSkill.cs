@@ -33,7 +33,7 @@ public class ElectricShotSkill : MonoBehaviour
         if (target == null)
             return;
 
-        GameObject obj = Instantiate(projectilePrefab, transform.position + spawnOffset, Quaternion.identity);
+        GameObject obj = PoolManager.Spawn(projectilePrefab, transform.position + spawnOffset, Quaternion.identity);   // 2026-11-18 성능 — 풀에서 돌려 쓴다
         obj.GetComponent<ElectricShotProjectile>().Initialize(target, projectileSpeed, shockDuration);
 
         SoundManager.Instance?.ReportSkillCast(SkillCastSound.ElectricShot);

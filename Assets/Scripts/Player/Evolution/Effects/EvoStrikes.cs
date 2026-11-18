@@ -126,11 +126,10 @@ public static class EvoStrikes
     {
         if (prefab == null) return;
 
-        GameObject fx = Object.Instantiate(prefab, at + Vector3.up * 0.3f, Quaternion.identity);
-        fx.transform.localScale = Vector3.one * scale;
-        Tint(fx, color);
-        ThinSmoke(fx, 0.45f, 0.6f);
-        Object.Destroy(fx, life);
+        // 2026-11-18 성능 — 맞힐 때마다 만들고 지우지 않고 돌려 쓴다 (FxPool). 색은 새로 만들 때 한 번만 —
+        // Tint · ThinSmoke 는 곱하는 방식이라 다시 입히면 점점 옅어진다. 색이 다르면 따로 모은다
+        FxPool.Spawn(prefab, FxPool.ColorKey(color), at + Vector3.up * 0.3f, Quaternion.identity, scale, life,
+                     fx => { Tint(fx, color); ThinSmoke(fx, 0.45f, 0.6f); });
     }
 
     /// <summary>

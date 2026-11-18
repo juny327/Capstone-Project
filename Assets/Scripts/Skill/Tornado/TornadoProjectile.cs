@@ -44,7 +44,7 @@ public class TornadoProjectile : MonoBehaviour
         // 지속시간 종료
         if (lifeTimer >= duration)
         {
-            Destroy(gameObject);
+            PoolManager.Despawn(gameObject);
             return;
         }
 
