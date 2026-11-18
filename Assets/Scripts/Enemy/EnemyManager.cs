@@ -164,8 +164,49 @@ public class EnemyManager : MonoBehaviour
         }
 
         if (candidates.Count == 0)
+            return FindFallbackSpawner();
+
+        return candidates[Random.Range(0, candidates.Count)];
+    }
+
+    /// <summary>범위 밖 등장 지점을 쓴 횟수 (시험).</summary>
+    public int FallbackSpawns { get; private set; }
+
+    /// <summary>
+    /// 범위(min ~ max) 안에 등장 지점이 하나도 없을 때 (2026-11-18) — 범위 밖에서 가장 가까운 지점들 가운데 하나를 쓴다.
+    ///
+    /// 등장 지점은 맵마다 무작위로 10개가 놓이고 범위는 10 ~ 25m 라서, 서 있는 자리에 따라 범위 안에 지점이 없을 수 있다
+    /// (계산: 맵 안 아무 자리 평균 4.5% · 모서리 근처 약 20%). 그러면 플레이어가 움직이기 전까지 몬스터가 영영 안 나왔다 —
+    /// 시작 자리에서 걸리면 한 마리도 안 나온다 (측정 판에서 처치 0 으로 멈춤: 가장 가까운 지점이 27m).
+    /// 범위 안에 지점이 있으면 예전과 똑같이 그 안에서 고른다.
+    /// </summary>
+    EnemySpawner FindFallbackSpawner()
+    {
+        // 너무 가까운 것(화면 안에서 튀어나온다)은 빼고 가장 가까운 거리
+        float nearest = float.MaxValue;
+        foreach (var spawner in spawners)
+        {
+            if (spawner == null || !spawner.isActiveAndEnabled) continue;
+            float dist = Vector3.Distance(player.position, spawner.transform.position);
+            if (dist > minSpawnDistance && dist < nearest) nearest = dist;
+        }
+
+        // 모두 너무 가깝다 (지점이 플레이어 둘레에만 있다) — 그중에서라도 고른다
+        bool allowClose = nearest == float.MaxValue;
+
+        // 가장 가까운 것에서 10m 안쪽까지를 후보로 — 한 지점에서만 줄지어 나오지 않게
+        foreach (var spawner in spawners)
+        {
+            if (spawner == null || !spawner.isActiveAndEnabled) continue;
+            float dist = Vector3.Distance(player.position, spawner.transform.position);
+            if (allowClose || (dist > minSpawnDistance && dist <= nearest + 10f))
+                candidates.Add(spawner);
+        }
+
+        if (candidates.Count == 0)
             return null;
 
+        FallbackSpawns++;
         return candidates[Random.Range(0, candidates.Count)];
     }
 
