@@ -15,14 +15,24 @@ public class FireBallEffect : UpgradeEffect
 
     public override void Apply(GameObject player)
     {
+        Apply(player, 1);
+    }
+
+    public override void Apply(GameObject player, int level)
+    {
+        if (player == null)
+            return;
+
         FireBallSkill skill = player.GetComponent<FireBallSkill>();
 
         if (skill == null)
             skill = player.AddComponent<FireBallSkill>();
 
+        float scaledDamage = ScaleValue(damage, level);
+
         skill.Setup(
             projectilePrefab,
-            damage,
+            scaledDamage,
             fireInterval,
             projectileSpeed,
             targetRange,

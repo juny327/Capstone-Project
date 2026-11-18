@@ -1,0 +1,94 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 415742e1445e457e9de71135183b3cbc, type: 3}
+  m_Name: ImpactFxSettings
+  m_EditorClassIdentifier: Assembly-CSharp::ImpactFxSettings
+  hitStop: 1
+  hitStopDuration: 0.06
+  hitStopScale: 0.05
+  hitStopCooldown: 0.4
+  zoomReturn: 0.12
+  zoomScale: 1
+  flashDuration: 0.1
+  flashScale: 1
+  thudDuration: 0.16
+  rumbleDuration: 0.45
+  kickDuration: 0.22
+  repeatGap: 0.2
+  supportOnlyFlash: 0.85
+  supportOnlyShake: 0.7
+  duckTime: 0.3
+  duckMusic: 0.55
+  duckSfx: 0.6
+  siegeFire:
+    hitStop: 0
+    zoom: 0
+    flash: 0
+    thud: 0
+    kick: 0.3
+    duck: 0
+  siegeBlast:
+    hitStop: 0
+    zoom: 0.02
+    flash: 0.06
+    thud: 0.6
+    kick: 0
+    duck: 0
+  sunLanceFire:
+    hitStop: 0
+    zoom: 0.03
+    flash: 0.11
+    thud: 0.7
+    kick: 0.3
+    duck: 1
+  gravityCollapse:
+    hitStop: 1
+    zoom: 0.03
+    flash: 0.11
+    thud: 0.7
+    kick: 0
+    duck: 1
+  killChainFinale:
+    hitStop: 1
+    zoom: 0.03
+    flash: 0.11
+    thud: 0.6
+    kick: 0
+    duck: 1
+  bloodFrenzyStart:
+    hitStop: 1
+    zoom: 0.03
+    flash: 0.14
+    thud: 0.4
+    kick: 0
+    duck: 1
+  prismConverge:
+    hitStop: 0
+    zoom: 0.03
+    flash: 0.11
+    thud: 0.4
+    kick: 0
+    duck: 1
+  spearCatch:
+    hitStop: 0
+    zoom: 0.015
+    flash: 0.05
+    thud: 0.2
+    kick: 0
+    duck: 0
+  meleeCrit:
+    hitStop: 1
+    zoom: 0.02
+    flash: 0.07
+    thud: 0
+    kick: 0
+    duck: 0

@@ -1,12 +1,28 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+
+/// <summary>
+/// 피해 가로채기 — 체력을 깎기 전에 묻는다. true 를 돌려주면 그 피해는 들어오지 않는다.
+/// 에너지 방패가 정면 공격을 막는 데 쓴다 (커스터마이징-구현계획.md 9-2).
+/// </summary>
+public interface IDamageFilter
+{
+    bool Absorb(ref DamageInfo info);
+}
 
 public class PlayerStats : MonoBehaviour, IDamageable
 {
     [Header("Level")]
     public int level = 1;
+
+    [Tooltip("보유 경험치 — 레벨업 카드를 살 때만 줄어든다 (HUD 의 EXP)")]
     public int currentExp = 0;
+
+    [Tooltip("이번 레벨 게이지 — 구슬로 차고, expToNextLevel 을 넘으면 레벨업 (보유 경험치는 그대로)")]
+    public int levelExp = 0;
+
     public int expToNextLevel = 10;
     public float expGrowthRate = 1.3f;
 
@@ -16,6 +32,9 @@ public class PlayerStats : MonoBehaviour, IDamageable
 
     public event Action<int, int> OnHpChanged;
     public event Action<int> OnExpChanged;
+
+    /// <summary>피해를 받아 체력이 줄었을 때 (깎인 양). 죽는 한 방 · 막힌 피해 · 무적 중에는 오지 않는다.</summary>
+    public event Action<int> OnDamaged;
     private Animator anim;
 
     // 사망 가드 - 사망 후 추가 피격으로 Die()가 반복 호출되는 것을 막는다
@@ -38,6 +57,33 @@ public class PlayerStats : MonoBehaviour, IDamageable
         invulnerableUntil = 0f;
     }
 
+    // 피해 가로채기 (방패 등). 무적 확인 뒤, 체력을 깎기 전에 차례로 묻는다
+    readonly List<IDamageFilter> damageFilters = new List<IDamageFilter>();
+
+    public void AddDamageFilter(IDamageFilter filter)
+    {
+        if (filter != null && !damageFilters.Contains(filter)) damageFilters.Add(filter);
+    }
+
+    public void RemoveDamageFilter(IDamageFilter filter) => damageFilters.Remove(filter);
+
+    // 받는 피해 배율 - 캐릭터마다 다르다 (검사 0.85). 체력만 올리면 회복 카드 가치가 달라져 감소율로 나눠 준다
+    float damageTakenMultiplier = 1f;
+    public float DamageTakenMultiplier => damageTakenMultiplier;
+
+    /// <summary>
+    /// 캐릭터 설정 적용 (CharacterLoadout). Awake 보다 먼저 불려도 늦게 불려도 결과가 같도록
+    /// 최대 체력과 현재 체력을 둘 다 쓴다.
+    /// </summary>
+    public void ApplyCharacter(int characterMaxHp, float takenMultiplier)
+    {
+        maxHp = Mathf.Max(1, characterMaxHp);
+        currentHp = maxHp;
+        damageTakenMultiplier = Mathf.Max(0.01f, takenMultiplier);
+
+        OnHpChanged?.Invoke(currentHp, maxHp);
+    }
+
     void Awake()
     {
         currentHp = maxHp;
@@ -46,14 +92,18 @@ public class PlayerStats : MonoBehaviour, IDamageable
 
     public void AddExp(int amount)
     {
-        if (amount <= 0)
+        // 죽은 뒤 끌려온 구슬은 무시한다 — 사망 연출 중에 레벨업 카드가 열리지 않게
+        if (isDead || amount <= 0)
             return;
 
+        // 2026-11-04 — 레벨업이 경험치를 가져가지 않는다. 예전에는 레벨업에 다 써서 카드 창이 열린 순간 보유 경험치가 0 이라
+        // 경험치를 내는 카드(팀원 스킬 레벨 시스템)를 하나도 살 수 없었다. 이제 게이지(levelExp)만 넘은 만큼 줄고, 보유 경험치는 남는다.
         currentExp += amount;
+        levelExp += amount;
 
-        while (currentExp >= expToNextLevel)
+        while (levelExp >= expToNextLevel)
         {
-            currentExp -= expToNextLevel;
+            levelExp -= expToNextLevel;
             level++;
 
             expToNextLevel = Mathf.Max(
@@ -100,14 +150,25 @@ public class PlayerStats : MonoBehaviour, IDamageable
     public void TakeDamage(DamageInfo info)
     {
         if (isDead) return;           // 사망 후 중복 처리 차단
-        if (IsInvulnerable) return;   // 구르기 무적 등
+        if (IsInvulnerable) return;   // 구르기 · 패링 무적 등
 
-        currentHp -= (int)info.damage;
+        // 방패처럼 막는 것이 있으면 피해가 들어오지 않는다 (뒤에서부터 — 가로채기 중 목록이 바뀌어도 안전하게)
+        for (int i = damageFilters.Count - 1; i >= 0; i--)
+            if (i < damageFilters.Count && damageFilters[i] != null && damageFilters[i].Absorb(ref info)) return;
+
+        // 배율 1 이면 예전과 같다. 배율로 1 미만이 되어도 1 이상의 피해는 최소 1 로 둔다
+        int amount = (int)(info.damage * damageTakenMultiplier);
+        if (amount < 1 && info.damage >= 1f) amount = 1;
+
+        currentHp -= amount;
 
         if (currentHp < 0)
             currentHp = 0;
 
         OnHpChanged?.Invoke(currentHp, maxHp);
+
+        // 피격 소리 (PlayerMove) — 죽는 한 방은 사망 소리가 따로 난다
+        if (amount > 0 && currentHp > 0) OnDamaged?.Invoke(amount);
 
         if (info.cameraShake > 0f)
         {

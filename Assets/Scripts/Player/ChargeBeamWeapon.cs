@@ -1,0 +1,658 @@
+using System.Collections.Generic;
+using UnityEngine;
+
+/// <summary>
+/// 충전 레이저 — 모았다가 굵은 관통 빔을 한 방 쏜다 (아이작 *혈사포* 계열).
+///
+/// **충전은 별도 상태 기계가 아니다.** WeaponBase 가 발사 후 걸어 주는 쿨다운
+/// (= `fireInterval`)이 그대로 충전 시간이고, 여기서는 그 진행도를 보여 주기만 한다.
+/// 덕분에 "충전 중에 적이 사라지면 어떻게 되나" 같은 문제가 생기지 않는다 —
+/// 쿨다운은 적과 무관하게 흐르므로 충전이 끊기지 않는다.
+///
+/// 판정은 <see cref="Physics.SphereCastNonAlloc"/> 한 번이다.
+/// 중복 제거는 <see cref="MeleeWeapon"/> 과 같은 HashSet 방식을 쓴다.
+/// </summary>
+public class ChargeBeamWeapon : WeaponBase
+{
+    private ChargeBeamWeaponData Config => (ChargeBeamWeaponData)data;
+
+    protected override bool AutoReload => Config == null || Config.autoReload;
+
+    // 할당 없이 재사용하는 버퍼
+    private readonly RaycastHit[] hits = new RaycastHit[32];
+    private readonly HashSet<Transform> struck = new HashSet<Transform>();
+
+    private readonly List<LineRenderer> beams = new List<LineRenderer>();   // 발사된 빔 (분광 프리즘이면 여러 갈래)
+    private readonly List<LineRenderer> cores = new List<LineRenderer>();   // 빔 안쪽 흰 심지 (coreWidth — beams 와 같은 번호)
+    private readonly List<Color> beamColors = new List<Color>();            // 빔마다 처음 색 (끝에서 옅어질 때 기준)
+    private LineRenderer charge;    // 총구에 모이는 빛
+    private Material runtimeMaterial;
+
+    private float beamHideAt = -1f;
+
+    // 이번 갈래의 피해 배율 — 사방 빔(프리즘 노바)에서 조준한 첫 갈래만 세게
+    private float damageScale = 1f;
+
+    // 충전 중 바닥에 그리는 갈래 예고선
+    private readonly List<LineRenderer> telegraphs = new List<LineRenderer>();
+
+    // 상위 무기 "프리즘 노바" — 한 발이 분산 → 수렴 → 방사로 이어진다 (PrismBurstSettings)
+    private PrismNovaBurst burst;
+
+    // 상위 무기 "태양창" — 모으는 동안 사거리가 늘어나는 한 방 (SunLanceSettings)
+    private SunLanceBurst sun;
+
+    protected override bool IsBusy => (burst != null && burst.Running) || (sun != null && sun.Running);
+
+    /// <summary>태양창 한 발이 진행 중인가 (시험 · HUD).</summary>
+    public SunLanceBurst SunLance => sun;
+
+    /// <summary>프리즘 노바 한 발이 진행 중인가 (시험 · HUD).</summary>
+    public PrismNovaBurst Burst => burst;
+
+    /// <summary>분광 프리즘 — 갈래 사이 각도(도).</summary>
+    private const float PrismAngle = 14f;
+
+    /// <summary>
+    /// 사거리 안에 적이 있을 때만 쏜다.
+    ///
+    /// 감지 범위(10m)와 빔 사거리(18m)가 달라서, 확인하지 않으면
+    /// 허공에 쏘면서 2초짜리 충전을 날린다.
+    /// </summary>
+    public override bool HasTargetInReach(in WeaponFireContext context)
+    {
+        if (context.Targets == null) return false;
+
+        return context.Targets.GetNearest(context.Origin, Stats.Range) != null;
+    }
+
+    protected override void OnFire(in WeaponRuntimeStats stats, in WeaponFireContext context)
+    {
+        ChargeBeamWeaponData cfg = Config;
+
+        if (cfg == null)
+        {
+            Debug.LogError($"[ChargeBeamWeapon] ChargeBeamWeaponData 가 아닙니다. ({name})", this);
+            enabled = false;
+            return;
+        }
+
+        // 모으던 소리를 끊는다 — 쏘는 순간 멎어야 "다 모아서 쐈다" 로 들린다
+        StopChargeSound();
+
+        if (cfg.prismBurst != null && cfg.prismBurst.enabled)
+        {
+            BeginPrismBurst(cfg, in stats);
+            return;
+        }
+
+        if (cfg.sunLance != null && cfg.sunLance.enabled)
+        {
+            BeginSunLance(cfg);
+            return;
+        }
+
+        Vector3 origin = Muzzle.position;
+        Vector3 dir = context.AimDirection;
+
+        // 갈래가 여럿이면(분광 프리즘) 부채꼴로 나눈다. 갈래마다 따로 판정한다 — 바로 앞의 적은 여러 갈래에 맞는다.
+        // 사방 빔(상위 무기 "프리즘 노바")이면 첫 갈래를 조준 방향에 두고 360° 를 고르게 나눈다
+        int count = Mathf.Max(1, stats.ProjectileCount);
+        for (int i = 0; i < count; i++)
+        {
+            float angle = BeamAngle(cfg, i, count);
+            Vector3 d = Quaternion.Euler(0f, angle, 0f) * dir;
+
+            damageScale = cfg.beamsAllAround && i == 0 ? cfg.primaryBeamDamageMul : 1f;
+
+            // 벽 · 엄폐물이 있으면 갈래마다 거기까지만 — 벽 너머 적은 맞지 않고, 빔도 벽에서 끝난다
+            float reach = CombatFx.ObstacleDistance(origin, d, stats.Range);
+            ApplyBeamDamage(cfg, in stats, origin, d, reach);
+            ShowBeam(cfg, i, origin, origin + d * reach, BeamColor(cfg, i, count));
+            if (reach < stats.Range)
+            {
+                SpawnFx(cfg.hitEffectPrefab, origin + d * reach, Quaternion.LookRotation(-d));
+                CombatFx.ObstacleHitSound();
+            }
+        }
+
+        damageScale = 1f;
+        HideTelegraphs();
+
+        for (int i = count; i < beams.Count; i++)
+        {
+            if (beams[i] != null) beams[i].enabled = false;
+            if (i < cores.Count && cores[i] != null) cores[i].enabled = false;
+        }
+
+        SpawnFx(cfg.muzzleFlashPrefab, origin, Quaternion.LookRotation(dir));
+        if (cfg.fireRing > 0f && cfg.beamMaterial != null)
+        {
+            FxLine.Ring(cfg.beamMaterial, origin - Vector3.up * 0.15f, 0.1f, cfg.fireRing, cfg.beamColor, 0.1f, 0.2f);
+            FxLine.Ring(cfg.beamMaterial, origin - Vector3.up * 0.15f, 0.05f, cfg.fireRing * 0.55f, cfg.coreColor, 0.06f, 0.14f);
+            GroundGlow.Flash(new Vector3(origin.x, Owner != null ? Owner.transform.position.y : origin.y - 1.2f, origin.z), cfg.fireRing * 1.5f, cfg.beamColor, 0.2f);
+        }
+
+        // 다음 발을 위한 충전이 곧바로 시작된다.
+        // 적이 있을 때만 쏘므로, 이 소리도 전투 중에만 난다.
+        StartChargeSound(cfg, stats.FireInterval);
+    }
+
+    // ───────── 프리즘 노바 ─────────
+
+    void BeginPrismBurst(ChargeBeamWeaponData cfg, in WeaponRuntimeStats stats)
+    {
+        if (charge != null) charge.enabled = false;
+        HideTelegraphs();
+
+        if (burst == null) burst = gameObject.AddComponent<PrismNovaBurst>();
+
+        Transform ownerRoot = AimRoot;   // 보조 무기면 제 자리(노리는 적 쪽)
+        burst.Begin(this, cfg.prismBurst, Muzzle, ownerRoot, stats.Range, OnPrismBurstFinished);
+        SpawnFx(cfg.muzzleFlashPrefab, Muzzle.position, Quaternion.LookRotation(ownerRoot.forward));
+    }
+
+    void BeginSunLance(ChargeBeamWeaponData cfg)
+    {
+        if (charge != null) charge.enabled = false;
+        HideTelegraphs();
+
+        if (sun == null) sun = gameObject.AddComponent<SunLanceBurst>();
+
+        Transform ownerRoot = AimRoot;   // 보조 무기면 제 자리(노리는 적 쪽)
+        sun.Begin(this, cfg.sunLance, Muzzle, ownerRoot, OnPrismBurstFinished);
+    }
+
+    // 한 발이 끝나면 충전을 처음부터 — 빔을 쏘는 동안 흐른 쿨다운으로 곧바로 다음 발이 나가지 않게
+    void OnPrismBurstFinished()
+    {
+        float interval = Stats.FireInterval;
+        RestartCooldown(interval);
+        if (IsActive && Config != null) StartChargeSound(Config, interval);
+    }
+
+    /// <summary>프리즘 노바 한 번 맞힐 피해 — 무기 공격력 × mul, 치명타 판정 포함.</summary>
+    public float RollPrismDamage(float mul, out bool critical)
+    {
+        WeaponRuntimeStats stats = Stats;
+        critical = RollCritical(in stats);
+        return ApplyCritical(in stats, critical) * mul;
+    }
+
+    /// <summary>프리즘 노바 피해 주기 — 명중 알림(처치 판정 포함)까지 다른 탄 · 빔과 같은 규칙.</summary>
+    public void DealPrismDamage(Transform target, float damage, bool critical, Vector3 point, Vector3 direction)
+    {
+        if (target == null || damage <= 0f) return;
+
+        bool wasAlive = CombatFx.IsAlive(target);
+        CombatFx.Damage(target, damage, point, direction, critical, 0f, HitSound.Laser);
+        bool killed = CheckDirectKill(target, wasAlive);   // 레이저를 대신하는 공격 — Drain
+
+        if (HasHitEffects)
+        {
+            NotifyHit(new WeaponHit
+            {
+                Target = target,
+                Damageable = target.GetComponent<IDamageable>(),
+                Point = point,
+                Direction = direction,
+                Damage = damage,
+                IsCritical = critical,
+                Killed = killed,
+            });
+        }
+    }
+
+    static float BeamAngle(ChargeBeamWeaponData cfg, int index, int count)
+    {
+        if (count <= 1) return 0f;
+        if (cfg.beamsAllAround) return 360f / count * index;
+        return -PrismAngle * (count - 1) * 0.5f + PrismAngle * index;
+    }
+
+    /// <summary>갈래 색 — 무지개면 갈래마다 색상환을 고르게 나눈다.</summary>
+    static Color BeamColor(ChargeBeamWeaponData cfg, int index, int count)
+    {
+        if (!cfg.rainbowBeams || count <= 1) return cfg.beamColor;
+
+        Color c = Color.HSVToRGB(index / (float)count, 0.7f, 1f);
+        c.a = cfg.beamColor.a;
+        return c;
+    }
+
+    // ───────── 충전 소리 ─────────
+
+    private AudioSource chargeSource;
+
+    /// <summary>
+    /// 충전음을 **끝에서부터 맞춰** 재생한다.
+    ///
+    /// 받아 온 클립(8초)이 충전 시간(2.2초)보다 훨씬 길다. 앞부분부터 틀면
+    /// 한창 올라가는 중에 발사되어 "다 모았다" 는 느낌이 나지 않는다.
+    /// 클립의 **마지막 `duration` 초**만 틀면 고조되는 지점이 발사 순간과 맞는다.
+    /// </summary>
+    void StartChargeSound(ChargeBeamWeaponData cfg, float duration)
+    {
+        if (cfg.chargeSound == null || duration <= 0.05f) return;
+
+        EnsureChargeSource(cfg);
+
+        if (chargeSource == null) return;
+
+        chargeSource.clip = cfg.chargeSound;
+        chargeSource.volume = cfg.chargeVolume * SoundScale;   // 보조 무기는 작게
+
+        float offset = cfg.chargeSound.length - duration;
+
+        // 클립이 충전 시간보다 짧으면 처음부터 (먼저 끝나도 어색하지 않다)
+        chargeSource.time = Mathf.Max(0f, offset);
+        chargeSource.Play();
+    }
+
+    void StopChargeSound()
+    {
+        if (chargeSource != null && chargeSource.isPlaying)
+            chargeSource.Stop();
+    }
+
+    void EnsureChargeSource(ChargeBeamWeaponData cfg)
+    {
+        if (chargeSource != null) return;
+
+        // 전용 AudioSource 를 둔다. SoundManager 풀은 재생 중에 끊을 수단이 없다.
+        GameObject go = new GameObject("ChargeSound");
+        go.transform.SetParent(transform, false);
+
+        chargeSource = go.AddComponent<AudioSource>();
+        chargeSource.playOnAwake = false;
+        chargeSource.loop = false;
+        chargeSource.spatialBlend = 0f;   // 플레이어 무기라 2D
+
+        if (SoundManager.Instance != null)
+            chargeSource.outputAudioMixerGroup = SoundManager.Instance.SfxGroup;
+    }
+
+    void ApplyBeamDamage(ChargeBeamWeaponData cfg, in WeaponRuntimeStats stats,
+        Vector3 origin, Vector3 dir, float range)
+    {
+        struck.Clear();
+
+        int count = Physics.SphereCastNonAlloc(
+            origin, cfg.beamRadius, dir, hits, range,
+            cfg.hitLayers, QueryTriggerInteraction.Collide);
+
+        for (int i = 0; i < count; i++)
+        {
+            Collider col = hits[i].collider;
+
+            if (col == null) continue;
+
+            // Bullet 의 기존 규약과 맞춘다 — 태그로 적을 가린다
+            if (!col.CompareTag("Enemy") && !col.CompareTag("Boss")) continue;
+
+            IDamageable target = col.GetComponentInParent<IDamageable>();
+
+            if (target == null) continue;
+
+            Component component = target as Component;
+            Transform root = component != null ? component.transform : col.transform;
+
+            // 자식 히트박스가 여러 개인 적을 한 번만 때린다
+            if (!struck.Add(root)) continue;
+
+            // SphereCast 가 시작 지점에 이미 겹친 콜라이더를 반환하면 point 가 0 이 된다
+            Vector3 point = hits[i].point;
+            if (point == Vector3.zero) point = col.ClosestPoint(origin);
+
+            bool isCritical = RollCritical(in stats);
+            float dealt = ApplyCritical(in stats, isCritical) * damageScale;
+            bool wasAlive = CombatFx.IsAlive(root);
+
+            target.TakeDamage(new DamageInfo
+            {
+                damage = dealt,
+                isCritical = isCritical,
+                hitPoint = point,
+                hitDirection = dir,
+                cameraShake = cfg.cameraShake,
+            });
+
+            bool killed = CheckDirectKill(root, wasAlive);   // Drain
+
+            if (HasHitEffects)
+            {
+                NotifyHit(new WeaponHit
+                {
+                    Target = root,
+                    Damageable = target,
+                    Point = point,
+                    Direction = dir,
+                    Damage = dealt,
+                    IsCritical = isCritical,
+                    Killed = killed,
+                });
+            }
+
+            SpawnFx(cfg.hitEffectPrefab, point, Quaternion.LookRotation(-dir));
+            if (cfg.hitRing > 0f && cfg.beamMaterial != null)
+                FxLine.Ring(cfg.beamMaterial, new Vector3(point.x, Owner != null ? Owner.transform.position.y : point.y - 0.9f, point.z),
+                            0.1f, cfg.hitRing, cfg.beamColor, 0.08f, 0.22f);
+
+            // 관통이라 한 프레임에 여러 명이 들어온다. 소리는 프레임 끝에 한 번만.
+            if (SoundManager.Instance != null)
+                SoundManager.Instance.ReportHit(isCritical, HitSound.Laser);
+            PlayHitLayer();   // 상위 무기 전용 적중음 (최소 간격으로 한 번)
+        }
+
+        // 맞히면 한 발에 한 번 흔든다 (2026-11-12 — 피해 정보의 cameraShake 는 적이 쓰지 않아 한 번도 흔들리지 않았다).
+        // 프리즘처럼 한 번에 빔이 여러 줄이어도 한 프레임에 한 번
+        if (struck.Count > 0 && Time.frameCount != lastShakeFrame)
+        {
+            lastShakeFrame = Time.frameCount;
+            ShakeCamera(this, cfg.cameraShake);
+        }
+    }
+
+    int lastShakeFrame = -1;
+
+    protected override void OnTick(float deltaTime)
+    {
+        ChargeBeamWeaponData cfg = Config;
+
+        if (cfg == null) return;
+
+        // 빔은 잠깐 보여 주고 끈다. 판정은 이미 발사 순간에 끝났다.
+        if (Time.time >= beamHideAt)
+        {
+            for (int i = 0; i < beams.Count; i++)
+                if (beams[i] != null && beams[i].enabled) beams[i].enabled = false;
+            for (int i = 0; i < cores.Count; i++)
+                if (cores[i] != null && cores[i].enabled) cores[i].enabled = false;
+        }
+        else if (cfg.beamFadeOut || cfg.firePunch > 1f || cfg.coreWidth > 0f)
+        {
+            float left = Mathf.Clamp01((beamHideAt - Time.time) / Mathf.Max(0.01f, cfg.beamDuration));   // 1 → 0
+
+            // 가늘어지며 사라진다 (프리즘 노바) — 앞 40% 는 굵게 두고 나머지 동안 줄인다
+            float mul = cfg.beamFadeOut ? Mathf.Clamp01(left / 0.6f) : 1f;
+            // 쏘는 순간 굵게 — 앞 절반 동안 원래 굵기로 줄어든다
+            if (cfg.firePunch > 1f) mul *= Mathf.Lerp(1f, cfg.firePunch, Mathf.Clamp01((left - 0.5f) / 0.5f));
+            // 두 겹 광선은 끝 35% 동안 옅어진다 (뚝 끊기지 않게)
+            float alpha = cfg.coreWidth > 0f ? Mathf.Clamp01(left / 0.35f) : 1f;
+
+            float width = cfg.beamWidth * mul;
+            for (int i = 0; i < beams.Count; i++)
+            {
+                if (beams[i] == null || !beams[i].enabled) continue;
+                beams[i].startWidth = width;
+                beams[i].endWidth = width * 0.6f;
+
+                if (cfg.coreWidth <= 0f) continue;
+                Color bc = i < beamColors.Count ? beamColors[i] : cfg.beamColor;
+                bc.a *= alpha;
+                beams[i].startColor = bc;
+                beams[i].endColor = bc;
+
+                if (i >= cores.Count || cores[i] == null || !cores[i].enabled) continue;
+                Color cc = cfg.coreColor;
+                cc.a *= alpha;
+                cores[i].startWidth = cfg.coreWidth * mul;
+                cores[i].endWidth = cfg.coreWidth * mul * 0.6f;
+                cores[i].startColor = cc;
+                cores[i].endColor = cc;
+            }
+        }
+
+        UpdateChargeVisual(cfg);
+    }
+
+    /// <summary>
+    /// 총구에 빛이 점점 커지는 표시.
+    ///
+    /// 이게 없으면 2초 넘게 아무 일도 일어나지 않아 고장 난 것처럼 보인다.
+    /// </summary>
+    void UpdateChargeVisual(ChargeBeamWeaponData cfg)
+    {
+        if (!IsActive || IsReloading || IsBusy)
+        {
+            if (charge != null) charge.enabled = false;
+            HideTelegraphs();
+            return;
+        }
+
+        float interval = Stats.FireInterval;
+
+        if (interval <= 0.01f) return;
+
+        // 쿨다운이 줄어드는 만큼 충전이 찬다
+        float progress = Mathf.Clamp01(1f - CooldownRemaining / interval);
+
+        EnsureCharge(cfg);
+
+        if (charge == null) return;
+
+        charge.enabled = progress > 0.05f;
+
+        if (!charge.enabled) return;
+
+        Vector3 origin = Muzzle.position;
+        Vector3 forward = Muzzle.forward;
+
+        charge.SetPosition(0, origin);
+        charge.SetPosition(1, origin + forward * 0.15f);
+
+        // 다 차면 가장 굵고 진하다 — 언제 나갈지 예측할 수 있어야 한다
+        float width = cfg.chargeWidth * progress;
+        charge.startWidth = width;
+        charge.endWidth = width;
+
+        Color c = cfg.beamColor;
+        c.a = progress;
+        charge.startColor = c;
+        charge.endColor = c;
+
+        if (cfg.telegraphBeams) UpdateTelegraphs(cfg, origin, forward, progress);
+    }
+
+    /// <summary>
+    /// 충전이 절반을 넘으면 바닥에 갈래 방향으로 가는 예고선을 그린다 — 어디로 나갈지 미리 보인다 (프리즘 노바).
+    /// 방향은 총구가 보는 쪽 기준이라 커서를 돌리면 같이 돈다.
+    /// </summary>
+    void UpdateTelegraphs(ChargeBeamWeaponData cfg, Vector3 origin, Vector3 forward, float progress)
+    {
+        forward.y = 0f;
+        if (forward.sqrMagnitude < 0.0001f) forward = transform.forward;
+        forward.Normalize();
+
+        float alpha = Mathf.InverseLerp(0.5f, 1f, progress);
+        int count = alpha > 0f ? Mathf.Max(1, Stats.ProjectileCount) : 0;
+
+        while (telegraphs.Count < count)
+            telegraphs.Add(CreateLine($"Telegraph{telegraphs.Count + 1}", cfg));
+
+        Vector3 from = new Vector3(origin.x, Owner != null ? Owner.transform.position.y + 0.08f : origin.y, origin.z);
+        float length = Mathf.Min(Stats.Range, 9f);
+
+        for (int i = 0; i < telegraphs.Count; i++)
+        {
+            LineRenderer t = telegraphs[i];
+            if (t == null) continue;
+
+            t.enabled = i < count;
+            if (!t.enabled) continue;
+
+            Vector3 d = Quaternion.Euler(0f, BeamAngle(cfg, i, count), 0f) * forward;
+            t.SetPosition(0, from);
+            t.SetPosition(1, from + d * CombatFx.ObstacleDistance(origin, d, length));   // 벽에서 끊는다
+            t.startWidth = 0.05f;
+            t.endWidth = 0.02f;
+
+            Color tc = BeamColor(cfg, i, count);
+            tc.a = alpha * 0.45f;
+            t.startColor = tc;
+            tc.a = 0f;
+            t.endColor = tc;
+        }
+    }
+
+    void HideTelegraphs()
+    {
+        for (int i = 0; i < telegraphs.Count; i++)
+            if (telegraphs[i] != null) telegraphs[i].enabled = false;
+    }
+
+    void ShowBeam(ChargeBeamWeaponData cfg, int index, Vector3 from, Vector3 to, Color color)
+    {
+        LineRenderer beam = EnsureBeam(cfg, index);
+
+        if (beam == null) return;
+
+        beam.SetPosition(0, from);
+        beam.SetPosition(1, to);
+        beam.startWidth = cfg.beamWidth;
+        beam.endWidth = cfg.beamWidth * 0.6f;
+        beam.startColor = color;
+        beam.endColor = color;
+        beam.sortingOrder = 0;
+        beam.enabled = true;
+        FxGlow.Apply(beam, cfg.coreWidth > 0f ? FxGlow.Body : 1f);
+
+        while (beamColors.Count <= index) beamColors.Add(color);
+        beamColors[index] = color;
+
+        // 안쪽 흰 심지 — 같은 자리에 가늘게
+        if (cfg.coreWidth > 0f)
+        {
+            while (cores.Count <= index) cores.Add(CreateLine($"BeamCore{cores.Count + 1}", cfg));
+            LineRenderer core = cores[index];
+            if (core != null)
+            {
+                core.SetPosition(0, from);
+                core.SetPosition(1, to);
+                core.startWidth = cfg.coreWidth * cfg.firePunch;
+                core.endWidth = cfg.coreWidth * cfg.firePunch * 0.6f;
+                core.startColor = cfg.coreColor;
+                core.endColor = cfg.coreColor;
+                core.sortingOrder = 1;
+                core.enabled = true;
+                FxGlow.Apply(core, FxGlow.Core);
+            }
+
+            // 광선 아래 바닥에 깔리는 빛
+            float groundY = Owner != null ? Owner.transform.position.y : from.y - 1.2f;
+            GroundGlow.Strip(new Vector3(from.x, groundY, from.z), new Vector3(to.x, groundY, to.z), cfg.beamWidth * 5f, color, cfg.beamDuration);
+        }
+        if (cfg.firePunch > 1f)
+        {
+            beam.startWidth = cfg.beamWidth * cfg.firePunch;
+            beam.endWidth = cfg.beamWidth * cfg.firePunch * 0.6f;
+        }
+
+        beamHideAt = Time.time + cfg.beamDuration;
+
+        // 발사했으니 충전 표시는 즉시 지운다
+        if (charge != null) charge.enabled = false;
+    }
+
+    // ───────── 연출 준비 ─────────
+
+    LineRenderer EnsureBeam(ChargeBeamWeaponData cfg, int index)
+    {
+        while (beams.Count <= index)
+            beams.Add(CreateLine(beams.Count == 0 ? "Beam" : $"Beam{beams.Count + 1}", cfg));
+
+        return beams[index];
+    }
+
+    void EnsureCharge(ChargeBeamWeaponData cfg)
+    {
+        if (charge != null) return;
+
+        charge = CreateLine("ChargeGlow", cfg);
+    }
+
+    LineRenderer CreateLine(string childName, ChargeBeamWeaponData cfg)
+    {
+        GameObject go = new GameObject(childName);
+        go.transform.SetParent(transform, false);
+
+        LineRenderer line = go.AddComponent<LineRenderer>();
+        line.positionCount = 2;
+        line.useWorldSpace = true;          // 무기가 회전해도 빔은 쏜 방향 그대로
+        line.numCapVertices = 4;
+        line.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        line.receiveShadows = false;
+        line.enabled = false;
+
+        line.material = ResolveMaterial(cfg);
+
+        return line;
+    }
+
+    Material ResolveMaterial(ChargeBeamWeaponData cfg)
+    {
+        if (cfg.beamMaterial != null) return cfg.beamMaterial;
+
+        if (runtimeMaterial != null) return runtimeMaterial;
+
+        // 데이터에 머티리얼이 없을 때의 폴백. 에디터 도구가 만들어 넣어 주는 것이 정상이다.
+        Shader shader = Shader.Find("Sprites/Default");
+
+        if (shader == null)
+        {
+            Debug.LogWarning($"[ChargeBeamWeapon] 빔 머티리얼이 없습니다. ({name})", this);
+            return null;
+        }
+
+        runtimeMaterial = new Material(shader);
+
+        return runtimeMaterial;
+    }
+
+    void SpawnFx(GameObject prefab, Vector3 position, Quaternion rotation)
+    {
+        if (prefab == null || PoolManager.Instance == null) return;
+
+        GameObject fx = PoolManager.Instance.Get(prefab);
+
+        if (fx == null) return;
+
+        fx.transform.SetPositionAndRotation(position, rotation);
+    }
+
+    public override void SetActive(bool active)
+    {
+        base.SetActive(active);
+
+        // 스왑으로 손에서 빠지면 연출도 같이 꺼야 한다.
+        // SetActive 가 자식을 전부 끄지만, 다시 들었을 때 빔이 남아 있으면 안 된다.
+        if (active) return;
+
+        for (int i = 0; i < beams.Count; i++)
+            if (beams[i] != null) beams[i].enabled = false;
+
+        for (int i = 0; i < cores.Count; i++)
+            if (cores[i] != null) cores[i].enabled = false;
+        if (charge != null) charge.enabled = false;
+        HideTelegraphs();
+        if (burst != null) burst.Cancel();
+        if (sun != null) sun.Cancel();
+
+        // 손에 없는 무기가 계속 충전음을 내면 안 된다
+        StopChargeSound();
+    }
+
+    protected override void OnReloadStarted(float duration)
+    {
+        // 장전 중에는 충전이 멈춘다
+        StopChargeSound();
+    }
+
+    protected override void OnDestroy()
+    {
+        base.OnDestroy();
+
+        if (runtimeMaterial != null)
+            Destroy(runtimeMaterial);
+    }
+}

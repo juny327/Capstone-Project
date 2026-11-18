@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f8450c75c93a0ee408e6ae14ed4d2462, type: 3}
+  m_Name: AE_LaserSight
+  m_EditorClassIdentifier: Assembly-CSharp::LaserSightEffect
+  material: {fileID: 2100000, guid: b6310812509a3ab46bf4e098541a27ab, type: 2}
+  color: {r: 1, g: 0.15, b: 0.12, a: 0.85}
+  width: 0.05
+  maxLength: 14

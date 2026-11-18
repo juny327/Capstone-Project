@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2053801b010909f488af8899e8b93e8a, type: 3}
+  m_Name: AT_Explosive
+  m_EditorClassIdentifier: Assembly-CSharp::AttachmentData
+  displayName: "\uD3ED\uBC1C\uD0C4"
+  description: "\uBA85\uC911 \uC9C0\uC810\uC5D0\uC11C \uC791\uAC8C \uD130\uC9C4\uB2E4"
+  icon: {fileID: 21300000, guid: 7237c522b87dba946ab36dee90cc499e, type: 3}
+  slot: 4
+  tier: 2
+  families: 1
+  onlyFor: []
+  modifier:
+    damageAdd: 0
+    damageMul: 1
+    fireIntervalMul: 1.25
+    critChanceAdd: 0
+    critMultiplierAdd: 0
+    projectileSpeedAdd: 0
+    projectileCountAdd: 0
+    pierceAdd: 0
+    spreadMul: 1
+    lifeTimeMul: 1
+    burstAdd: 0
+    magazineAdd: 0
+    reloadTimeMul: 1
+    rangeAdd: 0
+    subUnitAdd: 0
+  magazinePercent: 0
+  projectileCountSet: 0
+  effect: {fileID: 11400000, guid: 1a95b7f2eadc863479fd977af5f3a326, type: 2}
+  ability: {fileID: 0}
+  tint: {r: 1, g: 0.42, b: 0.25, a: 1}
+  note: "\uBC18\uACBD 1.5m \uD3ED\uBC1C (\uD53C\uD574 40%)"
+  minWeaponLevel: 1
+  basePrice: 24

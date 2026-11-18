@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6294773452ea9ec4eaf64d2fb7b4fd8e, type: 3}
+  m_Name: SYN_ShieldCatch
+  m_EditorClassIdentifier: Assembly-CSharp::SynergyData
+  kind: 5
+  title: "\uBC29\uD328 \uBC1B\uAE30"
+  description: "\uBC29\uD328\uB97C \uB4E0 \uCC44 \uADF8\uB7A9 \u2014 \uB04C\uB824\uC628
+    \uC801\uC774 \uBC29\uD328\uC5D0 \uBD80\uB52A\uD600 \uD53C\uD574 \xB7 \uACBD\uC9C1
+    +1\uCD08"
+  color: {r: 1, g: 0.82, b: 0.3, a: 1}
+  attachmentA: {fileID: 0}
+  attachmentB: {fileID: 0}
+  abilityA: {fileID: 11400000, guid: 931fbc73911dfe9449a732935edfe98d, type: 2}
+  abilityB: {fileID: 11400000, guid: 093e1ab18a43da348af0e7924630fd40, type: 2}
+  abilityBVariantLevel: -1
+  abilityBVariantChoice: 0
+  requiresParry: 0
+  radius: 2.5
+  duration: 3
+  damageRatio: 1.5
+  stun: 1
+  lineMaterial: {fileID: 2100000, guid: b6310812509a3ab46bf4e098541a27ab, type: 2}
+  particleMaterial: {fileID: 0}
+  vfxPrefab: {fileID: 3077343761403282166, guid: f78aaaec3b393e24ca74cd6de8194347, type: 3}
+  sound:
+    clips:
+    - {fileID: 8300000, guid: d018157677e232d439822fb910b2d4ee, type: 3}
+    volume: 0.6
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0

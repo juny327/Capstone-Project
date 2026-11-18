@@ -10,6 +10,7 @@ public enum EnemyState
     Hit,
     Dead
 }
+
 public class Enemy : MonoBehaviour, IDamageable, IPoolable
 {
     public EnemyState state;
@@ -31,12 +32,31 @@ public class Enemy : MonoBehaviour, IDamageable, IPoolable
 
     public Transform target;
 
-    public Action<Enemy> OnDeath; // 매니저가 구독할거. list관리할때 지우려고
+    public Action<Enemy> OnDeath;
     public event Action OnCriticalHit;
+
     private EnemyManager manager;
     private HitFlashController hitFlash;
+
     [Header("Orb")]
     public GameObject expOrb;
+
+
+    // Freeze
+    bool isFrozen;
+    Coroutine freezeRoutine;
+
+    public bool IsFrozen => isFrozen;
+
+
+    // Shock
+    bool isShocked;
+    Coroutine shockRoutine;
+
+    public bool IsShocked => isShocked;
+
+
+
     void Awake()
     {
         brain = GetComponent<EnemyBrain>();
@@ -56,6 +76,7 @@ public class Enemy : MonoBehaviour, IDamageable, IPoolable
         ApplyImportedEnemyVisualScale();
     }
 
+
     public void Initialize(Transform target, EnemyManager manager)
     {
         this.target = target;
@@ -67,20 +88,37 @@ public class Enemy : MonoBehaviour, IDamageable, IPoolable
         movement.Initialize(this);
         attack?.Initialize(this);
 
-        // Spawn position and component references are now ready.
+
         var agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
+
         if (agent != null)
         {
             agent.enabled = true;
             agent.Warp(transform.position);
         }
+
+
         state = EnemyState.Idle;
         brain.OnStateEnter(state);
     }
 
+
+
+    /// <summary>이번에 나왔을 때의 최대 체력 — 몬스터 데이터 × 스테이지 배율 (2026-11-12).</summary>
+    public float MaxHp { get; private set; }
+
     public void OnSpawn()
     {
-        currentHp = data.maxHp;
+        float multiplier = EnemyManager.Instance != null ? EnemyManager.Instance.healthMultiplier : 1f;
+        MaxHp = data.maxHp * multiplier;
+        currentHp = MaxHp;
+
+        isFrozen = false;
+        freezeRoutine = null;
+
+        isShocked = false;
+        shockRoutine = null;
+
         ApplyImportedEnemyVisualScale();
     }
 
@@ -146,98 +184,278 @@ public class Enemy : MonoBehaviour, IDamageable, IPoolable
         }
     }
 
+
+
     public void OnDespawn()
     {
+        if (freezeRoutine != null)
+        {
+            StopCoroutine(freezeRoutine);
+            freezeRoutine = null;
+        }
+
+
+        if (shockRoutine != null)
+        {
+            StopCoroutine(shockRoutine);
+            shockRoutine = null;
+        }
+
+
+        isFrozen = false;
+        isShocked = false;
+
+
         attack?.CancelAttack();
         attack?.ResetBuffModifiers();
         movement?.SetSpeedMultiplier(1f);
+
         OnDeath = null;
         OnCriticalHit = null;
 
+
         var agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
+
         if (agent != null)
             agent.enabled = false;
     }
 
+
+
     public void Tick()
     {
-        if (state == EnemyState.Dead) return;
+        if (state == EnemyState.Dead)
+            return;
+
+
+        if (isFrozen || isShocked)
+            return;
+
 
         brain.Tick();
     }
 
+
+
     public void ChangeState(EnemyState newState)
     {
-        if (state == newState) return;
+        if (state == newState)
+            return;
+
 
         if (newState != EnemyState.Attack)
             attack?.CancelAttack();
+
 
         state = newState;
         brain.OnStateEnter(newState);
     }
 
+
+
+    // ==========================
+    // Freeze
+    // ==========================
+
+    public void ApplyFreeze(float duration)
+    {
+        if (state == EnemyState.Dead)
+            return;
+
+
+        if (freezeRoutine != null)
+            StopCoroutine(freezeRoutine);
+
+
+        freezeRoutine = StartCoroutine(FreezeRoutine(duration));
+    }
+
+
+
+    IEnumerator FreezeRoutine(float duration)
+    {
+        isFrozen = true;
+
+
+        attack?.CancelAttack();
+        movement?.Stop();
+
+
+        yield return new WaitForSeconds(duration);
+
+
+        isFrozen = false;
+        freezeRoutine = null;
+    }
+
+
+
+
+    // ==========================
+    // Shock
+    // ==========================
+
+    public void ApplyShock(float duration)
+    {
+        if (state == EnemyState.Dead)
+            return;
+
+
+        if (shockRoutine != null)
+            StopCoroutine(shockRoutine);
+
+
+        shockRoutine = StartCoroutine(ShockRoutine(duration));
+    }
+
+
+
+    IEnumerator ShockRoutine(float duration)
+    {
+        isShocked = true;
+
+
+        attack?.CancelAttack();
+        movement?.Stop();
+
+
+        yield return new WaitForSeconds(duration);
+
+
+        isShocked = false;
+        shockRoutine = null;
+    }
+
+
+
+
     public void TakeDamage(DamageInfo info)
     {
-        if (state == EnemyState.Dead) return;
+        if (state == EnemyState.Dead)
+            return;
+
 
         currentHp -= info.damage;
 
         currentHp = Mathf.Max(currentHp, 0f);
-        // hitFlash 발동
+
+
         hitFlash.HitFlash();
 
-        ui.Show();
-        ui.UpdateHealth(currentHp, data.maxHp);
 
-        DamageTextManager.Instance.ShowDamage((int)info.damage, transform.position + Vector3.up * 2f, info.isCritical);
+        ui.Show();
+        ui.UpdateHealth(currentHp, MaxHp > 0f ? MaxHp : data.maxHp);
+
+
+        DamageTextManager.Instance.ShowDamage(
+            (int)info.damage,
+            transform.position + Vector3.up * 2f,
+            info.isCritical
+        );
+
+
         if (currentHp <= 0)
         {
             Die();
             return;
         }
+
+
         if (info.isCritical)
         {
             OnCriticalHit?.Invoke();
+
+
             if (!(attack is SuicideAttack))
             {
                 ChangeState(EnemyState.Hit);
             }
         }
     }
+
+
+
     void Die()
     {
+        if (freezeRoutine != null)
+        {
+            StopCoroutine(freezeRoutine);
+            freezeRoutine = null;
+        }
+
+
+        if (shockRoutine != null)
+        {
+            StopCoroutine(shockRoutine);
+            shockRoutine = null;
+        }
+
+
+        isFrozen = false;
+        isShocked = false;
+
+
         ChangeState(EnemyState.Dead);
 
         GetComponent<MonsterFController>()?.ClearEffects();
         GetComponent<MonsterGController>()?.ClearEffects();
 
-        movement.Stop();      
+        // 하던 공격을 멈춘다 — 근접 공격의 isAttack 이 켜진 채면 애니메이터가 죽음 대신 공격을 다시 틀었다 (2026-11-08)
+        attack?.CancelAttack();
+
+        movement.Stop();
+
 
         animator.Play("Die");
 
+        // 풀 반납은 죽음 애니메이션 끝의 이벤트가 한다. 어떤 이유로 그 애니메이션이 끊겨도 시체가 남지 않게
+        // 조금 뒤 직접 돌려보낸다. 먼저 돌아가면 꺼지면서 이 코루틴도 멈추니 두 번 반납되지 않는다 (2026-11-08)
+        StartCoroutine(ReturnToPoolFallback());
+
+
         OnDeath?.Invoke(this);
 
-        // Animation Event에서 ReturnToPool 실행.
+
         SpawnExpOrb();
+        GameEvents.OnEnemyDefeated?.Invoke(this);
     }
+
+
+
     void SpawnExpOrb()
     {
         int expAmount = data.expDrop;
 
-        GameObject orbGO = PoolManager.Instance.Get(expOrb); // 풀에서 바로 가져오기
-        Vector3 spawnPos = transform.position + Vector3.up * 2.5f; // 위에서 드랍
-        orbGO.transform.position = spawnPos;
-        //orbGO.SetActive(true);
-        
-        var orb = orbGO.GetComponent<ExpOrb>();
-        orb.Initialize(expAmount);
 
-        // ExpOrb.cs에서 OnEnable될 때 Rigidbody를 사용해 튀어오르게 구현
+        GameObject orbGO = PoolManager.Instance.Get(expOrb);
+
+
+        Vector3 spawnPos = transform.position + Vector3.up * 2.5f;
+
+
+        orbGO.transform.position = spawnPos;
+
+
+        var orb = orbGO.GetComponent<ExpOrb>();
+
+        orb.Initialize(expAmount);
     }
+
+
 
     void ReturnToPool()
     {
         PoolManager.Instance.Return(gameObject);
+    }
+
+    // 가장 긴 죽음 애니메이션(몬스터 B, 약 2.3초)보다 넉넉하게
+    const float DeathReturnFallbackSeconds = 4f;
+
+    IEnumerator ReturnToPoolFallback()
+    {
+        yield return new WaitForSeconds(DeathReturnFallbackSeconds);
+
+        if (state == EnemyState.Dead && gameObject.activeInHierarchy)
+            ReturnToPool();
     }
 }

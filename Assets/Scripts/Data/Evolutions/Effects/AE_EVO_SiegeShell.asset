@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d4b5fb928d99174e939eab9ea449b11, type: 3}
+  m_Name: AE_EVO_SiegeShell
+  m_EditorClassIdentifier: Assembly-CSharp::SiegeShellEffect
+  hitRadius: 1.5
+  hitRatio: 0.6
+  push: 2
+  endRadius: 3
+  endRatio: 1.5
+  material: {fileID: 2100000, guid: b6310812509a3ab46bf4e098541a27ab, type: 2}
+  color: {r: 1, g: 0.75, b: 0.25, a: 1}
+  explosionPrefab: {fileID: 5162910912013668194, guid: cf82839c411151342a7b2337bda9fb34, type: 3}
+  cameraShake: 0.45
+  blastSound:
+    clips:
+    - {fileID: 8300000, guid: 670987b1567025e45a709ee09df2bcb8, type: 3}
+    - {fileID: 8300000, guid: 6f0fd072993ca754e8ff678030d36181, type: 3}
+    volume: 0.7
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0.05

@@ -30,9 +30,32 @@ public class ProjectileWeaponData : WeaponData
     [Tooltip("관통 가능한 적 수. 0이면 첫 적에게 맞고 사라진다")]
     [Min(0)] public int pierceCount = 0;
 
+    [Tooltip("끄면 탄을 만들지 않는다 — 쏘는 알림 · 탄약 · 소리만 남고, 공격은 상위 무기 고유 동작이 맡는다 (용의 포효 화염 방사)")]
+    public bool spawnProjectiles = true;
+
+    [Header("Homing (상위 무기 — 스웜 카빈)")]
+    [Tooltip("0 이면 곧게. 0 보다 크면 탄마다 다른 적을 골라 이 속도(도/초)로 꺾어 따라간다")]
+    [Min(0f)] public float homingTurnRate = 0f;
+    [Min(1f)] public float homingRange = 14f;
+
+    [Header("Ammo")]
+    [Tooltip("탄창 크기. 0 이면 무제한이라 장전하지 않는다")]
+    [Min(0)] public int magazineSize = 30;
+
+    [Tooltip("장전에 걸리는 시간(초). 모션 클립은 2.67초이며 코드가 배속을 맞춘다")]
+    [Min(0.1f)] public float reloadTime = 2f;
+
+    [Tooltip("탄이 떨어지면 자동으로 장전한다")]
+    public bool autoReload = true;
+
     [Header("Effects")]
     public GameObject muzzleFlashPrefab;
     public GameObject casingPrefab;
+
+    [Header("쏘는 모습 (2026-11-14) — 프리팹 위에 코드가 얹어 그린다")]
+    public ShotFx shotFx = new ShotFx();
+
+    public override ShotFx ShotFx => shotFx;
 
     public override WeaponKind Kind => WeaponKind.Projectile;
 
@@ -42,10 +65,15 @@ public class ProjectileWeaponData : WeaponData
         WeaponModifier m = modifier.Sanitized();
 
         s.ProjectileSpeed = Mathf.Max(0.1f, projectileSpeed + m.projectileSpeedAdd);
-        s.ProjectileLifeTime = projectileLifeTime;
-        s.SpreadAngle = Mathf.Max(0f, spreadAngle);
+        s.ProjectileLifeTime = Mathf.Max(0.05f, projectileLifeTime * m.lifeTimeMul);
+        s.SpreadAngle = Mathf.Max(0f, spreadAngle * m.spreadMul);
         s.ProjectileCount = Mathf.Max(1, projectileCount + m.projectileCountAdd);
         s.PierceCount = Mathf.Max(0, pierceCount + m.pierceAdd);
+        s.BurstCount = Mathf.Max(1, 1 + m.burstAdd);
+
+        // 0 은 "무제한" 이라는 뜻이므로 업그레이드가 붙어도 0 을 유지한다
+        s.MagazineSize = magazineSize <= 0 ? 0 : Mathf.Max(1, magazineSize + m.magazineAdd);
+        s.ReloadTime = Mathf.Max(0.1f, reloadTime * m.reloadTimeMul);
 
         return s;
     }

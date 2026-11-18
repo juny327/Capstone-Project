@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -7,6 +8,64 @@ using UnityEngine;
 public class ProjectileWeapon : WeaponBase
 {
     private ProjectileWeaponData Config => (ProjectileWeaponData)data;
+
+    // 장전 애니메이션. MeleeWeapon 의 Slash 처리와 같은 방식이다 —
+    // 파라미터가 아직 없어도 조용히 건너뛰어 경고가 쌓이지 않게 한다.
+    private static readonly int HashReload = Animator.StringToHash("Reload");
+    private static readonly int HashReloadSpeed = Animator.StringToHash("ReloadSpeed");
+
+    /// <summary>Reload.anim 길이(초). 이 길이를 장전 시간에 맞춰 배속으로 재생한다.</summary>
+    private const float ReloadClipLength = 2.67f;
+
+    private Animator ownerAnim;
+    private bool hasReloadParam;
+    private bool hasReloadSpeedParam;
+    private bool animChecked;
+
+    // 점사 (전용 개조 "3점사") — 첫 발은 OnFire 에서, 나머지는 짧은 간격으로 OnTick 에서 쏜다. 탄약은 한 번만 쓴다
+    private const float BurstGap = 0.07f;
+    private int burstRemaining;
+    private float burstTimer;
+
+    protected override bool AutoReload => Config == null || Config.autoReload;
+
+    protected override void OnReloadStarted(float duration)
+    {
+        burstRemaining = 0;
+
+        if (!animChecked) CacheAnimator();
+        if (ownerAnim == null || !hasReloadParam) return;
+
+        // 클립(2.67초)을 데이터의 장전 시간에 맞춰 배속 재생한다
+        if (hasReloadSpeedParam && duration > 0.01f)
+            ownerAnim.SetFloat(HashReloadSpeed, ReloadClipLength / duration);
+
+        ownerAnim.SetTrigger(HashReload);
+    }
+
+    protected override void OnReloadCanceled()
+    {
+        if (ownerAnim == null || !hasReloadParam) return;
+
+        // 트리거가 남아 있으면 다음 상태 전이에서 장전이 한 번 더 재생된다
+        ownerAnim.ResetTrigger(HashReload);
+    }
+
+    void CacheAnimator()
+    {
+        animChecked = true;
+
+        if (Owner == null) return;
+
+        ownerAnim = Owner.GetComponent<Animator>();
+        if (ownerAnim == null) return;
+
+        foreach (AnimatorControllerParameter p in ownerAnim.parameters)
+        {
+            if (p.nameHash == HashReload) hasReloadParam = true;
+            else if (p.nameHash == HashReloadSpeed) hasReloadSpeedParam = true;
+        }
+    }
 
     protected override void OnFire(in WeaponRuntimeStats stats, in WeaponFireContext context)
     {
@@ -25,14 +84,66 @@ public class ProjectileWeapon : WeaponBase
             return;
         }
 
-        SpawnEffect(cfg.muzzleFlashPrefab, Muzzle);
-        SpawnEffect(cfg.casingPrefab, casingPoint);
-
         // 기본은 캐릭터가 바라보는 방향(= 마우스 방향)으로 쏜다. 기존 소총(Gun)이 muzzle.forward 로 쏘던 것과 같다.
         // NearestTarget 이면 감지 범위 안 최근접 적을 자동 조준한다 (사거리 제한 없음)
         Vector3 baseDir = cfg.aimMode == WeaponAimMode.NearestTarget
             ? ResolveFireDirection(in context, float.PositiveInfinity, out _)
             : context.AimDirection;
+
+        if (!cfg.spawnProjectiles)
+        {
+            SpawnEffect(cfg.muzzleFlashPrefab, Muzzle);
+            return;
+        }
+
+        SpawnVolley(cfg, in stats, baseDir);
+
+        // 쏘는 순간 흔들림 (스나이퍼 · 샷건처럼 한 발이 무거운 총) — 점사의 이어지는 발은 흔들지 않는다
+        if (cfg.shotFx != null && cfg.shotFx.fireShake > 0f) ShakeCamera(this, cfg.shotFx.fireShake);
+
+        // 점사 — 남은 발은 짧은 간격으로 이어서 (그사이 돌아보면 그쪽으로 나간다)
+        burstRemaining = Mathf.Max(0, stats.BurstCount - 1);
+        burstTimer = BurstGap;
+    }
+
+    protected override void OnTick(float deltaTime)
+    {
+        if (burstRemaining <= 0) return;
+
+        if (!IsActive || IsReloading || Config == null || Config.projectilePrefab == null || PoolManager.Instance == null)
+        {
+            burstRemaining = 0;
+            return;
+        }
+
+        burstTimer -= deltaTime;
+        if (burstTimer > 0f) return;
+
+        burstTimer += BurstGap;
+        burstRemaining--;
+
+        // 보조 무기는 주무기 조준(마우스)과 무관하게 처음 쏜 방향으로 잇는다
+        Vector3 dir = IsSupport ? LastAimDirection : Owner != null ? Owner.transform.forward : transform.forward;
+        dir.y = 0f;
+        if (dir.sqrMagnitude < 0.0001f) return;
+
+        WeaponRuntimeStats stats = Stats;
+        SpawnVolley(Config, in stats, dir.normalized);
+        PlayVolleySound();
+    }
+
+    /// <summary>한 번에 나가는 탄들 (산탄이면 여러 발). 총구 섬광 · 탄피도 여기서.</summary>
+    void SpawnVolley(ProjectileWeaponData cfg, in WeaponRuntimeStats stats, Vector3 baseDir)
+    {
+        SpawnEffect(cfg.muzzleFlashPrefab, Muzzle);
+        if (!IsSupport) SpawnEffect(cfg.casingPrefab, casingPoint);   // 보조 무기는 탄피를 흘리지 않는다 (셋이 쏘면 바닥이 탄피로 덮인다)
+
+        ShotFx fx = cfg.shotFx;
+        float fxScale = IsSupport ? ShotFxDraw.SupportScale : 1f;
+        float groundY = Owner != null ? Owner.transform.position.y : float.NaN;
+        ShotFxDraw.MuzzleFlash(fx, Muzzle.position, baseDir, fxScale, groundY, ShotHeat);
+
+        Color tint = AmmoTint;
 
         for (int i = 0; i < stats.ProjectileCount; i++)
         {
@@ -42,6 +153,10 @@ public class ProjectileWeapon : WeaponBase
             if (obj == null) continue;
 
             obj.transform.SetPositionAndRotation(Muzzle.position, Quaternion.LookRotation(dir));
+
+            // 아주 빠른 탄(스나이퍼)은 쏘는 순간 총구에서 끝까지 한 줄을 그린다
+            if (fx != null && fx.Enabled && fx.tracerInstant)
+                ShotFxDraw.InstantTracer(fx, Muzzle.position, InstantTracerEnd(Muzzle.position, dir, in stats), fxScale, groundY);
 
             Bullet bullet = obj.GetComponent<Bullet>();
             if (bullet == null) continue;
@@ -54,7 +169,61 @@ public class ProjectileWeapon : WeaponBase
                 ApplyCritical(in stats, isCritical),
                 stats.ProjectileLifeTime,
                 isCritical,
-                stats.PierceCount));
+                stats.PierceCount,
+                homingTarget: cfg.homingTurnRate > 0f ? NextHomingTarget(cfg) : null,
+                source: this,
+                tint: tint,
+                homingTurnRate: cfg.homingTurnRate));
         }
+    }
+
+    const float InstantTracerMax = 40f;
+    static readonly List<Transform> tracerTargets = new List<Transform>();
+
+    /// <summary>
+    /// 한 줄 궤적이 끝나는 곳 — 벽 · 사거리 끝, 또는 관통이 다하는 적 (관통 3 이면 네 번째 적). 화면 밖까지 긋지 않게 40m 에서 끊는다.
+    /// 그림만 정한다 — 판정은 탄이 한다.
+    /// </summary>
+    Vector3 InstantTracerEnd(Vector3 origin, Vector3 dir, in WeaponRuntimeStats stats)
+    {
+        float reach = Mathf.Min(InstantTracerMax, stats.ProjectileSpeed * Mathf.Max(0.1f, stats.ProjectileLifeTime));
+        reach = CombatFx.ObstacleDistance(origin, dir, reach);
+
+        CombatFx.FindEnemiesAlong(origin, origin + dir * reach, 0.35f, tracerTargets);
+        if (tracerTargets.Count > stats.PierceCount)
+        {
+            tracerTargets.Sort((a, b) => Vector3.Dot(a.position - origin, dir).CompareTo(Vector3.Dot(b.position - origin, dir)));
+            float last = Vector3.Dot(tracerTargets[stats.PierceCount].position - origin, dir);
+            if (last > 0.5f) reach = Mathf.Min(reach, last + 0.3f);
+        }
+        return origin + dir * reach;
+    }
+
+    // 유도탄 목표 — 가까운 적부터 돌려 가며 고른다 (점사 세 발이 서로 다른 적을 쫓게)
+    readonly List<Transform> homingCandidates = new List<Transform>();
+    int homingCursor;
+
+    Transform NextHomingTarget(ProjectileWeaponData cfg)
+    {
+        Vector3 origin = Owner != null ? Owner.transform.position : transform.position;
+        CombatFx.FindEnemies(origin, cfg.homingRange, homingCandidates);
+        if (homingCandidates.Count == 0) return null;
+
+        homingCandidates.Sort((a, b) => (a.position - origin).sqrMagnitude.CompareTo((b.position - origin).sqrMagnitude));
+        int pick = Mathf.Min(homingCandidates.Count, 4);
+        return homingCandidates[homingCursor++ % pick];
+    }
+
+    /// <summary>점사의 이어지는 발 소리 — 첫 발 소리는 WeaponBase.Fire 가 낸다.</summary>
+    void PlayVolleySound()
+    {
+        if (data == null) return;
+        PlaySound(data.PickFireSound(), data.fireVolume * 0.8f, Random.Range(1.0f, 1.08f));
+    }
+
+    public override void SetActive(bool active)
+    {
+        base.SetActive(active);
+        if (!active) burstRemaining = 0;
     }
 }

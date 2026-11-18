@@ -25,11 +25,11 @@ Transform:
   m_GameObject: {fileID: 5746087705236801590}
   serializedVersion: 2
   m_LocalRotation: {x: 0.73422444, y: -0.67679393, z: 0.00845712, w: 0.052848782}
-  m_LocalPosition: {x: -0.08049231, y: 0.2614567, z: 0.01382816}
-  m_LocalScale: {x: 4.046655, y: 4.046655, z: 4.046655}
+  m_LocalPosition: {x: -0.10033396, y: 0.49549618, z: 0.0015670061}
+  m_LocalScale: {x: 7.7560887, y: 7.7560887, z: 7.7560887}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 670683083534192271}
+  - {fileID: 6783652113316406496}
   m_Father: {fileID: 4618812530623009728}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &5825881266557484979
@@ -80,7 +80,18 @@ MonoBehaviour:
   data: {fileID: 0}
   muzzle: {fileID: 0}
   casingPoint: {fileID: 0}
---- !u!1001 &1063983982444947812
+  swingStyle: 0
+  verticalChance: 0.5
+  verticalArcAngle: 60
+  verticalHitDelay: 0.49397722
+  bladeTip: {x: -0.22917289, y: 1.9391073, z: -0.23621552}
+  tipMinHeight: 0.05
+  leftGripNear: {x: 0.012817022, y: -0.10844905, z: 0.013210897}
+  leftGripFar: {x: 0.03456883, y: -0.29249826, z: 0.035631154}
+  guardGrip: {x: 0, y: 0, z: 0}
+  guardAxis: {x: 0, y: 0, z: 0}
+  guardLeftAlong: 0
+--- !u!1001 &6462356341996389131
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -137,8 +148,8 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 5b2781863ba5bd24d97cd4ddd37bdc7b, type: 3}
---- !u!4 &670683083534192271 stripped
+--- !u!4 &6783652113316406496 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 5b2781863ba5bd24d97cd4ddd37bdc7b, type: 3}
-  m_PrefabInstance: {fileID: 1063983982444947812}
+  m_PrefabInstance: {fileID: 6462356341996389131}
   m_PrefabAsset: {fileID: 0}

@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2053801b010909f488af8899e8b93e8a, type: 3}
+  m_Name: AT_LaserSight
+  m_EditorClassIdentifier: Assembly-CSharp::AttachmentData
+  displayName: "\uB808\uC774\uC800 \uC870\uC900\uAE30"
+  description: "\uCD1D\uAD6C\uC5D0\uC11C \uBD89\uC740 \uC870\uC900\uC120 \u2014 \uD0C4\uC774
+    \uBAA8\uC778\uB2E4"
+  icon: {fileID: -9095540338600036987, guid: b9a25a9cbb0d4ad4799fe553b6a189a6, type: 3}
+  slot: 0
+  tier: 0
+  families: 1
+  onlyFor: []
+  modifier:
+    damageAdd: 0
+    damageMul: 1
+    fireIntervalMul: 1
+    critChanceAdd: 0.05
+    critMultiplierAdd: 0
+    projectileSpeedAdd: 0
+    projectileCountAdd: 0
+    pierceAdd: 0
+    spreadMul: 0.7
+    lifeTimeMul: 1
+    burstAdd: 0
+    magazineAdd: 0
+    reloadTimeMul: 1
+    rangeAdd: 0
+    subUnitAdd: 0
+  magazinePercent: 0
+  projectileCountSet: 0
+  effect: {fileID: 11400000, guid: 50af99ab7641287498ffd798926127e9, type: 2}
+  ability: {fileID: 0}
+  tint: {r: 0, g: 0, b: 0, a: 0}
+  note: 
+  minWeaponLevel: 1
+  basePrice: 12

@@ -19,7 +19,7 @@ public class ExpOrb : MonoBehaviour, IPoolable
     private Rigidbody rb;
     private BoxCollider bc;
 
-    Renderer renderer;
+    Renderer orbRenderer;   // renderer 는 Component.renderer 와 겹쳐 CS0108 경고가 났다 (2026-11-06)
     MaterialPropertyBlock mpb;
 
     private void Awake()
@@ -34,7 +34,7 @@ public class ExpOrb : MonoBehaviour, IPoolable
         bc.isTrigger = false; // 바닥 충돌
         sc.isTrigger = true;  // 플레이어 감지
         sc.radius = attractDistance;
-        renderer = GetComponent<Renderer>();
+        orbRenderer = GetComponent<Renderer>();
         mpb = new MaterialPropertyBlock();
     }
 
@@ -58,9 +58,9 @@ public class ExpOrb : MonoBehaviour, IPoolable
     public void Initialize(int value)
     {
         expValue = value;
-        renderer.GetPropertyBlock(mpb);
+        orbRenderer.GetPropertyBlock(mpb);
         mpb.SetFloat("_ExpValue", value);
-        renderer.SetPropertyBlock(mpb);
+        orbRenderer.SetPropertyBlock(mpb);
     }
 
     private void Update()

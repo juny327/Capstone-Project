@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2053801b010909f488af8899e8b93e8a, type: 3}
+  m_Name: MOD_Laser_Overcharge
+  m_EditorClassIdentifier: Assembly-CSharp::AttachmentData
+  displayName: "\uACFC\uCDA9\uC804"
+  description: "\uB354 \uC624\uB798 \uBAA8\uC544 \uD6E8\uC52C \uC138\uAC8C"
+  icon: {fileID: 21300000, guid: 1b6009aeae92d4c438aa9dd99414985e, type: 3}
+  slot: 5
+  tier: 2
+  families: 4
+  onlyFor:
+  - {fileID: 11400000, guid: 74ca696becb4fb443800afef14778251, type: 2}
+  modifier:
+    damageAdd: 0
+    damageMul: 2.2
+    fireIntervalMul: 1.5
+    critChanceAdd: 0
+    critMultiplierAdd: 0
+    projectileSpeedAdd: 0
+    projectileCountAdd: 0
+    pierceAdd: 0
+    spreadMul: 1
+    lifeTimeMul: 1
+    burstAdd: 0
+    magazineAdd: 0
+    reloadTimeMul: 1
+    rangeAdd: 0
+    subUnitAdd: 0
+  magazinePercent: 0
+  projectileCountSet: 0
+  effect: {fileID: 0}
+  ability: {fileID: 0}
+  tint: {r: 0, g: 0, b: 0, a: 0}
+  note: 
+  minWeaponLevel: 3
+  basePrice: 30

@@ -31,11 +31,6 @@ public class SlowEffect : StatusEffect
         {
             fx = Object.Instantiate(effectPrefab, target.transform);
             fx.transform.localPosition = Vector3.zero;
-            Debug.Log("a");
-        }
-        else
-        {
-            Debug.Log("b");
         }
 
         yield return new WaitForSeconds(duration);

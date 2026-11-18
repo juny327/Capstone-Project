@@ -61,8 +61,8 @@ public class GameAppManager : MonoBehaviour
             GameEvents.OnCameraReady?.Invoke(Camera.main);
         }
 
-        // 인트로 앤딩에선 플레이어 비활성화
-        else if (scene.name == "IntroScene" || scene.name == "EndingScene")
+        // 엔딩에선 플레이어 비활성화
+        else if (scene.name == "EndingScene")
         {
             if (Player != null)
                 Player.SetActive(false);
@@ -80,7 +80,18 @@ public class GameAppManager : MonoBehaviour
             DontDestroyOnLoad(Player);
         }
 
-        //PlayerStats.ResetState();
+        // 죽은 채로 다음 스테이지에 들어가지 않는다. GameManager 가 사망 뒤 클리어를 막으므로 정상이면 일어나지 않는다.
+        // ResetState() 로 되살리지 않는 이유: 체력은 0 그대로라 "HP 0 으로 살아 있는" 상태가 된다
+        if (PlayerStats != null && PlayerStats.IsDead)
+        {
+            Debug.LogError("[GameAppManager] 죽은 플레이어로 다음 스테이지에 들어가려 했습니다 — 로비로 돌아갑니다.");
+            ReturnToLobby();
+            return;
+        }
+
+        // 지난 스테이지를 클리어할 때 GameManager 가 건 무적을 푼다
+        if (PlayerStats != null)
+            PlayerStats.ClearInvulnerable();
 
         // 씬 넘어갈 때 위치 리셋
         Player.transform.position = spawnPosition;
@@ -91,6 +102,20 @@ public class GameAppManager : MonoBehaviour
 
         // 각 씬 시스템들이 다시 Player 참조하도록 이벤트 발생
         GameEvents.OnPlayerSpawned?.Invoke(Player.transform);
+    }
+
+    /// <summary>
+    /// 테스트 룸 보스 바로 가기 (2026-11-13) — 테스트 룸에서 꾸린 플레이어(무기 · 진화 · 보조 칸 · 서브 능력)를
+    /// 이번 판 플레이어로 넘겨받는다. 다음 Stage 씬이 열리면 SetupPlayer 가 새로 만들지 않고 이 플레이어를 쓴다.
+    /// </summary>
+    public void AdoptPlayer(GameObject player)
+    {
+        if (player == null || player == Player) return;
+        if (Player != null) Destroy(Player);
+
+        Player = player;
+        PlayerStats = player.GetComponent<PlayerStats>();
+        DontDestroyOnLoad(player);
     }
 
     void OnPlayerDead()

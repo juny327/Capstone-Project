@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: edbd9fa9dc934ea1ace8f8a9f0777f05, type: 3}
+  m_Name: FxGlowSettings
+  m_EditorClassIdentifier: Assembly-CSharp::FxGlowSettings
+  coreGlow: 2.5
+  bodyGlow: 1.5
+  groundMaterial: {fileID: 2100000, guid: b6310812509a3ab46bf4e098541a27ab, type: 2}
+  groundStrength: 0.5
+  maxLights: 4
+  lightIntensity: 6
+  stageLook: {fileID: 11400000, guid: 15852acf61286d945b6692ff165a12dc, type: 2}

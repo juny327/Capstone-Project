@@ -15,6 +15,21 @@ public class Bullet : MonoBehaviour, IPoolable
 
     int pierceRemaining;
 
+    // 쏜 무기 — 맞혔을 때 그 무기의 부착물 명중 효과(화상 · 전격 · 튕김 · 폭발)를 부른다. 풀로 돌아갈 때 지운다
+    WeaponBase source;
+    Color tint;
+
+    // 유도 (스웜 카빈) — 목표가 사라지면 곧게 간다
+    Transform homingTarget;
+    float homingTurnRate;
+
+    // 빠른 탄(레일건 탄속 180)은 물리 한 단계에 3m 넘게 날아가 트리거를 건너뛴다 — 지난 위치부터 훑어 잡는다
+    const float SweepSpeed = 40f;
+    Vector3 lastPosition;
+    float sweepRadius = 0.15f;
+    bool returned;
+    readonly RaycastHit[] sweepHits = new RaycastHit[16];
+
     // 같은 적의 자식 콜라이더에 여러 번 맞는 것을 막는다.
     // ⚠ OnDespawn 에서 반드시 비워야 한다. 안 비우면 풀에서 재사용된 총알이
     //    이전에 맞힌 적을 못 맞히는 버그가 된다.
@@ -22,6 +37,12 @@ public class Bullet : MonoBehaviour, IPoolable
 
     Rigidbody rb;
     Poolable poolable;
+
+    // 쏜 무기의 모습 (ShotFx) — 탄 궤적은 탄에 붙어 같이 돌려 쓰인다
+    BulletTracer tracer;
+    MissileTrail smoke;
+    ShotFx shotFx;
+    float fxScale = 1f;
 
     public GameObject hitEffectPrefab;
     public GameObject bossHitEffectPrefab;
@@ -41,6 +62,11 @@ public class Bullet : MonoBehaviour, IPoolable
             meshRenderer = GetComponentInChildren<Renderer>();
 
         mpb = new MaterialPropertyBlock();
+
+        Collider col = GetComponent<Collider>();
+        if (col is SphereCollider sphere) sweepRadius = sphere.radius * transform.lossyScale.x;
+        else if (col is CapsuleCollider capsule) sweepRadius = capsule.radius * transform.lossyScale.x;
+        sweepRadius = Mathf.Clamp(sweepRadius, 0.05f, 0.5f);
     }
 
     public void OnSpawn()
@@ -48,11 +74,19 @@ public class Bullet : MonoBehaviour, IPoolable
         rb.linearVelocity = Vector3.zero;
     }
 
-    public void OnDespawn()
+    public virtual void OnDespawn()
     {
         rb.linearVelocity = Vector3.zero;
         alreadyHit.Clear();       // ★ 반드시
         pierceRemaining = 0;
+        source = null;
+        tint = default;
+        homingTarget = null;
+        homingTurnRate = 0f;
+        returned = true;
+        shotFx = null;
+        if (tracer != null) tracer.End();
+        if (smoke != null) { smoke.Release(); smoke = null; }   // 연기는 탄이 사라진 뒤에도 남아 흩어진다
         CancelInvoke();
     }
 
@@ -63,15 +97,57 @@ public class Bullet : MonoBehaviour, IPoolable
         damage = info.Damage;
         isCritical = info.IsCritical;
         pierceRemaining = Mathf.Max(0, info.PierceCount);
+        source = info.Source;
+        tint = info.Tint;
+        homingTarget = info.HomingTarget;
+        homingTurnRate = info.HomingTurnRate;
+        lastPosition = transform.position;
+        returned = false;
 
         alreadyHit.Clear();
 
         rb.linearVelocity = transform.forward * speed;
 
         ApplyDamageVisual();
+        BeginShotFx();
 
         CancelInvoke();
-        Invoke(nameof(ReturnToPool), info.LifeTime > 0f ? info.LifeTime : lifeTime);
+        Invoke(nameof(Expire), info.LifeTime > 0f ? info.LifeTime : lifeTime);
+    }
+
+    /// <summary>쏜 무기의 모습을 읽어 탄 궤적을 켠다 (값이 없는 무기는 예전 그대로 — 궤적 없음).</summary>
+    void BeginShotFx()
+    {
+        shotFx = source != null && source.Data != null ? source.Data.ShotFx : null;
+        fxScale = source != null && source.IsSupport ? ShotFxDraw.SupportScale : 1f;
+
+        // 휘어 날아가는 길에 남는 연기 (스웜 카빈 미사일) — 탄과 따로 돌려 쓴다
+        if (smoke != null) { smoke.Release(); smoke = null; }
+        if (shotFx != null && shotFx.Enabled && shotFx.HasSmoke) smoke = MissileTrail.Follow(transform, shotFx, fxScale);
+
+        bool wantTracer = shotFx != null && shotFx.Enabled && shotFx.tracerLength > 0f && shotFx.tracerWidth > 0f && !shotFx.tracerInstant;
+        if (!wantTracer)
+        {
+            if (tracer != null) tracer.End();
+            return;
+        }
+
+        if (tracer == null) tracer = BulletTracer.Attach(transform);
+
+        // 연사 열(회전 기관포) → 치명타 탄은 붉게 · 부착물 탄 색(소이탄 주황 · 전격탄 파랑)이 있으면 그 색으로
+        float heat = source != null ? source.ShotHeat : 0f;
+        Color color = shotFx.HeatColor(shotFx.tracerColor, heat);
+        if (isCritical) color = Color.Lerp(color, new Color(1f, 0.25f, 0.2f, color.a), 0.65f);
+        else if (tint.a > 0.01f) color = new Color(tint.r, tint.g, tint.b, color.a);
+        tracer.Begin(shotFx, color, fxScale, heat);
+    }
+
+    /// <summary>사거리 끝 — 쏜 무기에 알리고 풀로 돌아간다 (공성포의 끝 폭발).</summary>
+    void Expire()
+    {
+        if (!returned && source != null && source.HasHitEffects)
+            source.NotifyProjectileExpired(transform.position, transform.forward);
+        ReturnToPool();
     }
 
     /// <summary>
@@ -90,10 +166,89 @@ public class Bullet : MonoBehaviour, IPoolable
             0));
     }
 
+    void FixedUpdate()
+    {
+        if (!returned && homingTurnRate > 0f) Steer();
+        if (returned || speed < SweepSpeed) return;
+
+        // 지난 위치부터 **이번 물리 단계가 끝날 자리까지** 훑는다 — 뒤만 훑으면 벽을 지나친 자리에 한 프레임 보였다가 사라진다
+        Vector3 end = transform.position + rb.linearVelocity * Time.fixedDeltaTime;
+        Vector3 path = end - lastPosition;
+        float distance = path.magnitude;
+
+        if (distance > 0.01f)
+        {
+            Vector3 dir = path / distance;
+            Vector3 keep = transform.position;
+            int count = Physics.SphereCastNonAlloc(lastPosition, sweepRadius, dir, sweepHits, distance,
+                ~0, QueryTriggerInteraction.Collide);
+
+            // 가까운 것부터 — 관통이 다하면 거기서 멈춰야 한다
+            System.Array.Sort(sweepHits, 0, count, HitDistanceComparer.Instance);
+
+            for (int i = 0; i < count && !returned; i++)
+            {
+                if (sweepHits[i].collider == null) continue;
+
+                // 닿은 자리로 옮겨 놓고 처리한다 — 적중 효과 · 공성포 폭발이 맞은 곳에서 난다
+                if (sweepHits[i].distance > 0f) transform.position = lastPosition + dir * sweepHits[i].distance;
+                HandleHit(sweepHits[i].collider);
+            }
+
+            // 관통해서 계속 날아가면 원래 자리로 — 옮긴 채로 두면 앞으로 튀거나 뒤로 밀린다
+            if (!returned) transform.position = keep;
+        }
+
+        lastPosition = transform.position;
+    }
+
+    /// <summary>목표 쪽으로 조금씩 꺾는다 (수평으로만). 목표가 죽었거나 꺼졌으면 그대로 간다.</summary>
+    void Steer()
+    {
+        if (homingTarget == null || !homingTarget.gameObject.activeInHierarchy || !CombatFx.IsAlive(homingTarget))
+        {
+            homingTarget = null;
+            homingTurnRate = 0f;
+            return;
+        }
+
+        Vector3 to = CombatFx.Body(homingTarget) - transform.position;
+        to.y = 0f;
+        if (to.sqrMagnitude < 0.0001f) return;
+
+        // 가까울수록 세게 꺾는다 — 회전 반경(속도 ÷ 각속도, 17m/s · 360°/s 면 약 2.7m)보다 가까워지면 표적 둘레를 맴돌기만 한다
+        float dist = to.magnitude;
+        float rate = homingTurnRate * (1f + 4f * Mathf.Clamp01(1f - dist / 3.5f));
+
+        Vector3 forward = transform.forward;
+        forward.y = 0f;
+        Vector3 turned = dist < 1f
+            ? to / dist
+            : Vector3.RotateTowards(forward.normalized, to / dist, rate * Mathf.Deg2Rad * Time.fixedDeltaTime, 0f);
+        transform.rotation = Quaternion.LookRotation(turned);
+        rb.linearVelocity = turned * speed;
+    }
+
+    sealed class HitDistanceComparer : IComparer<RaycastHit>
+    {
+        public static readonly HitDistanceComparer Instance = new HitDistanceComparer();
+        public int Compare(RaycastHit a, RaycastHit b) => a.distance.CompareTo(b.distance);
+    }
+
     void OnTriggerEnter(Collider other)
     {
+        if (returned) return;
+        HandleHit(other);
+    }
+
+    void HandleHit(Collider other)
+    {
         if (!other.CompareTag("Enemy") && !other.CompareTag("Boss"))
+        {
+            // 벽 · 엄폐물 · 상자 같은 맵 장애물이면 거기서 사라진다 (관통 탄도 벽은 못 뚫는다)
+            if (IsObstacle(other)) HitObstacle();
             return;
+        }
 
         // IDamageable 을 가진 루트 기준으로 중복 히트를 제거한다.
         // 자식 히트박스가 여러 개인 적을 한 번만 때리기 위함.
@@ -106,9 +261,12 @@ public class Bullet : MonoBehaviour, IPoolable
             return;
 
         SpawnHitEffect(other);
+        ShotFxDraw.HitSpark(shotFx, transform.position, transform.forward, isCritical, fxScale, root.position.y);
 
         if (d != null)
         {
+            bool wasAlive = CombatFx.IsAlive(root);   // 맞기 전 — 처치 판정 (Drain · 부착물 처치 효과)
+
             DamageInfo info = new DamageInfo
             {
                 damage = damage,
@@ -118,10 +276,37 @@ public class Bullet : MonoBehaviour, IPoolable
             };
 
             d.TakeDamage(info);
+
+            // Drain: 플레이어의 직접 총알 공격으로 적을 처치했을 때만 회복 (쓰러지는 중인 적을 다시 맞힌 것은 세지 않는다)
+            bool killed = WeaponBase.CheckDirectKill(root, wasAlive);
+
+            // 프레임 끝에 한 번만 난다 — 관통이면 같은 프레임에 여러 번 들어온다
+            if (SoundManager.Instance != null)
+                SoundManager.Instance.ReportHit(isCritical, HitSound.Bullet);
+            if (source != null) source.PlayHitLayer();   // 상위 무기 전용 적중음 (있을 때만)
+
+            // 착탄 후 파생 효과(전격 연쇄 · 파열 · 폭발)가 끼어드는 자리.
+            // 여기 한 곳만 열어 두면 무기마다 Bullet 을 복사하지 않아도 된다.
+            OnHit(root, transform.position, damage);
+
+            // 쏜 무기의 부착물 명중 효과 (소이탄 · 전격탄 · 튕김탄 · 폭발탄)
+            if (source != null && source.HasHitEffects)
+            {
+                source.NotifyHit(new WeaponHit
+                {
+                    Target = root,
+                    Damageable = d,
+                    Point = transform.position,
+                    Direction = transform.forward,
+                    Damage = damage,
+                    IsCritical = isCritical,
+                    Killed = killed,
+                });
+            }
         }
 
-        // 관통이 남아 있으면 계속 날아간다
-        if (pierceRemaining > 0)
+        // 관통이 남아 있으면 계속 날아간다 — 첫 적에서 멈추는 탄(공성포 포탄)은 빼고
+        if (pierceRemaining > 0 && (source == null || !source.StopsProjectileOnHit))
         {
             pierceRemaining--;
             return;
@@ -129,6 +314,32 @@ public class Bullet : MonoBehaviour, IPoolable
 
         ReturnToPool();
     }
+
+    /// <summary>맵 장애물인가 — 규칙은 광선과 같다 (<see cref="CombatFx.IsMapObstacle"/>). 총알보다 낮은 것(바닥)은 뺀다.</summary>
+    bool IsObstacle(Collider other) => CombatFx.IsMapObstacle(other, transform.position.y - sweepRadius);
+
+    /// <summary>장애물에 막혔다 — 작은 적중 효과를 남기고, 사거리 끝처럼 쏜 무기에 알린 뒤(공성포는 벽에서 터진다) 풀로 돌아간다.</summary>
+    void HitObstacle()
+    {
+        SpawnEffectAt(hitEffectPrefab, transform.position + new Vector3(0f, -1f, 0f), Quaternion.identity);
+        ShotFxDraw.HitSpark(shotFx, transform.position, transform.forward, false, fxScale * 0.8f);
+        CombatFx.ObstacleHitSound();
+
+        if (source != null && source.HasHitEffects)
+            source.NotifyProjectileExpired(transform.position, transform.forward);
+
+        ReturnToPool();
+    }
+
+    /// <summary>
+    /// 적을 맞히고 피해를 준 직후. 파생 클래스가 추가 효과를 붙인다.
+    ///
+    /// 관통으로 여러 명을 맞히면 **명중할 때마다** 호출된다.
+    /// </summary>
+    /// <param name="target">맞은 적의 루트 (IDamageable 을 가진 오브젝트)</param>
+    /// <param name="point">착탄 위치</param>
+    /// <param name="dealtDamage">치명타가 반영된 실제 피해량</param>
+    protected virtual void OnHit(Transform target, Vector3 point, float dealtDamage) { }
 
     void SpawnHitEffect(Collider other)
     {
@@ -158,6 +369,16 @@ public class Bullet : MonoBehaviour, IPoolable
         }
     }
 
+    static void SpawnEffectAt(GameObject prefab, Vector3 position, Quaternion rotation)
+    {
+        if (prefab == null || PoolManager.Instance == null) return;
+
+        GameObject effect = PoolManager.Instance.Get(prefab);
+        if (effect == null) return;
+
+        effect.transform.SetPositionAndRotation(position, rotation);
+    }
+
     void ApplyDamageVisual()
     {
         if (meshRenderer == null) return;
@@ -170,6 +391,11 @@ public class Bullet : MonoBehaviour, IPoolable
         {
             // 🔥 크리티컬 = 빨간색 (확실하게)
             color = Color.red;
+        }
+        else if (tint.a > 0.01f)
+        {
+            // 부착물 탄 색 (소이탄 주황 · 전격탄 파랑 · 레일건 하늘)
+            color = tint;
         }
         else
         {
@@ -189,6 +415,7 @@ public class Bullet : MonoBehaviour, IPoolable
 
     void ReturnToPool()
     {
+        returned = true;
         poolable.ReturnToPool();
     }
 }

@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2053801b010909f488af8899e8b93e8a, type: 3}
+  m_Name: AT_Bayonet
+  m_EditorClassIdentifier: Assembly-CSharp::AttachmentData
+  displayName: "\uCD1D\uAC80 \uB3CC\uACA9"
+  description: "E \u2014 \uC9E7\uAC8C \uB3CC\uC9C4\uD558\uBA70 \uCC0C\uB974\uACE0
+    \uBC00\uCE5C\uB2E4 \xB7 \uB3CC\uC9C4 \uC911 \uBB34\uC801"
+  icon: {fileID: 21300000, guid: 6025336166ea5ad4a93dab4adf795a10, type: 3}
+  slot: 2
+  tier: 1
+  families: 7
+  onlyFor: []
+  modifier:
+    damageAdd: 0
+    damageMul: 1
+    fireIntervalMul: 1
+    critChanceAdd: 0
+    critMultiplierAdd: 0
+    projectileSpeedAdd: 0
+    projectileCountAdd: 0
+    pierceAdd: 0
+    spreadMul: 1
+    lifeTimeMul: 1
+    burstAdd: 0
+    magazineAdd: 0
+    reloadTimeMul: 1
+    rangeAdd: 0
+    subUnitAdd: 0
+  magazinePercent: 0
+  projectileCountSet: 0
+  effect: {fileID: 0}
+  ability: {fileID: 3773702545418886073, guid: a7a5560f66f1d3d4b815f2f433aefaf3, type: 3}
+  tint: {r: 0, g: 0, b: 0, a: 0}
+  note: "E: 3m \uB3CC\uC9C4 \xB7 \uD53C\uD574 = \uCD1D \uACF5\uACA9\uB825 \xD74 \xB7
+    \uBC00\uCE58\uAE30 \xB7 5\uCD08"
+  minWeaponLevel: 1
+  basePrice: 22

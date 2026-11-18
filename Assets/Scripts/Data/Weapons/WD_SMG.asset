@@ -17,13 +17,15 @@ MonoBehaviour:
   icon: {fileID: 21300000, guid: 00b4c988e7b7c004a8130a0ce91ca544, type: 3}
   weaponPrefab: {fileID: 4085249434206812143, guid: 2e5dc36225e989c4c90719b5e9141ea7, type: 3}
   socket: 0
+  supportOnly: 0
+  supportTarget: 0
   fireInterval: 0.12
   damage: 1.33
   critChance: 0.03
   critMultiplier: 2
-  maxLevel: 5
+  maxLevel: 3
   perLevelBonus:
-    damageAdd: 0
+    damageAdd: 0.2
     damageMul: 1
     fireIntervalMul: 1
     critChanceAdd: 0
@@ -31,9 +33,18 @@ MonoBehaviour:
     projectileSpeedAdd: 0
     projectileCountAdd: 0
     pierceAdd: 0
+    magazineAdd: 0
+    reloadTimeMul: 1
     rangeAdd: 0
     subUnitAdd: 0
   requiresTarget: 1
+  fireSounds:
+  - {fileID: 8300000, guid: 39e709d10c7c7384185160ccd9940e19, type: 3}
+  fireVolume: 0.22
+  firePitchRange: {x: 0.96, y: 1.04}
+  reloadStartSound: {fileID: 8300000, guid: 0134019f5dd95c640a25be0da776e24f, type: 3}
+  reloadEndSound: {fileID: 8300000, guid: 72d73c3f83644ce4db326744eddb1211, type: 3}
+  reloadVolume: 0.6
   aimMode: 0
   projectilePrefab: {fileID: 5875018044698817663, guid: 47d42afc0830c50448915274e6d3e535, type: 3}
   projectileSpeed: 25
@@ -41,5 +52,24 @@ MonoBehaviour:
   projectileCount: 1
   spreadAngle: 5
   pierceCount: 0
+  magazineSize: 45
+  reloadTime: 1.6
+  autoReload: 1
   muzzleFlashPrefab: {fileID: 2916273817513264348, guid: 95044fb3908b36c46bc62060360f7ba6, type: 3}
   casingPrefab: {fileID: 8464276986609709168, guid: 4aa9530848b0025449ef44e32d3f9a41, type: 3}
+  shotFx:
+    material: {fileID: 2100000, guid: b6310812509a3ab46bf4e098541a27ab, type: 2}
+    tracerColor: {r: 1, g: 0.72, b: 0.35, a: 0.9}
+    tracerWidth: 0.1
+    tracerLength: 1.6
+    tracerInstant: 0
+    tracerInstantFade: 0.15
+    flashColor: {r: 1, g: 0.8, b: 0.4, a: 1}
+    flashSize: 0.55
+    flashFan: 0
+    flashRing: 0
+    sparkColor: {r: 1, g: 0.75, b: 0.35, a: 1}
+    sparkSize: 0.45
+    sparkLines: 1
+    sparkRing: 0
+    fireShake: 0

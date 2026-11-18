@@ -26,6 +26,21 @@ public struct WeaponModifier
     public int projectileCountAdd;
     public int pierceAdd;
 
+    [Tooltip("탄 퍼짐 배율. 0.7 이면 30% 모인다 (부착물 2단계)")]
+    public float spreadMul;
+
+    [Tooltip("탄이 날아가는 시간 배율 = 사거리 배율. 0.6 이면 사거리 −40%")]
+    public float lifeTimeMul;
+
+    [Tooltip("한 번 쏠 때 이어서 나가는 발 수. 2 면 3점사")]
+    public int burstAdd;
+
+    [Header("Ammo")]
+    [Tooltip("탄창 크기 증가")]
+    public int magazineAdd;
+    [Tooltip("장전 시간 배율. 0.8 이면 20% 빨라진다")]
+    public float reloadTimeMul;
+
     [Header("Melee / SubUnit")]
     [Tooltip("근접 사거리 또는 드론 사거리 증가")]
     public float rangeAdd;
@@ -36,14 +51,23 @@ public struct WeaponModifier
     {
         damageMul = 1f,
         fireIntervalMul = 1f,
+        reloadTimeMul = 1f,
+        spreadMul = 1f,
+        lifeTimeMul = 1f,
     };
 
-    /// <summary>곱셈 항등원이 0으로 남아 있으면 1로 보정한다.</summary>
+    /// <summary>
+    /// 곱셈 항등원이 0으로 남아 있으면 1로 보정한다.
+    /// 필드를 늘리기 전에 저장된 에셋 · 코드에서 만든 값도 여기서 1이 된다.
+    /// </summary>
     public WeaponModifier Sanitized()
     {
         WeaponModifier r = this;
         if (r.damageMul <= 0f) r.damageMul = 1f;
         if (r.fireIntervalMul <= 0f) r.fireIntervalMul = 1f;
+        if (r.reloadTimeMul <= 0f) r.reloadTimeMul = 1f;
+        if (r.spreadMul <= 0f) r.spreadMul = 1f;
+        if (r.lifeTimeMul <= 0f) r.lifeTimeMul = 1f;
         return r;
     }
 
@@ -64,6 +88,11 @@ public struct WeaponModifier
             pierceAdd = x.pierceAdd + y.pierceAdd,
             rangeAdd = x.rangeAdd + y.rangeAdd,
             subUnitAdd = x.subUnitAdd + y.subUnitAdd,
+            magazineAdd = x.magazineAdd + y.magazineAdd,
+            reloadTimeMul = x.reloadTimeMul * y.reloadTimeMul,
+            spreadMul = x.spreadMul * y.spreadMul,
+            lifeTimeMul = x.lifeTimeMul * y.lifeTimeMul,
+            burstAdd = x.burstAdd + y.burstAdd,
         };
     }
 
@@ -86,6 +115,11 @@ public struct WeaponModifier
             pierceAdd = s.pierceAdd * times,
             rangeAdd = s.rangeAdd * times,
             subUnitAdd = s.subUnitAdd * times,
+            magazineAdd = s.magazineAdd * times,
+            reloadTimeMul = Mathf.Pow(s.reloadTimeMul, times),
+            spreadMul = Mathf.Pow(s.spreadMul, times),
+            lifeTimeMul = Mathf.Pow(s.lifeTimeMul, times),
+            burstAdd = s.burstAdd * times,
         };
     }
 }
@@ -108,11 +142,21 @@ public struct WeaponRuntimeStats
     public int ProjectileCount;
     public int PierceCount;
 
+    /// <summary>한 번 쏠 때 이어서 나가는 발 수 (3점사 = 3). 0 · 1 이면 한 발.</summary>
+    public int BurstCount;
+
     // 근접 / 서브유닛 공용
     public float Range;
     public float ArcAngle;
     public int MaxTargets;
     public int SubUnitCount;
+
+    // 탄창
+    /// <summary>탄창 크기. 0 이면 무제한(근접·서브유닛).</summary>
+    public int MagazineSize;
+
+    /// <summary>장전에 걸리는 시간(초).</summary>
+    public float ReloadTime;
 }
 
 /// <summary>
@@ -157,15 +201,28 @@ public readonly struct ProjectileSpawnInfo
     public readonly int PierceCount;
     public readonly Transform HomingTarget;   // null 허용
 
+    /// <summary>쏜 무기 — 맞혔을 때 그 무기의 부착물 명중 효과(화상 · 전격 · 튕김 · 폭발)를 부른다. null 허용.</summary>
+    public readonly WeaponBase Source;
+
+    /// <summary>탄 색 (소이탄 주황 · 전격탄 파랑). a = 0 이면 기본 색.</summary>
+    public readonly Color Tint;
+
+    /// <summary>HomingTarget 쪽으로 꺾는 속도 (도/초). 0 이면 곧게 날아간다 (스웜 카빈).</summary>
+    public readonly float HomingTurnRate;
+
     public ProjectileSpawnInfo(
         float speed, float damage, float lifeTime,
-        bool isCritical, int pierceCount, Transform homingTarget = null)
+        bool isCritical, int pierceCount, Transform homingTarget = null,
+        WeaponBase source = null, Color tint = default, float homingTurnRate = 0f)
     {
+        HomingTurnRate = homingTurnRate;
         Speed = speed;
         Damage = damage;
         LifeTime = lifeTime;
         IsCritical = isCritical;
         PierceCount = pierceCount;
         HomingTarget = homingTarget;
+        Source = source;
+        Tint = tint;
     }
 }

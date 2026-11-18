@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6294773452ea9ec4eaf64d2fb7b4fd8e, type: 3}
+  m_Name: SYN_BlastCharge
+  m_EditorClassIdentifier: Assembly-CSharp::SynergyData
+  kind: 2
+  title: "\uD3ED\uD30C \uB3CC\uACA9"
+  description: "\uCD1D\uAC80 \uB3CC\uC9C4 \uB05D\uC5D0\uC11C \uD3ED\uBC1C (\uBC18\uACBD
+    2.5m)"
+  color: {r: 1, g: 0.4, b: 0.2, a: 1}
+  attachmentA: {fileID: 11400000, guid: 17d39d84a324d5e42b84ce9f333875bd, type: 2}
+  attachmentB: {fileID: 11400000, guid: 1302c35315c392648a58432309236cf0, type: 2}
+  abilityA: {fileID: 0}
+  abilityB: {fileID: 0}
+  abilityBVariantLevel: -1
+  abilityBVariantChoice: 0
+  requiresParry: 0
+  radius: 2.5
+  duration: 3
+  damageRatio: 3
+  stun: 1
+  lineMaterial: {fileID: 2100000, guid: b6310812509a3ab46bf4e098541a27ab, type: 2}
+  particleMaterial: {fileID: 0}
+  vfxPrefab: {fileID: 5162910912013668194, guid: cf82839c411151342a7b2337bda9fb34, type: 3}
+  sound:
+    clips:
+    - {fileID: 8300000, guid: 81e3ad067244c3b46a3f385c3cb8d8f5, type: 3}
+    volume: 0.55
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0

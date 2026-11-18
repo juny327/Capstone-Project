@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2053801b010909f488af8899e8b93e8a, type: 3}
+  m_Name: AT_GrenadeLauncher
+  m_EditorClassIdentifier: Assembly-CSharp::AttachmentData
+  displayName: "\uC720\uD0C4 \uBC1C\uC0AC\uAE30"
+  description: "E \u2014 \uCEE4\uC11C \uCABD\uC73C\uB85C \uC720\uD0C4, \uB5A8\uC5B4\uC9C4
+    \uC790\uB9AC\uC5D0\uC11C \uD3ED\uBC1C"
+  icon: {fileID: 21300000, guid: 5bdb12705f8fc944b8e7887db4e7b596, type: 3}
+  slot: 2
+  tier: 1
+  families: 7
+  onlyFor: []
+  modifier:
+    damageAdd: 0
+    damageMul: 1
+    fireIntervalMul: 1
+    critChanceAdd: 0
+    critMultiplierAdd: 0
+    projectileSpeedAdd: 0
+    projectileCountAdd: 0
+    pierceAdd: 0
+    spreadMul: 1
+    lifeTimeMul: 1
+    burstAdd: 0
+    magazineAdd: 0
+    reloadTimeMul: 1
+    rangeAdd: 0
+    subUnitAdd: 0
+  magazinePercent: 0
+  projectileCountSet: 0
+  effect: {fileID: 0}
+  ability: {fileID: 3546261613371668903, guid: 9bb0b1b893fa582468248932de3a21f1, type: 3}
+  tint: {r: 0, g: 0, b: 0, a: 0}
+  note: "E: \uC720\uD0C4 \xB7 \uBC18\uACBD 2.5m \xB7 \uD53C\uD574 = \uCD1D \uACF5\uACA9\uB825
+    \xD75 \xB7 6\uCD08"
+  minWeaponLevel: 1
+  basePrice: 22

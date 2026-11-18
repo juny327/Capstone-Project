@@ -1,0 +1,560 @@
+using System.Collections;
+using UnityEngine;
+using UnityEngine.Audio;
+using UnityEngine.SceneManagement;
+
+/// <summary>
+/// 게임 이벤트를 듣고 소리를 낸다.
+///
+/// **이 스크립트 하나가 `GameEvents` 만 구독한다.** 다른 작업자의 코드(레벨업 · 처치 ·
+/// 스테이지 · 무기)를 한 줄도 건드리지 않고 소리가 붙는다는 뜻이다. 병합 충돌이 날 일이 없다.
+///
+/// `AudioSource` 는 미리 만들어 두고 돌려 쓴다.
+/// 이 프로젝트는 투사체 · 이펙트를 전부 풀링할 만큼 할당에 신경 쓰고 있으므로 같은 기준을 맞춘다.
+///
+/// 씬마다 하나씩 둔다(`UpgradeManager` 와 같은 방식). 씬을 넘어 이어질 소리가 아직 없기 때문이다.
+/// BGM 을 넣게 되면 그때 `DontDestroyOnLoad` 로 바꾼다.
+/// </summary>
+public class SoundManager : MonoBehaviour
+{
+    [Tooltip("이벤트별 클립 묶음")]
+    [SerializeField] private GameSoundSet sounds;
+
+    [Header("Mixer (없어도 동작한다)")]
+    [Tooltip("효과음이 나갈 그룹. 비우면 마스터로 나간다")]
+    [SerializeField] private AudioMixerGroup sfxGroup;
+
+    [Tooltip("UI 소리가 나갈 그룹")]
+    [SerializeField] private AudioMixerGroup uiGroup;
+
+    [Tooltip("배경음이 나갈 그룹")]
+    [SerializeField] private AudioMixerGroup bgmGroup;
+
+    [Header("Music")]
+    [Tooltip("씬별 배경음 목록. 비우면 음악이 나오지 않는다")]
+    [SerializeField] private MusicSet music;
+
+    [Range(0f, 1f)] [SerializeField] private float musicVolume = 1f;
+
+    [Tooltip("곡이 바뀔 때 겹쳐 넘기는 시간(초). 0 이면 즉시 교체")]
+    [Min(0f)] [SerializeField] private float musicFade = 1.2f;
+
+    [Header("Pool")]
+    [Tooltip("동시에 낼 수 있는 소리 수. 넘으면 가장 오래된 것을 끊는다")]
+    [Min(1)] [SerializeField] private int voiceCount = 12;
+
+    [Range(0f, 1f)] [SerializeField] private float masterVolume = 1f;
+
+    [Header("피격 (2026-11-12)")]
+    [Tooltip("내가 맞은 순간부터 이 시간(초) 동안 새로 나는 무기 · 맞힘 소리를 줄인다 — 총소리에 피격음이 묻히지 않게")]
+    [Min(0f)] [SerializeField] private float hurtDuckTime = 0.35f;
+
+    [Tooltip("그동안 무기 · 맞힘 소리 음량 배율")]
+    [Range(0f, 1f)] [SerializeField] private float hurtDuckLevel = 0.45f;
+
+    /// <summary>
+    /// 무기처럼 이벤트를 거치지 않는 쪽에서 쓰는 접근점.
+    /// `PoolManager` · `CameraShakeManager` 와 같은 방식이다.
+    /// </summary>
+    public static SoundManager Instance { get; private set; }
+
+    /// <summary>효과음 그룹. 무기 소리가 여기로 나간다.</summary>
+    public AudioMixerGroup SfxGroup => sfxGroup;
+
+    /// <summary>UI 그룹 — 로비 · 설정창 버튼 소리(UISound)가 여기로 나간다.</summary>
+    public AudioMixerGroup UiGroup => uiGroup;
+
+    /// <summary>설정창 효과음 음량 — 자기 AudioSource 로 소리를 내는 쪽(중력 대검 블랙홀 반복음)이 맞춘다.</summary>
+    public float SfxVolume => masterVolume;
+
+    private AudioSource[] voices;
+    private int next;
+    private bool isDuplicate;
+
+    void Awake()
+    {
+        // BGM 이 스테이지를 넘어 이어져야 하므로 씬을 넘어 살아남는다.
+        // 씬마다 하나씩 놓여 있으므로, 두 번째부터는 스스로 사라진다.
+        if (Instance != null && Instance != this)
+        {
+            isDuplicate = true;
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+
+        CreateVoices();
+        CreateMusicSource();
+    }
+
+    void OnDestroy()
+    {
+        if (Instance == this) Instance = null;
+    }
+
+    void OnEnable()
+    {
+        if (isDuplicate) return;
+
+        SceneManager.sceneLoaded += OnSceneLoaded;
+
+        GameEvents.OnPlayerLevelUp += OnLevelUp;
+        GameEvents.OnOpenUpgradeUI += OnUpgradeOpen;
+        GameEvents.OnWeaponsChanged += OnWeaponsChanged;
+        GameEvents.OnEnemyKilled += OnEnemyKilled;
+        GameEvents.OnWeaponSwapped += OnWeaponSwapped;
+        GameEvents.OnPlayerDeadStart += OnPlayerDead;
+        GameEvents.OnStageClear += OnStageClear;
+        GameEvents.OnStageRewardOpen += OnStageRewardOpen;
+        GameEvents.OnStageRewardSelected += OnStageRewardSelected;
+        GameEvents.OnBossSpawned += OnBossSpawned;
+    }
+
+    void OnDisable()
+    {
+        if (isDuplicate) return;
+
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+
+        GameEvents.OnPlayerLevelUp -= OnLevelUp;
+        GameEvents.OnOpenUpgradeUI -= OnUpgradeOpen;
+        GameEvents.OnWeaponsChanged -= OnWeaponsChanged;
+        GameEvents.OnEnemyKilled -= OnEnemyKilled;
+        GameEvents.OnWeaponSwapped -= OnWeaponSwapped;
+        GameEvents.OnPlayerDeadStart -= OnPlayerDead;
+        GameEvents.OnStageClear -= OnStageClear;
+        GameEvents.OnStageRewardOpen -= OnStageRewardOpen;
+        GameEvents.OnStageRewardSelected -= OnStageRewardSelected;
+        GameEvents.OnBossSpawned -= OnBossSpawned;
+    }
+
+    // ───────── 이벤트 ─────────
+
+    void OnLevelUp(int level) => Play(sounds != null ? sounds.levelUp : null, uiGroup);
+    void OnUpgradeOpen() => Play(sounds != null ? sounds.upgradeOpen : null, uiGroup);
+    void OnWeaponsChanged() => Play(sounds != null ? sounds.weaponAcquired : null, uiGroup);
+    void OnEnemyKilled() => Play(sounds != null ? sounds.enemyKilled : null, sfxGroup);
+    void OnWeaponSwapped(IWeapon w) => Play(sounds != null ? sounds.weaponSwap : null, sfxGroup);
+    void OnPlayerDead() => Play(sounds != null ? sounds.playerDead : null, sfxGroup);
+    void OnStageClear() => Play(sounds != null ? sounds.stageClear : null, uiGroup);
+    void OnStageRewardOpen() => Play(sounds != null ? sounds.stageRewardOpen : null, uiGroup);
+    void OnStageRewardSelected(StageReward reward) => Play(sounds != null ? sounds.stageRewardSelect : null, uiGroup);
+    void OnBossSpawned(BossHealth boss) => Play(sounds != null ? sounds.bossSpawn : null, sfxGroup);
+
+    // ───────── 재생 ─────────
+
+    /// <summary>
+    /// 2D 로 재생한다. 플레이어와 UI 소리는 거리와 무관하게 같은 볼륨이어야 한다 —
+    /// 탑다운 카메라라 거리 감쇠가 어색하다.
+    /// </summary>
+    public void Play(GameSoundSet.Entry entry, AudioMixerGroup group = null,
+        float volumeScale = 1f, float pitchScale = 1f)
+    {
+        PlayOn(null, entry, group, volumeScale, pitchScale);
+    }
+
+    /// <summary>
+    /// 내가 맞은 소리 — **전용 칸**으로 낸다 (총 · 맞힘 소리가 12칸을 다 쓰고 있어도 끊기지 않게),
+    /// 그리고 hurtDuckTime 동안 새로 나는 무기 · 맞힘 소리를 hurtDuckLevel 배로 줄인다 (2026-11-12 — 총소리에 묻혀 안 들렸다).
+    /// </summary>
+    public void PlayPlayerHurt(GameSoundSet.Entry entry)
+    {
+        if (priorityVoice == null) return;
+        if (PlayOn(priorityVoice, entry, sfxGroup, 1f, 1f)) duckUntil = Time.unscaledTime + hurtDuckTime;
+    }
+
+    /// <summary>지금 무기 · 맞힘 소리에 곱하는 배율 (맞은 직후 잠깐 작게).</summary>
+    public float WeaponDuck => Time.unscaledTime < duckUntil ? hurtDuckLevel : 1f;
+
+    // ───────── 큰 순간 (2026-11-14 연출 개선 5) ─────────
+    // 큰 소리가 묻히지 않게, 그 순간부터 잠깐 배경음과 다른 효과음을 낮춘다.
+    //  · 같은 프레임에 낸 소리(= 그 큰 소리 자신)는 그대로 둔다
+    //  · 그 전부터 울리던 효과음은 프레임 끝에 한 번 줄이고, 그 뒤 seconds 동안 새로 나는 효과음도 줄여서 낸다
+    //  · 배경음은 빠르게 내려갔다가 천천히 돌아온다
+    private float impactDuckUntil = -999f;
+    private float impactSfxLevel = 1f;
+    private float impactMusicLevel = 1f;
+    private int impactDuckFrame = -1;
+    private bool impactPending;
+    private float musicDuck = 1f;
+    private int[] voiceFrame;
+
+    /// <summary>시험용 — 낮춘 횟수 · 지금 배경음에 곱해진 배율.</summary>
+    public static int ImpactDucks { get; private set; }
+    public float MusicDuck => musicDuck;
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetImpactDucks() => ImpactDucks = 0;
+
+    /// <summary>큰 순간 — seconds 동안 배경음을 musicLevel 배, 다른 효과음을 sfxLevel 배로 낮춘다.</summary>
+    public void DuckForImpact(float seconds, float musicLevel, float sfxLevel)
+    {
+        if (seconds <= 0f) return;
+        impactDuckUntil = Time.unscaledTime + seconds;
+        impactMusicLevel = Mathf.Clamp01(musicLevel);
+        impactSfxLevel = Mathf.Clamp01(sfxLevel);
+        impactDuckFrame = Time.frameCount;
+        impactPending = true;
+        ImpactDucks++;
+    }
+
+    /// <summary>지금 새로 내는 효과음에 곱하는 배율 — 큰 순간과 같은 프레임의 소리는 그대로.</summary>
+    float ImpactDuck => Time.unscaledTime < impactDuckUntil && Time.frameCount > impactDuckFrame ? impactSfxLevel : 1f;
+
+    void ApplyImpactDuck()
+    {
+        // 그 전부터 울리던 효과음을 한 번 줄인다 (이번 프레임에 낸 것은 빼고)
+        if (impactPending)
+        {
+            impactPending = false;
+            for (int i = 0; i < voices.Length; i++)
+                if (voices[i].isPlaying && voiceFrame[i] < impactDuckFrame) voices[i].volume *= impactSfxLevel;
+        }
+
+        // 배경음 — 0.06초에 내려가고 0.35초에 돌아온다
+        float target = Time.unscaledTime < impactDuckUntil ? impactMusicLevel : 1f;
+        if (Mathf.Approximately(musicDuck, target)) return;
+        musicDuck = Mathf.MoveTowards(musicDuck, target, Time.unscaledDeltaTime / (target < musicDuck ? 0.06f : 0.35f));
+        if (musicSource != null && currentTrack != null && musicRoutine == null)
+            musicSource.volume = currentTrack.volume * musicVolume * musicDuck;
+    }
+
+    private AudioSource priorityVoice;
+    private float duckUntil = -999f;
+
+    /// <returns>실제로 냈으면 true (최소 간격에 걸리거나 클립이 없으면 false).</returns>
+    bool PlayOn(AudioSource fixedVoice, GameSoundSet.Entry entry, AudioMixerGroup group, float volumeScale, float pitchScale)
+    {
+        if (entry == null || !entry.HasClip) return false;
+
+        // 처치음처럼 초당 여러 번 나는 소리를 솎아 낸다.
+        // timeScale 0 에서도 카드 소리가 나야 하므로 unscaledTime 을 쓴다.
+        float now = Time.unscaledTime;
+
+        if (entry.minInterval > 0f && now - entry.lastPlayedAt < entry.minInterval) return false;
+
+        entry.lastPlayedAt = now;
+
+        AudioClip clip = entry.Pick();
+
+        if (clip == null) return false;
+
+        AudioSource voice = fixedVoice != null ? fixedVoice : NextVoice();
+
+        voice.Stop();
+        voice.clip = clip;
+        voice.volume = Mathf.Clamp01(entry.volume * volumeScale) * masterVolume * (fixedVoice != null ? 1f : ImpactDuck);
+        voice.pitch = Mathf.Clamp(entry.PickPitch() * pitchScale, 0.1f, 3f);   // pitchScale — 설정 슬라이더 틱이 값만큼 높아진다
+        voice.outputAudioMixerGroup = group;
+        voice.Play();
+        return true;
+    }
+
+    // ───────── 타격 ─────────
+
+    // 맞힘 종류(HitSound)마다 따로 모은다 — 같은 프레임에 총 · 칼 · 레이저가 맞으면 각각 한 번씩 난다
+    private static readonly int HitKinds = System.Enum.GetValues(typeof(HitSound)).Length;
+    private readonly bool[] pendingHit = new bool[HitKinds];
+    private readonly bool[] pendingCritical = new bool[HitKinds];
+    private readonly int[] pendingHitCount = new int[HitKinds];
+
+    /// <summary>
+    /// 적을 맞혔다고 알린다. **바로 재생하지 않고 프레임 끝에 종류마다 한 번만 낸다.**
+    ///
+    /// 스나이퍼(관통 3)나 검(최대 5명)은 같은 프레임에 여러 명을 때린다.
+    /// 그대로 재생하면 같은 소리가 겹쳐 터지면서 뭉갠다.
+    /// 모아 두었다가 한 번만 내고, 맞은 수만큼 볼륨을 조금 올린다.
+    ///
+    /// 치명타가 하나라도 섞이면 치명타 소리로 낸다 (레이저는 '치익'을 조금 크게) — 그래서 즉시 재생하지 않고 미룬다.
+    /// </summary>
+    public void ReportHit(bool isCritical, HitSound kind = HitSound.Normal)
+    {
+        int k = (int)kind;
+        pendingHit[k] = true;
+        pendingHitCount[k]++;
+        if (isCritical) pendingCritical[k] = true;
+    }
+
+    /// <summary>총알 · 광선이 벽에 막혔다. 산탄처럼 몰려 와도 minInterval 로 한 번만 난다.</summary>
+    public void PlayObstacleHit() => Play(sounds != null ? sounds.obstacleHit : null, sfxGroup);
+
+    /// <summary>
+    /// 무기/기존 계열은 공용 적중음으로 fallback 하고, 스킬은 전용 슬롯이 비어 있으면 무음으로 둔다.
+    /// 오디오 클립은 나중에 Inspector에서 연결할 수 있다.
+    /// </summary>
+    GameSoundSet.Entry HitEntry(HitSound kind)
+    {
+        if (sounds == null) return null;
+
+        switch (kind)
+        {
+            case HitSound.Laser:
+                return sounds.laserHit != null && sounds.laserHit.HasClip ? sounds.laserHit : sounds.hit;
+            case HitSound.Bullet:
+                return sounds.bulletHit != null && sounds.bulletHit.HasClip ? sounds.bulletHit : sounds.hit;
+            case HitSound.Melee:
+                return sounds.meleeHit != null && sounds.meleeHit.HasClip ? sounds.meleeHit : sounds.hit;
+            case HitSound.Electric:
+                return sounds.electricHit != null && sounds.electricHit.HasClip ? sounds.electricHit : sounds.hit;
+
+            // Skill hit sounds intentionally do NOT fallback to the generic hit sound.
+            // This keeps cast/hit identity clean until the dedicated clips are assigned.
+            case HitSound.FireBall: return sounds.fireBallHit;
+            case HitSound.ChainLightning: return sounds.chainLightningHit;
+            case HitSound.BlackHole: return sounds.blackHoleHit;
+            case HitSound.Tornado: return sounds.tornadoHit;
+            case HitSound.Shuriken: return sounds.shurikenHit;
+            case HitSound.ElectricShot: return sounds.electricShotHit;
+
+            default:
+                return sounds.hit;
+        }
+    }
+
+    /// <summary>스킬 발동 사운드. 피격 사운드와 별도의 데이터 슬롯을 사용한다.</summary>
+    public void ReportSkillCast(SkillCastSound kind)
+    {
+        if (sounds == null) return;
+
+        GameSoundSet.Entry entry = kind switch
+        {
+            SkillCastSound.FireBall => sounds.fireBallCast,
+            SkillCastSound.ChainLightning => sounds.chainLightningCast,
+            SkillCastSound.BlackHole => sounds.blackHoleCast,
+            SkillCastSound.Tornado => sounds.tornadoCast,
+            SkillCastSound.Shuriken => sounds.shurikenCast,
+            SkillCastSound.ElectricShot => sounds.electricShotCast,
+            _ => null
+        };
+
+        Play(entry, sfxGroup);
+    }
+
+    /// <summary>Drain의 실제 HP 회복 성공 사운드.</summary>
+    public void PlayDrainHeal()
+    {
+        if (sounds == null) return;
+        Play(sounds.drainHeal, sfxGroup);
+    }
+
+    void LateUpdate()
+    {
+        ApplyImpactDuck();
+
+        for (int k = 0; k < pendingHit.Length; k++)
+        {
+            if (!pendingHit[k]) continue;
+
+            if (sounds != null)
+            {
+                var kind = (HitSound)k;
+                bool laser = (kind == HitSound.Laser && sounds.laserHit.HasClip) ||
+                             (kind == HitSound.Electric && sounds.electricHit.HasClip);
+
+                // 레이저 · 전기는 치명타도 제 소리 '치익' · '치직' (금속 '땡' 은 어울리지 않는다 — 사용자 피드백) — 대신 조금 크게
+                GameSoundSet.Entry entry = pendingCritical[k] && !laser ? sounds.criticalHit : HitEntry(kind);
+
+                // 여러 명을 한 번에 맞히면 조금 더 크게 — 광역이 닿았다는 느낌
+                float scale = Mathf.Min(1.35f, (laser && pendingCritical[k] ? 1.25f : 1f) + (pendingHitCount[k] - 1) * (laser ? 0.06f : 0.08f));
+
+                Play(entry, sfxGroup, scale * WeaponDuck);   // 내가 맞은 직후에는 작게
+            }
+
+            pendingHit[k] = false;
+            pendingCritical[k] = false;
+            pendingHitCount[k] = 0;
+        }
+    }
+
+    /// <summary>
+    /// 클립 하나를 바로 재생한다. 무기 소리처럼 `GameSoundSet` 을 거치지 않는 쪽에서 쓴다.
+    /// </summary>
+    public void PlayClip(AudioClip clip, float volume = 1f, float pitch = 1f,
+        AudioMixerGroup group = null)
+    {
+        if (clip == null) return;
+
+        AudioSource voice = NextVoice();
+
+        voice.Stop();
+        voice.clip = clip;
+        voice.volume = Mathf.Clamp01(volume) * masterVolume * WeaponDuck * ImpactDuck;   // 무기 소리 — 내가 맞은 직후 · 큰 순간 직후에는 작게
+
+        // 피치가 0 이면 소리가 멈춘 것처럼 들린다. 음수는 역재생이라 사고다.
+        voice.pitch = Mathf.Clamp(pitch, 0.1f, 3f);
+        voice.outputAudioMixerGroup = group != null ? group : sfxGroup;
+        voice.Play();
+    }
+
+    AudioSource NextVoice()
+    {
+        // 놀고 있는 것을 먼저 쓴다. 전부 바쁘면 가장 오래된 것을 끊는다.
+        for (int i = 0; i < voices.Length; i++)
+        {
+            int index = (next + i) % voices.Length;
+
+            if (voices[index].isPlaying) continue;
+
+            next = (index + 1) % voices.Length;
+            voiceFrame[index] = Time.frameCount;
+
+            return voices[index];
+        }
+
+        AudioSource oldest = voices[next];
+        voiceFrame[next] = Time.frameCount;
+        next = (next + 1) % voices.Length;
+
+        return oldest;
+    }
+
+    // ───────── 배경음 ─────────
+
+    private AudioSource musicSource;
+    private MusicSet.SceneTrack currentTrack;
+    private Coroutine musicRoutine;
+
+    void CreateMusicSource()
+    {
+        GameObject go = new GameObject("Music");
+        go.transform.SetParent(transform, false);
+
+        musicSource = go.AddComponent<AudioSource>();
+        musicSource.playOnAwake = false;
+        musicSource.loop = true;
+        musicSource.spatialBlend = 0f;
+        musicSource.outputAudioMixerGroup = bgmGroup;
+        musicSource.volume = 0f;
+    }
+
+    void Start()
+    {
+        // 처음 놓인 씬은 sceneLoaded 를 못 받는다 — 구독이 그 뒤에 일어나기 때문이다
+        if (isDuplicate) return;
+
+        PlayMusicFor(SceneManager.GetActiveScene().name);
+    }
+
+    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        PlayMusicFor(scene.name);
+    }
+
+    /// <summary>
+    /// 씬에 맞는 곡으로 바꾼다.
+    ///
+    /// **같은 곡이면 건드리지 않는다.** 스테이지가 넘어갈 때마다 처음부터 다시 시작하면
+    /// 음악이 끊긴 것처럼 들린다.
+    /// </summary>
+    public void PlayMusicFor(string sceneName)
+    {
+        if (music == null || musicSource == null) return;
+
+        MusicSet.SceneTrack track = music.Find(sceneName);
+
+        // 이미 같은 곡이 흐르고 있다 — 그대로 둔다
+        if (track != null && currentTrack != null && track.clip == currentTrack.clip)
+        {
+            currentTrack = track;
+            return;
+        }
+
+        currentTrack = track;
+
+        if (musicRoutine != null) StopCoroutine(musicRoutine);
+
+        musicRoutine = StartCoroutine(SwapMusic(track));
+    }
+
+    IEnumerator SwapMusic(MusicSet.SceneTrack track)
+    {
+        // 씬 로드 직후라 timeScale 이 0 일 수 있다 (보상 창 등). 실시간으로 센다.
+        yield return FadeMusic(() => 0f);
+
+        musicSource.Stop();
+
+        if (track == null || track.clip == null)
+        {
+            musicRoutine = null;
+            yield break;
+        }
+
+        musicSource.clip = track.clip;
+        musicSource.Play();
+
+        // 목표는 매 프레임 다시 읽는다 — 페이드 도중 설정창에서 배경음을 바꾸면 끝난 뒤에도 그 값이 남게 (2026-11-02 고침)
+        yield return FadeMusic(() => track.volume * musicVolume);
+
+        musicRoutine = null;
+    }
+
+    IEnumerator FadeMusic(System.Func<float> target)
+    {
+        if (musicFade <= 0.01f)
+        {
+            musicSource.volume = target();
+            yield break;
+        }
+
+        float from = musicSource.volume;
+        float elapsed = 0f;
+
+        while (elapsed < musicFade)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            musicSource.volume = Mathf.Lerp(from, target(), elapsed / musicFade);
+
+            yield return null;
+        }
+
+        musicSource.volume = target();
+    }
+
+    /// <summary>옵션 메뉴에서 부를 음악 볼륨. 0~1.</summary>
+    public void SetMusicVolume(float value)
+    {
+        musicVolume = Mathf.Clamp01(value);
+
+        if (musicSource == null || currentTrack == null) return;
+
+        // 페이드 중이면 그쪽이 끝나면서 새 값으로 맞춰진다
+        if (musicRoutine == null)
+            musicSource.volume = currentTrack.volume * musicVolume * musicDuck;
+    }
+
+    /// <summary>옵션 메뉴에서 부를 효과음 볼륨. 0~1.</summary>
+    public void SetSfxVolume(float value)
+    {
+        masterVolume = Mathf.Clamp01(value);
+    }
+
+    void CreateVoices()
+    {
+        voices = new AudioSource[Mathf.Max(1, voiceCount)];
+        voiceFrame = new int[voices.Length];
+
+        for (int i = 0; i < voices.Length; i++)
+        {
+            GameObject go = new GameObject($"Voice{i}");
+            go.transform.SetParent(transform, false);
+
+            AudioSource source = go.AddComponent<AudioSource>();
+            source.playOnAwake = false;
+            source.loop = false;
+            source.spatialBlend = 0f;   // 2D
+
+            voices[i] = source;
+        }
+
+        // 피격 전용 칸 — 돌려 쓰는 칸과 따로 (총소리가 칸을 다 써도 끊기지 않는다)
+        GameObject pv = new GameObject("VoiceHurt");
+        pv.transform.SetParent(transform, false);
+        priorityVoice = pv.AddComponent<AudioSource>();
+        priorityVoice.playOnAwake = false;
+        priorityVoice.loop = false;
+        priorityVoice.spatialBlend = 0f;
+        priorityVoice.priority = 0;   // 유니티 쪽 목소리 수가 모자라도 가장 나중에 빠진다
+    }
+}

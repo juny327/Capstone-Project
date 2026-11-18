@@ -1,0 +1,78 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e9f188fced24a347854d377fb9adfd4, type: 3}
+  m_Name: WD_Greatsword
+  m_EditorClassIdentifier: Assembly-CSharp::MeleeWeaponData
+  weaponName: "\uB300\uAC80"
+  description: "\uB290\uB9AC\uC9C0\uB9CC \uB113\uAC8C \uBCA0\uB294 \uC591\uC190 \uB300\uAC80"
+  icon: {fileID: 21300000, guid: ed2b8f1654a6be34db48b6ea6a060009, type: 3}
+  weaponPrefab: {fileID: 5825881266557484979, guid: 8ea43d44ee82c2a4b86ecea89a218fbe, type: 3}
+  socket: 0
+  supportOnly: 0
+  supportTarget: 5
+  fireInterval: 1.4
+  damage: 16
+  critChance: 0.1
+  critMultiplier: 2
+  maxLevel: 3
+  perLevelBonus:
+    damageAdd: 2.4
+    damageMul: 1
+    fireIntervalMul: 1
+    critChanceAdd: 0
+    critMultiplierAdd: 0
+    projectileSpeedAdd: 0
+    projectileCountAdd: 0
+    pierceAdd: 0
+    spreadMul: 1
+    lifeTimeMul: 1
+    burstAdd: 0
+    magazineAdd: 0
+    reloadTimeMul: 1
+    rangeAdd: 0
+    subUnitAdd: 0
+  requiresTarget: 1
+  evolvedFrom: {fileID: 0}
+  innateEffects: []
+  themeColor: {r: 1, g: 1, b: 1, a: 0}
+  fireSounds:
+  - {fileID: 8300000, guid: 9a98cd2d981fab941879d3da078784d0, type: 3}
+  - {fileID: 8300000, guid: e3760d5047edad749ac1e25cd676ab46, type: 3}
+  fireVolume: 0.75
+  firePitchRange: {x: 0.8, y: 0.88}
+  reloadStartSound: {fileID: 0}
+  reloadEndSound: {fileID: 0}
+  reloadVolume: 0.8
+  range: 4
+  arcAngle: 160
+  maxTargets: 8
+  hitDelay: 0.41
+  hitLayers:
+    serializedVersion: 2
+    m_Bits: 129
+  cameraShake: 0.25
+  slashEffectPrefab: {fileID: 0}
+  slashMaterial: {fileID: 2100000, guid: b6310812509a3ab46bf4e098541a27ab, type: 2}
+  slashColor: {r: 1.0, g: 0.3, b: 0.24, a: 0.9}
+  slashCoreColor: {r: 1.0, g: 0.88, b: 0.82, a: 1}
+  slashWidth: 0.72
+  slashReach: 0.92
+  slashSweep: 0.1
+  slashFade: 0.28
+  slashThrust: 0
+  hitSpark: 1
+  swingSounds:
+  - {fileID: 8300000, guid: 27ba4e5c0914d8646adc9885958471c8, type: 3}
+  - {fileID: 8300000, guid: 5b0254f09ba83b843b65757b7019cb20, type: 3}
+  - {fileID: 8300000, guid: 17f7ebd9779308646a88789556b5aa0b, type: 3}
+  swingVolume: 0.55
+  swingPitchRange: {x: 0.94, y: 1.06}

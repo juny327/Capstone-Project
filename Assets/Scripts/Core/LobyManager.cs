@@ -46,6 +46,10 @@ public class LobyManager : MonoBehaviour
 
     public void StartGame()
     {
+        // 새 게임 시작 시 이전 플레이의 업그레이드 레벨을 초기화한다.
+        // 스테이지 전환 시에는 호출하지 않으므로 획득 레벨이 유지된다.
+        UpgradeManager.ResetAllUpgradeLevels();
+
         // 고른 무기를 씬 너머까지 들고 갈 수 있는 곳에 맡긴다
         if (GameAppManager.Instance != null)
             GameAppManager.Instance.SelectWeapon(Selected);

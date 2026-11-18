@@ -87,5 +87,7 @@ public class FireBallSkill : MonoBehaviour
             projectileSpeed,
             cameraShake
         );
+
+        SoundManager.Instance?.ReportSkillCast(SkillCastSound.FireBall);
     }
 }

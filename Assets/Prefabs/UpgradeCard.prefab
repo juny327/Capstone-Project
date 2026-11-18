@@ -238,8 +238,8 @@ MonoBehaviour:
   cost: {fileID: 7026911645304774888}
   animator: {fileID: 8661286325982914854}
   audioSource: {fileID: 0}
-  successSound: {fileID: 0}
-  failSound: {fileID: 0}
+  successSound: {fileID: 8300000, guid: fffc4cf0bb60d0d42a66a1a3c191cf93, type: 3}
+  failSound: {fileID: 8300000, guid: 111441d7f73e4fe458f8690068e92621, type: 3}
 --- !u!95 &8661286325982914854
 Animator:
   serializedVersion: 7

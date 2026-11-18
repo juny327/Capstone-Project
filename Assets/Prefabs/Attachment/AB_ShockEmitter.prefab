@@ -1,0 +1,65 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &6027407378000809923
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 151695671443994089}
+  - component: {fileID: 3207000032346062669}
+  m_Layer: 0
+  m_Name: AB_ShockEmitter
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &151695671443994089
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6027407378000809923}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3207000032346062669
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6027407378000809923}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e12ae4a87bddfb429c3da26d4aebe05, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ShockEmitterAbility
+  radius: 3
+  push: 2
+  pushDuration: 0.2
+  stun: 1
+  damageRatio: 1
+  minDamage: 3
+  cooldownSeconds: 8
+  fxMaterial: {fileID: 2100000, guid: b6310812509a3ab46bf4e098541a27ab, type: 2}
+  waveColor: {r: 0.4, g: 0.85, b: 1, a: 0.95}
+  sound:
+    clips:
+    - {fileID: 8300000, guid: 7464c16cdf354f94a9d16d5aea57efa6, type: 3}
+    - {fileID: 8300000, guid: f595650ca3f17154e8de61ccc64e6a00, type: 3}
+    - {fileID: 8300000, guid: 67ba844c78b6b7c4a97318cef5ee19d1, type: 3}
+    - {fileID: 8300000, guid: 71c406fc88da5534bb9fca5392a86e5f, type: 3}
+    - {fileID: 8300000, guid: d3e8ad6433eb4724098935962aea45be, type: 3}
+    volume: 0.6
+    pitchRange: {x: 0.75, y: 0.85}
+    minInterval: 0.03
