@@ -139,7 +139,7 @@ public class ProjectileWeapon : WeaponBase
         if (!IsSupport) SpawnEffect(cfg.casingPrefab, casingPoint);   // 보조 무기는 탄피를 흘리지 않는다 (셋이 쏘면 바닥이 탄피로 덮인다)
 
         ShotFx fx = cfg.shotFx;
-        float fxScale = IsSupport ? ShotFxDraw.SupportScale : 1f;
+        float fxScale = ShotFxScale;   // 보조 칸 ×0.8 · 강화 레벨 (Lv2 ×1.1 · Lv3 ×1.2)
         float groundY = Owner != null ? Owner.transform.position.y : float.NaN;
         ShotFxDraw.MuzzleFlash(fx, Muzzle.position, baseDir, fxScale, groundY, ShotHeat);
 

@@ -119,7 +119,7 @@ public class Bullet : MonoBehaviour, IPoolable
     void BeginShotFx()
     {
         shotFx = source != null && source.Data != null ? source.Data.ShotFx : null;
-        fxScale = source != null && source.IsSupport ? ShotFxDraw.SupportScale : 1f;
+        fxScale = source != null ? source.ShotFxScale : 1f;   // 보조 칸 ×0.8 · 강화 레벨 (Lv2 ×1.1 · Lv3 ×1.2)
 
         // 휘어 날아가는 길에 남는 연기 (스웜 카빈 미사일) — 탄과 따로 돌려 쓴다
         if (smoke != null) { smoke.Release(); smoke = null; }

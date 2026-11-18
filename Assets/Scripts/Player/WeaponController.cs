@@ -988,6 +988,9 @@ public class WeaponController : MonoBehaviour
     {
         anim = GetComponent<Animator>();
 
+        // 강화 연출 (2026-11-17) — 무기 레벨이 오르면 전투 화면에서 빛 · "Lv2" 로 보여 준다
+        if (GetComponent<WeaponLevelUpFx>() == null) gameObject.AddComponent<WeaponLevelUpFx>();
+
         if (anim != null)
         {
             shootLayer = anim.GetLayerIndex("ShootLayer");

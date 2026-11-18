@@ -114,7 +114,7 @@ public class PlayerHurtFx : MonoBehaviour
     /// 다른 연출이 화면을 쓰는 중 — 보스 등장 · 보스 처치 연출(쓰러짐 → 빛 조각) · 균열 엔딩 · 결과 / 크레딧(테스트 룸 미리보기 포함).
     /// 처치 연출은 11-17 확인 시험에서 빠져 있던 것을 찾아 더했다 (체력이 낮으면 쓰러지는 장면 내내 붉은 빛이 맥박쳤다).
     /// </summary>
-    static bool OtherSceneFxRunning =>
+    internal static bool OtherSceneFxRunning =>
         RiftEnding.Running || DragonDeathShow.Running || EndingFlow.Instance != null
         || (DragonEntrance.Current != null && !DragonEntrance.Current.Finished);
 

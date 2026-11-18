@@ -464,20 +464,22 @@ public class MeleeWeapon : WeaponBase
 
         Vector3 center = origin + Vector3.up * SlashHeight;
         float reach = range * cfg.slashReach;
-        Color glow = new Color(cfg.slashColor.r, cfg.slashColor.g, cfg.slashColor.b, cfg.slashColor.a * 0.45f);
+        float lv = LevelFxScale;   // 강화 레벨 — Lv2 ×1.1 · Lv3 ×1.2 굵기 · 은은한 빛 (2026-11-17)
+        float width = cfg.slashWidth * lv;
+        Color glow = new Color(cfg.slashColor.r, cfg.slashColor.g, cfg.slashColor.b, Mathf.Clamp01(cfg.slashColor.a * 0.45f * lv));
 
         if (cfg.slashThrust && !vertical)
         {
             Vector3 from = center + forward * 0.8f, to = center + forward * reach;
-            FxLine.Line(cfg.slashMaterial, from, to, cfg.slashColor, cfg.slashWidth, cfg.slashFade);
-            FxLine.Line(cfg.slashMaterial, Vector3.Lerp(from, to, 0.25f), to, cfg.slashCoreColor, cfg.slashWidth * 0.35f, cfg.slashFade * 0.7f);
+            FxLine.Line(cfg.slashMaterial, from, to, cfg.slashColor, width, cfg.slashFade);
+            FxLine.Line(cfg.slashMaterial, Vector3.Lerp(from, to, 0.25f), to, cfg.slashCoreColor, width * 0.35f, cfg.slashFade * 0.7f);
             FxLine.Ring(cfg.slashMaterial, origin + forward * reach, 0.15f, 0.9f, cfg.slashColor, 0.1f, cfg.slashFade);
         }
         else if (vertical)
         {
             // 세로로 선 초승달 — 위에서 아래로. 아래 끝이 바닥을 파고들지 않게 반각을 줄이고 조금 높인다
             BloodSlash.Spawn(cfg.slashMaterial, center + Vector3.up * 0.5f, forward, reach, Mathf.Min(arcAngle * 0.5f, 26f), 78f,
-                             cfg.slashWidth * 1.15f, cfg.slashColor, cfg.slashCoreColor, cfg.slashSweep, cfg.slashFade * 1.2f, true, glow);
+                             width * 1.15f, cfg.slashColor, cfg.slashCoreColor, cfg.slashSweep, cfg.slashFade * 1.2f, true, glow);
             FxLine.Ring(cfg.slashMaterial, origin + forward * (reach * 0.85f), 0.2f, 1.3f, cfg.slashColor, 0.12f, cfg.slashFade);
             GroundGlow.Flash(origin + forward * (reach * 0.85f), 2.0f, cfg.slashColor, 0.22f);   // 내려찍은 자리
         }
@@ -485,7 +487,7 @@ public class MeleeWeapon : WeaponBase
         {
             slashFlip = !slashFlip;
             BloodSlash.Spawn(cfg.slashMaterial, center, forward, reach, arcAngle * 0.5f, slashFlip ? 12f : -9f,
-                             cfg.slashWidth, cfg.slashColor, cfg.slashCoreColor, cfg.slashSweep, cfg.slashFade, true, glow);
+                             width, cfg.slashColor, cfg.slashCoreColor, cfg.slashSweep, cfg.slashFade, true, glow);
         }
         SlashFxCount++;
     }

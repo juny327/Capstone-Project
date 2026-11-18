@@ -46,6 +46,22 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
     public WeaponData Data => data;
     public int Level => level;
 
+    /// <summary>
+    /// 레벨이 오른 무기 · 오르기 전 레벨 (2026-11-17 강화 연출) — 정비 창 강화 · 레벨업 카드 · 테스트 룸.
+    /// 진화로 레벨을 넘겨받는 것(InheritFrom)은 알리지 않는다 — 진화 연출이 따로 있다.
+    /// </summary>
+    public static event System.Action<WeaponBase, int> LevelRaised;
+    bool inheritingLevel;
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetLevelEvent() => LevelRaised = null;
+
+    /// <summary>강화 레벨에 따른 탄 · 궤적 크기 (Lv1 ×1 · Lv2 ×1.1 · Lv3 ×1.2). 상위 무기는 자기 연출이 따로 있어 ×1.</summary>
+    public float LevelFxScale => data == null || data.IsEvolved ? 1f : 1f + 0.1f * (level - 1);
+
+    /// <summary>탄 · 총구 연출 크기 — 보조 칸 ×0.8 · 강화 레벨.</summary>
+    public float ShotFxScale => (IsSupport ? ShotFxDraw.SupportScale : 1f) * LevelFxScale;
+
     /// <summary>쿨다운이 끝나고, 장전 중이 아니며, 탄약이 남아 있어야 쏠 수 있다.</summary>
     public bool CanFire => cooldown <= 0f && IsActive && !IsReloading && HasAmmo && !IsBusy && !HeldAway;
 
@@ -438,7 +454,9 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
         if (min <= 0f) min = 1f;
         if (max <= 0f) max = 1f;
 
-        PlaySound(clip, data.fireVolume, Random.Range(min, max));
+        // 강화할수록 조금 더 묵직하게 (2026-11-17) — Lv2 피치 ×0.96 · 소리 ×1.05, Lv3 ×0.92 · ×1.1. 상위 무기는 그대로
+        float heavy = data.IsEvolved ? 0f : level - 1;
+        PlaySound(clip, data.fireVolume * (1f + 0.05f * heavy), Random.Range(min, max) * (1f - 0.04f * heavy));
         PlayFireLayer();
     }
 
@@ -538,8 +556,10 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
     public virtual void SetLevel(int newLevel)
     {
         int max = data != null ? Mathf.Max(1, data.maxLevel) : 1;
+        int before = level;
         level = Mathf.Clamp(newLevel, 1, max);
         OnStatsChanged();
+        if (level > before && !inheritingLevel) LevelRaised?.Invoke(this, before);
     }
 
     // ───────── 부착물 ─────────
@@ -574,7 +594,9 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
 
         // 레벨업 카드 · 무기 전용 강화로 쌓인 증분 (전역 강화가 이미 들어 있다)
         accumulated = previous.accumulated;
+        inheritingLevel = true;
         SetLevel(previous.level);
+        inheritingLevel = false;
 
         foreach (var pair in previous.attachments)
         {
