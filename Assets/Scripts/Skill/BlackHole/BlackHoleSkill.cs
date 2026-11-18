@@ -122,6 +122,7 @@ public class BlackHoleSkill : MonoBehaviour
         pulledEnemies.Clear();
 
         SoundManager.Instance?.ReportSkillCast(SkillCastSound.BlackHole);
+        Debug.Log($"[BlackHole] 생성 | 위치={position}");
     }
 
     void ApplyBlackHole()
@@ -235,6 +236,10 @@ public class BlackHoleSkill : MonoBehaviour
 
         if (explosionDamage > 0f)
             ApplyExplosionDamage(explosionPosition);
+
+        Debug.Log(
+            $"[BlackHole] 종료 | 폭발 피해={explosionDamage}"
+        );
 
         Destroy(activeBlackHole);
 

@@ -14,6 +14,11 @@ public class ElectricShotProjectile : MonoBehaviour
         speed = moveSpeed;
         shockDuration = duration;
     }
+    void Start()
+    {
+        Debug.Log("Electric Shot Spawned");
+    }
+
     void Update()
     {
         if (target == null)

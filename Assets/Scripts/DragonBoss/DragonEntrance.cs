@@ -129,9 +129,6 @@ public class DragonEntrance : MonoBehaviour
     {
         yield return null;   // GameAppManager 가 플레이어를 시작 자리에 세운 뒤
         Setup();
-        // 2026-11-18 성능 — 준비(장면 훑기 · 캔버스 · 조명 찾기 · 연출 오브젝트 만들기, 80 ~ 100ms)는 입장 가림막이
-        // 덮인 동안 끝내고, 연출은 가림막이 걷히기 시작할 때 시작한다 (가림막 없이 들어오면 바로)
-        while (SceneCurtain.Covering) yield return null;
         run = StartCoroutine(Run());
     }
 
@@ -172,7 +169,6 @@ public class DragonEntrance : MonoBehaviour
         SetupVolume();
         BuildOverlay();
         BuildFx();
-        PrepareCopy();   // 낙하 때 만들지 않게 미리 (11-18 성능)
     }
 
     void LockPlayer()
@@ -493,31 +489,18 @@ public class DragonEntrance : MonoBehaviour
 
     // ───────── 드래곤 ─────────
 
-    /// <summary>
-    /// 연출용 몸을 미리 만들어 꺼 둔다 (2026-11-18 성능 — Setup 에서, 입장 가림막이 덮인 동안).
-    /// 낙하 순간에 만들면 그 프레임이 72ms 끊겼다.
-    /// </summary>
-    void PrepareCopy()
+    void SpawnCopy()
     {
-        if (modelPrefab == null || copy != null) return;
+        if (modelPrefab == null) return;
         copy = Instantiate(modelPrefab, core + Vector3.up * landHeight, Quaternion.LookRotation(toPlayer));
         copy.name = "DragonEntranceBody";
         SceneManager.MoveGameObjectToScene(copy, gameObject.scene);
         temp.Add(copy);
-        copyAnim = copy.GetComponentInChildren<Animator>();   // 끄기 전에 (꺼진 자식은 못 찾는다)
+        copyAnim = copy.GetComponentInChildren<Animator>();
         if (copyAnim != null && copyAnim.runtimeAnimatorController != null)
             foreach (AnimationClip clip in copyAnim.runtimeAnimatorController.animationClips)
                 foreach (string s in new[] { DragonBoss.IdleState, DragonBoss.WalkState, DragonBoss.AttackState, DragonBoss.DieState })
                     if (clip.name.EndsWith("_" + s)) lengths[s] = clip.length;
-        copy.SetActive(false);
-    }
-
-    void SpawnCopy()
-    {
-        PrepareCopy();
-        if (copy == null) return;
-        copy.transform.SetPositionAndRotation(core + Vector3.up * landHeight, Quaternion.LookRotation(toPlayer));
-        copy.SetActive(true);
     }
 
     void CopyPose(string state, float time, float speed)
