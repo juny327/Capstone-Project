@@ -56,10 +56,12 @@ public class DamageText : MonoBehaviour
         cam = Camera.main; // 카메라 캐싱
     }
 
-    public void Show(int damage, Vector3 worldPos, bool isCritical)
+    public void Show(int damage, Vector3 worldPos, bool isCritical) => Show((float)damage, worldPos, isCritical);
+
+    public void Show(float damage, Vector3 worldPos, bool isCritical)
     {
         transform.position = worldPos;
-        text.SetText("{0}", damage);
+        text.SetText(DamageTextManager.Format(damage));   // 10 미만은 소수 한 자리 (2026-11-17)
 
         if (isCritical)
         {

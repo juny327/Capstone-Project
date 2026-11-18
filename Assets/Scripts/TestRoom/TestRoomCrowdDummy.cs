@@ -47,7 +47,7 @@ public class TestRoomCrowdDummy : MonoBehaviour, IDamageable, IPullable
 
         if (hitFlash != null) hitFlash.HitFlash();
         if (DamageTextManager.Instance != null)
-            DamageTextManager.Instance.ShowDamage((int)Mathf.Min(info.damage, int.MaxValue - 128f), transform.position + Vector3.up * 2f, info.isCritical);
+            DamageTextManager.Instance.ShowDamage(Mathf.Min(info.damage, 1e9f), transform.position + Vector3.up * 2f, info.isCritical);
 
         if (hp > 0f) return;
 

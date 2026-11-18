@@ -20,7 +20,7 @@ public class TestRoomDummy : MonoBehaviour, IDamageable
         Stats.Record(info, Time.timeAsDouble);
         hitFlash.HitFlash();
         if (DamageTextManager.Instance != null)
-            DamageTextManager.Instance.ShowDamage((int)Mathf.Min(info.damage, int.MaxValue - 128f),
+            DamageTextManager.Instance.ShowDamage(Mathf.Min(info.damage, 1e9f),
                 transform.position + Vector3.up * 2f, info.isCritical);
 
         if (info.isCritical && criticalDecalPrefab != null && PoolManager.Instance != null)

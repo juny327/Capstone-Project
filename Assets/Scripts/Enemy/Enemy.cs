@@ -349,7 +349,7 @@ public class Enemy : MonoBehaviour, IDamageable, IPoolable
 
 
         DamageTextManager.Instance.ShowDamage(
-            (int)info.damage,
+            info.damage,   // 소수 한 자리까지 보인다 (2026-11-17 — 예전엔 (int) 로 버려 총 강화가 숫자에 안 보였다)
             transform.position + Vector3.up * 2f,
             info.isCritical
         );
