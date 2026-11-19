@@ -172,6 +172,36 @@ public class WeaponController : MonoBehaviour
     /// <summary>지금까지 받은 범용 업그레이드 누적분. 새로 얻는 무기에 그대로 얹어 준다.</summary>
     private WeaponModifier globalModifier = WeaponModifier.Identity;
 
+    // 공격력 증가 카드의 구매 횟수를 플레이어 단위로 저장한다.
+    // 새 무기 획득/상위 무기 진화 후에도 동일한 강화 레벨을 사용한다.
+    private int directDamageUpgradeLevel;
+
+    public int DirectDamageUpgradeLevel => directDamageUpgradeLevel;
+
+    public void AddDirectDamageUpgrade()
+    {
+        directDamageUpgradeLevel++;
+        RaiseLegacyStats();
+    }
+
+    // 직접 타격에만 고정 피해를 더한다. 치명타 등 공격 자체의 배율은 additiveScale 에 반영한다.
+    // 스킬/부착물/명중 파생 효과의 기준 피해(Stats.Damage)는 변경하지 않는다.
+    public float ResolveDirectDamage(WeaponBase source, float damage, float additiveScale = 1f)
+    {
+        if (source == null || source.Data == null || source.IsSupport ||
+            source.Data.IsAlwaysActive || source.Data.SupportOnly || !ReferenceEquals(ActiveWeapon, source))
+            return damage;
+
+        if (source.Data.Kind != WeaponKind.Projectile && source.Data.Kind != WeaponKind.Melee)
+            return damage;
+
+        float bonus = source.Data.GetDamageUpgradeFlatPerLevel() * directDamageUpgradeLevel;
+        return Mathf.Max(0f, damage + bonus * additiveScale);
+    }
+
+    public float ActiveDirectDamage => ActiveWeapon is WeaponBase weapon
+        ? weapon.DirectDamage : (ActiveWeapon != null ? ActiveWeapon.Stats.Damage : 0f);
+
     // 캐릭터 규칙 (CharacterLoadout 이 설정). 비어 있으면 모든 손 무기를 허용한다
     private WeaponKind[] allowedHeldKinds;
     private WeaponData characterStarter;
@@ -1380,7 +1410,7 @@ public class WeaponController : MonoBehaviour
 
         WeaponRuntimeStats s = active.Stats;
 
-        GameEvents.OnBulletDamageChanged?.Invoke(s.Damage);
+        GameEvents.OnBulletDamageChanged?.Invoke(ActiveDirectDamage);
         GameEvents.OnBulletSpeedChanged?.Invoke(s.ProjectileSpeed);
     }
 }

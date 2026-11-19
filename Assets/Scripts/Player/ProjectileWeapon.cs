@@ -164,16 +164,21 @@ public class ProjectileWeapon : WeaponBase
             // 탄마다 크리티컬을 따로 판정한다 (산탄이면 일부만 크리티컬이 될 수 있다)
             bool isCritical = RollCritical(in stats);
 
+            float effectDamage = ApplyCritical(in stats, isCritical);
+            float directDamage = ResolveDirectDamage(effectDamage,
+                isCritical ? stats.CritMultiplier : 1f);
+
             bullet.Init(new ProjectileSpawnInfo(
                 stats.ProjectileSpeed,
-                ApplyCritical(in stats, isCritical),
+                directDamage,
                 stats.ProjectileLifeTime,
                 isCritical,
                 stats.PierceCount,
                 homingTarget: cfg.homingTurnRate > 0f ? NextHomingTarget(cfg) : null,
                 source: this,
                 tint: tint,
-                homingTurnRate: cfg.homingTurnRate));
+                homingTurnRate: cfg.homingTurnRate,
+                effectDamage: effectDamage));
         }
     }
 

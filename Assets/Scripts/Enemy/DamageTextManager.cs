@@ -17,7 +17,7 @@ public class DamageTextManager : MonoBehaviour
         Instance = this;
     }
 
-    public void ShowDamage(int damage, Vector3 pos, bool isCritical)
+    public void ShowDamage(float damage, Vector3 pos, bool isCritical)
     {
         GameObject obj = PoolManager.Instance.Get(damageTextPrefab);
         obj.GetComponent<DamageText>().Show(damage, pos, isCritical);

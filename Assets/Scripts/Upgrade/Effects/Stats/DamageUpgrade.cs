@@ -1,20 +1,14 @@
 using UnityEngine;
 
 /// <summary>
-/// 공격력 증가.
+/// 주무기 직접 공격 피해를 무기별 고정값으로 증가시킨다. 드론·보조 무기·스킬·추가 효과는 제외한다.
 ///
 /// 예전에는 옛 Gun 컴포넌트의 bulletDamage 를 올렸는데, 실제 발사는 WeaponController 가
-/// 하므로 **HUD 숫자만 오르고 피해량은 그대로**였다. 이제 무기 스탯 체계에 적용한다.
+/// 하므로 직접 공격 전용 누적분을 WeaponController 에 적용한다.
 /// </summary>
 [CreateAssetMenu(menuName = "Upgrade/Effects/Damage")]
 public class DamageUpgrade : UpgradeEffect
 {
-    [Tooltip("모든 무기 피해 + 고정값 (탄마다 붙어 샷건 · 연사 무기만 크게 오른다)")]
-    public float amount;
-
-    [Tooltip("모든 무기 피해 × (1 + percent). 0.1 = +10%, 살 때마다 곱해진다 (2026-11-08)")]
-    public float percent;
-
     public override void Apply(GameObject player)
     {
         if (player == null) return;
@@ -27,10 +21,19 @@ public class DamageUpgrade : UpgradeEffect
             return;
         }
 
-        WeaponModifier modifier = WeaponModifier.Identity;
-        modifier.damageAdd = amount;
-        modifier.damageMul = 1f + percent;
+        float before = controller.ActiveDirectDamage;
+        controller.AddDirectDamageUpgrade();
+        float after = controller.ActiveDirectDamage;
 
-        controller.ApplyGlobalModifier(modifier);
+        IWeapon weapon = controller.ActiveWeapon;
+        string weaponName = weapon != null && weapon.Data != null
+            ? weapon.Data.weaponName : "(주무기 없음)";
+
+        Debug.Log($"[DamageUpgrade] Lv.{controller.DirectDamageUpgradeLevel} " +
+                  $"| {weaponName} 직접 피해 {before:0.###} -> {after:0.###}", controller);
+
+        if (weapon != null && Mathf.Approximately(before, after))
+            Debug.LogWarning("[DamageUpgrade] 구매 후 주무기 피해가 변하지 않았습니다. " +
+                "무기 유형/주무기 연결/Damage Upgrade Flat Per Level을 확인하세요.", controller);
     }
 }

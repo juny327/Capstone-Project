@@ -186,7 +186,7 @@ public class BloodFrenzyEffect : AttachmentEffect
         public override void OnHit(in WeaponHit hit)
         {
             if (hit.Target != null && hit.Target.TryGetComponent(out BossHealth _)) Add(cfg.bossHitGain);
-            if (Frenzy) Steal(hit.Damage, hit.Point);
+            if (Frenzy) Steal(hit.EffectDamage, hit.Point);
         }
 
         public override void OnAttack(in WeaponAttack attack)

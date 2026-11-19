@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: ShurikenUpgrade
   m_EditorClassIdentifier: Assembly-CSharp::UpgradeData
   upgradeName: "\uC288\uB9AC\uCF04"
-  description: "\uC288\uB9AC\uCF04 3\uAC1C\uAC00 12\uCD08\uAC04 \uBAB8 \uB458\uB808\uB97C
-    \uB3C8\uB2E4 (\uD53C\uD574 1)\n\uB808\uBCA8\uB9C8\uB2E4 \uC288\uB9AC\uCF04 +1"
+  description: "\uC8FC\uBCC0\uC744 \uD68C\uC804\uD558\uC5EC \uACF5\uACA9\uD558\uB294
+    \uC288\uB9AC\uCF04\uC744 \uC18C\uD658\uD55C\uB2E4\n\uB808\uBCA8\uB9C8\uB2E4 \uC288\uB9AC\uCF04
+    +1"
   icon: {fileID: 21300000, guid: 249f9bfcf47ceec48b6db33d2cb3c9b5, type: 3}
   costExp: 10
   maxLevel: 3

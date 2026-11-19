@@ -84,6 +84,31 @@ public abstract class WeaponData : ScriptableObject
     public float fireInterval = 0.5f;
     public float damage = 10f;
 
+    [Header("Direct Damage Upgrade")]
+    [Tooltip("공격력 증가 카드 1레벨당 주무기 기본 타격에 더할 고정 피해. -1 = 무기 이름별 기본값. 진화 시 원본 무기의 값을 계승합니다.")]
+    [Min(-1f)] public float damageUpgradeFlatPerLevel = -1f;
+
+    /// <summary>상위 무기는 진화 전 원본 무기의 레벨당 고정 증가량을 사용한다.</summary>
+    public float GetDamageUpgradeFlatPerLevel()
+    {
+        WeaponData original = Root;
+        if (original.damageUpgradeFlatPerLevel >= 0f)
+            return original.damageUpgradeFlatPerLevel;
+
+        switch (original.name)
+        {
+            case "WD_Rifle": return 1f;
+            case "WD_SMG": return 1f;
+            case "WD_Sniper": return 3f;
+            case "WD_Sword": return 2f;
+            case "WD_Greatsword": return 4f;
+            case "WD_Spear": return 2f;
+        }
+        // 새로운 주무기 에셋에 증가량이 지정되지 않았다면 기본 +1.
+        // 드론/보조 무기는 WeaponController.ResolveDirectDamage 에서 걸러진다.
+        return 1f;
+    }
+
     [Header("Critical")]
     [Range(0f, 1f)] public float critChance = 0.05f;
     [Min(1f)] public float critMultiplier = 2f;

@@ -56,10 +56,10 @@ public class DamageText : MonoBehaviour
         cam = Camera.main; // 카메라 캐싱
     }
 
-    public void Show(int damage, Vector3 worldPos, bool isCritical)
+    public void Show(float damage, Vector3 worldPos, bool isCritical)
     {
         transform.position = worldPos;
-        text.SetText("{0}", damage);
+        text.text = damage.ToString("0.##"); // Lv.1: 2.4를 2로 잘라 표시하지 않는다.
 
         if (isCritical)
         {
