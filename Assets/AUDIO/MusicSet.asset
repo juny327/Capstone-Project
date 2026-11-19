@@ -17,17 +17,17 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 99e93ccba1e935142b595f5dbbd1345b, type: 3}
     volume: 0.32
   - sceneName: Stage1
-    clip: {fileID: 8300000, guid: 9a2890cf2665c3343b38d7665f68053e, type: 3}
-    volume: 0.65
+    clip: {fileID: 8300000, guid: 46bb6e9fb0bdb5e59a2ca705e9cc4980, type: 3}
+    volume: 0.64
   - sceneName: Stage2
-    clip: {fileID: 8300000, guid: 2ef05110edb227643b57b86c9a678b9b, type: 3}
-    volume: 0.53
+    clip: {fileID: 8300000, guid: 9446958a399da9d8958faa4d172259f1, type: 3}
+    volume: 0.39
   - sceneName: Stage3
-    clip: {fileID: 8300000, guid: cd62a4715201096479d8b171701b60f2, type: 3}
-    volume: 0.4
+    clip: {fileID: 8300000, guid: 10b4339cc3770d9a4279ed035cadb5a7, type: 3}
+    volume: 0.29
   - sceneName: StageBoss
-    clip: {fileID: 8300000, guid: 94e5b2c3b58ef38478d3e8318ad41a8c, type: 3}
-    volume: 0.42
+    clip: {fileID: 8300000, guid: 00560ef3ff2baebd1e4427adb2aa45f7, type: 3}
+    volume: 0.54
   - sceneName: EndingScene
     clip: {fileID: 8300000, guid: 431fcee2e0297df4f920b31742b28619, type: 3}
     volume: 0.48

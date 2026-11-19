@@ -18,7 +18,10 @@
 | `Abstraction/MusicLoops` | Music Loop Bundle 2026 Q2 (29곡) | [tallbeard.itch.io](https://tallbeard.itch.io/music-loop-bundle) | **CC0** | 없음 | 2026-09-25 |
 | `OpenGameArt/Electricity` | Electricity Sound Effects (`continuousspark`) | [opengameart.org](https://opengameart.org/content/electricity-sound-effects-0) | **CC0** | 없음 | 2026-09-25 |
 | `OpenGameArt/Electricity` | Electricity Game Sound Pack (`chargestart` · `hit`) | [opengameart.org](https://opengameart.org/content/electricity-game-sound-pack) | **CC0** | 없음 | 2026-09-25 |
-| `Torone/Music Loops Pack 2 - Sci-Fi` | Music loops pack 2 - Sci-Fi (반복용 6곡, 배경음 전부) | [torone.itch.io](https://torone.itch.io/music-loops-pack-2-sci-fi) | **CC BY 4.0** | ⚠ **있음** | 2026-09-27 |
+| `Torone/Music Loops Pack 2 - Sci-Fi` | Music loops pack 2 - Sci-Fi (반복용 6곡 — 11-19 부터 로비 · 엔딩만, 나머지 4곡은 파일만 남음) | [torone.itch.io](https://torone.itch.io/music-loops-pack-2-sci-fi) | **CC BY 4.0** | ⚠ **있음** | 2026-09-27 |
+| `RagnarRandom/Rock Music For Games` | Rock Music For Games 중 2곡 — Stage1 `Rock City Ransom (Revised)` · Stage2 `Escape from the Planet of the Lobsters` (원본 ogg, 봉우리만 −1.5 dB 아래로) | [ragnarrandom.itch.io](https://ragnarrandom.itch.io/rock-music-for-games) | **CC0** ("free to use for whatever you want") | 없음 (표기는 반긴다) | 2026-11-19 |
+| `TeknoAXE` | Stage3 `Running Rage` — 노래라 반복판으로 잘라 씀 (A 리프 시작 14.55초 ~ 같은 자리 131.12초, 68마디 · 116.57초, 원본 mp3 → ogg) | [teknoaxe.com](https://teknoaxe.com/Home.php) | **CC BY 4.0** | ⚠ **있음** (바꿨다는 것도 적기) | 2026-11-19 |
+| `AilaScott/Free Music Pack` | FREE TO USE GAME MUSIC 중 보스 `Sear The Time Vortex` (원본 wav 48kHz → ogg) | [ailascott.itch.io](https://ailascott.itch.io/free-music-pack-lo-fi-indie-metal-orchestral) | **CC BY 4.0** (zip 안 READ ME · Sample Attribution) | ⚠ **있음** — 5달러를 내면 표기 없이 쓸 수 있다 | 2026-11-19 |
 | `AUDIO/Melee` | 근접 휘두름 `Swing_Light/Heavy/Thrust_01~03.wav` ('휙' — 대역 통과 잡음의 중심이 위 → 아래로 쓸려 내려감, 대검은 낮은 바람 몸통) | **직접 합성** — Python 표준 라이브러리 | 자체 제작 (제약 없음) | 없음 | 2026-11-02 |
 | `AUDIO/Electric` | 전격 소총 발사 `ElectricZap_01~03.wav` · 뇌운 낙뢰 `ThunderStrike_01~03.wav` · 전기 맞힘 `ArcHit_01~03.wav` (임펄스 · 잡음 알갱이 · 톱니파 · 사인 하강 · 갈색 잡음 · 잔향을 쌓음, 합성 스크립트 `Logs/evo_resume/kept_synth_electric.py`) | **직접 합성** — Python (numpy · scipy) | 자체 제작 (제약 없음) | 없음 | 2026-11-02 |
 | `AUDIO/Laser` | 레이저 지속음 `LaserHum_Low/Deep/Wide.wav`(4초 이음매 없는 반복 — 55 · 45 · 65Hz 바탕음 + '우' 모음 배음 + 울렁임) · 레이저 맞힘 `LaserSizzle_01~03.wav`(걸러 낸 잡음 '치익') | **직접 합성** — Python 표준 라이브러리 | 자체 제작 (제약 없음) | 없음 | 2026-11-02 |
@@ -31,8 +34,10 @@
 
 **효과음은 전부 CC0 또는 직접 만든 소리다.** 상업 이용 가능하고 크레딧 표기 의무가 없다.
 
-> ⚠ **배경음(Torone)은 CC BY 4.0 — 크레딧 표기가 의무다.** 게임 크레딧(또는 설정 · 정보 화면)에 아래 `Music` 줄을 반드시 넣을 것.
-> 라이선스는 제작자 페이지 문구("Those loops are under Creative Common Attribution 4")로 확인했다 (2026-09-27). zip 안에 라이선스 파일은 없다.
+> ⚠ **배경음 Torone · TeknoAXE · Aila Scott 은 CC BY 4.0 — 크레딧 표기가 의무다.** 게임 크레딧(엔딩 `Resources/Ending/EndingSettings` 의 '# 음악')에 아래 `Music` 줄을 반드시 넣을 것. 발표 · 티저 영상에 이 곡이 나오면 영상 설명에도 같은 줄을 넣는다.
+> Torone 라이선스는 제작자 페이지 문구("Those loops are under Creative Common Attribution 4")로 확인했다 (2026-09-27). zip 안에 라이선스 파일은 없다.
+> TeknoAXE 는 사이트 아래 "Creative Commons Attribution 4.0 International License" 문구로 (2026-11-19). 파일 안에 제작자 표시가 없어 사이트 내려받기 주소의 파일과 앞부분을 대조해 출처를 확인했다. 곡을 잘라 썼으므로 "반복용으로 잘라 씀" 을 같이 적는다 (CC BY 4.0 은 바꾼 사실을 밝히라고 한다).
+> Aila Scott 은 zip 안 `READ ME.txt` 에 CC BY 4.0, `Sample Attribution.txt` 에 표기 문구("Name of Song © 2024 by Aila Scott is licensed under CC BY 4.0", 곡 이름은 팩 페이지 · 이름은 ailascott.com 으로 연결) (2026-11-19).
 
 나머지 제작자들도 표기를 반기므로 아래처럼 함께 넣어 두면 좋다.
 
@@ -43,6 +48,9 @@ Sound Effects
 
 Music
   "Music loops pack 2 - Sci-Fi" by Chris "Torone" CB (torone.itch.io) — CC BY 4.0   ← 필수
+  "Running Rage" by TeknoAXE (teknoaxe.com) — CC BY 4.0, 반복용으로 잘라 씀   ← 필수
+  "Sear The Time Vortex" © 2024 by Aila Scott (ailascott.com) — CC BY 4.0   ← 필수
+  "Rock City Ransom" · "Escape from the Planet of the Lobsters" by Ragnar Random (ragnarrandom.itch.io) — CC0
 
 Electricity SFX
   Brian MacIntosh, faxcorp (opengameart.org) — CC0
@@ -73,6 +81,8 @@ Dragon boss SFX
 ## 파일 형식 메모
 
 - **MP3 는 가져오지 않았다.** Snake 팩은 mp3·wav 가 같은 내용으로 중복되어 있어 wav 만 넣었다.
+  TeknoAXE `Running Rage` 는 mp3 원본을 잘라 ogg 로 만들어 넣었다 (원본 mp3 는 바탕화면 `캡스톤 사운드 집`).
+- 2026-11-19 배경음 4곡은 **normalize 를 껐다** — 음량은 씬마다 예전 곡과 같은 게임 안 크기(LUFS)가 되도록 `AUDIO/MusicSet` 값으로 맞췄다. 만드는 스크립트 `Logs/bgm/final/tools`
   원본은 바탕화면 `캡스톤 사운드 집` 에 그대로 있다.
 - `.22LR` · `.308 (7.62x51)` 폴더는 **앞의 점을 뗐다.** Unity 는 점으로 시작하는 폴더를 무시해서
   그대로 두면 파일이 아예 안 보인다.
