@@ -10,6 +10,9 @@ public class ObjectPool
     private Transform parent;
     private bool expandable;
 
+    /// <summary>풀이 새 오브젝트를 만들 때마다 (2026-11-18 — 그래픽 품질이 몬스터 천을 꺼 두는 데 쓴다).</summary>
+    public static event System.Action<GameObject> Created;
+
     public ObjectPool(GameObject prefab, int initialSize, Transform parent, bool expandable)
     {
         this.prefab = prefab;
@@ -36,6 +39,7 @@ public class ObjectPool
 
         pool.Enqueue(obj);
         inPool.Add(obj);
+        Created?.Invoke(obj);
     }
 
     public GameObject Get()
@@ -85,6 +89,7 @@ public class ObjectPool
 
             pool.Enqueue(obj);
             inPool.Add(obj);
+            Created?.Invoke(obj);
         }
 
         GameObject.Destroy(staging);

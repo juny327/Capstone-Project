@@ -83,7 +83,7 @@ public static class GameSettingsSetup
 
             var frame = new GameObject("Frame", typeof(RectTransform), typeof(Image));
             frame.transform.SetParent(window.transform, false);
-            Place(frame, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(760, 720));   // 화면 흔들림 줄이 늘어 500 → 640 (2026-11-14), 피격 화면 효과 줄로 → 720 (2026-11-17)
+            Place(frame, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(760, 880));   // 화면 흔들림 줄이 늘어 500 → 640 (2026-11-14), 피격 화면 효과 줄로 → 720 (2026-11-17), 그래픽 품질 · FPS 표시 줄로 → 880 (2026-11-18)
             frame.GetComponent<Image>().color = Accent;
 
             var panel = new GameObject("Panel", typeof(RectTransform), typeof(Image));
@@ -116,6 +116,22 @@ public static class GameSettingsSetup
                 new Vector2(0.5f, 1), new Vector2(250, -534), new Vector2(220, 52), new Vector2(0.5f, 0.5f));
             hurtFx.GetComponent<Image>().color = Track;   // 판과 같은 색이면 안 보인다 — 슬라이더 홈 색
             TMP_Text hurtFxValue = hurtFx.transform.Find("Text").GetComponent<TMP_Text>();
+
+            // 그래픽 품질 (2026-11-18 성능 3단계) — 누를 때마다 높음 → 중간 → 낮음. 높음 = 프로젝트 설정 그대로
+            Text(panel.transform, "GraphicsLabel", "그래픽 품질", font, 32, Color.white, TextAlignmentOptions.Left,
+                new Vector2(0.5f, 1), new Vector2(-190, -614), new Vector2(300, 48));
+            Button graphics = MakeButton(panel.transform, "GraphicsButton", "높음", font, 28,
+                new Vector2(0.5f, 1), new Vector2(250, -614), new Vector2(220, 52), new Vector2(0.5f, 0.5f));
+            graphics.GetComponent<Image>().color = Track;
+            TMP_Text graphicsValue = graphics.transform.Find("Text").GetComponent<TMP_Text>();
+
+            // FPS 표시 (2026-11-18) — 화면 위에 FPS · 프레임 시간. F3 키로도 켜고 끈다
+            Text(panel.transform, "FpsLabel", "FPS 표시 (F3)", font, 32, Color.white, TextAlignmentOptions.Left,
+                new Vector2(0.5f, 1), new Vector2(-190, -694), new Vector2(300, 48));
+            Button fps = MakeButton(panel.transform, "FpsButton", "꺼짐", font, 28,
+                new Vector2(0.5f, 1), new Vector2(250, -694), new Vector2(220, 52), new Vector2(0.5f, 0.5f));
+            fps.GetComponent<Image>().color = Track;
+            TMP_Text fpsValue = fps.transform.Find("Text").GetComponent<TMP_Text>();
 
             // 왼쪽 아래는 "로비로" 버튼 자리 (2026-11-02) — 안내는 "소리" 줄 오른쪽 끝으로
             Text(panel.transform, "Hint", "ESC 로 열고 닫기", font, 22, Muted, TextAlignmentOptions.Right,
@@ -151,6 +167,10 @@ public static class GameSettingsSetup
             so.FindProperty("shakeValue").objectReferenceValue = shakeValue;
             so.FindProperty("hurtFxButton").objectReferenceValue = hurtFx;
             so.FindProperty("hurtFxValue").objectReferenceValue = hurtFxValue;
+            so.FindProperty("graphicsButton").objectReferenceValue = graphics;
+            so.FindProperty("graphicsValue").objectReferenceValue = graphicsValue;
+            so.FindProperty("fpsButton").objectReferenceValue = fps;
+            so.FindProperty("fpsValue").objectReferenceValue = fpsValue;
             so.FindProperty("closeButton").objectReferenceValue = close;
             so.FindProperty("resetButton").objectReferenceValue = reset;
             so.FindProperty("title").objectReferenceValue = title;
@@ -167,7 +187,7 @@ public static class GameSettingsSetup
             Object.DestroyImmediate(root);
         }
 
-        Debug.Log($"{Tag} 설정창: {PrefabPath} (전체 · 배경음 · 효과음 · 화면 흔들림 · 피격 화면 효과, 로비 버튼 · ESC · 게임 중 로비로)");
+        Debug.Log($"{Tag} 설정창: {PrefabPath} (전체 · 배경음 · 효과음 · 화면 흔들림 · 피격 화면 효과 · 그래픽 품질 · FPS 표시, 로비 버튼 · ESC · 게임 중 로비로)");
         return true;
     }
 
