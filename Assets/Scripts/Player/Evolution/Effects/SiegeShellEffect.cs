@@ -95,7 +95,7 @@ public class SiegeShellEffect : AttachmentEffect
             EvoStrikes.Blast(Weapon, cfg.material, cfg.color, at, cfg.blastRadius, Weapon.Stats.Damage * cfg.blastRatio, cfg.push,
                 struck, cfg.explosionPrefab, 1.4f, 0f);
             if (shake > 0f) ImpactFx.Play(ImpactMoment.SiegeBlast, Weapon, cfg.color, shake);   // 한 번 쏠 때 한 번 — 쿵 · 줌 · 가장자리 번쩍
-            CombatFx.PlaySound(cfg.blastSound);
+            CombatFx.PlaySound(cfg.blastSound, SoundKind.Explosion);
         }
     }
 }

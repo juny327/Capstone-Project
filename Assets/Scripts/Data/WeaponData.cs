@@ -214,6 +214,13 @@ public abstract class WeaponData : ScriptableObject
     public bool HasFireLayer => fireLayerSounds != null && fireLayerSounds.Length > 0;
     public bool HasHitLayer => hitLayerSounds != null && hitLayerSounds.Length > 0;
 
+    [Header("소리 층 (2026-11-19 효과음 재정비)")]
+    [Tooltip("쏠 때(근접은 적에게 들어갈 때) 발사음과 함께 내는 층들 — 순간음 · 저음 몸통 · 꼬리를 한꺼번에, delay 가 있으면 그만큼 뒤에. " +
+             "층마다 소리 · 음량 · 피치 범위를 따로 둔다. 비우면 지금처럼 발사음(+ 덧소리)만")]
+    public SoundLayer[] fireStack;
+
+    public bool HasFireStack => fireStack != null && fireStack.Length > 0;
+
     public AudioClip PickFireSound()
     {
         if (fireSounds == null || fireSounds.Length == 0) return null;

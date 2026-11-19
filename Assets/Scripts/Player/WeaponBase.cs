@@ -458,7 +458,14 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
         float heavy = data.IsEvolved ? 0f : level - 1;
         PlaySound(clip, data.fireVolume * (1f + 0.05f * heavy), Random.Range(min, max) * (1f - 0.04f * heavy));
         PlayFireLayer();
+
+        // 소리 층 (2026-11-19 효과음 재정비) — 순간음 · 저음 몸통 · 꼬리를 데이터로 겹친다. 비어 있으면 아무것도 안 한다
+        if (data.HasFireStack && SoundManager.Instance != null)
+            SoundManager.Instance.PlayStack(data.fireStack, SoundKindOf, SoundScale, 1f - 0.04f * heavy);
     }
+
+    /// <summary>이 무기 소리의 종류 — 손에 든 무기는 Fire, 보조 칸은 SupportFire (2026-11-19 종류별 동시 발음 제한).</summary>
+    public SoundKind SoundKindOf => IsSupport ? SoundKind.SupportFire : SoundKind.Fire;
 
     float lastFireLayerAt = -99f;
     float lastHitLayerAt = -99f;
@@ -497,7 +504,7 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
         if (clip == null) return;
 
         lastHitLayerAt = Time.unscaledTime;
-        PlaySound(clip, data.hitLayerVolume, Random.Range(0.96f, 1.04f));
+        PlaySound(clip, data.hitLayerVolume, Random.Range(0.96f, 1.04f), SoundKind.Hit);
         HitLayersPlayed++;
     }
 
@@ -525,11 +532,11 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
     /// 플레이어 무기 소리는 2D 로 낸다 — 탑다운 카메라라 거리 감쇠가 어색하다.
     /// `SoundManager` 가 없으면 조용히 넘어간다 (씬 구성이 덜 된 경우).
     /// </summary>
-    protected void PlaySound(AudioClip clip, float volume, float pitch = 1f)
+    protected void PlaySound(AudioClip clip, float volume, float pitch = 1f, SoundKind kind = SoundKind.Auto)
     {
         if (clip == null || SoundManager.Instance == null) return;
 
-        SoundManager.Instance.PlayClip(clip, volume * SoundScale, pitch);
+        SoundManager.Instance.PlayClip(clip, volume * SoundScale, pitch, null, kind == SoundKind.Auto ? SoundKindOf : kind);
     }
 
     /// <summary>보조 무기 소리 크기 — 주무기와 보조 셋이 한꺼번에 쏘면 시끄럽다. 주무기 소리가 앞에 선다.</summary>

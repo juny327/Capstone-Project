@@ -236,7 +236,7 @@ public class EconomySystem : MonoBehaviour
     void PlayPickupSound()
     {
         if (SoundManager.Instance != null && Settings.pickupSound != null)
-            SoundManager.Instance.Play(Settings.pickupSound);
+            SoundManager.Instance.Play(Settings.pickupSound, SoundManager.Instance.SfxGroup, 1f, 1f, SoundKind.Pickup);
     }
 
     // ───────── 스테이지 ─────────

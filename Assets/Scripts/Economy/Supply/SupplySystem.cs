@@ -281,7 +281,8 @@ public class SupplySystem : MonoBehaviour
 
     static void Play(GameSoundSet.Entry entry)
     {
-        if (entry != null && entry.HasClip && SoundManager.Instance != null) SoundManager.Instance.Play(entry);
+        if (entry != null && entry.HasClip && SoundManager.Instance != null)   // 보급은 드물고 알려야 하는 신호다 — UI 와 같은 중요도
+            SoundManager.Instance.Play(entry, SoundManager.Instance.SfxGroup, 1f, 1f, SoundKind.UI);
     }
 
     static Vector3 Flat(Vector3 v) { v.y = 0f; return v; }

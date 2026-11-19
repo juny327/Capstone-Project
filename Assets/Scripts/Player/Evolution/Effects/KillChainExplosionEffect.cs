@@ -157,7 +157,7 @@ public class KillChainExplosionEffect : AttachmentEffect
             if (Time.time - lastSound > 0.07f)
             {
                 lastSound = Time.time;
-                CombatFx.PlaySound(cfg.sound);
+                CombatFx.PlaySound(cfg.sound, SoundKind.Explosion);
             }
 
             if (depth == 1) WeaponBase.ShakeCamera(Weapon, cfg.cameraShake);   // 보조 무기는 약하게 (WeaponBase.ShakeCamera)

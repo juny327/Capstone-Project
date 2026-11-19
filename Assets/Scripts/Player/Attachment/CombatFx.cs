@@ -187,9 +187,10 @@ public static class CombatFx
     /// <summary>몸통 높이 (선 · 폭발 연출을 발밑이 아니라 몸에 맞춘다).</summary>
     public static Vector3 Body(Transform root) => root.position + Vector3.up * 0.9f;
 
-    public static void PlaySound(GameSoundSet.Entry entry)
+    /// <summary>부착물 · 상위 무기 효과 · 연계의 소리. 폭발은 kind 에 Explosion 을 넘긴다 (2026-11-19 종류별 동시 발음 제한).</summary>
+    public static void PlaySound(GameSoundSet.Entry entry, SoundKind kind = SoundKind.Ability)
     {
-        if (entry != null && SoundManager.Instance != null) SoundManager.Instance.Play(entry);
+        if (entry != null && SoundManager.Instance != null) SoundManager.Instance.Play(entry, SoundManager.Instance.SfxGroup, 1f, 1f, kind);
     }
 
     /// <summary>총알 · 광선이 벽에 막힌 소리 ('탁').</summary>

@@ -624,7 +624,7 @@ public class MaintenanceUI : MonoBehaviour
     static void PlaySound(GameSoundSet.Entry entry)
     {
         if (entry != null && SoundManager.Instance != null)
-            SoundManager.Instance.Play(entry);
+            SoundManager.Instance.Play(entry, SoundManager.Instance.UiGroup, 1f, 1f, SoundKind.UI);
     }
 
     // ───────── HUD ─────────

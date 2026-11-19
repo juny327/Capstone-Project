@@ -69,7 +69,7 @@ public class ExplodeOnHitEffect : AttachmentEffect
             if (Time.time - lastSound > 0.08f)
             {
                 lastSound = Time.time;
-                CombatFx.PlaySound(cfg.sound);
+                CombatFx.PlaySound(cfg.sound, SoundKind.Explosion);
             }
         }
 

@@ -757,7 +757,9 @@ public class PlayerMove : MonoBehaviour
     {
         if (entry == null || SoundManager.Instance == null) return;
 
-        SoundManager.Instance.Play(entry);
+        // 발소리는 가장 덜 중요하다 — 전투음이 많으면 먼저 빠진다 (2026-11-19 종류별 동시 발음 제한)
+        SoundManager.Instance.Play(entry, SoundManager.Instance.SfxGroup, 1f, 1f,
+            sounds != null && entry == sounds.footstep ? SoundKind.Footstep : SoundKind.Player);
     }
 
     void OnSprint(InputAction.CallbackContext context)

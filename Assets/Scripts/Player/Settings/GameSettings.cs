@@ -5,8 +5,8 @@ using UnityEngine.SceneManagement;
 /// 게임 설정 값(지금은 음량 세 가지)을 저장하고 적용한다. 설정창(GameSettingsUI)이 여기를 부른다.
 ///
 ///  · 전체   → AudioListener.volume — 모든 소리 (SoundManager 를 거치지 않는 카드 · 몬스터 예고음 포함)
-///  · 배경음 → SoundManager.SetMusicVolume
-///  · 효과음 → SoundManager.SetSfxVolume — SoundManager 가 내는 모든 효과음 · UI 소리
+///  · 배경음 → SoundManager.SetMusicVolume — 믹서 BGM 그룹 (노출 파라미터 MusicVolume, 2026-11-19)
+///  · 효과음 → SoundManager.SetSfxVolume — 믹서 SFX · UI 그룹 (SfxVolume · UiVolume). 그룹으로 나가는 소리는 자기 AudioSource 로 내도 따른다
 ///
 /// PlayerPrefs 에 저장해 다음 실행에도 유지된다. SoundManager 는 씬을 넘어 살아남지만 첫 씬에서 늦게 생길 수 있어,
 /// 씬이 바뀔 때마다 한 번 더 적용한다.
