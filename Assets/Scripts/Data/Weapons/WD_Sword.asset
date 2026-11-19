@@ -21,6 +21,7 @@ MonoBehaviour:
   supportTarget: 0
   fireInterval: 0.7
   damage: 6.6
+  damageUpgradeFlatPerLevel: 2
   critChance: 0.1
   critMultiplier: 2
   maxLevel: 3

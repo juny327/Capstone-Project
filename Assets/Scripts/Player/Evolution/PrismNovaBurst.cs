@@ -241,8 +241,8 @@ public class PrismNovaBurst : MonoBehaviour
         Vector3 dir = m.heading;
         if (weapon != null)
         {
-            float dealt = weapon.RollPrismDamage(cfg.moteDamageMul, out bool crit);
-            weapon.DealPrismDamage(target, dealt, crit, m.position, dir);
+            float dealt = weapon.RollPrismDamage(cfg.moteDamageMul, out bool crit, out float effectDamage);
+            weapon.DealPrismDamage(target, dealt, crit, m.position, dir, effectDamage);
         }
         MoteHits++;
 
@@ -359,8 +359,8 @@ public class PrismNovaBurst : MonoBehaviour
             foreach (Transform t in found)
             {
                 if (weapon == null) break;
-                float dealt = weapon.RollPrismDamage(cfg.tickDamageMul, out bool crit);
-                weapon.DealPrismDamage(t, dealt, crit, CombatFx.Body(t), beamDir);
+                float dealt = weapon.RollPrismDamage(cfg.tickDamageMul, out bool crit, out float effectDamage);
+                weapon.DealPrismDamage(t, dealt, crit, CombatFx.Body(t), beamDir, effectDamage);
                 BeamHits++;
 
                 // 맞은 자리에 세 색이 번갈아 터지는 작은 고리 (세 틱마다)

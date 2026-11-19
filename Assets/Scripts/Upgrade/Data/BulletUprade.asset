@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: BulletUprade
   m_EditorClassIdentifier: Assembly-CSharp::UpgradeData
   upgradeName: "\uACF5\uACA9\uB825 \uC99D\uAC00"
-  description: "\uBAA8\uB4E0 \uBB34\uAE30 \uD53C\uD574 +10%"
+  description: "\uc8fc\ubb34\uae30 \uae30\ubcf8 \uacf5\uaca9\uc5d0 \ubb34\uae30\ubcc4 \uace0\uc815 \ud53c\ud574 \ucd94\uac00 (\uc18c\ucd1d\u00b7\uae30\uad00\ub2e8\ucd1d +1 / \uc2a4\ub098\uc774\ud37c +3 / \ud55c\uc190\uac80\u00b7\ucc3d +2 / \ub300\uac80 +4, \uc120\ud615 \ub204\uc801)"
   icon: {fileID: 2947914709021185861, guid: 44f8c69802068264599809705c4b512c, type: 3}
   costExp: 4
   maxLevel: 0

@@ -178,8 +178,8 @@ public class SunLanceBurst : MonoBehaviour
         {
             if (weapon == null) break;
 
-            float dealt = weapon.RollPrismDamage(mul, out bool crit);
-            weapon.DealPrismDamage(t, dealt, crit, CombatFx.Body(t), aim);
+            float dealt = weapon.RollPrismDamage(mul, out bool crit, out float effectDamage);
+            weapon.DealPrismDamage(t, dealt, crit, CombatFx.Body(t), aim, effectDamage);
             BurnTicker.Apply(t, burnDps, cfg.burnDuration);
             FxLine.Ring(cfg.lineMaterial, t.position, 0.2f, 1.2f, cfg.color, 0.16f, 0.22f);
             Hits++;

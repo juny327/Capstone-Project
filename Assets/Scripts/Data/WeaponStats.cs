@@ -196,6 +196,8 @@ public readonly struct ProjectileSpawnInfo
 {
     public readonly float Speed;
     public readonly float Damage;
+    // 직접 공격 카드가 적용되기 전의 피해. 명중 파생 효과의 기준값.
+    public readonly float EffectDamage;
     public readonly float LifeTime;
     public readonly bool IsCritical;
     public readonly int PierceCount;
@@ -213,11 +215,13 @@ public readonly struct ProjectileSpawnInfo
     public ProjectileSpawnInfo(
         float speed, float damage, float lifeTime,
         bool isCritical, int pierceCount, Transform homingTarget = null,
-        WeaponBase source = null, Color tint = default, float homingTurnRate = 0f)
+        WeaponBase source = null, Color tint = default, float homingTurnRate = 0f,
+        float? effectDamage = null)
     {
         HomingTurnRate = homingTurnRate;
         Speed = speed;
         Damage = damage;
+        EffectDamage = effectDamage ?? damage;
         LifeTime = lifeTime;
         IsCritical = isCritical;
         PierceCount = pierceCount;

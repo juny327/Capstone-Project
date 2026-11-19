@@ -348,8 +348,11 @@ public class MeleeWeapon : WeaponBase
             Vector3 dir = c.Direction;
 
             bool isCritical = forceCrit || RollCritical(in stats);
-            float dealt = ApplyCritical(in stats, isCritical);
-            if (applied > 0) dealt *= cfg.extraTargetDamage;   // 두 번째 대상부터
+            // 두 번째 대상부터 extraTargetDamage (2026-11-17) — 공격력 카드의 고정 증가분에도 같은 배율을 건다
+            float targetScale = applied > 0 ? cfg.extraTargetDamage : 1f;
+            float effectDamage = ApplyCritical(in stats, isCritical) * targetScale;
+            float dealt = ResolveDirectDamage(effectDamage,
+                targetScale * (isCritical ? stats.CritMultiplier : 1f));
             Vector3 point = c.Collider.ClosestPoint(origin);
             bool wasAlive = CombatFx.IsAlive(root);   // 맞히기 전 — 처치 판정 (Drain · 상위 무기)
 
@@ -375,6 +378,7 @@ public class MeleeWeapon : WeaponBase
                     Point = point,
                     Direction = dir,
                     Damage = dealt,
+                    EffectDamage = effectDamage,
                     IsCritical = isCritical,
                     Killed = killed,
                 });

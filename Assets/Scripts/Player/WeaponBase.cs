@@ -928,6 +928,14 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
         return Random.value < stats.CritChance;
     }
 
+    // Stats.Damage 는 스킬/부착물도 읽으므로 직접 공격 카드의 영향을 받지 않는다.
+    public float DirectDamage => ResolveDirectDamage(Stats.Damage);
+
+    public float ResolveDirectDamage(float damage, float additiveScale = 1f)
+    {
+        return Owner != null ? Owner.ResolveDirectDamage(this, damage, additiveScale) : damage;
+    }
+
     protected float ApplyCritical(in WeaponRuntimeStats stats, bool isCritical)
     {
         return isCritical ? stats.Damage * stats.CritMultiplier : stats.Damage;

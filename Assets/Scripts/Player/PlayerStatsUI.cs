@@ -134,7 +134,7 @@ public class PlayerStatsUI : MonoBehaviour
         WeaponController weapons = t.GetComponent<WeaponController>();
         if (weapons != null && weapons.ActiveWeapon != null)
         {
-            UpdateBulletDamage(weapons.ActiveWeapon.Stats.Damage);
+            UpdateBulletDamage(weapons.ActiveDirectDamage);
             UpdateBulletSpeed(weapons.ActiveWeapon.Stats.ProjectileSpeed);
         }
         else if (weapons == null)
@@ -286,7 +286,7 @@ public class PlayerStatsUI : MonoBehaviour
     {
         if (bulletDamageText == null) return;
 
-        bulletDamageText.text = "BulletPower : " + damage;
+        bulletDamageText.text = "BulletPower : " + damage.ToString("0.##");
     }
     
     void UpdateBulletSpeed(float speed)
