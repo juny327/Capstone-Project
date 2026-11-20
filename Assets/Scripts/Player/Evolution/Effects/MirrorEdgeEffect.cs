@@ -123,7 +123,7 @@ public class MirrorEdgeEffect : AttachmentEffect
             if (kit)
             {
                 // 검기가 나가는 순간 — 빛 폭발 · 앞으로 밀려 나가는 큰 초승달 · 반짝임
-                FxKit.EnergyBurst(start - Vector3.up * 0.9f, 1.2f, cfg.color, ks);
+                FxKit.EnergyBurst(start - Vector3.up * 0.9f, 1.2f * ks, cfg.color, ks);
                 FxKit.SlashArc(start, forward, 3.6f * ks, cfg.coreColor, 7f, 0.26f);
                 FxKit.Glints(start, 1.6f, Color.white, 14f * ks, 0.9f);
             }
@@ -132,7 +132,7 @@ public class MirrorEdgeEffect : AttachmentEffect
             {
                 float angle = cfg.waveCount > 1 ? -cfg.waveSpread * (cfg.waveCount - 1) * 0.5f + cfg.waveSpread * i : 0f;
                 Vector3 dir = Quaternion.Euler(0f, angle, 0f) * forward;
-                CrescentWave.Launch(cfg, start, dir, damage);
+                CrescentWave.Launch(cfg, start, dir, damage, ks);
                 WavesLaunched++;
             }
 

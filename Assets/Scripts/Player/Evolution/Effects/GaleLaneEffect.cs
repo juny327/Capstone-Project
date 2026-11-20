@@ -81,7 +81,7 @@ public class GaleLaneEffect : AttachmentEffect
             Vector3 start = attack.Origin;
             start.y = Weapon.Controller != null ? Weapon.Controller.transform.position.y : attack.Origin.y - 1.2f;
 
-            GaleLane.Spawn(cfg, start, dir, reach, stats.Damage * cfg.tickDamageMul);
+            GaleLane.Spawn(cfg, start, dir, reach, stats.Damage * cfg.tickDamageMul, Weapon.IsSupport ? 0.65f : 1f);
             Spawned++;
         }
     }
