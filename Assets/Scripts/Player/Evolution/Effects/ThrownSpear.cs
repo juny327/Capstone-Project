@@ -82,7 +82,7 @@ public class ThrownSpear : MonoBehaviour
         }
     }
 
-    float KitScale => weapon != null && weapon.IsSupport ? 0.65f : 1f;
+    float KitScale => weapon != null ? weapon.EvoFxScale : 1f;
 
     /// <summary>손의 창을 숨기고 공격을 막는다 — 받을 때 · 지워질 때 되돌린다.</summary>
     void HideHand()

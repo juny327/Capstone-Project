@@ -100,7 +100,7 @@ public class SpinUpEffect : AttachmentEffect
         /// <summary>공통 재료 (2026-11-20) — 쏠 때마다 총구에서 불을 뿜는다. 달아오를수록 크고, 최고 연사에 들어서는 순간 한 번 크게 터진다.</summary>
         void KitShot(in WeaponAttack attack)
         {
-            float scale = Weapon.IsSupport ? 0.6f : 1f;
+            float scale = Weapon.EvoFxScale;
             FxKit.MuzzleJet(attack.Origin, attack.Direction, spin, cfg.heatColor, scale);
 
             bool hot = spin >= 0.95f;
@@ -118,7 +118,7 @@ public class SpinUpEffect : AttachmentEffect
         {
             // 공통 재료 (2026-11-20) — 맞은 자리마다 섬광과 불꽃이 튄다 (달아오를수록 크게). 총알 세례가 보이게
             if (!cfg.kitMuzzle || !FxKit.Ready || !EvoStrikes.Take(6)) return;
-            FxKit.Hit(hit.Point, -hit.Direction, cfg.heatColor, (1f + 0.8f * spin) * (Weapon.IsSupport ? 0.6f : 1f));
+            FxKit.Hit(hit.Point, -hit.Direction, cfg.heatColor, (1f + 0.8f * spin) * Weapon.EvoFxScale);
         }
 
         public override void Tick(float deltaTime)
@@ -143,7 +143,7 @@ public class SpinUpEffect : AttachmentEffect
             if (cfg.kitMuzzle && Weapon.IsActive && spin > 0.6f && FxKit.Ready && Weapon.MuzzlePoint != null)
             {
                 Transform muzzle = Weapon.MuzzlePoint;
-                FxKit.TrailDust(muzzle.position - muzzle.forward * 0.3f, cfg.heatColor, 40f * spin * deltaTime * (Weapon.IsSupport ? 0.5f : 1f), 0.09f);
+                FxKit.TrailDust(muzzle.position - muzzle.forward * 0.3f, cfg.heatColor, 40f * spin * deltaTime * Weapon.EvoFxScale, 0.09f);
             }
 
             UpdateHum(firing);
@@ -215,7 +215,7 @@ public class SpinUpEffect : AttachmentEffect
             smoke.transform.position = muzzle.position + muzzle.forward * 0.3f;
 
             ParticleSystem.EmissionModule emission = smoke.emission;
-            emission.rateOverTime = cfg.smokeRate * amount * (Weapon.IsSupport ? 0.5f : 1f);
+            emission.rateOverTime = cfg.smokeRate * amount * Weapon.EvoFxScale;
             if (Weapon.IsActive) SmokeAlive = smoke.particleCount;
         }
 

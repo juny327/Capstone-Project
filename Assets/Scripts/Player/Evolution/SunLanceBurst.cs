@@ -158,7 +158,7 @@ public class SunLanceBurst : MonoBehaviour
     // ───────── 공통 재료 (2026-11-20) ─────────
 
     bool UsesKit => cfg != null && cfg.kitFx && FxKit.Ready;
-    float KitScale => weapon != null && weapon.IsSupport ? 0.65f : 1f;
+    float KitScale => weapon != null ? weapon.EvoFxScale : 1f;
 
     /// <summary>기둥이 지나간 길을 따라 불길이 차례로 솟고, 총구는 폭풍, 끝은 큰 폭발 · 빛기둥.</summary>
     void KitFire(Vector3 origin, Vector3 ground, float range)

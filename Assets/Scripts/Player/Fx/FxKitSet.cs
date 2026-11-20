@@ -49,6 +49,9 @@ public class FxKitSet : ScriptableObject
     [Range(0.1f, 1f)] public float lowAmount = 0.35f;
     [Tooltip("크기 배율 — 불 덩어리 · 섬광 · 충격파 · 연기 전부")]
     [Range(0.5f, 2f)] public float scale = 1f;
+    [Tooltip("보조 칸에 들어간 상위 무기의 연출 배율 (크기 · 양, 탄 · 궤적 포함). 1 = 주무기와 같다 — 2026-11-20 사용자: 줄이지 않고 원본 그대로. "
+             + "예전에는 0.5 ~ 0.7 이었다. 화면 흔들림 · 번쩍임 · 줌은 이 값과 상관없이 보조 칸에서 약하다")]
+    [Range(0.3f, 1f)] public float supportScale = 1f;
 
     [Header("가리는 것")]
     [Tooltip("연기 진하기 (0 = 없음)")]

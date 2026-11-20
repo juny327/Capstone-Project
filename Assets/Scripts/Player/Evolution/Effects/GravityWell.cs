@@ -154,7 +154,7 @@ public class GravityWell : MonoBehaviour
 
     // ───────── 공통 재료 (2026-11-20) ─────────
 
-    float KitScale => source != null && source.IsSupport ? 0.65f : 1f;
+    float KitScale => source != null ? source.EvoFxScale : 1f;
 
     /// <summary>중력장이 열리는 순간 — 바닥의 빛 원반 · 어두워지는 바닥 · 소용돌이.</summary>
     void KitOpen()

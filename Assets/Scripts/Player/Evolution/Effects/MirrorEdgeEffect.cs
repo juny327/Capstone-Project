@@ -108,7 +108,7 @@ public class MirrorEdgeEffect : AttachmentEffect
 
             // 공통 재료 (2026-11-20) — 휘두를 때마다 칼끝에 반짝임
             bool kit = cfg.UsesKit;
-            float ks = Weapon.IsSupport ? 0.65f : 1f;
+            float ks = Weapon.EvoFxScale;
             if (kit) FxKit.Glints(attack.Origin + forward * Mathf.Max(1f, attack.Range * 0.7f) + Vector3.up * 0.9f, 0.9f, cfg.color, 6f * ks, 0.8f);
 
             swings++;

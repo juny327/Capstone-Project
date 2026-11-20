@@ -68,7 +68,7 @@ public class SiegeShellEffect : AttachmentEffect
 
             // 공통 재료 (2026-11-20) — 총구 폭풍: 앞으로 뿜는 불 · 부채꼴 불꽃 · 양옆 연기 · 발밑 충격파
             if (cfg.UsesKit)
-                FxKit.MuzzleBlast(at, attack.Direction, Weapon != null && Weapon.IsSupport ? 0.65f : 1.1f, cfg.color,
+                FxKit.MuzzleBlast(at, attack.Direction, 1.1f * (Weapon != null ? Weapon.EvoFxScale : 1f), cfg.color,
                     Weapon != null && Weapon.Controller != null ? Weapon.Controller.transform.position.y : at.y - 1.2f);
         }
 
@@ -109,7 +109,7 @@ public class SiegeShellEffect : AttachmentEffect
             // 공통 재료 (2026-11-20) — 큰 포탄 한 발의 폭발: 판정 반경을 꽉 채우는 불 덩어리 · 가운데 불기둥 · 겹겹의 충격파 · 튀는 파편
             if (kit)
             {
-                float r = cfg.blastRadius * (Weapon.IsSupport ? 0.65f : 1f);
+                float r = cfg.blastRadius * Weapon.EvoFxScale;
                 FxKit.Explosion(at, r, cfg.color, 1.15f);
                 FxKit.FlameRing(at, r * 0.3f, cfg.color, 5f, r * 1.3f, 0.5f);
                 FxKit.Shockwave(at, r * 4.4f, Color.white, 0.42f, 0.9f);

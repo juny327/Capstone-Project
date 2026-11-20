@@ -254,7 +254,7 @@ public class PrismNovaBurst : MonoBehaviour
     // ───────── 공통 재료 (2026-11-20) ─────────
 
     bool UsesKit => cfg != null && cfg.kitFx && FxKit.Ready;
-    float KitScale => weapon != null && weapon.IsSupport ? 0.65f : 1f;
+    float KitScale => weapon != null ? weapon.EvoFxScale : 1f;
 
     /// <summary>빛이 총구로 모여 합쳐지는 순간 — 흰 빛 폭발 · 빛기둥 · 반짝임 · 세 색 충격파가 차례로.</summary>
     void KitConverge(Vector3 at, Vector3 floor)

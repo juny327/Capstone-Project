@@ -59,8 +59,11 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
     /// <summary>강화 레벨에 따른 탄 · 궤적 크기 (Lv1 ×1 · Lv2 ×1.1 · Lv3 ×1.2). 상위 무기는 자기 연출이 따로 있어 ×1.</summary>
     public float LevelFxScale => data == null || data.IsEvolved ? 1f : 1f + 0.1f * (level - 1);
 
-    /// <summary>탄 · 총구 연출 크기 — 보조 칸 ×0.8 · 강화 레벨.</summary>
-    public float ShotFxScale => (IsSupport ? ShotFxDraw.SupportScale : 1f) * LevelFxScale;
+    /// <summary>상위 무기 연출 배율 — 보조 칸이면 FxKit.SupportScale (기본 1 = 주무기와 같다, 2026-11-20). 주무기 · 기본 무기는 1.</summary>
+    public float EvoFxScale => IsSupport && data != null && data.IsEvolved ? FxKit.SupportScale : 1f;
+
+    /// <summary>탄 · 총구 연출 크기 — 보조 칸 ×0.8 (상위 무기는 EvoFxScale) · 강화 레벨.</summary>
+    public float ShotFxScale => (!IsSupport ? 1f : data != null && data.IsEvolved ? EvoFxScale : ShotFxDraw.SupportScale) * LevelFxScale;
 
     /// <summary>쿨다운이 끝나고, 장전 중이 아니며, 탄약이 남아 있어야 쏠 수 있다.</summary>
     public bool CanFire => cooldown <= 0f && IsActive && !IsReloading && HasAmmo && !IsBusy && !HeldAway;

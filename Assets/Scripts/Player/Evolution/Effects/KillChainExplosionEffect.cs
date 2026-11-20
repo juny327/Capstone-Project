@@ -154,9 +154,9 @@ public class KillChainExplosionEffect : AttachmentEffect
             ExplosionsByDepth[slot]++;
             KillsByDepth[slot] += killed.Count;
 
-            // 연쇄 단마다 커진다 (모습만 — 판정 반경을 그리는 첫 고리는 그대로). 보조 칸은 작고 옅게
+            // 연쇄 단마다 커진다 (모습만 — 판정 반경을 그리는 첫 고리는 그대로). 보조 칸 배율은 EvoFxScale (기본 1 — 줄이지 않는다)
             DeepestChain = Mathf.Max(DeepestChain, depth);
-            float grow = Mathf.Pow(cfg.depthGrow, depth - 1) * (Weapon != null && Weapon.IsSupport ? 0.7f : 1f);
+            float grow = Mathf.Pow(cfg.depthGrow, depth - 1) * (Weapon != null ? Weapon.EvoFxScale : 1f);
 
             FxLine.Ring(cfg.material, at, 0.3f, cfg.radius * 1.1f, cfg.color, 0.4f, 0.32f);
             FxLine.Ring(cfg.material, at, 0.1f, cfg.radius * 0.55f, Color.white, 0.14f, 0.18f);

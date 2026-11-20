@@ -74,6 +74,9 @@ public class FxKit : MonoBehaviour
     /// <summary>공통 재료를 쓸 수 있는가 (설정 에셋과 재질이 다 있다).</summary>
     public static bool Ready => !ForceOff && Set != null && Set.Complete;
 
+    /// <summary>보조 칸 상위 무기의 연출 배율 (FxKitSet.supportScale — 기본 1, 줄이지 않는다). 설정이 없어도 1.</summary>
+    public static float SupportScale => Set != null ? Mathf.Clamp(Set.supportScale, 0.1f, 1f) : 1f;
+
     /// <summary>입자 수 배율 — 설정 × 그래픽 품질.</summary>
     public static float Amount
     {

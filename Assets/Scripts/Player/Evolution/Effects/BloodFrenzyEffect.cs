@@ -351,7 +351,7 @@ public class BloodFrenzyEffect : AttachmentEffect
 
         // ───────── 공통 재료 (2026-11-20) ─────────
 
-        float KitScale => Weapon != null && Weapon.IsSupport ? 0.65f : 1f;
+        float KitScale => Weapon != null ? Weapon.EvoFxScale : 1f;
         Color BloodDrop => new Color(cfg.color.r * 0.85f, 0.02f, 0.04f, 1f);
         static readonly Color BloodMist = new Color(0.35f, 0.02f, 0.04f, 1f);
 

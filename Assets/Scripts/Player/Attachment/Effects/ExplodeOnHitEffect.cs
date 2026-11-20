@@ -68,8 +68,8 @@ public class ExplodeOnHitEffect : AttachmentEffect
             bool kit = cfg.kitPop && FxKit.Ready;
             if (kit)
             {
-                // 공통 재료 (2026-11-20) — '모습 더하기' 가 있는 것(스웜 카빈)은 크게, 기본 개조(폭발탄)는 조금 작게. 보조 칸은 더 작게
-                float size = (cfg.fireball > 0f ? 1.5f : 1f) * (Weapon != null && Weapon.IsSupport ? 0.7f : 1f);
+                // 공통 재료 (2026-11-20) — '모습 더하기' 가 있는 것(스웜 카빈)은 크게, 기본 개조(폭발탄)는 조금 작게. 보조 칸은 SupportFx
+                float size = (cfg.fireball > 0f ? 1.5f : 1f) * SupportFx;
                 if (EvoStrikes.Take(8)) FxKit.Pop(at, cfg.radius, cfg.color, size);
             }
             else if (cfg.vfxPrefab != null && EvoStrikes.Take(6)) EvoStrikes.Spawn(cfg.vfxPrefab, at, cfg.color, cfg.vfxScale);
@@ -82,12 +82,15 @@ public class ExplodeOnHitEffect : AttachmentEffect
             }
         }
 
-        /// <summary>불꽃 덩어리 · 안쪽 고리 · 파편 불꽃 · 흔들림 (값이 있는 것만). 보조 칸은 작고 옅게.</summary>
+        /// <summary>불꽃 덩어리 · 안쪽 고리 · 파편 불꽃 · 흔들림 (값이 있는 것만). 보조 칸은 SupportFx 배율.</summary>
+        /// <summary>보조 칸 연출 배율 — 상위 무기(스웜 카빈)는 EvoFxScale (기본 1), 기본 무기에 단 폭발탄은 0.7.</summary>
+        float SupportFx => Weapon == null || !Weapon.IsSupport ? 1f : Weapon.Data != null && Weapon.Data.IsEvolved ? Weapon.EvoFxScale : 0.7f;
+
         void Enrich(Vector3 at, bool kit)
         {
             if (cfg.fireball <= 0f && !cfg.innerRing && cfg.shards <= 0 && cfg.cameraShake <= 0f) return;
 
-            float s = Weapon != null && Weapon.IsSupport ? 0.7f : 1f;
+            float s = SupportFx;
             Color hot = Color.Lerp(cfg.color, Color.white, 0.45f);
 
             if (cfg.innerRing) FxLine.Ring(cfg.material, at, cfg.radius * 0.1f, cfg.radius * 0.55f, Color.white, 0.14f, 0.16f);

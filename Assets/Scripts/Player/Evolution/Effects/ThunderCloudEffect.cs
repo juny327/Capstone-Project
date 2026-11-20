@@ -118,7 +118,7 @@ public class ThunderCloudEffect : AttachmentEffect
             Vector3 top = cfg.strikeHeight > 0f
                 ? Vector3.Lerp(at, new Vector3(sky.x, at.y, sky.z), cfg.strikeLean) + Vector3.up * cfg.strikeHeight
                 : sky;
-            float scale = Weapon.IsSupport ? 0.7f : 1f;   // 보조 칸은 작고 옅게
+            float scale = Weapon.EvoFxScale;   // 보조 칸 배율 (기본 1 — 줄이지 않는다)
 
             EvoStrikes.Lightning(cfg.material, cfg.color, top, at, cfg.radius, Weapon.Stats.Damage * cfg.damageMul, cfg.stun, cfg.impactPrefab,
                 cfg.strikeWidth, cfg.strikeBranches, cfg.strikeGlowRadius, scale);
@@ -155,13 +155,13 @@ public class ThunderCloudEffect : AttachmentEffect
         /// </summary>
         void KitStorm(Transform player, float deltaTime)
         {
-            float size = cfg.cloudRadius * cfg.kitCloudScale * (Weapon.IsSupport ? 0.7f : 1f);
+            float size = cfg.cloudRadius * cfg.kitCloudScale * Weapon.EvoFxScale;
 
             shadeTimer -= deltaTime;
             if (shadeTimer <= 0f && cfg.kitShade > 0f)
             {
                 shadeTimer = 0.4f;
-                FxKit.Shade(player.position, size * 2.6f, cfg.kitShade * (Weapon.IsSupport ? 0.6f : 1f), 1f);
+                FxKit.Shade(player.position, size * 2.6f, cfg.kitShade * Weapon.EvoFxScale, 1f);
             }
 
             flickerTimer -= deltaTime;
