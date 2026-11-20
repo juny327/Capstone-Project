@@ -58,6 +58,10 @@ public class BloodFrenzyEffect : AttachmentEffect
     [Header("연출")]
     public Material material;
     public Color color = new Color(0.9f, 0.08f, 0.14f, 1f);
+    [Tooltip("공통 재료(FxKit)로 붉은 초승달 · 피 · 폭주의 불길과 빛기둥을 더한다 (2026-11-20). 끄면 예전 연출")]
+    public bool kitBlood = true;
+
+    public bool UsesKit => kitBlood && FxKit.Ready;
 
     [Tooltip("발밑 혈기 고리 반경")]
     [Min(0.1f)] public float ringRadius = 0.95f;
@@ -187,6 +191,7 @@ public class BloodFrenzyEffect : AttachmentEffect
         {
             if (hit.Target != null && hit.Target.TryGetComponent(out BossHealth _)) Add(cfg.bossHitGain);
             if (Frenzy) Steal(hit.EffectDamage, hit.Point);
+            if (cfg.UsesKit && EvoStrikes.Take(6)) KitSlashHit(hit.Point, hit.Direction);   // 공통 재료 (2026-11-20) — 벨 때마다 할퀸 자국 · 피
         }
 
         public override void OnAttack(in WeaponAttack attack)
@@ -240,6 +245,7 @@ public class BloodFrenzyEffect : AttachmentEffect
                 }
             }
 
+            if (cfg.UsesKit) KitSlash(body, dir, r);
             CombatFx.PlaySound(cfg.slashSound);
             CombatFx.PlaySound(cfg.bloodSound);
 
@@ -257,6 +263,7 @@ public class BloodFrenzyEffect : AttachmentEffect
                 Vector3 point = CombatFx.Body(t);
                 CombatFx.Damage(t, damage, point, to.sqrMagnitude > 0.0001f ? to.normalized : dir);
                 SlashHits++;
+                if (cfg.UsesKit && EvoStrikes.Take(6)) KitSlashHit(point, to.sqrMagnitude > 0.0001f ? to.normalized : dir);
 
                 // 검의 직접 공격 — 흡혈(팀원 스킬) · 폭주 회복 · 처치로 폭주 연장
                 if (Frenzy) Steal(damage, point);
@@ -331,6 +338,51 @@ public class BloodFrenzyEffect : AttachmentEffect
                 FxLine.Ring(cfg.material, owner.position, 0.3f, 3.5f, cfg.color, 0.28f, 0.45f);
                 FxLine.Ring(cfg.material, owner.position, 0.2f, 2.2f, Color.white, 0.12f, 0.3f);
             }
+            if (owner != null && cfg.UsesKit) KitFrenzyStart(owner.position);
+        }
+
+        // ───────── 공통 재료 (2026-11-20) ─────────
+
+        float KitScale => Weapon != null && Weapon.IsSupport ? 0.65f : 1f;
+        Color BloodDrop => new Color(cfg.color.r * 0.85f, 0.02f, 0.04f, 1f);
+        static readonly Color BloodMist = new Color(0.35f, 0.02f, 0.04f, 1f);
+
+        /// <summary>검격 한 줄 — 붉은 초승달이 밀려 나가고 피가 튄다.</summary>
+        void KitSlash(Vector3 body, Vector3 dir, float r)
+        {
+            float s = KitScale;
+            FxKit.SlashArc(body + dir * r * 0.55f, dir, r * 1.7f * s, cfg.color, 4f, 0.24f);
+            FxKit.Spray(body + dir * r * 0.8f, dir, BloodDrop, 7f * s, 6f, 0.7f);
+        }
+
+        /// <summary>검격에 맞은 적 — 할퀸 자국 · 뒤로 튀는 피 · 가끔 피 안개.</summary>
+        void KitSlashHit(Vector3 point, Vector3 away)
+        {
+            float s = KitScale;
+            FxKit.ClawMark(point, 1.7f * s, cfg.color, 0.22f);
+            FxKit.Spray(point, away, BloodDrop, 8f * s, 7f, 0.6f);
+            if (Random.value < 0.4f) FxKit.Mist(point - Vector3.up * 0.5f, 0.9f, BloodMist, 0.4f, 1f, 0.7f);
+        }
+
+        /// <summary>폭주 시작 — 붉은 빛 폭발 · 빛기둥 · 둘레에서 솟는 붉은 불길 · 피 안개 · 소용돌이 · 큰 충격파.</summary>
+        void KitFrenzyStart(Vector3 at)
+        {
+            float s = KitScale;
+            FxKit.EnergyBurst(at, 2.2f, cfg.color, 1.25f * s, true);
+            FxKit.Pillar(at, 1.3f * s, 6.5f, cfg.color, 0.6f, 8);
+            FxKit.FlameRing(at, 2.2f * s, cfg.color, 9f, 2.8f * s, 0.55f);
+            FxKit.Mist(at, 3f * s, BloodMist, 0.5f, 8f, 1.3f);
+            FxKit.Swirl(at, 6f * s, cfg.color, 0.6f, 3, 0.9f);
+            FxKit.Shockwave(at, 9f * s, cfg.color, 0.45f, 0.9f);
+        }
+
+        /// <summary>폭주 중 0.5초마다 — 퍼지는 붉은 물결 · 둘레의 불길 · 소용돌이.</summary>
+        void KitPulse(Vector3 at)
+        {
+            float s = KitScale;
+            FxKit.Wave(at, (cfg.ringRadius + 1.3f) * 2.2f * s, cfg.color, 0.45f, 0.6f);
+            FxKit.FlameRing(at, cfg.ringRadius * 1.3f * s, cfg.color, 5f, 1.8f * s, 0.4f);
+            FxKit.Swirl(at, cfg.ringRadius * 2.6f * s, cfg.color, 0.45f, 2, 0.7f);
         }
 
         void EndFrenzy()
@@ -397,6 +449,7 @@ public class BloodFrenzyEffect : AttachmentEffect
             Transform owner = OwnerRoot;
             if (owner != null && cfg.material != null)
                 FxLine.Line(cfg.material, from, owner.position + Vector3.up * 1.1f, cfg.color, 0.06f, 0.18f);
+            if (owner != null && cfg.UsesKit) FxKit.Fly(from, owner.position + Vector3.up * 1.1f, cfg.color, 3f, 0.28f);   // 피가 날아와 스민다
 
             int whole = Mathf.FloorToInt(healCarry);
             if (whole <= 0) return;
@@ -447,8 +500,13 @@ public class BloodFrenzyEffect : AttachmentEffect
                 {
                     pulseTimer = 0.5f;
                     FxLine.Ring(cfg.material, OwnerRoot.position, cfg.ringRadius, cfg.ringRadius + 1.3f, cfg.color, 0.12f, 0.4f);
+                    if (cfg.UsesKit) KitPulse(OwnerRoot.position);
                 }
             }
+
+            // 공통 재료 (2026-11-20) — 폭주하는 동안 몸 둘레에서 붉은 기운이 계속 피어오른다
+            if (Frenzy && Weapon.IsActive && OwnerRoot != null && cfg.UsesKit)
+                FxKit.Aura(OwnerRoot.position, 0.9f, cfg.color, 14f * deltaTime * KitScale, 0.9f);
 
             Publish();
             DrawRing();

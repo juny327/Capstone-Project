@@ -49,6 +49,16 @@ public class KillChainExplosionEffect : AttachmentEffect
     [Tooltip("검은 연기 수명 배율")]
     [Range(0.2f, 1f)] public float smokeLife = 0.6f;
 
+    [Header("공통 재료 연출 (2026-11-19 연출 개선) — 판정 · 피해와 무관")]
+    [Tooltip("켜면 폭발 프리팹(흰 연기 덩어리)과 불꽃 줄 대신 공통 재료(FxKit)로 그린다 — 불 덩어리 · 검붉은 연기 · 튀는 불꽃 · 파편 · 잔불 · 충격파 · 그을음. " +
+             "설정 에셋(Resources/Fx/FxKitSet)이 없으면 예전 그대로")]
+    public bool kitExplosion = true;
+    [Tooltip("연쇄 단마다 커지는 정도를 공통 재료 폭발에는 이만큼 더 세게 건다 (1 = depthGrow 그대로). 연쇄가 이어질수록 폭발이 눈에 띄게 커진다")]
+    [Range(1f, 2.5f)] public float kitGrowBoost = 1.6f;
+
+    /// <summary>공통 재료로 그리는가.</summary>
+    public bool UsesKit => kitExplosion && FxKit.Ready;
+
     [Header("큰 연쇄 (2026-11-15) — 큰 순간(히트 스톱 · 쿵 · 줌 · 번쩍)을 내는 조건")]
     [Tooltip("폭발 하나가 이만큼 이상을 한꺼번에 쓰러뜨리면, 그 자리들에서 다음 단이 터지는 순간이 큰 순간이 된다. (예전 조건 '연쇄 3단째'는 거의 안 나왔다 — 폭발 피해가 단마다 줄어 2단 폭발이 적을 못 잡는다)")]
     [Range(2, 8)] public int finaleKills = 3;
@@ -93,6 +103,8 @@ public class KillChainExplosionEffect : AttachmentEffect
     /// <summary>폭발 효과를 미리 만들어 둔다 — 입장 가림막 아래에서 (StageWarmup, 2026-11-18). 연쇄 한 번에 여럿이 터진다.</summary>
     public void Prewarm(int count, Vector3? wakeAt = null)
     {
+        // 공통 재료로 그리면 폭발 프리팹은 쓰지 않는다 — 채널만 깨워 둔다 (2026-11-19)
+        if (UsesKit) { FxKit.Prewarm(wakeAt ?? Vector3.zero); return; }
         if (explosionPrefab != null) FxPool.Prewarm(explosionPrefab, GetInstanceID(), count, SetupExplosion, wakeAt);
     }
 
@@ -149,10 +161,19 @@ public class KillChainExplosionEffect : AttachmentEffect
             FxLine.Ring(cfg.material, at, 0.3f, cfg.radius * 1.1f, cfg.color, 0.4f, 0.32f);
             FxLine.Ring(cfg.material, at, 0.1f, cfg.radius * 0.55f, Color.white, 0.14f, 0.18f);
             if (depth > 1) FxLine.Ring(cfg.material, at, cfg.radius * 0.5f, cfg.radius * 1.1f * grow, Color.Lerp(cfg.color, Color.white, 0.35f), 0.1f, 0.4f);
-            GroundGlow.Flash(at, cfg.radius * 1.4f * grow, cfg.color, 0.26f, Mathf.Min(1.1f, 0.7f * grow));
+            // 공통 재료로 그릴 때는 붉은 바닥 빛을 낮춘다 — 불 덩어리가 분홍 빛에 묻히지 않게 (2026-11-19)
+            GroundGlow.Flash(at, cfg.radius * 1.4f * grow, cfg.color, 0.26f, Mathf.Min(1.1f, 0.7f * grow) * (cfg.UsesKit ? 0.6f : 1f));
             FlashLight.Flash(at, cfg.color, Mathf.Max(4f, cfg.radius * 2.5f) * grow, 0.16f, Mathf.Min(1.5f, grow));
-            Flames(at, depth, grow);
-            SpawnExplosion(at, grow);
+            if (cfg.UsesKit)
+            {
+                // 공통 재료 (2026-11-19) — 연쇄 단마다 더 크게: 1 → 1.32 → 1.70 (depthGrow 1.2 · kitGrowBoost 1.6)
+                FxKit.Explosion(at, cfg.radius, cfg.color, 1f + (grow - 1f) * cfg.kitGrowBoost);
+            }
+            else
+            {
+                Flames(at, depth, grow);
+                SpawnExplosion(at, grow);
+            }
 
             if (Time.time - lastSound > 0.07f)
             {
@@ -164,7 +185,7 @@ public class KillChainExplosionEffect : AttachmentEffect
 
             // 큰 연쇄 — 앞 단 폭발이 여럿을 한꺼번에 쓰러뜨려 여러 군데가 같이 터지는 순간 (또는 마지막 단까지 간 연쇄).
             // 큰 순간(히트 스톱 · 쿵 · 줌 · 번쩍)은 같이 터져도 한 번만 (ImpactFx.repeatGap), 그리고 finaleCooldown 에 한 번만
-            if (finale || (depth >= cfg.maxDepth && depth > 1)) Finale();
+            if (finale || (depth >= cfg.maxDepth && depth > 1)) Finale(at);
 
             if (depth >= cfg.maxDepth || Weapon == null) yield break;
 
@@ -174,12 +195,13 @@ public class KillChainExplosionEffect : AttachmentEffect
                 Weapon.StartCoroutine(Explode(p, next, depth + 1, cfg.chainDelay + cfg.implodeTime * 0.5f, big));
         }
 
-        void Finale()
+        void Finale(Vector3 at)
         {
             if (Time.time - lastFinaleAt < cfg.finaleCooldown) return;
             lastFinaleAt = Time.time;
             Finales++;
             ImpactFx.Play(ImpactMoment.KillChainFinale, Weapon, cfg.color);
+            if (cfg.UsesKit) FxKit.BigShockwave(at, cfg.radius, cfg.color);   // 큰 연쇄의 마지막 — 넓게 퍼지는 충격파
         }
 
         /// <summary>붉은 불꽃 — 가운데 뜨거운 덩어리 + 밖으로 튀는 줄기. 깊은 단일수록 많고 길고 밝다.</summary>

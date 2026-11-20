@@ -75,6 +75,9 @@ public class PrismBurstSettings
     [Tooltip("빔 · 빛 꼬리 재질 (가산 — FxLine 재질)")]
     public Material lineMaterial;
 
+    [Tooltip("공통 재료(FxKit)로 빛 폭발 · 빛기둥 · 빔을 따라 흩어지는 알갱이를 더한다 (2026-11-20). 끄면 예전 연출")]
+    public bool kitFx = true;
+
     [Tooltip("빛 몸체 재질 (발광)")]
     public Material moteMaterial;
 

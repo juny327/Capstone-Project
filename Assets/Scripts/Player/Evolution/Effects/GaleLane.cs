@@ -72,6 +72,7 @@ public class GaleLane : MonoBehaviour
         FxLine.Ring(cfg.material, Tip, 0.2f, cfg.halfWidth * 1.6f, cfg.color, 0.12f, 0.3f);
         CombatFx.PlaySound(cfg.openSound);
         BuildBand();
+        if (cfg.UsesKit) KitOpen();
 
         if (cfg.tornadoPrefab != null)
         {
@@ -128,6 +129,7 @@ public class GaleLane : MonoBehaviour
         {
             streak = cfg.streakInterval;
             SpawnGust();
+            if (cfg.UsesKit) KitGust();
         }
 
         // 바람 소리 · 바닥 띠 — 0.15초에 들어오고 마지막 0.4초에 빠진다
@@ -214,7 +216,50 @@ public class GaleLane : MonoBehaviour
             CombatFx.Damage(enemy, damage, CombatFx.Body(enemy), dir);
             EnemySlow.Apply(enemy, cfg.slowFactor, cfg.tickInterval + cfg.slowLinger);
             GaleLaneEffect.Ticks++;
+            if (cfg.UsesKit && EvoStrikes.Take(6)) KitCut(enemy);
         }
+    }
+
+    // ───────── 공통 재료 (2026-11-20) ─────────
+
+    /// <summary>길이 열리는 순간 — 길 전체를 훑는 바람 줄기 · 차례로 도는 소용돌이 · 끝의 돌풍 폭발 · 먼지.</summary>
+    void KitOpen()
+    {
+        Color c = cfg.color;
+        FxKit.WindStreaks(start, dir, length, cfg.halfWidth, c, 70f, 30f);
+        FxKit.BeamDust(start + Vector3.up * 0.7f, Tip + Vector3.up * 0.7f, c, length * 2.5f, cfg.halfWidth, false, 1.5f);
+        FxKit.Wave(start, cfg.halfWidth * 5f, c, 0.4f, 0.6f);
+
+        float step = Mathf.Max(1.6f, cfg.halfWidth * 2f);
+        for (float d = step * 0.5f; d < length; d += step)
+            FxKit.Swirl(start + dir * d, cfg.halfWidth * 5f, c, 0.6f, 3, 0.9f, d / 45f);
+
+        FxKit.EnergyBurst(Tip, cfg.halfWidth * 2f, c);
+        FxKit.Mist(Vector3.Lerp(start, Tip, 0.5f), length * 0.3f, new Color(0.75f, 0.85f, 0.8f), 0.22f, 5f, 0.8f);
+    }
+
+    float kitSwirl;
+
+    /// <summary>길이 살아 있는 동안 — 바람 줄기가 계속 흐르고, 길 위 아무 데서나 소용돌이가 돈다. 끝의 토네이도 밑동도 돈다.</summary>
+    void KitGust()
+    {
+        FxKit.WindStreaks(start, dir, length, cfg.halfWidth, cfg.color, 7f, 26f);
+        FxKit.BeamDust(start + Vector3.up * 0.7f, Tip + Vector3.up * 0.7f, cfg.color, 3f, cfg.halfWidth, false, 1.4f);
+        FxKit.Aura(Tip, cfg.halfWidth * 1.4f, cfg.color, 1.6f, 1.4f);
+
+        kitSwirl -= cfg.streakInterval;
+        if (kitSwirl > 0f) return;
+        kitSwirl = 0.22f;
+        FxKit.Swirl(start + dir * Random.Range(0.1f, 0.9f) * length, cfg.halfWidth * Random.Range(3.6f, 5.2f), cfg.color, 0.5f, 2, 0.8f);
+        FxKit.Swirl(Tip, cfg.halfWidth * 6.5f, Color.Lerp(cfg.color, Color.white, 0.3f), 0.5f, 3, 0.9f);
+    }
+
+    /// <summary>바람이 벤 적 — 길 방향으로 지나가는 바람 칼날 · 튀는 줄기.</summary>
+    void KitCut(Transform enemy)
+    {
+        Vector3 p = CombatFx.Body(enemy);
+        FxKit.SlashArc(p, dir, 2.8f, cfg.color, 5f, 0.22f);
+        FxKit.Spray(p, dir, Color.Lerp(cfg.color, Color.white, 0.4f), 5f, 8f, 0.4f);
     }
 
     /// <summary>

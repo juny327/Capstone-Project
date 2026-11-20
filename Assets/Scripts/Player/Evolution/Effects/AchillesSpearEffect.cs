@@ -56,6 +56,10 @@ public class AchillesSpearEffect : AttachmentEffect
     [Range(0.05f, 1f)] public float orbitTrailLap = 0.33f;
     [Tooltip("손에 받는 순간 흔들림")]
     [Min(0f)] public float catchShake = 0.1f;
+    [Tooltip("공통 재료(FxKit)로 금빛 꼬리 · 맞힘 섬광 · 받을 때의 빛기둥을 더한다 (2026-11-20). 끄면 예전 연출")]
+    public bool kitGold = true;
+
+    public bool UsesKit => kitGold && FxKit.Ready;
 
     [Header("소리")]
     public GameSoundSet.Entry throwSound = new GameSoundSet.Entry();

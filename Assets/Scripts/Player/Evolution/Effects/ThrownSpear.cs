@@ -72,7 +72,17 @@ public class ThrownSpear : MonoBehaviour
         Vector3 feet = owner.position;
         FxLine.Ring(cfg.material, feet, 0.25f, 1.2f, cfg.goldColor, 0.1f, 0.18f);
         GroundGlow.Flash(feet, 1.8f, cfg.goldColor, 0.16f);
+
+        // 공통 재료 (2026-11-20) — 던지는 순간 발밑 빛 폭발 · 창을 따라 앞으로 쏠리는 금빛 줄기
+        if (cfg.UsesKit)
+        {
+            float s = KitScale;
+            FxKit.EnergyBurst(feet, 1f, cfg.goldColor, 0.9f * s);
+            FxKit.WindStreaks(feet, dir, reach * 2f, 0.5f, cfg.goldColor, 18f * s, 34f);
+        }
     }
+
+    float KitScale => weapon != null && weapon.IsSupport ? 0.65f : 1f;
 
     /// <summary>손의 창을 숨기고 공격을 막는다 — 받을 때 · 지워질 때 되돌린다.</summary>
     void HideHand()
@@ -246,6 +256,9 @@ public class ThrownSpear : MonoBehaviour
             case Phase.Orbit: Orbit(dt); break;
             case Phase.Return: Return(dt); break;
         }
+
+        // 공통 재료 (2026-11-20) — 날아가는 내내 금빛 알갱이 · 반짝임이 뒤에 남는다
+        if (cfg.UsesKit) FxKit.TrailDust(transform.position, cfg.goldColor, 150f * dt * KitScale, 0.3f, true, 1f);
     }
 
     void Fly(float dt)
@@ -270,6 +283,12 @@ public class ThrownSpear : MonoBehaviour
         SetOrbitTrail(0);
         CombatFx.PlaySound(cfg.landSound);
         FxLine.Ring(cfg.material, owner.position, radius * 0.9f, radius, cfg.color, 0.12f, 0.35f);
+        if (cfg.UsesKit)
+        {
+            // 궤도에 들어서는 순간 — 창이 꺾이는 자리의 빛 폭발 · 캐릭터 둘레 소용돌이
+            FxKit.EnergyBurst(Ground(to), 1.1f, cfg.goldColor, KitScale);
+            FxKit.Swirl(owner.position, radius * 2.3f, cfg.goldColor, 0.7f, 3, 0.8f);
+        }
     }
 
     /// <summary>캐릭터를 중심으로 원을 그리며 돈다 — 캐릭터가 움직이면 원도 따라간다. 창끝은 도는 방향.</summary>
@@ -336,6 +355,14 @@ public class ThrownSpear : MonoBehaviour
         FxLine.Ring(cfg.material, feet, 1.1f, 0.2f, Color.white, 0.07f, 0.16f);
         GroundGlow.Flash(feet, 1.6f, cfg.goldColor, 0.2f);
         ImpactFx.Play(ImpactMoment.SpearCatch, weapon, cfg.goldColor, cfg.catchShake);   // 쿵 · 살짝 줌 · 금색 번쩍 (보조 무기는 약한 흔들림만)
+        if (cfg.UsesKit)
+        {
+            // 손에 받는 순간 — 금빛 빛기둥 · 빛 폭발 · 반짝임
+            float s = KitScale;
+            FxKit.Pillar(feet, 1f * s, 6f, cfg.goldColor, 0.5f, 8);
+            FxKit.EnergyBurst(feet, 1.4f, cfg.goldColor, 1.1f * s);
+            FxKit.Glints(feet + Vector3.up * 1.2f, 1.5f, Color.white, 14f * s, 0.6f);
+        }
     }
 
     /// <summary>지나간 구간의 적을 한 번씩 벤다 (stage 0 날아감 · 1 궤도 · 2 돌아옴 — 테스트 집계).</summary>
@@ -369,6 +396,7 @@ public class ThrownSpear : MonoBehaviour
         FxLine.Line(cfg.material, p - dir * 0.2f, p + dir * 0.5f, Color.white, 0.08f, 0.1f);
         GroundGlow.Flash(enemy.position, 1.2f, cfg.goldColor, 0.14f, 0.8f);
         if (stage == 0) FxLine.Ring(cfg.material, enemy.position, 0.1f, 0.7f, cfg.color, 0.1f, 0.14f);
+        if (cfg.UsesKit && EvoStrikes.Take(6)) FxKit.Hit(p, dir, cfg.goldColor, (stage == 0 ? 1.3f : 1f) * KitScale);
     }
 
     Vector3 Ground(Vector3 p) => p - Vector3.up * cfg.flyHeight;

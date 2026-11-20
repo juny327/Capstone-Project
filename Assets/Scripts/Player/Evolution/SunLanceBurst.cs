@@ -140,11 +140,37 @@ public class SunLanceBurst : MonoBehaviour
             ringTimer = 0.12f;
             Color r = Color.Lerp(cfg.color, Color.white, charge * 0.6f);
             FxLine.Ring(cfg.lineMaterial, Origin() - Vector3.up * 0.2f, 1.6f - charge * 0.6f, 0.15f, r, 0.08f + charge * 0.1f, 0.14f);
+
+            // 공통 재료 (2026-11-20) — 둘레의 빛이 총구로 빨려들고, 발밑 빛 원반이 커지고, 예고선 위로 불티가 오른다
+            if (UsesKit)
+            {
+                FxKit.Inflow(Ground(Origin()), 2.2f, r, (4f + 8f * charge) * KitScale);
+                FxKit.Disc(Ground(Origin()), (2.4f + 2.6f * charge) * KitScale, cfg.color, 0.3f, 0.35f + 0.5f * charge);
+                FxKit.BeamDust(from + Vector3.up * 0.2f, to + Vector3.up * 0.2f, cfg.color, 5f * charge * KitScale, 0.4f, false);
+            }
         }
 
         // 끝점 표시 — "여기까지 닿는다"
         if (Mathf.Repeat(phaseTime, 0.2f) < dt)
             FxLine.Ring(cfg.lineMaterial, to, 0.1f, 0.9f, c, 0.08f, 0.18f);
+    }
+
+    // ───────── 공통 재료 (2026-11-20) ─────────
+
+    bool UsesKit => cfg != null && cfg.kitFx && FxKit.Ready;
+    float KitScale => weapon != null && weapon.IsSupport ? 0.65f : 1f;
+
+    /// <summary>기둥이 지나간 길을 따라 불길이 차례로 솟고, 총구는 폭풍, 끝은 큰 폭발 · 빛기둥.</summary>
+    void KitFire(Vector3 origin, Vector3 ground, float range)
+    {
+        float s = KitScale;
+        Vector3 end = ground + aim * range;
+        FxKit.MuzzleBlast(origin, aim, 1.1f * s, cfg.color, ground.y);
+        FxKit.FireLine(ground + aim * 1.2f, end, cfg.beamWidth * 0.75f * s, cfg.color);
+        FxKit.Explosion(end, 2.4f * s, cfg.color, 1.2f);
+        FxKit.Pillar(end, 1.3f * s, 7f, cfg.color, 0.6f, 8);
+        FxKit.BeamDust(origin, origin + aim * range, cfg.color, Mathf.Clamp(range * 3f, 10f, 60f) * s, 0.9f);
+        FxKit.Glints(origin, 1.2f, Color.white, 8f * s, 0.6f);
     }
 
     // 바짝 붙은 적이 있으면 모은 만큼만 — 끝까지 모으다 맞지 않게 (earlyReleaseRange)
@@ -196,6 +222,7 @@ public class SunLanceBurst : MonoBehaviour
         GroundGlow.Flash(Ground(beamTo), 2.6f, cfg.color, 0.35f);
         FlashLight.Flash(ground, cfg.color, 7f, 0.22f, 1.2f);
         FlashLight.Flash(Ground(beamTo), cfg.color, 6f, 0.25f);
+        if (UsesKit) KitFire(origin, ground, range);
 
         ImpactFx.Play(ImpactMoment.SunLanceFire, weapon, cfg.color, cfg.cameraShake, aim);   // 쿵 + 쏘는 반대쪽 밀림 + 줌 + 번쩍 (보조는 흔들림만)
         CombatFx.PlaySound(cfg.fireSound);

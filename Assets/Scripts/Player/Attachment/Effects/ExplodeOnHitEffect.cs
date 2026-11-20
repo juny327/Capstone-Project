@@ -28,6 +28,8 @@ public class ExplodeOnHitEffect : AttachmentEffect
     [Range(0, 10)] public int shards;
     [Tooltip("터질 때 흔들림 — 여러 발이 이어 터져도 0.12초에 한 번만")]
     [Min(0f)] public float cameraShake;
+    [Tooltip("공통 재료(FxKit)로 그린다 — 작은 불 폭발 (2026-11-20). 끄면 예전 연출")]
+    public bool kitPop = true;
 
     // 산탄 8발이 한 프레임에 터지면 소리가 겹쳐 터진다 — 짧게 한 번만
     static float lastSound;
@@ -63,8 +65,15 @@ public class ExplodeOnHitEffect : AttachmentEffect
 
             FxLine.Ring(cfg.material, at, cfg.radius * 0.25f, cfg.radius, cfg.color, 0.3f, 0.28f);
             GroundGlow.Flash(new Vector3(at.x, hit.Target != null ? hit.Target.position.y : at.y - 1f, at.z), cfg.radius * 1.3f, cfg.color, 0.22f);
-            if (cfg.vfxPrefab != null && EvoStrikes.Take(6)) EvoStrikes.Spawn(cfg.vfxPrefab, at, cfg.color, cfg.vfxScale);
-            Enrich(at);
+            bool kit = cfg.kitPop && FxKit.Ready;
+            if (kit)
+            {
+                // 공통 재료 (2026-11-20) — '모습 더하기' 가 있는 것(스웜 카빈)은 크게, 기본 개조(폭발탄)는 조금 작게. 보조 칸은 더 작게
+                float size = (cfg.fireball > 0f ? 1.5f : 1f) * (Weapon != null && Weapon.IsSupport ? 0.7f : 1f);
+                if (EvoStrikes.Take(8)) FxKit.Pop(at, cfg.radius, cfg.color, size);
+            }
+            else if (cfg.vfxPrefab != null && EvoStrikes.Take(6)) EvoStrikes.Spawn(cfg.vfxPrefab, at, cfg.color, cfg.vfxScale);
+            Enrich(at, kit);
 
             if (Time.time - lastSound > 0.08f)
             {
@@ -74,7 +83,7 @@ public class ExplodeOnHitEffect : AttachmentEffect
         }
 
         /// <summary>불꽃 덩어리 · 안쪽 고리 · 파편 불꽃 · 흔들림 (값이 있는 것만). 보조 칸은 작고 옅게.</summary>
-        void Enrich(Vector3 at)
+        void Enrich(Vector3 at, bool kit)
         {
             if (cfg.fireball <= 0f && !cfg.innerRing && cfg.shards <= 0 && cfg.cameraShake <= 0f) return;
 
@@ -82,14 +91,14 @@ public class ExplodeOnHitEffect : AttachmentEffect
             Color hot = Color.Lerp(cfg.color, Color.white, 0.45f);
 
             if (cfg.innerRing) FxLine.Ring(cfg.material, at, cfg.radius * 0.1f, cfg.radius * 0.55f, Color.white, 0.14f, 0.16f);
-            if (cfg.fireball > 0f)
+            if (cfg.fireball > 0f && !kit)   // 공통 재료를 쓰면 불 덩어리 · 파편은 거기서 그린다
             {
                 GroundGlow.Flash(at + Vector3.up * 0.5f, cfg.fireball * s, hot, 0.15f, 2f * s);
                 GroundGlow.Flash(at + Vector3.up * 0.55f, cfg.fireball * 0.45f * s, Color.white, 0.1f, 2f * s);   // 가운데 흰 심지
             }
 
             float turn = Random.Range(0f, 360f);
-            for (int i = 0; i < cfg.shards; i++)
+            for (int i = 0; !kit && i < cfg.shards; i++)
             {
                 Vector3 d = Quaternion.AngleAxis(turn + i * 360f / cfg.shards + Random.Range(-18f, 18f), Vector3.up) * Vector3.forward;
                 Vector3 from = at + Vector3.up * 0.4f + d * cfg.radius * 0.2f;

@@ -96,6 +96,8 @@ public class CrescentWave : MonoBehaviour
         Vector3 to = from + direction * step;
         transform.position = to;
         travelled += step;
+        bool kit = cfg.UsesKit;
+        if (kit) FxKit.TrailDust(to, cfg.color, 90f * Time.deltaTime, 0.24f, true, 0.9f);   // 공통 재료 (2026-11-20) — 검기가 지나간 자리에 빛 알갱이 · 반짝임
 
         Vector3 groundFrom = from - Vector3.up * 0.9f;
         Vector3 groundTo = to - Vector3.up * 0.9f;
@@ -109,6 +111,11 @@ public class CrescentWave : MonoBehaviour
             FxLine.Ring(cfg.sparkMaterial, enemy.position, 0.1f, 1.1f, cfg.color, 0.12f, 0.16f);
             FxLine.Ring(cfg.sparkMaterial, enemy.position, 0.1f, 0.6f, cfg.coreColor, 0.08f, 0.1f);
             Burst(CombatFx.Body(enemy), cfg.hitSparkles, 3.5f);
+            if (kit && EvoStrikes.Take(6))
+            {
+                FxKit.Hit(CombatFx.Body(enemy), direction, cfg.color, 1.2f);
+                FxKit.Shockwave(enemy.position, 2.4f, cfg.color, 0.24f, 0.8f);
+            }
         }
 
         float k = Mathf.Clamp01(travelled / cfg.waveDistance);
@@ -118,6 +125,7 @@ public class CrescentWave : MonoBehaviour
         if (travelled >= cfg.waveDistance)
         {
             Burst(transform.position, cfg.hitSparkles, 2.5f);   // 끝에서 흩어진다
+            if (kit) FxKit.EnergyBurst(transform.position - Vector3.up * 0.9f, 0.9f, cfg.color, 0.9f);
             ReleaseDust();
             Destroy(gameObject);
         }
