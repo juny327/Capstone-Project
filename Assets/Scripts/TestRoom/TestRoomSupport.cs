@@ -118,7 +118,10 @@ public static class TestRoomSupport
                 if (target == null) continue;
             }
 
-            target.SetLevel(Mathf.Max(1, root.maxLevel));   // 진화 조건 Lv3 — 시험이니 올려 준다 (짝 장비는 보지 않는다)
+            target.SetLevel(Mathf.Max(1, root.maxLevel));   // 진화 조건 Lv3 — 시험이니 올려 준다
+            // 짝 개조는 달아 준다 (2026-11-20) — 실제 게임에서는 개조가 상위 무기에 그대로 남는다.
+            // 안 달고 진화시키면 스웜 카빈은 점사 없이 한 발씩, 공성포는 슬러그 없이 나가 실제와 다르게 보였다
+            if (next.requiredAttachment != null) wc.TryAttach(root, next.requiredAttachment, out _);
             if (wc.Evolve(next)) done.Add(next.result.weaponName);
         }
 

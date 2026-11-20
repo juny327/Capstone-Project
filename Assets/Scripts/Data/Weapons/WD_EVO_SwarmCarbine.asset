@@ -19,13 +19,13 @@ MonoBehaviour:
   icon: {fileID: 21300000, guid: c7ba8d6ce6f21d047a1d68c7df509037, type: 3}
   weaponPrefab: {fileID: 1885557548371891229, guid: fb8422ed8a00ecf44b865fe7a2ce5ed2, type: 3}
   socket: 0
-  fireInterval: 0.3
-  damage: 6.06
+  fireInterval: 0.2
+  damage: 3.88
   critChance: 0.05
   critMultiplier: 2
   maxLevel: 3
   perLevelBonus:
-    damageAdd: 0.42
+    damageAdd: 0.26
     damageMul: 1
     fireIntervalMul: 1
     critChanceAdd: 0
@@ -71,7 +71,7 @@ MonoBehaviour:
   spawnProjectiles: 1
   homingTurnRate: 360
   homingRange: 14
-  magazineSize: 30
+  magazineSize: 42
   reloadTime: 2
   autoReload: 1
   muzzleFlashPrefab: {fileID: 2916273817513264348, guid: 95044fb3908b36c46bc62060360f7ba6, type: 3}

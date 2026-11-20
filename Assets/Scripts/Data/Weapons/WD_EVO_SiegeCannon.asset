@@ -29,7 +29,7 @@ MonoBehaviour:
     critChanceAdd: 0
     critMultiplierAdd: 0
     projectileSpeedAdd: 0
-    projectileCountAdd: 1
+    projectileCountAdd: 0
     pierceAdd: 0
     spreadMul: 1
     lifeTimeMul: 1
@@ -61,10 +61,10 @@ MonoBehaviour:
   hitLayerMinInterval: 0.09
   aimMode: 0
   projectilePrefab: {fileID: 5875018044698817663, guid: aeb8ad19eaf5dc04dbad61c4e2775d2c, type: 3}
-  projectileSpeed: 22
-  projectileLifeTime: 0.7
-  projectileCount: 8
-  spreadAngle: 28
+  projectileSpeed: 18
+  projectileLifeTime: 0.86
+  projectileCount: 1
+  spreadAngle: 0
   pierceCount: 0
   spawnProjectiles: 1
   homingTurnRate: 0
@@ -77,8 +77,8 @@ MonoBehaviour:
   shotFx:
     material: {fileID: 2100000, guid: b6310812509a3ab46bf4e098541a27ab, type: 2}
     tracerColor: {r: 1, g: 0.8, b: 0.35, a: 0.9}
-    tracerWidth: 0.16
-    tracerLength: 1.6
+    tracerWidth: 0.34
+    tracerLength: 2.4
     tracerInstant: 0
     tracerInstantFade: 0.15
     flashColor: {r: 1, g: 0.8, b: 0.4, a: 1}
@@ -90,3 +90,8 @@ MonoBehaviour:
     sparkLines: 2
     sparkRing: 0
     fireShake: 0
+    smokeMaterial: {fileID: 2100000, guid: 34344ea80e234d84eb0e7a92d1b29673, type: 2}
+    smokeTime: 0.55
+    smokeWidth: 1.3
+    smokeHeadColor: {r: 1, g: 0.7, b: 0.3, a: 0.9}
+    smokeTailColor: {r: 0.45, g: 0.42, b: 0.4, a: 0.7}

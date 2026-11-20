@@ -16,7 +16,7 @@ MonoBehaviour:
   killGain: 10
   gainPerHeal: 1.7
   fullHpMultiplier: 2
-  bossHitGain: 2
+  hitGain: 5
   frenzyDuration: 6
   killExtend: 0.5
   maxFrenzy: 10
