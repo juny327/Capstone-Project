@@ -176,6 +176,48 @@ public static class DragonFx
         return ps;
     }
 
+    /// <summary>불의 벽 — 길이 length · 두께 thickness 띠에서 높이 솟는 불꽃 (부모의 앞(+Z)이 벽이 뻗는 방향). 만들자마자 켜진다.</summary>
+    public static ParticleSystem FlameWall(Transform parent, Material fire, float length, float thickness)
+    {
+        var go = new GameObject("FlameWallFx");
+        go.transform.SetParent(parent, false);
+        go.transform.localPosition = new Vector3(0f, 0.1f, 0f);
+        var ps = go.AddComponent<ParticleSystem>();
+        ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+
+        var main = ps.main;
+        main.loop = true;
+        main.playOnAwake = false;
+        main.simulationSpace = ParticleSystemSimulationSpace.World;
+        main.startLifetime = new ParticleSystem.MinMaxCurve(0.55f, 0.95f);
+        main.startSpeed = new ParticleSystem.MinMaxCurve(2.6f, 4.8f);
+        main.startSize = new ParticleSystem.MinMaxCurve(1.0f, 1.9f);
+        main.startRotation = new ParticleSystem.MinMaxCurve(0f, Mathf.PI * 2f);
+        main.startColor = new ParticleSystem.MinMaxGradient(new Color(1f, 0.85f, 0.45f), new Color(1f, 0.5f, 0.15f));
+        main.maxParticles = 600;
+
+        var emission = ps.emission;
+        emission.rateOverTime = Mathf.Clamp(length * 16f, 40f, 260f);
+
+        // 누운 상자(가로 = 두께 · 세로 = 길이)에서 위로 — 벽처럼 선다
+        var shape = ps.shape;
+        shape.shapeType = ParticleSystemShapeType.Box;
+        shape.scale = new Vector3(thickness * 0.7f, length, 0.1f);
+        shape.rotation = new Vector3(-90f, 0f, 0f);
+
+        var size = ps.sizeOverLifetime;
+        size.enabled = true;
+        size.size = new ParticleSystem.MinMaxCurve(1f, new AnimationCurve(new Keyframe(0f, 0.6f), new Keyframe(0.4f, 1.2f), new Keyframe(1f, 0.45f)));
+
+        var color = ps.colorOverLifetime;
+        color.enabled = true;
+        color.color = FireGradient(0.9f);
+
+        FireRenderer(go, fire);
+        ps.Play(true);
+        return ps;
+    }
+
     /// <summary>한 번 터지는 불 — 불비가 떨어진 자리 · 부하가 나오는 자리. 스스로 사라진다.</summary>
     public static void Burst(Vector3 at, Material fire, float radius)
     {

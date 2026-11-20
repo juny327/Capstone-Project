@@ -23,6 +23,8 @@ public class DragonTelegraph : MonoBehaviour
     bool thin;                       // 가는 선(조준선) — 번쩍임을 옅게
     float size;                      // 직선: 길이 · 부채꼴 · 원: 반지름
     float near;                      // 직선: 시작 거리
+    float halfWidth;                 // 직선: 폭의 절반
+    float halfAngle = 180f;          // 부채꼴: 반각 (원은 180)
     Transform fill;
     readonly List<Mesh> meshes = new List<Mesh>();
     readonly List<MeshRenderer> renderers = new List<MeshRenderer>();
@@ -41,6 +43,7 @@ public class DragonTelegraph : MonoBehaviour
         t.shape = Shape.Rect;
         t.thin = width < 1.6f;
         t.near = near;
+        t.halfWidth = width * 0.5f;
         t.size = Mathf.Max(0.1f, far - near);
         float w = width * 0.5f, edge = Mathf.Clamp(width * 0.06f, 0.06f, 0.16f);
         t.Quad("Range", -w, w, near, far, 0f, RangeColor);
@@ -59,6 +62,7 @@ public class DragonTelegraph : MonoBehaviour
     {
         DragonTelegraph t = Create("Telegraph_Sector", material, apex, forward);
         t.shape = Shape.Sector;
+        t.halfAngle = halfAngle;
         t.size = radius;
         t.Fan("Range", 0f, radius, halfAngle, 0f, RangeColor);
         t.fill = t.Fan("Fill", 0f, 1f, halfAngle, 0.002f, FillColor).transform;
@@ -98,6 +102,28 @@ public class DragonTelegraph : MonoBehaviour
 
     Material material;
 
+    /// <summary>
+    /// 그 자리가 예고 범위 안인가 (margin m 만큼 넉넉히 본다 — 플레이어 반지름) — 2026-11-20. 시험 봇이 예고를 읽고 피할 때 쓴다
+    /// (나중에 '예고가 캐릭터를 덮으면 발밑 고리가 붉게' 같은 위험 표시에도 쓸 수 있다).
+    /// </summary>
+    public bool Contains(Vector3 point, float margin = 0f)
+    {
+        if (dying) return false;
+        Vector3 local = transform.InverseTransformPoint(new Vector3(point.x, transform.position.y, point.z));
+        var flat = new Vector2(local.x, local.z);
+        switch (shape)
+        {
+            case Shape.Rect:
+                return Mathf.Abs(local.x) <= halfWidth + margin && local.z >= near - margin && local.z <= near + size + margin;
+            case Shape.Sector:
+                if (flat.magnitude > size + margin) return false;
+                if (flat.magnitude < 0.6f) return true;
+                return Vector2.Angle(Vector2.up, flat) <= halfAngle + Mathf.Rad2Deg * Mathf.Atan2(margin, flat.magnitude);
+            default:
+                return flat.magnitude <= size + margin;
+        }
+    }
+
     // ───────── 진행 ─────────
 
     /// <summary>0 = 테두리만, 1 = 다 참 (이때 맞는다).</summary>
@@ -120,6 +146,26 @@ public class DragonTelegraph : MonoBehaviour
         Tint(thin ? new Color(FlashColor.r, FlashColor.g, FlashColor.b, 0.32f) : FlashColor);
         flashUntil = Time.time + FlashTime;
         dying = true;
+    }
+
+    public static readonly Color LockEdge = new Color(1f, 1f, 1f, 1f);
+    public static readonly Color LockFill = new Color(1f, 0.04f, 0.04f, 0.62f);
+    public static readonly Color LockRange = new Color(1f, 0.08f, 0.05f, 0.26f);
+
+    /// <summary>
+    /// 방향이 굳었다 (2026-11-20 보스 패턴 개선) — 따라오던 예고가 멈추는 순간 테두리가 하얗게, 안쪽이 더 붉게 바뀌고 한 번 번쩍인다.
+    /// 이때부터가 피하는 시간이다.
+    /// </summary>
+    public void Lock()
+    {
+        if (dying) return;
+        foreach (MeshRenderer r in renderers)
+        {
+            if (r == null) continue;
+            baseColors[r] = r.name.StartsWith("Edge") ? LockEdge : r.name.StartsWith("Fill") ? LockFill : LockRange;
+        }
+        Tint(FlashColor);
+        flashUntil = Time.time + 0.07f;
     }
 
     /// <summary>다 찬 채 남긴다 (브레스처럼 판정이 이어질 때) — 한 번 번쩍인 뒤 채움색으로.</summary>

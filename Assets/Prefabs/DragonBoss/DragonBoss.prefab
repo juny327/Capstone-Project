@@ -183,12 +183,8 @@ MonoBehaviour:
   chargeFront: 5.86
   wallStagger: 1.6
   roarHold: 0.9
-  minionsPhase2: 3
-  minionsPhase3: 4
-  minionCap: 6
   summonDelay: 1
   summonRadius: {x: 5.5, y: 8.5}
-  rainCount: 7
   rainRadius: 2.2
   rainWarn: 1.2
   rainStagger: 0.12
@@ -208,18 +204,41 @@ MonoBehaviour:
   groundShockDamage: 15
   sweepAngle: 110
   sweepHalfAngle: 26
-  sweepDuration: 1.9
   chainBites: {x: 2, y: 3}
   chainRewind: 0.3
   chainLunge: 0.46
   chainDamage: 15
-  firePatchLife: 6
   firePatchTick: 0.5
   firePatchDamage: 5
   firePatchRadius: 2.1
   firePatchSpacing: 3.2
-  firePatchMax: 14
-  comboChance: 0.55
+  wallGap: 5
+  wallLength: 12
+  wallThickness: 1.2
+  wallWarn: 0.8
+  wallLife: 3.4
+  wallTick: 0.5
+  wallDamage: 8
+  wallChargeRange: 6.5
+  ringStart: 1.6
+  ringSpeed: 9
+  ringMax: 20
+  ringThickness: 1.2
+  ringGap: 70
+  ringGapOffset: 1.8
+  ringWarn: 1
+  ringInterval: 0.7
+  ringNearZone: 5
+  ringDamage: 15
+  leapMinRange: 9
+  leapRadius: 2.3
+  leapCrouch: 0.35
+  leapAir: 1.4
+  leapLock: 0.9
+  leapTrack: 3.5
+  leapHeight: 3.2
+  leapDamage: 25
+  leapRecover: 1.2
 --- !u!1001 &952870755912336564
 PrefabInstance:
   m_ObjectHideFlags: 0
