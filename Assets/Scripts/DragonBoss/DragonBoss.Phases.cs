@@ -147,18 +147,21 @@ public partial class DragonBoss
         for (float t = 0f; t < total; t += Dt)
         {
             Scrub(DieState, RoarClip(t, rise));
+            if (roared) FxRoarTick(1.4f);
             if (!roared && t >= rise * 0.8f)
             {
                 roared = true;
                 phase = next;
                 OnPhaseChanged?.Invoke(phase);
-                Shake(1.0f);
+                Quake(1.25f, transform.position, 1.0f);
+                FxRoar(transform.position, true);
                 Ring(transform.position, 14f * areaScale, 0.8f);
             }
             if (roared && !echoed && t >= rise + 0.3f)
             {
                 echoed = true;
-                Shake(0.5f);
+                Jolt(0.6f, transform.position, 0.5f);
+                FxRoar(transform.position, false);
                 Ring(transform.position, 10f * areaScale, 0.6f);
             }
             yield return null;
@@ -195,7 +198,8 @@ public partial class DragonBoss
             Scrub(DieState, RoarClip(t, rise));
             yield return null;
         }
-        Shake(0.5f);
+        Jolt(0.55f, transform.position, 0.5f);
+        FxRoar(transform.position, false);
         Ring(transform.position, 8f * areaScale, 0.6f);
         if (CanSummon()) yield return SummonCore(rise, rise);
         BackToIdle(0.4f);
@@ -223,6 +227,7 @@ public partial class DragonBoss
         {
             marks[i].Flash();
             SpawnMinion(PickMinion(prefabs), points[i]);
+            FxSummon(points[i]);
             if (fireMaterial != null) DragonFx.Burst(points[i] + Vector3.up * 0.4f, fireMaterial, 1.3f);
         }
         readyAt[Pattern.Summon] = Time.time + Cooldown(Pattern.Summon) * tune.cooldownScale;
@@ -313,7 +318,8 @@ public partial class DragonBoss
             if (begin < 0f && t >= rise * 0.7f)
             {
                 begin = t;
-                Shake(0.5f);
+                Jolt(0.55f, transform.position, 0.5f);
+                FxRoar(transform.position, false);
                 Ring(transform.position, 7f * areaScale, 0.5f);
                 foreach (Vector3 p in points) marks.Add(Track(DragonTelegraph.Circle(telegraphMaterial, p, rainRadius)));
             }
@@ -327,11 +333,13 @@ public partial class DragonBoss
                     falling[i] = true;
                     if (fireMaterial != null) DragonMeteor.Drop(fireMaterial, points[i], fall, rainRadius);
                     Sfx(DragonSfx.Rain);
+                    FxRainFall(points[i]);
                 }
                 if (u < 1f) continue;
                 landed[i] = true;
                 marks[i].Flash();
-                Shake(0.18f);
+                Jolt(0.28f, points[i], 0.18f);
+                FxRainLand(points[i]);
                 if (PlayerInCircle(points[i], rainRadius) && Time.time - lastHit > 0.35f)   // 겹친 원 두 개에 한꺼번에 맞지 않게
                 {
                     lastHit = Time.time;
@@ -414,7 +422,8 @@ public partial class DragonBoss
         }
 
         warning.Flash();
-        Shake(0.55f);
+        Shove(0.65f, target != null ? target.position : center + transform.forward, center, 0.55f);
+        FxTailSweep(center, dir);
         Sfx(DragonSfx.Tail);
         Ring(center, tailRadius, 0.35f);
         if (dustFx != null) dustFx.Play(true);
@@ -468,7 +477,8 @@ public partial class DragonBoss
             agent.ResetPath();
             agent.updateRotation = false;
             if (dustFx != null) dustFx.Play(true);
-            Shake(0.2f);
+            Jolt(0.26f, start, 0.2f);
+            FxRetreat(start, back);
             Sfx(DragonSfx.Wing);
             float moved = 0f;
             for (float t = 0f; t < retreatTime; t += Dt)
@@ -524,7 +534,8 @@ public partial class DragonBoss
                 yield return null;
             }
             warning.Flash();
-            Shake(0.25f);
+            Shove(0.4f, origin + Flat(forward).normalized * (biteFar * 0.7f), origin, 0.25f);
+            FxBite(origin, forward, true);
             Sfx(DragonSfx.Bite);
             if (PlayerInRect(origin, forward, biteWidth, biteNear, biteFar)) HitPlayer(chainDamage, origin, 0.45f);
             for (float h = 0f; h < 0.08f; h += Dt)

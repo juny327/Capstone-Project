@@ -34,6 +34,12 @@ public class DragonTelegraph : MonoBehaviour
 
     public bool Alive => this != null && !dying;
 
+    /// <summary>켜면 다 차기 직전(80%부터) 테두리가 빠르게 깜박인다 — 곧 맞는다는 신호 (2026-11-20 연출, 보스가 설정에 따라 켠다).</summary>
+    public static bool Blink;
+    const float BlinkFrom = 0.8f;
+    float progressNow;
+    bool held, blinking;
+
     // ───────── 만들기 ─────────
 
     /// <summary>origin 에서 forward 쪽으로 near ~ far, 폭 width 인 직사각형. 안쪽은 앞쪽으로 차오른다.</summary>
@@ -131,6 +137,7 @@ public class DragonTelegraph : MonoBehaviour
     {
         if (fill == null) return;
         float p = Mathf.Clamp01(progress);
+        progressNow = p;
         switch (shape)
         {
             case Shape.Rect: fill.localScale = new Vector3(1f, 1f, Mathf.Max(0.0001f, size * p)); break;
@@ -171,6 +178,7 @@ public class DragonTelegraph : MonoBehaviour
     /// <summary>다 찬 채 남긴다 (브레스처럼 판정이 이어질 때) — 한 번 번쩍인 뒤 채움색으로.</summary>
     public void Hold()
     {
+        held = true;
         SetProgress(1f);
         Tint(FlashColor);
         flashUntil = Time.time + FlashTime;
@@ -184,10 +192,28 @@ public class DragonTelegraph : MonoBehaviour
 
     void Update()
     {
-        if (flashUntil < 0f || Time.time < flashUntil) return;
-        flashUntil = -1f;
-        if (dying) { Destroy(gameObject); return; }
-        RestoreTint();
+        if (flashUntil >= 0f)
+        {
+            if (Time.time < flashUntil) return;
+            flashUntil = -1f;
+            if (dying) { Destroy(gameObject); return; }
+            RestoreTint();
+        }
+
+        // 다 차기 직전 — 테두리만 깜박인다 (가는 조준선 · 이미 다 찬 예고는 빼고)
+        if (!Blink || dying || held || thin || progressNow < BlinkFrom || progressNow >= 1f)
+        {
+            if (blinking) { blinking = false; RestoreTint(); }
+            return;
+        }
+        blinking = true;
+        bool bright = Mathf.Repeat(Time.time * 11f, 1f) < 0.5f;
+        foreach (MeshRenderer r in renderers)
+        {
+            if (r == null || !r.name.StartsWith("Edge") || !baseColors.TryGetValue(r, out Color c)) continue;
+            block.SetColor("_BaseColor", bright ? Color.Lerp(c, Color.white, 0.75f) : new Color(c.r, c.g, c.b, c.a * 0.35f));
+            r.SetPropertyBlock(block);
+        }
     }
 
     void OnDestroy()

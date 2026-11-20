@@ -68,7 +68,77 @@ public class DragonBossSettings : ScriptableObject
 
         [Header("새 패턴 (2단계 — 불의 벽 · 퍼지는 고리 · 도약 내려찍기)")]
         public bool newPatterns;
+
+        [Header("마지막 발악 — 남은 체력이 Staging.enrageAt 아래로 내려가면")]
+        [Tooltip("패턴 진행 속도에 곱한다 (1 = 없음). 몸이 달아오르는 표시는 연출(Staging)이 낸다")]
+        [Range(1f, 1.5f)] public float enrageTempo = 1f;
     }
+
+    /// <summary>
+    /// 보스 연출 (2026-11-20) — 화면 흔들림 · 공격 이펙트 · 압박감. 두 난이도 공통.
+    /// 판정 · 패턴에는 손대지 않는다 (마지막 발악의 속도만 난이도 값 Tuning.enrageTempo).
+    /// </summary>
+    [System.Serializable]
+    public class Staging
+    {
+        [Tooltip("연출 개선 전체 — 끄면 2026-11-20 이전 그대로 (세기만 다른 흔들림 하나 · 이펙트 없음)")]
+        public bool enabled = true;
+
+        [Header("화면 흔들림 — 설정 창의 '화면 흔들림' 을 따른다")]
+        [Range(0f, 2f)] public float shakeScale = 1f;
+        [Tooltip("플레이어가 이 거리(m) 안이면 그대로")]
+        [Min(0f)] public float nearRange = 8f;
+        [Tooltip("이 거리(m) 밖이면 farShake 배 — 가까이 있을수록 위협적이다")]
+        [Min(1f)] public float farRange = 16f;
+        [Range(0f, 1f)] public float farShake = 0.5f;
+        [Tooltip("발걸음 흔들림 — 멀 때(stepRange) · 바로 옆일 때. 다가오는 것이 화면으로 느껴진다")]
+        public Vector2 stepShake = new Vector2(0.05f, 0.16f);
+        [Tooltip("이 거리(m) 밖의 발걸음은 흔들지 않는다")]
+        [Min(1f)] public float stepRange = 15f;
+        [Tooltip("큰 한 방(땅 물어뜯기 · 벽 충돌 · 도약 착지 · 포효)에 시야를 당기는 비율")]
+        [Range(0f, 0.1f)] public float zoom = 0.035f;
+        [Tooltip("큰 한 방에 화면 가장자리가 불빛으로 물드는 세기")]
+        [Range(0f, 1f)] public float edgeFlash = 0.12f;
+        [Tooltip("이어지는 떨림 — 불을 뿜는 동안 · 돌진으로 달리는 동안 · 포효하는 동안")]
+        [Range(0f, 0.6f)] public float tremor = 0.16f;
+
+        [Header("공격 이펙트 — 무기 연출과 같은 입자 재료(FxKit)")]
+        public bool attackFx = true;
+        [Tooltip("이펙트 크기 · 양 배율")]
+        [Range(0.3f, 2f)] public float fxScale = 1f;
+        [Tooltip("페이즈가 몸에 보인다 — 2페이즈 입가의 불티 · 3페이즈 몸 둘레의 열기")]
+        public bool bodyMarks = true;
+        [Tooltip("큰 한 방을 맞으면 몸이 번쩍이고 움찔한다 (패턴은 끊지 않는다)")]
+        public bool flinch = true;
+        [Tooltip("한 번에 최대 체력의 이 비율 넘게 깎이면 큰 한 방")]
+        [Range(0.002f, 0.1f)] public float flinchDamage = 0.012f;
+        [Tooltip("예고가 다 차기 직전에 테두리가 빠르게 깜박인다")]
+        public bool telegraphBlink = true;
+
+        [Header("압박감")]
+        public bool pressure = true;
+        [Tooltip("보스전 동안 시야를 넓히는 배율 (1 = 그대로)")]
+        [Range(1f, 1.3f)] public float cameraWide = 1.1f;
+        [Tooltip("큰 공격을 준비할 때 시야를 당기는 비율 — 판정 뒤 돌아온다")]
+        [Range(0f, 0.08f)] public float windupLean = 0.035f;
+        [Tooltip("화면 가장자리가 어두워지는 세기 — 1 · 2 · 3페이즈 (붉은색은 '맞았다' 전용이라 쓰지 않는다)")]
+        public Vector3 edgeDark = new Vector3(0f, 0.28f, 0.5f);
+        [Tooltip("큰 공격을 준비할 때 가장자리가 한 번 맥박친다 (더해지는 세기)")]
+        [Range(0f, 0.6f)] public float edgePulse = 0.22f;
+        [Tooltip("큰 공격을 준비할 때 배경음을 잠깐 줄인다")]
+        public bool windupDuck = true;
+        [Tooltip("예고가 캐릭터를 덮으면 발밑 고리가 붉어진다")]
+        public bool dangerRing = true;
+        [Tooltip("화면 밖의 보스가 공격을 시작하면 가장자리 화살표로 알린다")]
+        public bool edgeArrow = true;
+        [Tooltip("페이즈가 바뀔 때 체력바가 번쩍이며 흔들린다")]
+        public bool barBreak = true;
+        [Tooltip("남은 체력이 이 비율 아래면 마지막 발악 — 몸이 달아오른다 (속도는 난이도 값)")]
+        [Range(0f, 0.5f)] public float enrageAt = 0.1f;
+    }
+
+    [Tooltip("연출 — 화면 흔들림 · 공격 이펙트 · 압박감 (두 난이도 공통)")]
+    public Staging staging = new Staging();
 
     [Tooltip("이지 — 조준은 예전 그대로, 패턴이 느리고 쉴 틈이 길다")]
     public Tuning easy = DefaultEasy();
@@ -102,5 +172,6 @@ public class DragonBossSettings : ScriptableObject
         sweepMeets = true,
         rainRing = true,
         newPatterns = true,
+        enrageTempo = 1.1f,
     };
 }

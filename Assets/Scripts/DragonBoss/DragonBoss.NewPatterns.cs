@@ -119,17 +119,21 @@ public partial class DragonBoss
         for (float t = 0f; t < wallWarn; t += Dt)
         {
             Scrub(DieState, RoarClip(t, rise));
+            FxRoarTick(0.7f);
             foreach (DragonTelegraph m in marks) m.SetProgress(t / wallWarn);
             yield return null;
         }
         foreach (DragonTelegraph m in marks) m.Flash();
         if (spans.Count > 0)
         {
-            Shake(0.45f);
+            Jolt(0.5f, mid, 0.45f);
             Sfx(DragonSfx.Ignite);
         }
         foreach (var span in spans)
+        {
             DragonFireWall.Spawn(this, telegraphMaterial, fireMaterial, span.from, span.to, wallThickness, wallLife, wallTick, wallDamage);
+            FxWallRise(span.from, span.to);
+        }
 
         // 머리를 내린다 — 이어지는 공격 동작으로 넘어가기 전에 잠깐
         BackToIdle(0.2f);
@@ -187,11 +191,14 @@ public partial class DragonBoss
             {
                 clip += Dt;
                 Scrub(DieState, RoarClip(clip, rise));
+                FxRoarTick(0.8f);
                 if (mark != null) mark.SetProgress(t / wait);
                 yield return null;
             }
             if (mark != null) mark.Flash();
-            Shake(i == 0 ? 0.55f : 0.4f);
+            if (i == 0) Quake(0.9f, center, 0.55f);
+            else Jolt(0.55f, center, 0.4f);
+            FxRingLaunch(center, i == 0);
             Sfx(DragonSfx.Slam, i == 0 ? 1f : 0.8f);
             DragonRingWave.Launch(this, telegraphMaterial, center, ringStart, ringMax, ringSpeed, ringThickness, gapYaw, ringGap, ringDamage);
             if (i == count - 1) break;
@@ -249,7 +256,8 @@ public partial class DragonBoss
 
         // 뛰어오른다 — 날개를 편 자세로 포물선. 길 찾기 위치는 끄고 직접 옮긴다 (착지 때 다시 맞춘다)
         SetAirborne(true);
-        Shake(0.3f);
+        Jolt(0.4f, start, 0.3f);
+        FxLeapTakeoff(start);
         Sfx(DragonSfx.Wing);
         if (dustFx != null) dustFx.Play(true);
         for (float t = 0f; t < leapAir; t += Dt)
@@ -263,6 +271,8 @@ public partial class DragonBoss
             if (look.sqrMagnitude > 0.25f) transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(look), 240f * Time.deltaTime);
             if (dustFx != null && u > 0.12f && dustFx.isEmitting) dustFx.Stop(true, ParticleSystemStopBehavior.StopEmitting);
             mark.SetProgress((leapCrouch + t) / total);
+            FxLeapShadow(spot, u);
+            if (u > 0.9f) Hush(0.15f);   // 떨어지기 직전의 정적
             yield return null;
         }
 
@@ -270,7 +280,8 @@ public partial class DragonBoss
         transform.position = spot + Vector3.up * agent.baseOffset;
         SetAirborne(false);
         mark.Flash();
-        Shake(1.0f);
+        Quake(1.25f, spot, 1.0f);
+        FxLeapLand(spot);
         Sfx(DragonSfx.Land);
         Ring(spot, leapRadius * 1.7f, 0.45f);
         if (fireMaterial != null) DragonFx.Burst(spot + Vector3.up * 0.4f, fireMaterial, leapRadius * 0.8f);

@@ -231,7 +231,10 @@ public partial class DragonBoss
                 {
                     hit = true;
                     warning.Flash();
-                    Shake(ground ? 0.7f : 0.25f);
+                    if (ground) Quake(0.95f, slam, 0.7f);
+                    else Shove(0.45f, origin + Flat(forward).normalized * (biteFar * 0.7f), origin, 0.25f);
+                    FxBite(origin, forward, false);
+                    if (ground) FxGroundSlam(slam, groundBiteRadius);
                     Sfx(DragonSfx.Bite);
                     if (ground) Sfx(DragonSfx.Slam);
                     bool bitten = PlayerInRect(origin, forward, biteWidth, biteNear, biteFar);
@@ -303,7 +306,8 @@ public partial class DragonBoss
         }
 
         warning.Hold();
-        Shake(0.35f);
+        Shove(0.45f, transform.position + transform.forward * (breathApex + breathRadius * 0.5f), transform.position, 0.35f);
+        FxBreathStart(transform.position + transform.forward * breathApex, transform.forward);
         SetBreathCone(half);
         breathing = true;
         LateUpdate();
@@ -325,6 +329,8 @@ public partial class DragonBoss
                 Face(target.position, tune.breathTrack);
                 FollowBreath(warning);
             }
+            Vector3 fireForward = Flat(transform.forward).normalized;
+            FxBreathTick(transform.position + fireForward * breathApex, fireForward, breathRadius, half);   // 가장자리 불길 · 그을음 · 이어지는 떨림
             tick -= Time.deltaTime;
             if (tick <= 0f)
             {
@@ -427,7 +433,8 @@ public partial class DragonBoss
         var projectile = go.GetComponent<RangedProjectile>();
         if (projectile == null) { Destroy(go); return; }
         projectile.Initialize(mouth, dir, fireballSpeed, fireballDamage, new VolleyHitGroup());
-        Shake(0.12f);
+        Jolt(0.16f, mouth, 0.12f);
+        FxFireballLaunch(go, mouth, dir);
         Sfx(DragonSfx.Fireball);
     }
 
@@ -496,10 +503,12 @@ public partial class DragonBoss
                 }
             }
             warning.SetProgress(t / chargeWindup);
+            FxChargeWindup(t / chargeWindup);
             yield return null;
         }
         warning.Hold();
-        Shake(0.4f);
+        Shove(0.5f, start + forward * 6f, start, 0.4f);
+        FxChargeLaunch(forward);
         Sfx(DragonSfx.Charge);
         if (dustFx != null) dustFx.Play(true);
         agent.isStopped = true;
@@ -519,6 +528,8 @@ public partial class DragonBoss
             transform.rotation = Quaternion.LookRotation(forward);
             float actual = Flat(transform.position - before).magnitude;
             moved += step;
+            FxChargeRun(forward, step);
+            if (travel - moved < chargeSpeed * 0.1f) Hush(0.12f);   // 길 끝 직전에는 떨림을 멈춘다 — 박는 순간이 더 크게 느껴진다
             // 3페이즈 — 지나간 길에 불이 남는다
             sinceFire += step;
             if (sinceFire >= firePatchSpacing)
@@ -540,7 +551,8 @@ public partial class DragonBoss
 
         if (wall)
         {
-            Shake(0.9f);
+            Quake(1.1f, transform.position, 0.9f);
+            FxChargeCrash(forward);
             Sfx(DragonSfx.Crash);
         }
         chargeBlocked = wall;

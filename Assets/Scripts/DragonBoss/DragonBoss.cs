@@ -155,7 +155,7 @@ public partial class DragonBoss : MonoBehaviour
     }
 
     /// <summary>패턴 안의 시간 흐름 — 난이도의 패턴 진행 속도를 곱한다 (동작 · 예고 · 판정이 같이 느려진다).</summary>
-    float Dt => Time.deltaTime * tune.tempo;
+    float Dt => Time.deltaTime * tune.tempo * (Enraged ? tune.enrageTempo : 1f);
     /// <summary>페이즈별 값 (x · y · z = 1 · 2 · 3페이즈).</summary>
     float ByPhase(Vector3 v) => phase <= 1 ? v.x : phase == 2 ? v.y : v.z;
     /// <summary>따라오던 예고가 방향을 굳혔다 (패턴) — 이때부터가 피하는 시간.</summary>
@@ -190,6 +190,8 @@ public partial class DragonBoss : MonoBehaviour
         if (GetComponent<DragonBodyBlock>() == null) gameObject.AddComponent<DragonBodyBlock>();
         ApplySize();
         LoadTuning(Difficulty.Current);
+        LoadStaging();
+        if (GetComponent<DragonPressure>() == null) gameObject.AddComponent<DragonPressure>().Init(this);   // 압박감 (카메라 · 화면 가장자리 · 위험 표시 — 연출)
         agent.speed = moveSpeed;
         agent.angularSpeed = turnSpeed;
         agent.acceleration = 12f;
@@ -245,6 +247,7 @@ public partial class DragonBoss : MonoBehaviour
 
     void OnHpChanged(int hp, int max)
     {
+        OnHurtStaging(hp, max);   // 큰 한 방이면 번쩍 + 움찔 (연출)
         if (max <= 0 || hp <= 0) return;
         float left = hp / (float)max;
         int reached = left <= phase3At ? 3 : left <= phase2At ? 2 : 1;
@@ -258,6 +261,7 @@ public partial class DragonBoss : MonoBehaviour
         ResolveTarget();
         ReadTestKeys();
         TickGrowl();
+        TickStaging();
 
         switch (state)
         {
@@ -601,6 +605,7 @@ public partial class DragonBoss : MonoBehaviour
     {
         if (state == State.Dead) return;
         CancelPattern();
+        ResetStaging();
         StopAllCoroutines();
         DragonSound.StopAll(0.15f);
         Sfx(DragonSfx.Death);
@@ -825,7 +830,8 @@ public partial class DragonBoss : MonoBehaviour
         stepPhase += Time.deltaTime * animationRate / length * 2f;
         if (stepPhase < 1f) return;
         stepPhase -= 1f;
-        Sfx(DragonSfx.Step);
+        leftStep = !leftStep;
+        Sfx(DragonSfx.Step, StepFx(leftStep));   // 가까울수록 크게 울리고 화면이 떨린다 (연출)
     }
 
     static void Shake(float force)
