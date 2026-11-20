@@ -1,6 +1,6 @@
 # 모델 에셋 출처 · 라이선스
 
-프로젝트에 들어온 3D 모델 · 애니메이션의 출처를 기록한다. 소리는 [AUDIO_LICENSES.md](AUDIO_LICENSES.md) 에 따로 있다.
+프로젝트에 들어온 3D 모델 · 애니메이션 · 입자 그림의 출처를 기록한다. 소리는 [AUDIO_LICENSES.md](AUDIO_LICENSES.md) 에 따로 있다.
 
 > **왜 적어 두는가**
 > 무료 팩이라도 라이선스가 제각각이다. 정식 라이선스 문구가 없는 팩은 특히
@@ -13,6 +13,7 @@
 |---|---|---|---|---|---|
 | `FuturaWeapons` | Futura Weapon Pack (10종 84개 중 11개 사용) | [moisturizedfish.itch.io](https://moisturizedfish.itch.io/futura-weapon-pack) | ⚠ **정식 문구 없음** — 아래 참고 | 권장 | 2026-09-14 · 09-26 · 10-04 · 10-11 |
 | `KayKit/Character Animations 1.1` | KayKit Character Animations 1.1 — Free (근접 모션 FBX 1개, 22개 중 8구간 사용) | [kaylousberg.itch.io](https://kaylousberg.itch.io/kaykit-character-animations) | **CC0 1.0** (폴더의 `License.txt`) | 없음 (권장) | 2026-09-26 |
+| `Arts/FxKit/Textures` | Kenney Particle Pack 1.1 — 입자 그림 80장 중 48장을 채널별 묶음(2×2 등)으로 짠 18장 (`FxKit_Scorch` · `FxKit_Spark` 두 장은 직접 만든 것). 연출 공통 재료(FxKit)가 쓴다. 다시 만들기: `Logs/fxkit/tools/make_kenney_sheets.ps1` | [kenney.nl](https://kenney.nl/assets/particle-pack) | **CC0 1.0** (팩의 `License.txt`) | 없음 (권장) | 2026-11-20 |
 
 **Futura Weapon Pack** — 무료 팩이고, 페이지에 라이선스 문구가 없다.
 상업적 이용을 묻는 댓글에 제작자가 **"Sure, go for it!"** 이라고 답한 것이 허락의 전부다.

@@ -69,6 +69,9 @@ public static class StageWarmup
             bosses++;
         }
 
+        // 연출 공통 재료 (2026-11-19) — 입자 채널 9개를 만들고 한 번 그려 둔다 (첫 폭발 · 낙뢰 때 끊기지 않게)
+        FxKit.Prewarm(wakeAt);
+
         // 피격 연출 — 처음 맞을 때 만들던 화면 요소를 미리 (첫 피격 프레임 12ms)
         PlayerHurtFx hurt = player != null ? player.GetComponent<PlayerHurtFx>() : null;
         if (hurt != null) hurt.Prewarm();
