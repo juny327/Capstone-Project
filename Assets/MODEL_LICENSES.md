@@ -14,6 +14,9 @@
 | `FuturaWeapons` | Futura Weapon Pack (10종 84개 중 11개 사용) | [moisturizedfish.itch.io](https://moisturizedfish.itch.io/futura-weapon-pack) | ⚠ **정식 문구 없음** — 아래 참고 | 권장 | 2026-09-14 · 09-26 · 10-04 · 10-11 |
 | `KayKit/Character Animations 1.1` | KayKit Character Animations 1.1 — Free (근접 모션 FBX 1개, 22개 중 8구간 사용) | [kaylousberg.itch.io](https://kaylousberg.itch.io/kaykit-character-animations) | **CC0 1.0** (폴더의 `License.txt`) | 없음 (권장) | 2026-09-26 |
 | `Arts/FxKit/Textures` | Kenney Particle Pack 1.1 — 입자 그림 80장 중 48장을 채널별 묶음(2×2 등)으로 짠 18장 (`FxKit_Scorch` · `FxKit_Spark` 두 장은 직접 만든 것). 연출 공통 재료(FxKit)가 쓴다. 다시 만들기: `Logs/fxkit/tools/make_kenney_sheets.ps1` | [kenney.nl](https://kenney.nl/assets/particle-pack) | **CC0 1.0** (팩의 `License.txt`) | 없음 (권장) | 2026-11-20 |
+| `Arts/MeleeWeapons/Hammer` | "SCI-FI Hammer" — Qubzy (FBX 1개). 전투 망치 (`W_Hammer`) · 묠니르 (`W_EVO_Mjolnir`, 같은 모델을 하늘빛으로 다시 칠함). 재질은 `Arts/MeleeWeapons/Materials` 에서 따로 만든다 | [poly.pizza/m/MsNEnPrE69](https://poly.pizza/m/MsNEnPrE69) | **CC BY 3.0** | **있음** — 크레딧에 넣음 | 2026-11-20 |
+| `Arts/MeleeWeapons/Baton` | "Security Baton" — Dylan Kowertz (GLB 를 OBJ + 텍스처 3장으로 바꿔 넣음 — 프로젝트에 glTF 가져오기가 없어서). 방망이 (`W_Bat`) | [sketchfab.com/3d-models/security-baton-412e3c2828d1434f972e250099f9d74d](https://sketchfab.com/3d-models/security-baton-412e3c2828d1434f972e250099f9d74d) | **CC BY 4.0** | **있음** — 크레딧에 넣음 | 2026-11-20 |
+| `Arts/MeleeWeapons/Tetsubo` | "Low-poly Tetsubo" — Yavuz Temel (FBX 1개, 614면). 도깨비 방망이 (`W_EVO_Dokkaebi`, 징을 연두 도깨비불색으로 다시 칠함) | [sketchfab.com/3d-models/low-poly-tetsubo-58e81d5de7b9475ba99140a38cf23ccf](https://sketchfab.com/3d-models/low-poly-tetsubo-58e81d5de7b9475ba99140a38cf23ccf) | **CC BY 4.0** (Sketchfab 'CC Attribution') | **있음** — 크레딧에 넣음 | 2026-11-20 |
 
 **Futura Weapon Pack** — 무료 팩이고, 페이지에 라이선스 문구가 없다.
 상업적 이용을 묻는 댓글에 제작자가 **"Sure, go for it!"** 이라고 답한 것이 허락의 전부다.
@@ -43,6 +46,9 @@ Humanoid 클립으로 잘라 근접 양손 모션에 쓴다 — `KK_2H_Chop`(내
 ```
 Melee Weapon Models
   Futura Weapon Pack — moisturizedfish (itch.io)
+  SCI-FI Hammer — Qubzy (poly.pizza, CC BY 3.0)
+  Security Baton — Dylan Kowertz (sketchfab.com, CC BY 4.0)
+  Low-poly Tetsubo — Yavuz Temel (sketchfab.com, CC BY 4.0)
 Melee Animations
   KayKit Character Animations — Kay Lousberg (CC0)
 ```
