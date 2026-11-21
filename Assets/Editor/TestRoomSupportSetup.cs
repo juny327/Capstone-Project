@@ -23,12 +23,12 @@ public static class TestRoomSupportSetup
     const string AreaName = "SupportArea";
     const string WeaponDir = "Assets/Scripts/Data/Weapons/";
 
-    // 한 줄 4칸 — null 은 기능 구역 (2줄 끝 진화 · 3줄 끝 비우기)
+    // 한 줄 5칸 — null 은 기능 구역 (2줄 진화 · 비우기). 2026-11-20 근거리 2종(전투 망치 · 방망이)을 3줄 끝에 더함
     static readonly string[][] Rows =
     {
         new[] { "WD_Rifle", "WD_SMG", "WD_Sniper", "WD_Drone" },
-        new[] { "WD_Shotgun", "WD_TeslaRifle", "WD_ChargeLaser", null },
-        new[] { "WD_Sword", "WD_Greatsword", "WD_Spear", null },
+        new[] { "WD_Shotgun", "WD_TeslaRifle", "WD_ChargeLaser", null, null },
+        new[] { "WD_Sword", "WD_Greatsword", "WD_Spear", "WD_Hammer", "WD_Bat" },
     };
 
     [MenuItem("Tools/Test Room/보조 무기 구역 추가")]
@@ -72,7 +72,7 @@ public static class TestRoomSupportSetup
         float x0 = TestRoomLayout.SupportStartX, step = TestRoomLayout.SupportStepX;
         float top = TestRoomLayout.SupportTopZ, rowStep = TestRoomLayout.SupportRowStep;
         TestRoomSetup.WorldLabel("보조 무기 — 들어가면 보조 칸에 (가득하면 마지막 칸을 바꾼다)", area,
-                                 new Vector3(x0 + step * 1.5f, 0.1f, top + 2.4f), font, 0.013f);
+                                 new Vector3(x0 + step * 2f, 0.1f, top + 2.4f), font, 0.013f);
 
         int placed = 0;
         for (int r = 0; r < Rows.Length; r++)
@@ -84,7 +84,7 @@ public static class TestRoomSupportSetup
 
                 if (name == null)
                 {
-                    bool evolve = r == 1;
+                    bool evolve = c == 3;   // 2줄 넷째 칸 진화 · 다섯째 칸 비우기
                     Pad(actionPrefab, scene, area, evolve ? "Support_Evolve" : "Support_Clear", at,
                         evolve ? TestSupportPad.PadAction.Evolve : TestSupportPad.PadAction.Clear, null,
                         evolve ? "보조 칸 진화" : "보조 비우기",
