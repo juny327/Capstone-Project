@@ -14,6 +14,9 @@ public enum ImpactMoment
     MeleeCrit,          // 근접 치명타 (패링 직후 한 방 포함)
     BossKill,           // 보스 체력이 0 이 되는 마지막 한 방 (엔딩 ①)
     BossBurst,          // 쓰러진 보스가 빛으로 터지는 순간 (엔딩 ②)
+    MjolnirStrike,      // 묠니르 세 번째 내려찍기의 낙뢰 (2026-11-20)
+    MjolnirCatch,       // 던진 묠니르를 받는 순간
+    DokkaebiBlast,      // 도깨비 방망이 풀스윙 — 도깨비불 타구가 터지는 순간
 }
 
 /// <summary>
@@ -111,6 +114,11 @@ public class ImpactFxSettings : ScriptableObject
     public Moment bossKill = new Moment { duck = true, hitStop = true, zoom = 0.05f, flash = 0.16f, thud = 0.8f };
     public Moment bossBurst = new Moment { duck = true, zoom = 0.04f, flash = 0.2f, thud = 0.9f };
 
+    [Header("새 근접 상위 무기 (2026-11-20)")]
+    public Moment mjolnirStrike = new Moment { duck = true, hitStop = true, zoom = 0.03f, flash = 0.13f, thud = 0.6f };
+    public Moment mjolnirCatch = new Moment { zoom = 0.015f, flash = 0.06f, thud = 0.25f };
+    public Moment dokkaebiBlast = new Moment { duck = true, zoom = 0.025f, flash = 0.11f, thud = 0.5f };
+
     public Moment Get(ImpactMoment moment)
     {
         switch (moment)
@@ -126,6 +134,9 @@ public class ImpactFxSettings : ScriptableObject
             case ImpactMoment.MeleeCrit: return meleeCrit;
             case ImpactMoment.BossKill: return bossKill;
             case ImpactMoment.BossBurst: return bossBurst;
+            case ImpactMoment.MjolnirStrike: return mjolnirStrike;
+            case ImpactMoment.MjolnirCatch: return mjolnirCatch;
+            case ImpactMoment.DokkaebiBlast: return dokkaebiBlast;
             default: return null;
         }
     }

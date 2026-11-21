@@ -57,6 +57,9 @@ public enum SupportTarget
 
     /// <summary>가장 가까운 무리 — 둘레에 적이 가장 많이 모인 적 (대검 — 넓게 휘두르기).</summary>
     Crowd,
+
+    /// <summary>원거리 공격을 하는 적 먼저 — 없으면 가장 가까운 적 (전투 망치, 2026-11-20).</summary>
+    Ranged,
 }
 
 /// <summary>

@@ -36,7 +36,10 @@ public class EconomySystem : MonoBehaviour
     int stageIndexCache = 1;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-    static void ResetStatics() => Instance = null;
+    static void ResetStatics() { Instance = null; BonusCoinsDropped = 0; }
+
+    /// <summary>보너스 코인으로 떨어뜨린 양 (시험 — 도깨비 방망이 '뚝딱').</summary>
+    public static int BonusCoinsDropped { get; private set; }
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void Bootstrap()
@@ -172,6 +175,36 @@ public class EconomySystem : MonoBehaviour
 
             coin.Launch(origin, origin + new Vector3(dir.x, 0f, dir.y), each + (i < extra ? 1 : 0));
         }
+    }
+
+    /// <summary>
+    /// 보너스 코인 (2026-11-20 도깨비 방망이 '뚝딱') — origin 에서 튀어 나와 둘레에 떨어진다. 줍는 규칙은 처치 코인과 같다 (가까이 가면 날아온다).
+    /// 플레이어 · 코인 프리팹이 없으면 아무것도 하지 않고 false.
+    /// </summary>
+    public bool DropBonusCoins(Vector3 origin, int amount)
+    {
+        if (amount <= 0 || Settings == null || Settings.coinPrefab == null) return false;
+
+        ResolvePlayer();
+        if (!HasLivePlayer) return false;
+
+        int count = Mathf.Clamp(amount, 1, Mathf.Max(1, Settings.maxCoinObjects));
+        int each = amount / count;
+        int extra = amount % count;
+        for (int i = 0; i < count; i++)
+        {
+            Vector2 dir = Random.insideUnitCircle;
+            if (dir.sqrMagnitude < 0.0001f) dir = Vector2.right;
+            dir = dir.normalized * Random.Range(Settings.scatterRadius.x, Settings.scatterRadius.y);
+
+            CoinPickup coin = Spawn();
+            if (coin == null) continue;
+
+            coin.Launch(origin, origin + new Vector3(dir.x, 0f, dir.y), each + (i < extra ? 1 : 0));
+        }
+
+        BonusCoinsDropped += amount;
+        return true;
     }
 
     CoinPickup Spawn()
