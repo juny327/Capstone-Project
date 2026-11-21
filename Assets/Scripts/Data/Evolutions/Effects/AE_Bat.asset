@@ -1,0 +1,72 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c53612cdcb507540ac3cde9bc377804, type: 3}
+  m_Name: AE_Bat
+  m_EditorClassIdentifier: Assembly-CSharp::BatEffect
+  knockback: 2.5
+  finisherKnockback: 5
+  knockTime: 0.22
+  collideRadius: 0.9
+  collideDamageMul: 0.5
+  wallDamageMul: 0.5
+  wallStun: 0.5
+  material: {fileID: 2100000, guid: b6310812509a3ab46bf4e098541a27ab, type: 2}
+  color: {r: 0.45, g: 0.82, b: 1, a: 1}
+  dustColor: {r: 0.78, g: 0.72, b: 0.62, a: 1}
+  kit: 0
+  dokkaebi: 0
+  tukEvery: 5
+  tukCoins: 1
+  tukStageCap: 12
+  ghostColor: {r: 0.62, g: 1, b: 0.25, a: 1}
+  goldColor: {r: 1, g: 0.84, b: 0.32, a: 1}
+  font: {fileID: 0}
+  tukWord: "\uB69D\uB531!"
+  wispOrbit: {x: 1.15, y: 1.6}
+  ghostfire: 0
+  ghostSpeed: 18
+  ghostDistance: 14
+  ghostBlastRadius: 2.5
+  ghostDamage: {x: 1, y: 2}
+  slowFactor: 0.5
+  slowSeconds: 2
+  collideSound:
+    clips:
+    - {fileID: 8300000, guid: 6b73692ba265ed24dbc71a45d6b73211, type: 3}
+    - {fileID: 8300000, guid: b468156eb68ae6a47b580e41cb5e2c0d, type: 3}
+    - {fileID: 8300000, guid: 9be9be90340c1634298356822b1c3353, type: 3}
+    volume: 0.4
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0.06
+  wallSound:
+    clips:
+    - {fileID: 8300000, guid: c69d98c7f05e71f44b711d81e62e27f0, type: 3}
+    - {fileID: 8300000, guid: 4cbad0b6ac522a9488910cc838a9d5b9, type: 3}
+    - {fileID: 8300000, guid: d346bb6ed7f09824c9ae4750ee7d6a11, type: 3}
+    volume: 0.45
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0.08
+  tukSound:
+    clips: []
+    volume: 1
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0
+  ghostLaunchSound:
+    clips: []
+    volume: 1
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0
+  ghostBlastSound:
+    clips: []
+    volume: 1
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0

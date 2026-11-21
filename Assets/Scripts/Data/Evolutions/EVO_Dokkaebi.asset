@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 774e8839cb40ed44f82f525be90550ac, type: 3}
+  m_Name: EVO_Dokkaebi
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponEvolutionData
+  from: {fileID: 11400000, guid: 0b47d88f78101a24ebd02138e70d13af, type: 2}
+  requiredLevel: 0
+  requiredAttachment: {fileID: 0}
+  requiredSubAbility: {fileID: 0}
+  requiredAbilityLevel: 1
+  requiredAnyGunAttachment: {fileID: 0}
+  requiredSkill: {fileID: 11400000, guid: 7bf2963a07beb464faa35e10e90c7c89, type: 2}
+  result: {fileID: 11400000, guid: 5c2b56f554fcd7247ae0632be43fe9b3, type: 2}
+  title: "\uB3C4\uAE68\uBE44 \uBC29\uB9DD\uC774"
+  flavor: "\uB2E4\uC12F \uBC88\uC9F8 \uD0C0\uACA9\uB9C8\uB2E4 '\uB69D\uB531!' \uCF54\uC778,
+    \uD480\uC2A4\uC719\uC740 \uC5F0\uB450 \uB3C4\uAE68\uBE44\uBD88 \uD0C0\uAD6C (\uBA40\uB9AC
+    \uCE60\uC218\uB85D \uCD5C\uB300 2\uBC30 \xB7 \uB9DE\uC740 \uC801 \uB290\uB824\uC9D0)"
+  color: {r: 0.62, g: 1, b: 0.25, a: 1}
+  sound: {fileID: 8300000, guid: f595650ca3f17154e8de61ccc64e6a00, type: 3}
+  soundVolume: 0.9
+  bodySound: {fileID: 0}
+  bodyVolume: 0.6
+  bassSound: {fileID: 0}
+  bassVolume: 0.7
+  shopPrice: 0

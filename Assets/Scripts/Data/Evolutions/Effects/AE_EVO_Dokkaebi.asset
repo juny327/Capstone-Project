@@ -1,0 +1,77 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c53612cdcb507540ac3cde9bc377804, type: 3}
+  m_Name: AE_EVO_Dokkaebi
+  m_EditorClassIdentifier: Assembly-CSharp::BatEffect
+  knockback: 2.5
+  finisherKnockback: 5
+  knockTime: 0.22
+  collideRadius: 0.9
+  collideDamageMul: 0.5
+  wallDamageMul: 0.5
+  wallStun: 0.5
+  material: {fileID: 2100000, guid: b6310812509a3ab46bf4e098541a27ab, type: 2}
+  color: {r: 0.62, g: 1, b: 0.25, a: 1}
+  dustColor: {r: 0.78, g: 0.72, b: 0.62, a: 1}
+  kit: 1
+  dokkaebi: 1
+  tukEvery: 5
+  tukCoins: 1
+  tukStageCap: 12
+  ghostColor: {r: 0.62, g: 1, b: 0.25, a: 1}
+  goldColor: {r: 1, g: 0.84, b: 0.32, a: 1}
+  font: {fileID: 11400000, guid: b142b49dad0aa7747857b5917f44e1e7, type: 2}
+  tukWord: "\uB69D\uB531!"
+  wispOrbit: {x: 1.15, y: 1.6}
+  ghostfire: 1
+  ghostSpeed: 18
+  ghostDistance: 14
+  ghostBlastRadius: 2.5
+  ghostDamage: {x: 1, y: 2}
+  slowFactor: 0.5
+  slowSeconds: 2
+  collideSound:
+    clips:
+    - {fileID: 8300000, guid: 14a6c5ccd1168b34995102c178c41985, type: 3}
+    - {fileID: 8300000, guid: 5b36dda9a4bded24bb0264082bb1191b, type: 3}
+    volume: 0.4
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0.06
+  wallSound:
+    clips:
+    - {fileID: 8300000, guid: c69d98c7f05e71f44b711d81e62e27f0, type: 3}
+    - {fileID: 8300000, guid: 4cbad0b6ac522a9488910cc838a9d5b9, type: 3}
+    volume: 0.45
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0.08
+  tukSound:
+    clips:
+    - {fileID: 8300000, guid: d7cda74adc564da469fbb96527092a80, type: 3}
+    - {fileID: 8300000, guid: 7d13b3255ee05574f9ea24ff8bddc3c8, type: 3}
+    volume: 0.75
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0.1
+  ghostLaunchSound:
+    clips:
+    - {fileID: 8300000, guid: 08df0f3b3ce34110a5e1b2d0f021696c, type: 3}
+    - {fileID: 8300000, guid: b0be3748af6d47e7b6828a8ae1cc721f, type: 3}
+    - {fileID: 8300000, guid: 49a63e77e59d454aa0a50129ff889950, type: 3}
+    volume: 0.55
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0.1
+  ghostBlastSound:
+    clips:
+    - {fileID: 8300000, guid: 670987b1567025e45a709ee09df2bcb8, type: 3}
+    - {fileID: 8300000, guid: 6f0fd072993ca754e8ff678030d36181, type: 3}
+    volume: 0.55
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0.12
