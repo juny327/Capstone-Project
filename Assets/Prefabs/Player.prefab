@@ -2735,7 +2735,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMove
   detector: {fileID: 1129838663952604652}
-  baseSpeed: 3
+  baseSpeed: 3.3
   jumpPower: 3
   GroundCheckDis: 0.4
   groundLayer:
@@ -2757,7 +2757,7 @@ MonoBehaviour:
   exhaustedRecoverRatio: 0.25
   rollDistance: 4
   rollDuration: 0.75
-  rollReferenceSpeed: 3
+  rollReferenceSpeed: 3.3
   rollMaxScale: 1.25
   rollClipDuration: 1.5
   rollCooldown: 3.25
