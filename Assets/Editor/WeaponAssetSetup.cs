@@ -47,7 +47,7 @@ public static class WeaponAssetSetup
     const string WeaponPrefabDir = "Assets/Prefabs/Weapons";
     const string WeaponDataDir = "Assets/Scripts/Data/Weapons";
     const string PlayerPrefabPath = "Assets/Prefabs/Player.prefab";
-    const string KnifePath = "Assets/LowPolyWeapons_LITE/Prefabs/Knife_01.prefab";
+    const string KnifePath = "Assets/LowPolyWeapons_LITE/Prefabs/Knife_01.prefab";   // 11-22 폴더를 지움 — 없으면 검 만들기를 건너뛴다
     const string BulletPath = "Assets/Prefabs/Bullet_new.prefab";
     const string MuzzleFlashPath = "Assets/Prefabs/Effect/Shoot.prefab";
     const string CasingPath = "Assets/Prefabs/Effect/BulletCase.prefab";
@@ -217,7 +217,6 @@ public static class WeaponAssetSetup
 
         Require($"{PartsDir}/Scope_1.fbx", missing);
         Require($"{PartsDir}/Barrel_Single.fbx", missing);
-        Require(KnifePath, missing);
         Require(PlayerPrefabPath, missing);
         Require(BulletPath, missing);
         Require(MuzzleFlashPath, missing);
@@ -474,6 +473,12 @@ public static class WeaponAssetSetup
         if (SkipIfExists(path)) return;
 
         var knife = AssetDatabase.LoadAssetAtPath<GameObject>(KnifePath);
+        if (knife == null)
+        {
+            // 2026-11-22 LowPolyWeapons_LITE 를 지웠다 (검은 '8. Futura 검 A로 W_Sword 교체' 로 만든다)
+            Debug.LogWarning($"{Tag} 임시 칼 모델이 없어 W_Sword 를 만들지 않습니다 — 메뉴 '8. Futura 검 A로 W_Sword 교체' 를 쓰세요");
+            return;
+        }
 
         GameObject root = CreateRoot("W_Sword", scene);
         root.AddComponent<MeleeWeapon>();
