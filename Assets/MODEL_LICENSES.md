@@ -55,15 +55,15 @@ Melee Animations
 
 ## 확인 필요
 
-아래 폴더는 출처 기록이 없다. 받은 사람이 채워 넣을 것.
+아래 폴더는 출처 기록이 없었다. **2026-11-22 조사** — 팩 안 파일과 웹에서 찾은 것. "추정"은 받은 사람이 확인할 것.
 
-| 폴더 | 쓰는 곳 | 출처 | 라이선스 |
-|---|---|---|---|
-| `SciFiWarriorPBRHPPolyart` | 플레이어 모델 · 몸 머티리얼 (HP / Polyart) | ? | ? |
-| `Kevin Iglesias` | 플레이어 근접 · 구르기 애니메이션 | ? | ? |
-| `GunPack` | 총기 모델 · 부착물 그림(`Parts/Scope_1` · `Barrel_Single` → 2배율 스코프 · 확장 총열 아이콘) | ? | ? |
-| `LowPolyWeapons_LITE` | (지금은 안 씀) | ? | ? |
-| `Space_Exploration_GUI_Kit` | HUD 아이콘 (패링 방패 아이콘 포함) | ? | ? |
+| 폴더 | 쓰는 곳 | 출처 | 라이선스 | 상태 |
+|---|---|---|---|---|
+| `Kevin Iglesias` | 플레이어 근접 · 구르기 애니메이션 | Kevin Iglesias — Human Melee Animations 2.0 FREE ([keviniglesias.com](https://www.keviniglesias.com/#license)) | **Standard Unity Asset Store EULA · Fab Standard License** — 상업 이용 가능 · 재판매 금지 · **출처 표기 불필요** (팩 안 `Human Melee Animations 2.0 FREE.pdf`) | ✅ 확인 |
+| `SciFiWarriorPBRHPPolyart` | 플레이어 모델 · 몸 머티리얼 (HP / Polyart) | Unity Asset Store 무료 에셋 [#106154](https://assetstore.unity.com/packages/3d/characters/humanoids/sci-fi-warrior-pbr-hp-106154) "Sci-Fi Warrior PBR HP" (지금 페이지 이름은 "Robot Hero : PBR HP Polyart" 로 보임) | Standard Unity Asset Store EULA (스토어 무료 에셋 공통) | 추정 — 제작자 이름 미확인 |
+| `Space_Exploration_GUI_Kit` | HUD 아이콘 (패링 방패 아이콘 포함) | 같은 이름의 스토어 페이지를 찾지 못함 — 가장 가까운 후보 Unity Asset Store [Space Game GUI Kit #298577](https://assetstore.unity.com/packages/space-game-gui-kit/298577) (무료, 상점 · 아이콘 포함) | 스토어 것이면 Standard EULA · 안의 글꼴 Asap · Righteous 는 **SIL OFL 1.1** (팩 안 `Fonts/OFL.txt` — 확인) | 미확인 — 팀원(가져온 사람)에게 |
+| `GunPack` | 총기 모델 · 부착물 그림(`Parts/Scope_1` · `Barrel_Single` → 2배율 스코프 · 확장 총열 아이콘) | 찾지 못함 (파일 이름 AR_3 · AR_6 · SMG_1 · Grenade 로 검색해도 일치하는 팩 없음) | ? | 미확인 — 받은 사람에게 (9-14 커밋 "추가 총기, 드론시스템") |
+| `LowPolyWeapons_LITE` | **안 씀** — 폴더 밖에서 참조 0 (11-22 확인). 지워도 된다 | 찾지 못함 | ? | 지우면 기록도 필요 없음 |
 
 > Unity Asset Store 에서 받은 팩이라면 Standard Unity Asset Store EULA 를 따르며,
 > **좌석(seat) 단위** 라이선스라 팀원이 각자 받아야 하는 경우가 있다. 팩마다 확인할 것.
