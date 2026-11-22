@@ -110,9 +110,9 @@ MonoBehaviour:
   shurikenHit:
     clips:
     - {fileID: 8300000, guid: d8e7350367160344baa52b7e8b656e32, type: 3}
-    volume: 1
-    pitchRange: {x: 0.96, y: 1.04}
-    minInterval: 0
+    volume: 0.3
+    pitchRange: {x: 0.92, y: 1.08}
+    minInterval: 0.09
   electricShotHit:
     clips:
     - {fileID: 8300000, guid: 907967d654b094a469f68754e71bf535, type: 3}
