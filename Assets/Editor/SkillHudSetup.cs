@@ -73,7 +73,7 @@ public static class SkillHudSetup
             panel.transform.SetParent(root.transform, false);
             Place(panel, new Vector2(0, 1), new Vector2(24, -24), new Vector2(PanelWidth, 100), new Vector2(0, 1));
             var bg = panel.GetComponent<Image>();
-            bg.color = new Color(Ink.r, Ink.g, Ink.b, 0.72f);
+            bg.color = new Color(Ink.r, Ink.g, Ink.b, 0.86f);   // 11-22 0.72 → 0.86 — 바닥 글씨가 비쳐 HUD 글자와 겹쳤다
             bg.raycastTarget = false;
 
             var layout = panel.GetComponent<VerticalLayoutGroup>();

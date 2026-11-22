@@ -926,7 +926,7 @@ public static class CustomizationSetup
             prt.anchoredPosition = new Vector2(-24, 120);
             prt.sizeDelta = new Vector2(340, 100);
             var bg = panel.GetComponent<Image>();
-            bg.color = new Color(Ink.r, Ink.g, Ink.b, 0.72f);
+            bg.color = new Color(Ink.r, Ink.g, Ink.b, 0.86f);   // 11-22 0.72 → 0.86 — 바닥 글씨가 비쳐 HUD 글자와 겹쳤다
             bg.raycastTarget = false;
 
             var layout = panel.GetComponent<VerticalLayoutGroup>();
@@ -952,7 +952,7 @@ public static class CustomizationSetup
 
             TMP_Text headerTitle = Text(header.transform, "Title", "무기", 21, Accent, TextAlignmentOptions.Left,
                 new Vector2(0, 0.5f), new Vector2(50 + 100, 0), new Vector2(200, 30));
-            TMP_Text headerHint = Text(header.transform, "Hint", "Z 상세", 14, Muted, TextAlignmentOptions.Right,
+            TMP_Text headerHint = Text(header.transform, "Hint", "Z 상세", 15, Muted, TextAlignmentOptions.Right,
                 new Vector2(1, 0.5f), new Vector2(-45, 0), new Vector2(90, 24));
 
             var rows = new EquipmentRowView[AttachmentData.SlotCount];

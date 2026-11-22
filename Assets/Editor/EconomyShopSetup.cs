@@ -644,8 +644,8 @@ public static class EconomyShopSetup
             b.slotIcons[s].raycastTarget = false;
             b.slotIcons[s].enabled = false;
 
-            Text(cell.transform, "Label", AttachmentData.SlotName((AttachmentSlot)s), font, 12, Muted, TextAlignmentOptions.Center,
-                new Vector2(0.5f, 0), new Vector2(0, -9), new Vector2(52, 16));
+            Text(cell.transform, "Label", AttachmentData.SlotName((AttachmentSlot)s), font, 14, Muted, TextAlignmentOptions.Center,
+                new Vector2(0.5f, 0), new Vector2(0, -10), new Vector2(60, 18));   // 11-22 12 → 14 (12px 한글은 뭉개졌다)
         }
 
         b.parts = Text(root.transform, "Parts", "부착물 없음", font, 15, Muted, TextAlignmentOptions.Left,
@@ -685,7 +685,7 @@ public static class EconomyShopSetup
             flashImage.raycastTarget = false;
             flashImage.enabled = false;
 
-            TMP_Text label = Text(root.transform, "Label", "", font, 15, Muted, TextAlignmentOptions.Left,
+            TMP_Text label = Text(root.transform, "Label", "", font, 16, Muted, TextAlignmentOptions.Left,   // 11-22 15 → 16
                 new Vector2(0, 1), new Vector2(6 + 25, -20), new Vector2(50, 24));
 
             var frameGo = new GameObject("Frame", typeof(RectTransform), typeof(Image));

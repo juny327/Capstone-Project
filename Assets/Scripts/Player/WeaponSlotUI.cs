@@ -250,7 +250,7 @@ public class WeaponSlotUI : MonoBehaviour
         {
             tag.text = mainTag;
             tag.color = mainTagColor;
-            tag.fontSize = 14f;
+            tag.fontSize = 17f;   // 11-22 14 → 17 — 작은 한글 굵은 글씨가 뭉개졌다
             return;
         }
 
@@ -258,8 +258,8 @@ public class WeaponSlotUI : MonoBehaviour
         bool drone = occupied && (weapon.Data.SupportOnly || weapon.Data.IsAlwaysActive);
 
         tag.text = drone ? droneTag : supportTag;
-        tag.color = new Color(supportColor.r, supportColor.g, supportColor.b, occupied ? 1f : 0.4f);
-        tag.fontSize = 16f;   // 칸이 작아진 만큼 글자를 키워 주무기 글자와 비슷하게 보이게
+        tag.color = new Color(supportColor.r, supportColor.g, supportColor.b, occupied ? 1f : 0.6f);   // 11-22 빈 칸 0.4 → 0.6
+        tag.fontSize = 19f;   // 칸이 작아진 만큼 글자를 키워 주무기 글자와 비슷하게 보이게 (11-22 16 → 19, 화면에서 약 15px)
 
         if (slot.frame != null)
             slot.frame.color = new Color(supportColor.r, supportColor.g, supportColor.b, occupied ? 0.95f : 0.35f);
@@ -279,7 +279,7 @@ public class WeaponSlotUI : MonoBehaviour
         rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 1f);
         rt.pivot = new Vector2(0.5f, 0f);
         rt.anchoredPosition = new Vector2(0f, 3f);
-        rt.sizeDelta = new Vector2(120f, 22f);
+        rt.sizeDelta = new Vector2(120f, 26f);
 
         var text = go.AddComponent<TextMeshProUGUI>();
         TextMeshProUGUI source = slot.label != null ? slot.label : slot.level;
