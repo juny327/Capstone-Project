@@ -103,8 +103,8 @@ public class GuideContent : ScriptableObject
     public Card[] swordsmanCards =
     {
         new Card("Parry", "회피, 마우스 오른쪽", "패링", "때를 맞춰 막으면 날아오는 탄을 되돌려 보내고 주변의 적을 밀쳐 낸다. 성공하면 떠 있는 무기가 반격한다"),
-        new Card("SwordMain", "주무기", "검, 대검, 창", "로비에서 하나를 고른다. 가까이 온 적을 스스로 벤다"),
-        new Card("SwordSupport", "보조 무기, 2칸", "곁에 떠 있는 칼", "정비 창에서 산 근접 무기가 몸 둘레에 떠 있다가 적에게 날아가 벤다"),
+        new Card("SwordMain", "주무기", "검, 전투 망치, 방망이", "로비에서 하나를 고른다. 가까이 온 적을 스스로 친다. 망치는 기절시키고, 방망이는 멀리 날려 보낸다"),
+        new Card("SwordSupport", "보조 무기, 2칸", "곁에 떠 있는 칼", "정비 창에서 산 근접 무기(대검, 창 등)가 몸 둘레에 떠 있다가 적에게 날아가 친다"),
         new Card("Shield", "서브 능력, E", "에너지 방패", "누르고 있는 동안 정면 공격을 막는다. 떼면 앞의 적을 밀쳐 낸다"),
         new Card("Grapple", "서브 능력, F", "그랩 훅", "와이어를 쏘아 처음 닿은 적을 내 앞까지 끌어온다"),
     };
@@ -129,7 +129,7 @@ public class GuideContent : ScriptableObject
         "2. 짝 장비를 갖춘다. 개조와 서브 능력은 정비 창에서 사고, 스킬은 레벨업 카드로 얻는다",
         "3. 정비 창 맨 앞이나 스테이지 보상에 뜨는 상위 무기 카드를 고른다 (무료)",
     };
-    public string evolutionNote = "필요한 짝은 로비의 조합식에 나온다. 보조 칸의 무기도 진화한다";
+    public string evolutionNote = "필요한 짝은 로비의 조합식과 위 스킬 카드에 나온다. 보조 칸의 무기도 진화한다";
 
     [Header("5쪽 — 아이템")]
     public Item[] items =
