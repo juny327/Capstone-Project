@@ -20,6 +20,7 @@ MonoBehaviour:
   socket: 0
   fireInterval: 1.4
   damage: 21.12
+  damageUpgradeFlatPerLevel: -1
   critChance: 0.1
   critMultiplier: 2
   maxLevel: 3
@@ -44,6 +45,9 @@ MonoBehaviour:
   innateEffects:
   - {fileID: 11400000, guid: 8595a7e3c2aa3a244adefccedcef7026, type: 2}
   themeColor: {r: 0.72, g: 0.32, b: 1, a: 1}
+  supportOnly: 0
+  supportTarget: 0
+  supportTint: {r: 1, g: 1, b: 1, a: 0}
   fireSounds:
   - {fileID: 8300000, guid: 9a98cd2d981fab941879d3da078784d0, type: 3}
   - {fileID: 8300000, guid: e3760d5047edad749ac1e25cd676ab46, type: 3}
@@ -61,6 +65,13 @@ MonoBehaviour:
   - {fileID: 8300000, guid: c15ea2e34cca60310580574ac96589e1, type: 3}
   hitLayerVolume: 0.18
   hitLayerMinInterval: 0.09
+  meleeBodySounds:
+  - {fileID: 8300000, guid: b2c729cc819a75c42900b67a09a3c746, type: 3}
+  - {fileID: 8300000, guid: aeff4c1c6d5013e4cbe8b710b4be2a45, type: 3}
+  - {fileID: 8300000, guid: bfffc13e8db309548816028b121f30e2, type: 3}
+  - {fileID: 8300000, guid: 7dfd65d9e139b1f4c8335954110a5895, type: 3}
+  meleeBodyVolume: 1
+  fireStack: []
   range: 4
   arcAngle: 160
   maxTargets: 8
@@ -70,10 +81,18 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 129
   cameraShake: 0.25
+  finisherEvery: 0
+  finisherVertical: 1
+  finisherDamage: 1.3
+  finisherArc: 0
+  finisherRangeAdd: 0
+  finisherShake: 0
+  critOnWeakened: 0
+  supportPose: 0
   slashEffectPrefab: {fileID: 0}
   slashMaterial: {fileID: 2100000, guid: b6310812509a3ab46bf4e098541a27ab, type: 2}
-  slashColor: {r: 0.72, g: 0.32, b: 1.0, a: 0.9}
-  slashCoreColor: {r: 0.95, g: 0.85, b: 1.0, a: 1}
+  slashColor: {r: 0.72, g: 0.32, b: 1, a: 0.9}
+  slashCoreColor: {r: 0.95, g: 0.85, b: 1, a: 1}
   slashWidth: 0.75
   slashReach: 0.92
   slashSweep: 0.1

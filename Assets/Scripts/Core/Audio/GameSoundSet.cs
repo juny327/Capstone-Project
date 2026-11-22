@@ -155,6 +155,44 @@ public class GameSoundSet : ScriptableObject
     [Tooltip("적을 처치할 때. 초당 여러 번 나므로 minInterval 을 꼭 둘 것")]
     public Entry enemyKilled = new Entry();
 
+    [Tooltip("체력이 큰 몬스터를 처치할 때 (2026-11-22 효과음 2단계). 비우면 일반 처치음")]
+    public Entry bigEnemyKilled = new Entry();
+
+    [Tooltip("이 체력(EnemyData.maxHp — 스테이지 배율 전) 이상이면 큰 적 처치음 — 데몬 걸 E 가 18. 0 이면 끈다")]
+    [Min(0f)] public float bigEnemyMinHp = 18f;
+
+    [Header("몬스터 몸 소리 (2026-11-22 효과음 2단계)")]
+    [Tooltip("몬스터 종류마다 맞을 때 · 쓰러질 때의 몸 소리 (울음 · 보이스는 넣지 않는다). 몬스터 코드는 고치지 않는다 — "
+           + "무기가 맞힌 대상(ReportHit 의 target)과 처치 이벤트(GameEvents.OnEnemyDefeated)를 보고 SoundManager 가 낸다. 목록에 없는 몬스터는 소리 없음")]
+    public EnemyVoice[] enemyVoices;
+
+    /// <summary>몬스터 한 종류(또는 비슷한 몇 종류)의 몸 소리.</summary>
+    [System.Serializable]
+    public class EnemyVoice
+    {
+        [Tooltip("알아보기 쉬운 이름 (고블린 · 스켈레톤 · 데몬 걸)")]
+        public string label;
+        [Tooltip("이 소리를 쓰는 몬스터 데이터")]
+        public EnemyData[] enemies;
+        [Tooltip("맞을 때 — 내 맞힘 확인음과 함께 (확인음보다 작게)")]
+        public Entry hurt = new Entry();
+        [Tooltip("쓰러질 때 — 처치음과 함께")]
+        public Entry death = new Entry();
+    }
+
+    /// <summary>그 몬스터 데이터의 몸 소리 (없으면 null).</summary>
+    public EnemyVoice VoiceOf(EnemyData data)
+    {
+        if (data == null || enemyVoices == null) return null;
+        foreach (EnemyVoice v in enemyVoices)
+        {
+            if (v == null || v.enemies == null) continue;
+            foreach (EnemyData e in v.enemies)
+                if (e == data) return v;
+        }
+        return null;
+    }
+
     public Entry weaponSwap = new Entry();
     public Entry playerDead = new Entry();
 

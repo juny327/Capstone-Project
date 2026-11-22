@@ -214,8 +214,14 @@ public abstract class WeaponData : ScriptableObject
     [Tooltip("적중음을 다시 내기까지의 최소 간격(초) — 여러 명을 한꺼번에 맞혀도 한 번")]
     [Min(0f)] public float hitLayerMinInterval = 0.09f;
 
+    [Tooltip("근접 몸통 적중음 (2026-11-22 효과음 2단계) — 있으면 공용 근접 적중음(GameSoundSet.meleeHit) 대신 이 무기의 소리. "
+           + "치명타일 때는 그대로 공용 치명타 소리. 상위 무기는 원래 무기 것을 따른다 (검 → 거울칼날 · 혈검 등)")]
+    public AudioClip[] meleeBodySounds;
+    [Range(0f, 1f)] public float meleeBodyVolume = 1f;
+
     public bool HasFireLayer => fireLayerSounds != null && fireLayerSounds.Length > 0;
     public bool HasHitLayer => hitLayerSounds != null && hitLayerSounds.Length > 0;
+    public bool HasMeleeBody => meleeBodySounds != null && meleeBodySounds.Length > 0;
 
     [Header("소리 층 (2026-11-19 효과음 재정비)")]
     [Tooltip("쏠 때(근접은 적에게 들어갈 때) 발사음과 함께 내는 층들 — 순간음 · 저음 몸통 · 꼬리를 한꺼번에, delay 가 있으면 그만큼 뒤에. " +

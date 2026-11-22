@@ -307,7 +307,7 @@ public class ChainBeamWeapon : WeaponBase
 
         // 조준한 적 + 퍼진 적이 한 프레임에 들어온다. 소리는 프레임 끝에 한 번만.
         if (SoundManager.Instance != null)
-            SoundManager.Instance.ReportHit(isCritical, HitSound.Electric);
+            SoundManager.Instance.ReportHit(isCritical, HitSound.Electric, target);
         if (isFirst) PlayHitLayer();   // 상위 무기 전용 적중음 — 조준해서 맞힌 첫 적에서 한 번
     }
 

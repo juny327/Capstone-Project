@@ -17,8 +17,6 @@ MonoBehaviour:
   icon: {fileID: 21300000, guid: e9edf3a17d810e44cbaa436df8f381f1, type: 3}
   weaponPrefab: {fileID: 5825881266557484979, guid: 9c5da29612edc2c4fbe7d00bb3457f60, type: 3}
   socket: 0
-  supportOnly: 0
-  supportTarget: 0
   fireInterval: 0.7
   damage: 6.6
   damageUpgradeFlatPerLevel: 2
@@ -45,6 +43,9 @@ MonoBehaviour:
   evolvedFrom: {fileID: 0}
   innateEffects: []
   themeColor: {r: 1, g: 1, b: 1, a: 0}
+  supportOnly: 0
+  supportTarget: 0
+  supportTint: {r: 1, g: 1, b: 1, a: 0}
   fireSounds:
   - {fileID: 8300000, guid: e3760d5047edad749ac1e25cd676ab46, type: 3}
   - {fileID: 8300000, guid: 0c03edc4efa519a439adaf03a0af417a, type: 3}
@@ -53,6 +54,20 @@ MonoBehaviour:
   reloadStartSound: {fileID: 0}
   reloadEndSound: {fileID: 0}
   reloadVolume: 0.8
+  fireLayerSounds: []
+  fireLayerVolume: 0.3
+  fireLayerPitchRange: {x: 0.97, y: 1.03}
+  fireLayerMinInterval: 0
+  hitLayerSounds: []
+  hitLayerVolume: 0.25
+  hitLayerMinInterval: 0.09
+  meleeBodySounds:
+  - {fileID: 8300000, guid: 43565b4543dddb946a8e12d271f1e552, type: 3}
+  - {fileID: 8300000, guid: b82a6c0417c81114791d1a1266948fe5, type: 3}
+  - {fileID: 8300000, guid: 446fbb7d4d698d043887ffc48d340bd4, type: 3}
+  - {fileID: 8300000, guid: 3523106697c65c747afbe5b0b50584d4, type: 3}
+  meleeBodyVolume: 1
+  fireStack: []
   range: 3
   arcAngle: 120
   maxTargets: 5
@@ -62,10 +77,18 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 129
   cameraShake: 0.15
+  finisherEvery: 0
+  finisherVertical: 1
+  finisherDamage: 1.3
+  finisherArc: 0
+  finisherRangeAdd: 0
+  finisherShake: 0
+  critOnWeakened: 0
+  supportPose: 0
   slashEffectPrefab: {fileID: 0}
   slashMaterial: {fileID: 2100000, guid: b6310812509a3ab46bf4e098541a27ab, type: 2}
-  slashColor: {r: 1.0, g: 0.78, b: 0.38, a: 0.9}
-  slashCoreColor: {r: 1.0, g: 1.0, b: 0.92, a: 1}
+  slashColor: {r: 1, g: 0.78, b: 0.38, a: 0.9}
+  slashCoreColor: {r: 1, g: 1, b: 0.92, a: 1}
   slashWidth: 0.42
   slashReach: 0.9
   slashSweep: 0.07

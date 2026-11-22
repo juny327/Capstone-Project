@@ -375,6 +375,7 @@ public class MeleeWeapon : WeaponBase
 
         int applied = 0;
         int crits = 0;
+        int bodyHits = 0;   // 근접 몸통 적중음으로 낼 맞힘 (치명타가 아닌 것) — 2026-11-22
         float halfArc = arcAngle * 0.5f;
 
         // 맞힐 적을 먼저 모아 가까운 순서로 친다 (2026-11-17) — 맨 처음 적은 제 피해, 두 번째부터 extraTargetDamage 를 곱한다.
@@ -458,8 +459,16 @@ public class MeleeWeapon : WeaponBase
             }
 
             // 최대 5명을 한 번에 때린다. SoundManager 가 프레임 끝에 한 번만 낸다.
+            // 이 무기의 몸통 적중음이 있으면(검 · 창 · 대검과 그 상위 — 2026-11-22) 공용 근접 적중음 대신 그 소리 — 치명타는 그대로 공용 치명타
             if (SoundManager.Instance != null)
-                SoundManager.Instance.ReportHit(isCritical, HitSound.Melee);
+            {
+                if (data != null && data.HasMeleeBody && !isCritical)
+                {
+                    SoundManager.Instance.ReportEnemyHurt(root);
+                    bodyHits++;
+                }
+                else SoundManager.Instance.ReportHit(isCritical, HitSound.Melee, root);
+            }
 
             SpawnHitSpark(cfg, origin, point, dir, isCritical);
 
@@ -473,6 +482,7 @@ public class MeleeWeapon : WeaponBase
         // 베는 소리는 칼이 적에게 닿은 순간에 (2026-11-02 — 예전엔 휘두르기 시작에 나서 0.24 ~ 0.58초 먼저 들렸다)
         if (applied > 0) PlayFireSound();
         if (applied > 0) PlayHitLayer();   // 상위 무기 전용 적중음 (있을 때만)
+        if (bodyHits > 0) PlayMeleeBody(bodyHits);
 
         // 맞히면 한 번 흔든다 (2026-11-12) — 데이터의 cameraShake 는 피해 정보에 실려 적에게 넘어가기만 하고 아무도 쓰지 않아, 근접은 한 번도 흔들리지 않았다.
         // 적 수만큼이 아니라 한 번 휘두름에 한 번

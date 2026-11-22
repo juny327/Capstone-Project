@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.SceneManagement;
@@ -163,7 +164,7 @@ public class SoundManager : MonoBehaviour
         GameEvents.OnPlayerLevelUp += OnLevelUp;
         GameEvents.OnOpenUpgradeUI += OnUpgradeOpen;
         GameEvents.OnWeaponsChanged += OnWeaponsChanged;
-        GameEvents.OnEnemyKilled += OnEnemyKilled;
+        GameEvents.OnEnemyDefeated += OnEnemyDefeated;
         GameEvents.OnWeaponSwapped += OnWeaponSwapped;
         GameEvents.OnPlayerDeadStart += OnPlayerDead;
         GameEvents.OnStageClear += OnStageClear;
@@ -181,7 +182,7 @@ public class SoundManager : MonoBehaviour
         GameEvents.OnPlayerLevelUp -= OnLevelUp;
         GameEvents.OnOpenUpgradeUI -= OnUpgradeOpen;
         GameEvents.OnWeaponsChanged -= OnWeaponsChanged;
-        GameEvents.OnEnemyKilled -= OnEnemyKilled;
+        GameEvents.OnEnemyDefeated -= OnEnemyDefeated;
         GameEvents.OnWeaponSwapped -= OnWeaponSwapped;
         GameEvents.OnPlayerDeadStart -= OnPlayerDead;
         GameEvents.OnStageClear -= OnStageClear;
@@ -195,7 +196,25 @@ public class SoundManager : MonoBehaviour
     void OnLevelUp(int level) => Play(sounds != null ? sounds.levelUp : null, uiGroup, 1f, 1f, SoundKind.UI);
     void OnUpgradeOpen() => Play(sounds != null ? sounds.upgradeOpen : null, uiGroup, 1f, 1f, SoundKind.UI);
     void OnWeaponsChanged() => Play(sounds != null ? sounds.weaponAcquired : null, uiGroup, 1f, 1f, SoundKind.UI);
-    void OnEnemyKilled() => Play(sounds != null ? sounds.enemyKilled : null, sfxGroup, 1f, 1f, SoundKind.Kill);
+    /// <summary>
+    /// 몬스터가 쓰러졌다 (2026-11-22 — 예전엔 인자 없는 OnEnemyKilled 로 처치음만 냈다).
+    /// 처치 목표에 세는 몬스터면 처치음 — 체력이 큰 몬스터(bigEnemyMinHp 이상)는 큰 적 처치음. 그리고 그 종류의 '쓰러질 때' 몸 소리.
+    /// Enemy.Die 가 OnDeath(→ 처치 수) 바로 뒤에 같은 프레임에 부른다.
+    /// </summary>
+    void OnEnemyDefeated(Enemy enemy)
+    {
+        if (sounds == null || enemy == null) return;
+        EnemyData data = enemy.data;
+        if (enemy.countsTowardKillGoal)
+        {
+            bool big = data != null && sounds.bigEnemyMinHp > 0f && data.maxHp >= sounds.bigEnemyMinHp
+                       && sounds.bigEnemyKilled != null && sounds.bigEnemyKilled.HasClip;
+            if (big && PlayOn(null, sounds.bigEnemyKilled, sfxGroup, 1f, 1f, SoundKind.Kill)) BigKillPlayed++;
+            else if (!big) Play(sounds.enemyKilled, sfxGroup, 1f, 1f, SoundKind.Kill);
+        }
+        GameSoundSet.EnemyVoice voice = sounds.VoiceOf(data);
+        if (voice != null && voice.death != null && voice.death.HasClip && PlayOn(null, voice.death, sfxGroup, 1f, 1f, SoundKind.Kill)) EnemyDeathPlayed++;
+    }
     void OnWeaponSwapped(IWeapon w) => Play(sounds != null ? sounds.weaponSwap : null, sfxGroup, 1f, 1f, SoundKind.UI);
     void OnStageClear() => Play(sounds != null ? sounds.stageClear : null, uiGroup, 1f, 1f, SoundKind.UI);
     void OnStageRewardOpen() => Play(sounds != null ? sounds.stageRewardOpen : null, uiGroup, 1f, 1f, SoundKind.UI);
@@ -361,13 +380,33 @@ public class SoundManager : MonoBehaviour
     ///
     /// 치명타가 하나라도 섞이면 치명타 소리로 낸다 (레이저는 '치익'을 조금 크게) — 그래서 즉시 재생하지 않고 미룬다.
     /// </summary>
-    public void ReportHit(bool isCritical, HitSound kind = HitSound.Normal)
+    public void ReportHit(bool isCritical, HitSound kind = HitSound.Normal, Transform target = null)
     {
         int k = (int)kind;
         pendingHit[k] = true;
         pendingHitCount[k]++;
         if (isCritical) pendingCritical[k] = true;
+        ReportEnemyHurt(target);
     }
+
+    // 2026-11-22 효과음 2단계 — 몬스터 몸 소리. 이번 프레임에 맞은 몬스터 종류마다 한 번 (프레임 끝에)
+    readonly HashSet<GameSoundSet.EnemyVoice> pendingHurt = new HashSet<GameSoundSet.EnemyVoice>();
+
+    /// <summary>
+    /// 몬스터가 맞았다 — 그 몬스터 종류의 '맞을 때' 몸 소리를 프레임 끝에 한 번 낸다 (종류마다 최소 간격은 소리 칸의 minInterval).
+    /// 무기가 맞힌 대상을 넘긴다. 몬스터 코드는 고치지 않는다. 목록(GameSoundSet.enemyVoices)에 없는 몬스터 · 보스 · 표적은 소리 없음.
+    /// </summary>
+    public void ReportEnemyHurt(Transform target)
+    {
+        if (target == null || sounds == null || sounds.enemyVoices == null || sounds.enemyVoices.Length == 0) return;
+        Enemy enemy = target.GetComponentInParent<Enemy>();
+        if (enemy == null || enemy.data == null) return;
+        GameSoundSet.EnemyVoice voice = sounds.VoiceOf(enemy.data);
+        if (voice != null && voice.hurt != null && voice.hurt.HasClip) pendingHurt.Add(voice);
+    }
+
+    /// <summary>몬스터 몸 소리를 낸 수 (시험) — 맞을 때 · 쓰러질 때 · 큰 적 처치.</summary>
+    public static int EnemyHurtPlayed, EnemyDeathPlayed, BigKillPlayed;
 
     /// <summary>총알 · 광선이 벽에 막혔다. 산탄처럼 몰려 와도 minInterval 로 한 번만 난다.</summary>
     public void PlayObstacleHit() => Play(sounds != null ? sounds.obstacleHit : null, sfxGroup, 1f, 1f, SoundKind.Ambient);
@@ -462,6 +501,14 @@ public class SoundManager : MonoBehaviour
             pendingCritical[k] = false;
             pendingHitCount[k] = 0;
         }
+
+        // 몬스터 몸 소리 — 맞힘 확인음과 같은 프레임에 (확인음보다 작게 만든 소리 · 내가 맞은 직후에는 작게)
+        if (pendingHurt.Count > 0)
+        {
+            foreach (GameSoundSet.EnemyVoice voice in pendingHurt)
+                if (PlayOn(null, voice.hurt, sfxGroup, WeaponDuck, 1f, SoundKind.Hit)) EnemyHurtPlayed++;
+            pendingHurt.Clear();
+        }
     }
 
     /// <summary>
@@ -501,7 +548,7 @@ public class SoundManager : MonoBehaviour
     public static int Dropped { get; private set; }
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-    static void ResetVoiceStats() { CutSameKind = 0; CutLowerKind = 0; Dropped = 0; }
+    static void ResetVoiceStats() { CutSameKind = 0; CutLowerKind = 0; Dropped = 0; EnemyHurtPlayed = 0; EnemyDeathPlayed = 0; BigKillPlayed = 0; }
 
     KindRule Rule(SoundKind kind)
     {

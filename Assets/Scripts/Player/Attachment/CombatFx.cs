@@ -167,7 +167,7 @@ public static class CombatFx
         });
 
         if (SoundManager.Instance != null)
-            SoundManager.Instance.ReportHit(critical, sound);
+            SoundManager.Instance.ReportHit(critical, sound, root);
     }
 
     /// <summary>경직 (보스는 경직이 없다 — 넘어간다).</summary>

@@ -479,7 +479,7 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
     public static int HitLayersPlayed { get; private set; }
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-    static void ResetLayerCounts() { FireLayersPlayed = 0; HitLayersPlayed = 0; }
+    static void ResetLayerCounts() { FireLayersPlayed = 0; HitLayersPlayed = 0; MeleeBodyPlayed = 0; }
 
     /// <summary>발사음 덧소리 (상위 무기) — 원래 발사음과 같은 순간에 한 겹 더. 보조 무기는 PlaySound 가 줄인다.</summary>
     void PlayFireLayer()
@@ -496,6 +496,29 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
         PlaySound(clip, data.fireLayerVolume, min > 0f ? Random.Range(min, max) : 1f);
         FireLayersPlayed++;
     }
+
+    float lastMeleeBodyAt = -99f;
+
+    /// <summary>
+    /// 근접 몸통 적중음 (2026-11-22 효과음 2단계) — 공용 근접 적중음 대신 이 무기의 소리. 한 번 휘둘러 여럿을 맞혀도 한 번,
+    /// 맞힌 수만큼 조금 크게 (공용 적중음과 같은 규칙 — 1 + 0.08 × (수 − 1), 최대 1.35). 보조 칸이어도 줄이지 않는다 (공용 적중음과 같게).
+    /// </summary>
+    public void PlayMeleeBody(int hits)
+    {
+        if (data == null || !data.HasMeleeBody || SoundManager.Instance == null) return;
+        if (Time.unscaledTime - lastMeleeBodyAt < 0.06f) return;
+
+        AudioClip clip = data.meleeBodySounds[Random.Range(0, data.meleeBodySounds.Length)];
+        if (clip == null) return;
+
+        lastMeleeBodyAt = Time.unscaledTime;
+        float scale = Mathf.Min(1.35f, 1f + (Mathf.Max(1, hits) - 1) * 0.08f);
+        SoundManager.Instance.PlayClip(clip, data.meleeBodyVolume * scale, Random.Range(0.96f, 1.04f), null, SoundKind.Hit);
+        MeleeBodyPlayed++;
+    }
+
+    /// <summary>근접 몸통 적중음이 난 수 (시험).</summary>
+    public static int MeleeBodyPlayed;
 
     /// <summary>전용 적중음 (상위 무기) — 맞힌 쪽(탄 · 줄기 · 칼)이 부른다. 공용 적중음은 그대로 나고 그 위에 얹힌다.</summary>
     public void PlayHitLayer()
