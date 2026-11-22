@@ -247,34 +247,9 @@ public class GuideUI : MonoBehaviour
 
     /// <summary>
     /// 여러 줄로 접히는 글 — 낱말 가운데에서 줄이 바뀌지 않게 낱말마다 묶는다.
-    /// (한글은 그냥 두면 글자 단위로 끊겨 "가 / 까이" 처럼 된다. 프로젝트 전체 설정을 바꾸지 않고 이 창의 글에만 건다)
+    /// (한글은 그냥 두면 글자 단위로 끊겨 "가 / 까이" 처럼 된다.) 2026-11-22 카드 설명도 같이 쓰게 UiTextFit 으로 옮겼다.
     /// </summary>
-    public static string KeepWords(string text)
-    {
-        if (string.IsNullOrEmpty(text) || text.IndexOf(' ') < 0) return text;
-        string[] lines = text.Split('\n');   // 줄바꿈이 들어 있으면(스킬 설명) 줄마다 따로
-        var line = new System.Text.StringBuilder();
-        for (int l = 0; l < lines.Length; l++)
-        {
-            string[] words = lines[l].Split(' ');
-            line.Clear();
-            for (int i = 0; i < words.Length; i++)
-            {
-                // 괄호 안은 한 덩어리로 — "(피해 4)" 가 "(피해 / 4)" 로 갈리지 않게
-                string unit = words[i];
-                if (unit.IndexOf('(') >= 0 && unit.IndexOf(')') < 0)
-                    while (i + 1 < words.Length)
-                    {
-                        unit += " " + words[++i];
-                        if (words[i].IndexOf(')') >= 0) break;
-                    }
-                if (line.Length > 0) line.Append(' ');
-                line.Append(unit.Length > 1 ? "<nobr>" + unit + "</nobr>" : unit);
-            }
-            lines[l] = line.ToString();
-        }
-        return string.Join("\n", lines);
-    }
+    public static string KeepWords(string text) => UiTextFit.KeepWords(text);
 
     /// <summary>글 상자(글의 부모)의 폭을 글 길이에 맞춘다 — 상자의 기준점 쪽은 그대로 두고 늘어난다.</summary>
     public static void FitBox(TMP_Text text)

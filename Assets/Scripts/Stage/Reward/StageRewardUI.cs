@@ -69,6 +69,23 @@ public class StageRewardUI : MonoBehaviour
 
             if (has) cards[i].Setup(rewards[i], player);
         }
+
+        ShowDetailToggle(rewards.Count);
+    }
+
+    /// <summary>'상세 설명' 스위치 — 맨 오른쪽 카드의 오른쪽 위 바로 위 (2026-11-22). 카드는 토글이 바뀌면 스스로 글을 다시 그린다.</summary>
+    void ShowDetailToggle(int shown)
+    {
+        if (panel == null || cards == null || shown <= 0) return;
+
+        StageRewardCard right = null;
+        for (int i = 0; i < cards.Length && i < shown; i++)
+            if (cards[i] != null && (right == null || cards[i].transform.position.x > right.transform.position.x)) right = cards[i];
+        if (right == null) return;
+
+        Canvas.ForceUpdateCanvases();
+        DetailToggle.EnsureAbove((RectTransform)panel.transform, (RectTransform)right.transform, new Vector2(0f, 10f),
+            right.title != null ? right.title.font : null);
     }
 
     void Close(StageReward reward)

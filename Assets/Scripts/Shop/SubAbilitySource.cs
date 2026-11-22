@@ -105,10 +105,11 @@ public class SubAbilityOffer : ShopOffer
     {
         get
         {
-            if (Info != null) return Info.description;
-            if (fromLevel <= 0) return data.description;
+            // 간단 / 상세 (2026-11-22)
+            if (Info != null) return DescText.Variant(Info);
+            if (fromLevel <= 0) return DescText.SubAbility(data);
             string note = data.LevelNote(fromLevel + 1);
-            return string.IsNullOrEmpty(note) ? data.description : note;
+            return string.IsNullOrEmpty(note) ? DescText.SubAbility(data) : note;
         }
     }
 

@@ -74,6 +74,9 @@ public abstract class WeaponData : ScriptableObject
 {
     [Header("Identity")]
     public string weaponName = "New Weapon";
+    [Tooltip("간단 설명 — 카드 · 로비에 기본으로 보이는 핵심 한 줄 (20자 안팎). 비우면 description. '상세 설명' 을 켜면 description + 능력치 (DescText, 2026-11-22)")]
+    public string brief;
+    [Tooltip("상세 설명 — '상세 설명' 을 켰을 때 (DescText)")]
     [TextArea(2, 4)] public string description;
     public Sprite icon;
 

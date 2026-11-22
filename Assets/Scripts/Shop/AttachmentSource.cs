@@ -46,7 +46,7 @@ public class AttachmentOffer : ShopOffer
     public AttachmentData Attachment => attachment;
 
     public override string Title => attachment.displayName;
-    public override string Description => attachment.EffectText;
+    public override string Description => DescText.Attachment(attachment);   // 간단 = 한 줄 · 상세 = 설명 + 수치 (2026-11-22)
     public override Sprite Icon => attachment.icon;
     public override string Tag => $"{AttachmentData.SlotName(attachment.slot)} · {AttachmentData.TierName(attachment.tier)}";
     public override ShopOfferKind Kind => ShopOfferKind.Attachment;

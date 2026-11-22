@@ -40,7 +40,10 @@ public class WeaponEvolutionData : ScriptableObject
     [Tooltip("배너 · 카드 이름. 비우면 상위 무기 이름")]
     public string title;
 
-    [Tooltip("카드 설명 한두 줄 — 무엇이 바뀌는지")]
+    [Tooltip("간단 설명 — 카드 · 로비 조합식에 기본으로 보이는 핵심 한 줄 (20자 안팎). 비우면 flavor (2026-11-22)")]
+    public string brief;
+
+    [Tooltip("상세 설명 한두 줄 — 무엇이 바뀌는지. '상세 설명' 을 켜면 '원래 무기 조건 → 이름' 줄과 함께 (DescText)")]
     [TextArea(2, 4)] public string flavor;
 
     [Tooltip("배너 · 충격파 · 카드 강조 색")]

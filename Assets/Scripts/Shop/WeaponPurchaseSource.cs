@@ -41,7 +41,7 @@ public class WeaponPurchaseOffer : ShopOffer
     public WeaponData Weapon => weapon;
 
     public override string Title => weapon.weaponName;
-    public override string Description => weapon.description;
+    public override string Description => DescText.Weapon(weapon);   // 간단 / 상세 (2026-11-22)
     public override Sprite Icon => weapon.icon;
     public override string Tag => !support ? "새 무기" : weapon.SupportOnly ? "보조 · 드론" : "보조 무기";
     public override ShopOfferKind Kind => ShopOfferKind.Weapon;

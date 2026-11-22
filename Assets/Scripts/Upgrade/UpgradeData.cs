@@ -5,6 +5,9 @@ public class UpgradeData : ScriptableObject
 {
     public string upgradeName;
 
+    [Tooltip("간단 설명 — 카드에 기본으로 보이는 핵심 한 줄. 비우면 description ('상세 설명' 을 켜면 description, 2026-11-22)")]
+    public string brief;
+
     public string description;
 
     public Sprite icon;

@@ -86,6 +86,22 @@ public class UpgradeUI : MonoBehaviour
         successfulRefreshCount = 0; // 새 업그레이드 창마다 1코인부터 시작
         UpdateRefreshCostLabel();
         DrawCards();
+        ShowDetailToggle();
+    }
+
+    /// <summary>'상세 설명' 스위치 — 맨 오른쪽 카드의 오른쪽 위 바로 위 (2026-11-22). 카드는 토글이 바뀌면 스스로 설명을 다시 쓴다.</summary>
+    void ShowDetailToggle()
+    {
+        if (panel == null || cards == null) return;
+
+        UpgradeCard right = null;
+        foreach (UpgradeCard card in cards)
+            if (card != null && card.gameObject.activeSelf && (right == null || card.transform.position.x > right.transform.position.x)) right = card;
+        if (right == null) return;
+
+        Canvas.ForceUpdateCanvases();
+        DetailToggle.EnsureAbove((RectTransform)panel.transform, (RectTransform)right.transform, new Vector2(0f, 8f),
+            right.title != null ? right.title.font : null, new Color(0.78f, 0.55f, 1f, 1f));
     }
 
     // Inspector: 새로고침 Button -> On Click() -> UpgradeUI.OnRefreshButton
