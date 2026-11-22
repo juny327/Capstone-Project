@@ -39,39 +39,64 @@ MonoBehaviour:
   ghostDamage: {x: 1, y: 2}
   slowFactor: 0.5
   slowSeconds: 2
+  coinBounce: 1
+  coinBounceRadius: 1
+  coinBounceMax: 4
+  coinBounceDamage: 0.25
+  coinBounceSeek: 12
+  debt: 1
+  debtShare: 0.4
+  debtHpPerCoin: 2
+  debtRepayRate: 1
+  debtForgetChance: 0.25
+  debtForgetBonus: 1.5
+  debtWord: "\u2212{0} \uB0E5"
   collideSound:
     clips:
-    - {fileID: 8300000, guid: 14a6c5ccd1168b34995102c178c41985, type: 3}
-    - {fileID: 8300000, guid: 5b36dda9a4bded24bb0264082bb1191b, type: 3}
-    volume: 0.4
+    - {fileID: 8300000, guid: ee80ea2e92f085b46afe0e146ea0b7fe, type: 3}
+    - {fileID: 8300000, guid: 70255b8422f59dd40a922f5f65e6f6d7, type: 3}
+    - {fileID: 8300000, guid: 27eaa6bb1f79b5542b785f64a02cf1fc, type: 3}
+    volume: 0.368
     pitchRange: {x: 0.96, y: 1.04}
     minInterval: 0.06
   wallSound:
     clips:
-    - {fileID: 8300000, guid: c69d98c7f05e71f44b711d81e62e27f0, type: 3}
-    - {fileID: 8300000, guid: 4cbad0b6ac522a9488910cc838a9d5b9, type: 3}
-    volume: 0.45
+    - {fileID: 8300000, guid: e8dabd1bd93142a40b8165897c1fa560, type: 3}
+    - {fileID: 8300000, guid: 1224ec30bcf0b9c4985355bdc5c9f06b, type: 3}
+    volume: 0.454
     pitchRange: {x: 0.96, y: 1.04}
     minInterval: 0.08
   tukSound:
     clips:
-    - {fileID: 8300000, guid: d7cda74adc564da469fbb96527092a80, type: 3}
-    - {fileID: 8300000, guid: 7d13b3255ee05574f9ea24ff8bddc3c8, type: 3}
+    - {fileID: 8300000, guid: c8d56bae83283114c91a8a91db54f630, type: 3}
     volume: 0.75
     pitchRange: {x: 0.96, y: 1.04}
     minInterval: 0.1
   ghostLaunchSound:
     clips:
-    - {fileID: 8300000, guid: 08df0f3b3ce34110a5e1b2d0f021696c, type: 3}
-    - {fileID: 8300000, guid: b0be3748af6d47e7b6828a8ae1cc721f, type: 3}
-    - {fileID: 8300000, guid: 49a63e77e59d454aa0a50129ff889950, type: 3}
+    - {fileID: 8300000, guid: a9f602b44db97dd44a3ce19883892334, type: 3}
+    - {fileID: 8300000, guid: 3e01dd3fb1b8b9f4c986e39cfecceea7, type: 3}
     volume: 0.55
     pitchRange: {x: 0.96, y: 1.04}
     minInterval: 0.1
   ghostBlastSound:
     clips:
-    - {fileID: 8300000, guid: 670987b1567025e45a709ee09df2bcb8, type: 3}
-    - {fileID: 8300000, guid: 6f0fd072993ca754e8ff678030d36181, type: 3}
-    volume: 0.55
+    - {fileID: 8300000, guid: 0f6ea754cf1613a428adb779ca17b8de, type: 3}
+    - {fileID: 8300000, guid: 648c673c020747c46a584bdd8b264ef7, type: 3}
+    volume: 0.633
     pitchRange: {x: 0.96, y: 1.04}
     minInterval: 0.12
+  coinBounceSound:
+    clips:
+    - {fileID: 8300000, guid: d7cda74adc564da469fbb96527092a80, type: 3}
+    - {fileID: 8300000, guid: 7d13b3255ee05574f9ea24ff8bddc3c8, type: 3}
+    volume: 0.6
+    pitchRange: {x: 1, y: 1.15}
+    minInterval: 0
+  debtSound:
+    clips:
+    - {fileID: 8300000, guid: d7cda74adc564da469fbb96527092a80, type: 3}
+    - {fileID: 8300000, guid: 7d13b3255ee05574f9ea24ff8bddc3c8, type: 3}
+    volume: 0.7
+    pitchRange: {x: 0.85, y: 0.95}
+    minInterval: 0

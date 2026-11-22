@@ -39,19 +39,30 @@ MonoBehaviour:
   ghostDamage: {x: 1, y: 2}
   slowFactor: 0.5
   slowSeconds: 2
+  coinBounce: 0
+  coinBounceRadius: 1
+  coinBounceMax: 4
+  coinBounceDamage: 0.25
+  coinBounceSeek: 12
+  debt: 0
+  debtShare: 0.4
+  debtHpPerCoin: 2
+  debtRepayRate: 1
+  debtForgetChance: 0.25
+  debtForgetBonus: 1.5
+  debtWord: "\u2212{0} \uB0E5"
   collideSound:
     clips:
-    - {fileID: 8300000, guid: 6b73692ba265ed24dbc71a45d6b73211, type: 3}
-    - {fileID: 8300000, guid: b468156eb68ae6a47b580e41cb5e2c0d, type: 3}
-    - {fileID: 8300000, guid: 9be9be90340c1634298356822b1c3353, type: 3}
+    - {fileID: 8300000, guid: ee80ea2e92f085b46afe0e146ea0b7fe, type: 3}
+    - {fileID: 8300000, guid: 70255b8422f59dd40a922f5f65e6f6d7, type: 3}
+    - {fileID: 8300000, guid: 27eaa6bb1f79b5542b785f64a02cf1fc, type: 3}
     volume: 0.4
     pitchRange: {x: 0.96, y: 1.04}
     minInterval: 0.06
   wallSound:
     clips:
-    - {fileID: 8300000, guid: c69d98c7f05e71f44b711d81e62e27f0, type: 3}
-    - {fileID: 8300000, guid: 4cbad0b6ac522a9488910cc838a9d5b9, type: 3}
-    - {fileID: 8300000, guid: d346bb6ed7f09824c9ae4750ee7d6a11, type: 3}
+    - {fileID: 8300000, guid: e8dabd1bd93142a40b8165897c1fa560, type: 3}
+    - {fileID: 8300000, guid: 1224ec30bcf0b9c4985355bdc5c9f06b, type: 3}
     volume: 0.45
     pitchRange: {x: 0.96, y: 1.04}
     minInterval: 0.08
@@ -66,6 +77,16 @@ MonoBehaviour:
     pitchRange: {x: 0.96, y: 1.04}
     minInterval: 0
   ghostBlastSound:
+    clips: []
+    volume: 1
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0
+  coinBounceSound:
+    clips: []
+    volume: 1
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0
+  debtSound:
     clips: []
     volume: 1
     pitchRange: {x: 0.96, y: 1.04}

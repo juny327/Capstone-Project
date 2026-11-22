@@ -43,9 +43,9 @@ MonoBehaviour:
   flyHeight: 1.1
   slamSound:
     clips:
-    - {fileID: 8300000, guid: 65d738db04ec62a4098dc88f201c409e, type: 3}
-    - {fileID: 8300000, guid: e3a91b4174b044d45afaae0f2415356e, type: 3}
-    volume: 0.5
+    - {fileID: 8300000, guid: 8804d0db2e0e158498903ca0e708ba6f, type: 3}
+    - {fileID: 8300000, guid: cb383d4b592d01d419379ad0b1320451, type: 3}
+    volume: 0.504
     pitchRange: {x: 0.96, y: 1.04}
     minInterval: 0.08
   chainSound:
@@ -58,24 +58,19 @@ MonoBehaviour:
     minInterval: 0.08
   strikeSound:
     clips:
-    - {fileID: 8300000, guid: fe96114fd408e094fabe97de7169a7f3, type: 3}
-    - {fileID: 8300000, guid: 8151d6931ba78374e93b9ba47c6944e6, type: 3}
-    - {fileID: 8300000, guid: 2a973e38617103544a6fa5f7ebb9b843, type: 3}
+    - {fileID: 8300000, guid: 27389e6aed9fc974a91b170130d32cd5, type: 3}
     volume: 0.75
     pitchRange: {x: 0.96, y: 1.04}
     minInterval: 0.2
   throwSound:
     clips:
-    - {fileID: 8300000, guid: 17d752a2bc52b574eb89ee3f7594f91f, type: 3}
-    - {fileID: 8300000, guid: 01580c37a57dd484fa7e7411e95f8be7, type: 3}
-    - {fileID: 8300000, guid: 3d8e0fb3f27df2544bb9f05c11e5b24c, type: 3}
+    - {fileID: 8300000, guid: a2016a2cd3fccc94e9e75630f91ea9b6, type: 3}
     volume: 0.5
     pitchRange: {x: 0.96, y: 1.04}
     minInterval: 0.1
   catchSound:
     clips:
-    - {fileID: 8300000, guid: 2b2c79b126afa654da9e28bd00e28cf0, type: 3}
-    - {fileID: 8300000, guid: 1142e7d5671a57243a260b6bed82d367, type: 3}
+    - {fileID: 8300000, guid: a1a9272e87670c14abb9269b5ab5ab72, type: 3}
     volume: 0.55
     pitchRange: {x: 0.96, y: 1.04}
     minInterval: 0.1

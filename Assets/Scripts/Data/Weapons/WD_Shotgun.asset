@@ -13,13 +13,12 @@ MonoBehaviour:
   m_Name: WD_Shotgun
   m_EditorClassIdentifier: Assembly-CSharp::ProjectileWeaponData
   weaponName: "\uC0F7\uAC74"
-  description: "\uB4DC\uB860\uC5D0 \uC2E4\uB824 \uAC00\uAE4C\uC774 \uBD99\uC740 \uC801(3m \uC548)\uC5D0\uAC8C 8\uBC1C\uC744 \uD55C\uAEBC\uBC88\uC5D0 \uD37C\uB728\uB9B0\uB2E4. \uBA40\uB9AC \uC788\uB294 \uC801\uC740 \uC3D8\uC9C0 \uC54A\uB294\uB2E4."
+  description: "\uB4DC\uB860\uC5D0 \uC2E4\uB824 \uAC00\uAE4C\uC774 \uBD99\uC740 \uC801(3m
+    \uC548)\uC5D0\uAC8C 8\uBC1C\uC744 \uD55C\uAEBC\uBC88\uC5D0 \uD37C\uB728\uB9B0\uB2E4.
+    \uBA40\uB9AC \uC788\uB294 \uC801\uC740 \uC3D8\uC9C0 \uC54A\uB294\uB2E4."
   icon: {fileID: 21300000, guid: 8cdfb8efcf8b88845994f185cc01992d, type: 3}
   weaponPrefab: {fileID: 904226512922559315, guid: 930ac7e6d1a1f404fbc8f23db11d1d20, type: 3}
   socket: 0
-  supportOnly: 1
-  supportTarget: 3
-  supportTint: {r: 1, g: 0.85, b: 0.2, a: 1}
   fireInterval: 0.9
   damage: 1.1
   damageUpgradeFlatPerLevel: 0
@@ -35,26 +34,39 @@ MonoBehaviour:
     projectileSpeedAdd: 0
     projectileCountAdd: 1
     pierceAdd: 0
+    spreadMul: 1
+    lifeTimeMul: 1
+    burstAdd: 0
     magazineAdd: 0
     reloadTimeMul: 1
     rangeAdd: 0
     subUnitAdd: 0
   requiresTarget: 1
+  evolvedFrom: {fileID: 0}
+  innateEffects: []
+  themeColor: {r: 1, g: 1, b: 1, a: 0}
+  supportOnly: 1
+  supportTarget: 3
+  supportTint: {r: 1, g: 0.85, b: 0.2, a: 1}
   fireSounds:
-  - {fileID: 8300000, guid: c36a4edc0c65c4d44b9da54900b77773, type: 3}
-  fireVolume: 0.45
+  - {fileID: 8300000, guid: 117b0afb909f54c4ab31ad004b6faff4, type: 3}
+  - {fileID: 8300000, guid: ac58ee3d45c916d49853422782527024, type: 3}
+  - {fileID: 8300000, guid: fb8b39144379d6c4cae3aa03dd81208c, type: 3}
+  fireVolume: 0.658
   firePitchRange: {x: 0.96, y: 1.04}
   reloadStartSound: {fileID: 8300000, guid: 3a53496cd83eb9f40be9483501eddeac, type: 3}
   reloadEndSound: {fileID: 8300000, guid: a01efaa59bca5a244baf035fdc624c32, type: 3}
   reloadVolume: 0.6
-  fireLayerSounds:
-  - {fileID: 8300000, guid: 9d1ceeda56c1fec76f80e791bdf90e9f, type: 3}
+  fireLayerSounds: []
   fireLayerVolume: 0.25
   fireLayerPitchRange: {x: 0.97, y: 1.03}
   fireLayerMinInterval: 0
   hitLayerSounds: []
   hitLayerVolume: 0.18
   hitLayerMinInterval: 0.09
+  meleeBodySounds: []
+  meleeBodyVolume: 1
+  fireStack: []
   aimMode: 0
   projectilePrefab: {fileID: 5875018044698817663, guid: 47d42afc0830c50448915274e6d3e535, type: 3}
   projectileSpeed: 18
@@ -62,6 +74,9 @@ MonoBehaviour:
   projectileCount: 8
   spreadAngle: 28
   pierceCount: 0
+  spawnProjectiles: 1
+  homingTurnRate: 0
+  homingRange: 14
   magazineSize: 6
   reloadTime: 2.4
   autoReload: 1
@@ -83,3 +98,13 @@ MonoBehaviour:
     sparkLines: 2
     sparkRing: 0
     fireShake: 0.12
+    flashSwing: 0
+    hotFlashSize: 0
+    hotTracerLength: 0
+    hotTracerWidth: 0
+    hotColor: {r: 0, g: 0, b: 0, a: 0}
+    smokeMaterial: {fileID: 0}
+    smokeTime: 0
+    smokeWidth: 0.35
+    smokeHeadColor: {r: 1, g: 0.6, b: 0.25, a: 0.9}
+    smokeTailColor: {r: 0.55, g: 0.55, b: 0.58, a: 0.55}

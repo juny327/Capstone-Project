@@ -18,12 +18,16 @@ MonoBehaviour:
   color: {r: 1, g: 0.55, b: 0.15, a: 1}
   sound:
     clips:
-    - {fileID: 8300000, guid: 37611a59647a6734e9619bfca33a9d53, type: 3}
-    - {fileID: 8300000, guid: 4cdccc042cb621a47abab09517f17fef, type: 3}
+    - {fileID: 8300000, guid: 5d9bdccb6040af049bc0aaf163776336, type: 3}
+    - {fileID: 8300000, guid: 56a4c20962255a247a777efed257fe6a, type: 3}
+    - {fileID: 8300000, guid: 9f441b6e974c35b498bb28ea5e119896, type: 3}
     volume: 0.3
     pitchRange: {x: 0.96, y: 1.04}
     minInterval: 0.06
+  vfxPrefab: {fileID: 0}
+  vfxScale: 0.6
   fireball: 1.1
   innerRing: 1
   shards: 6
   cameraShake: 0.08
+  kitPop: 1

@@ -51,10 +51,10 @@ MonoBehaviour:
   supportTarget: 6
   supportTint: {r: 1, g: 1, b: 1, a: 0}
   fireSounds:
-  - {fileID: 8300000, guid: 65d738db04ec62a4098dc88f201c409e, type: 3}
-  - {fileID: 8300000, guid: e3a91b4174b044d45afaae0f2415356e, type: 3}
-  - {fileID: 8300000, guid: 14a6c5ccd1168b34995102c178c41985, type: 3}
-  fireVolume: 0.72
+  - {fileID: 8300000, guid: 7ba2e4367ca20dd43bbea2a46babea53, type: 3}
+  - {fileID: 8300000, guid: 15dc8f62114d8784782c13361b364be8, type: 3}
+  - {fileID: 8300000, guid: 66145455e95359945aeb5ceda51082ac, type: 3}
+  fireVolume: 0.728
   firePitchRange: {x: 0.82, y: 0.92}
   reloadStartSound: {fileID: 0}
   reloadEndSound: {fileID: 0}
@@ -68,6 +68,8 @@ MonoBehaviour:
   - {fileID: 8300000, guid: df1163305e48636fa4c0aa0f5884a2b7, type: 3}
   hitLayerVolume: 0.2
   hitLayerMinInterval: 0.09
+  meleeBodySounds: []
+  meleeBodyVolume: 1
   fireStack: []
   range: 2.6
   arcAngle: 70
@@ -97,8 +99,8 @@ MonoBehaviour:
   slashThrust: 0
   hitSpark: 1
   swingSounds:
-  - {fileID: 8300000, guid: 27ba4e5c0914d8646adc9885958471c8, type: 3}
-  - {fileID: 8300000, guid: 5b0254f09ba83b843b65757b7019cb20, type: 3}
-  - {fileID: 8300000, guid: 17f7ebd9779308646a88789556b5aa0b, type: 3}
-  swingVolume: 0.5
+  - {fileID: 8300000, guid: 27e2277f448a3c147acc99daddaa20c3, type: 3}
+  - {fileID: 8300000, guid: 36cff6a79585bcd4489967bea0f77909, type: 3}
+  - {fileID: 8300000, guid: 33ae7c2f4415f094cb156636c1de0d48, type: 3}
+  swingVolume: 0.679
   swingPitchRange: {x: 0.94, y: 1.06}

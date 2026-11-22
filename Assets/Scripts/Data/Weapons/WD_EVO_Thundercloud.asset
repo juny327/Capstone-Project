@@ -20,6 +20,7 @@ MonoBehaviour:
   socket: 0
   fireInterval: 0.5
   damage: 4.5
+  damageUpgradeFlatPerLevel: -1
   critChance: 0.08
   critMultiplier: 2
   maxLevel: 3
@@ -44,11 +45,14 @@ MonoBehaviour:
   innateEffects:
   - {fileID: 11400000, guid: 12d2ec64f5d1dca41ad8b63c17795fea, type: 2}
   themeColor: {r: 0.45, g: 0.42, b: 1, a: 1}
+  supportOnly: 0
+  supportTarget: 0
+  supportTint: {r: 1, g: 1, b: 1, a: 0}
   fireSounds:
-  - {fileID: 8300000, guid: 17d752a2bc52b574eb89ee3f7594f91f, type: 3}
-  - {fileID: 8300000, guid: 01580c37a57dd484fa7e7411e95f8be7, type: 3}
-  - {fileID: 8300000, guid: 3d8e0fb3f27df2544bb9f05c11e5b24c, type: 3}
-  fireVolume: 0.27
+  - {fileID: 8300000, guid: a895cefcb47abee429ab2c1081c304ee, type: 3}
+  - {fileID: 8300000, guid: de3ba090a9071f243b9be9c451b60558, type: 3}
+  - {fileID: 8300000, guid: cdbaba17d501935479c451562a08e1d1, type: 3}
+  fireVolume: 0.382
   firePitchRange: {x: 0.96, y: 1.04}
   reloadStartSound: {fileID: 8300000, guid: 87793c96ae4e8cc479acb0087a81befd, type: 3}
   reloadEndSound: {fileID: 8300000, guid: 156334c5cbcdce44b8c384027a7d8f99, type: 3}
@@ -62,6 +66,9 @@ MonoBehaviour:
   - {fileID: 8300000, guid: df1163305e48636fa4c0aa0f5884a2b7, type: 3}
   hitLayerVolume: 0.18
   hitLayerMinInterval: 0.09
+  meleeBodySounds: []
+  meleeBodyVolume: 1
+  fireStack: []
   range: 14
   beamRadius: 0.12
   beamDuration: 0.14

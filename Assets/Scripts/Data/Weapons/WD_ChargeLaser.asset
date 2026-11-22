@@ -13,13 +13,12 @@ MonoBehaviour:
   m_Name: WD_ChargeLaser
   m_EditorClassIdentifier: Assembly-CSharp::ChargeBeamWeaponData
   weaponName: "\uCDA9\uC804 \uB808\uC774\uC800"
-  description: "\uB4DC\uB860\uC5D0 \uC2E4\uB824 \uD798\uC744 \uBAA8\uC558\uB2E4\uAC00, \uC801\uC774 \uAC00\uC7A5 \uB9CE\uC774 \uACB9\uCE5C \uC904\uC744 \uC77C\uC9C1\uC120\uC73C\uB85C \uAFF0\uB6AB\uB294\uB2E4. \uB290\uB9AC\uC9C0\uB9CC \uD55C \uBC29\uC774 \uD06C\uB2E4."
+  description: "\uB4DC\uB860\uC5D0 \uC2E4\uB824 \uD798\uC744 \uBAA8\uC558\uB2E4\uAC00,
+    \uC801\uC774 \uAC00\uC7A5 \uB9CE\uC774 \uACB9\uCE5C \uC904\uC744 \uC77C\uC9C1\uC120\uC73C\uB85C
+    \uAFF0\uB6AB\uB294\uB2E4. \uB290\uB9AC\uC9C0\uB9CC \uD55C \uBC29\uC774 \uD06C\uB2E4."
   icon: {fileID: 21300000, guid: b99fc7fc0c734fb4cbdb85288b4617b4, type: 3}
   weaponPrefab: {fileID: 1597846053522236169, guid: f2e9bd52ecb8a42468a639ed1b81eb23, type: 3}
   socket: 0
-  supportOnly: 1
-  supportTarget: 4
-  supportTint: {r: 1, g: 0.3, b: 0.45, a: 1}
   fireInterval: 2.2
   damage: 9.9
   damageUpgradeFlatPerLevel: 0
@@ -35,18 +34,39 @@ MonoBehaviour:
     projectileSpeedAdd: 0
     projectileCountAdd: 0
     pierceAdd: 0
+    spreadMul: 1
+    lifeTimeMul: 1
+    burstAdd: 0
     magazineAdd: 0
     reloadTimeMul: 1
     rangeAdd: 0
     subUnitAdd: 0
   requiresTarget: 1
+  evolvedFrom: {fileID: 0}
+  innateEffects: []
+  themeColor: {r: 1, g: 1, b: 1, a: 0}
+  supportOnly: 1
+  supportTarget: 4
+  supportTint: {r: 1, g: 0.3, b: 0.45, a: 1}
   fireSounds:
-  - {fileID: 8300000, guid: dadd291a9954d8d4789092de4813473f, type: 3}
+  - {fileID: 8300000, guid: 8f2b327902e12124c832330739b0e401, type: 3}
+  - {fileID: 8300000, guid: d10a5b0a81cc0104ba681cb201abc895, type: 3}
+  - {fileID: 8300000, guid: e87f5373ea7791f468a7df0403fb9500, type: 3}
   fireVolume: 0.48
   firePitchRange: {x: 0.96, y: 1.04}
   reloadStartSound: {fileID: 8300000, guid: 36381054e71469145833f1167c65ffa4, type: 3}
   reloadEndSound: {fileID: 8300000, guid: 156334c5cbcdce44b8c384027a7d8f99, type: 3}
   reloadVolume: 0.6
+  fireLayerSounds: []
+  fireLayerVolume: 0.3
+  fireLayerPitchRange: {x: 0.97, y: 1.03}
+  fireLayerMinInterval: 0
+  hitLayerSounds: []
+  hitLayerVolume: 0.25
+  hitLayerMinInterval: 0.09
+  meleeBodySounds: []
+  meleeBodyVolume: 1
+  fireStack: []
   range: 18
   beamRadius: 0.25
   beamDuration: 0.22
@@ -61,8 +81,103 @@ MonoBehaviour:
   beamColor: {r: 0.35, g: 0.95, b: 1, a: 0.85}
   beamWidth: 0.35
   chargeWidth: 0.3
-  chargeSound: {fileID: 8300000, guid: 3ca2d41d3f7d72a42a124c6debd80346, type: 3}
-  chargeVolume: 0.41
+  extraBeams: 0
+  beamsAllAround: 0
+  primaryBeamDamageMul: 1
+  rainbowBeams: 0
+  beamFadeOut: 0
+  telegraphBeams: 0
+  prismBurst:
+    enabled: 0
+    colors:
+    - {r: 1, g: 0.25, b: 0.3, a: 1}
+    - {r: 0.3, g: 1, b: 0.45, a: 1}
+    - {r: 0.35, g: 0.55, b: 1, a: 1}
+    scatterTime: 1
+    moteSpeed: 16
+    moteMaxHits: 4
+    hopRange: 5
+    seekRange: 12
+    coneAngle: 140
+    moteDamageMul: 0.4
+    moteScale: 0.55
+    convergeTime: 0.3
+    sustainTime: 2
+    tickInterval: 0.1
+    tickDamageMul: 0.35
+    turnRate: 120
+    hitRadius: 0.7
+    beamWidth: 2.4
+    cameraShake: 0.35
+    sustainShake: 0.09
+    sustainShakeInterval: 0.08
+    lineMaterial: {fileID: 0}
+    kitFx: 1
+    moteMaterial: {fileID: 0}
+    scatterSound:
+      clips: []
+      volume: 1
+      pitchRange: {x: 0.96, y: 1.04}
+      minInterval: 0
+    convergeSound:
+      clips: []
+      volume: 1
+      pitchRange: {x: 0.96, y: 1.04}
+      minInterval: 0
+    beamSound:
+      clips: []
+      volume: 1
+      pitchRange: {x: 0.96, y: 1.04}
+      minInterval: 0
+    beamBassSound:
+      clips: []
+      volume: 1
+      pitchRange: {x: 0.96, y: 1.04}
+      minInterval: 0
+    beamHumSound:
+      clips: []
+      volume: 1
+      pitchRange: {x: 0.96, y: 1.04}
+      minInterval: 0
+    beamLoop: {fileID: 0}
+    beamLoopVolume: 0.5
+    beamLoopPitch: 1
+  sunLance:
+    enabled: 0
+    windUpTime: 0.8
+    minRange: 10
+    maxRange: 32
+    earlyReleaseRange: 0
+    minWindUp: 0.3
+    turnRate: 240
+    damageMul: 1
+    minChargeDamage: 0.6
+    hitRadius: 1.1
+    beamWidth: 2.6
+    beamTime: 0.45
+    burnRatio: 0.3
+    burnDuration: 3
+    scorchTime: 2.5
+    cameraShake: 0.7
+    lineMaterial: {fileID: 0}
+    color: {r: 1, g: 0.86, b: 0.45, a: 1}
+    scorchColor: {r: 1, g: 0.35, b: 0.08, a: 0.8}
+    kitFx: 1
+    gatherSound:
+      clips: []
+      volume: 1
+      pitchRange: {x: 0.96, y: 1.04}
+      minInterval: 0
+    fireSound:
+      clips: []
+      volume: 1
+      pitchRange: {x: 0.96, y: 1.04}
+      minInterval: 0
+    beamLoop: {fileID: 0}
+    beamLoopVolume: 0.5
+    beamLoopPitch: {x: 0.75, y: 1}
+  chargeSound: {fileID: 8300000, guid: 7f6c1ae3232ac004aa3ef25eb1e887b3, type: 3}
+  chargeVolume: 0.484
   muzzleFlashPrefab: {fileID: 2916273817513264348, guid: 95044fb3908b36c46bc62060360f7ba6, type: 3}
   hitEffectPrefab: {fileID: 4324968127605537629, guid: c694cdd4158a7394bb9c62a42fc6bd6b, type: 3}
   coreWidth: 0.12

@@ -43,9 +43,8 @@ MonoBehaviour:
   flyHeight: 1.1
   slamSound:
     clips:
-    - {fileID: 8300000, guid: 068c21036e0bcaa4f974f16931341bd3, type: 3}
-    - {fileID: 8300000, guid: 2b2c79b126afa654da9e28bd00e28cf0, type: 3}
-    - {fileID: 8300000, guid: 7f9eeeb584a40d246b77d3661e8a0980, type: 3}
+    - {fileID: 8300000, guid: 8804d0db2e0e158498903ca0e708ba6f, type: 3}
+    - {fileID: 8300000, guid: cb383d4b592d01d419379ad0b1320451, type: 3}
     volume: 0.5
     pitchRange: {x: 0.96, y: 1.04}
     minInterval: 0.08
