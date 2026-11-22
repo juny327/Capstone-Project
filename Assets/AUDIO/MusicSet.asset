@@ -14,23 +14,23 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MusicSet
   tracks:
   - sceneName: Loby
-    clip: {fileID: 8300000, guid: 99e93ccba1e935142b595f5dbbd1345b, type: 3}
-    volume: 0.32
+    clip: {fileID: 8300000, guid: cf861ccfd46ec70499e892f785f7692f, type: 3}
+    volume: 0.232
   - sceneName: Stage1
-    clip: {fileID: 8300000, guid: 46bb6e9fb0bdb5e59a2ca705e9cc4980, type: 3}
-    volume: 0.64
+    clip: {fileID: 8300000, guid: 70f0d30240c0211488aaa8bda09e8d12, type: 3}
+    volume: 0.462
   - sceneName: Stage2
-    clip: {fileID: 8300000, guid: 9446958a399da9d8958faa4d172259f1, type: 3}
-    volume: 0.39
+    clip: {fileID: 8300000, guid: 77987a446fc734a44812e7bbc286917e, type: 3}
+    volume: 0.432
   - sceneName: Stage3
-    clip: {fileID: 8300000, guid: 10b4339cc3770d9a4279ed035cadb5a7, type: 3}
-    volume: 0.29
+    clip: {fileID: 8300000, guid: e7d24d685518a3a49af33e76e8a770c4, type: 3}
+    volume: 0.265
   - sceneName: StageBoss
-    clip: {fileID: 8300000, guid: 00560ef3ff2baebd1e4427adb2aa45f7, type: 3}
-    volume: 0.54
+    clip: {fileID: 8300000, guid: 057fe71fa676d0e4288a52ffe70c58f8, type: 3}
+    volume: 0.305
   - sceneName: EndingScene
-    clip: {fileID: 8300000, guid: 431fcee2e0297df4f920b31742b28619, type: 3}
-    volume: 0.48
+    clip: {fileID: 8300000, guid: 9cfbb65bf24656f418513ae5f0323690, type: 3}
+    volume: 0.39
   - sceneName: TestRoom
-    clip: {fileID: 8300000, guid: cc8c07b6860bad946b1b761e8f44fedf, type: 3}
-    volume: 0.38
+    clip: {fileID: 8300000, guid: 852051582039ea642851f6a0bb77a667, type: 3}
+    volume: 0.3
