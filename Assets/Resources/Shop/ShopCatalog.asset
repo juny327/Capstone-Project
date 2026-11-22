@@ -31,6 +31,10 @@ MonoBehaviour:
     price: 25
   - weapon: {fileID: 11400000, guid: 7cc3048592b43e340bdf8f77ba9a5a1d, type: 2}
     price: 23
+  - weapon: {fileID: 11400000, guid: 8ae48e8bf008c244f8bc0bbf081269ca, type: 2}
+    price: 21
+  - weapon: {fileID: 11400000, guid: 0b47d88f78101a24ebd02138e70d13af, type: 2}
+    price: 18
   defaultWeaponPrice: 25
   supportPriceMultiplier: 0.6
   upgradeBaseRate: 0.6

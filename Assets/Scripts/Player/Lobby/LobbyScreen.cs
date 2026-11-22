@@ -457,7 +457,7 @@ public class LobbyScreen : MonoBehaviour
                 break;
             case MeleeWeaponData melee:
                 into.Add(("사거리", $"{Num(melee.range)}m"));
-                into.Add(("베는 폭", $"{Num(melee.arcAngle)}도"));
+                into.Add(("휘두르는 폭", $"{Num(melee.arcAngle)}도"));   // 망치 · 방망이도 로비에 (2026-11-22)
                 break;
         }
 

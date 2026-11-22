@@ -36,6 +36,64 @@ public static class CombatFx
     {
         deadBosses.Clear();
         watched.Clear();
+        bodyColliders.Clear();
+    }
+
+    // ───────── 큰 몸(보스)을 겨눌 점 — 2026-11-22 ─────────
+
+    // 루트 → 몸 충돌체 (보스가 아니면 null). 일반 적도 한 번 보고 null 로 기억한다
+    static readonly Dictionary<Transform, Collider[]> bodyColliders = new Dictionary<Transform, Collider[]>();
+    static readonly List<Collider> colliderScratch = new List<Collider>();
+
+    /// <summary>
+    /// 무기가 사거리 · 방향을 잴 점 — 보스처럼 큰 몸은 중심(루트)이 아니라 몸 표면에서 from 에 가장 가까운 점 (높이는 루트 높이),
+    /// 일반 적은 그대로 루트 위치. 드래곤은 길이 8m · 반지름 1.9m 캡슐이라 중심으로 재면 근접 무기가 몸에 딱 붙어야 휘둘렀다.
+    /// </summary>
+    public static Vector3 TargetPoint(Transform root, Vector3 from)
+    {
+        if (root == null) return from;
+        Collider[] cols = BodyColliders(root);
+        if (cols == null) return root.position;
+
+        Vector3 best = root.position;
+        float bestSqr = float.PositiveInfinity;
+        for (int i = 0; i < cols.Length; i++)
+        {
+            Collider c = cols[i];
+            if (c == null || !c.enabled || !c.gameObject.activeInHierarchy) continue;
+            Vector3 p = c is MeshCollider mesh && !mesh.convex ? c.bounds.ClosestPoint(from) : c.ClosestPoint(from);
+            Vector3 d = p - from;
+            d.y = 0f;
+            if (d.sqrMagnitude < bestSqr) { bestSqr = d.sqrMagnitude; best = p; }
+        }
+        if (float.IsPositiveInfinity(bestSqr)) return root.position;
+        best.y = root.position.y;
+        return best;
+    }
+
+    /// <summary>보스(BossHealth · Boss 태그)의 단단한 몸 충돌체. 보스가 아니면 null.</summary>
+    static Collider[] BodyColliders(Transform root)
+    {
+        if (bodyColliders.TryGetValue(root, out Collider[] cached))
+        {
+            if (cached == null) return null;
+            bool alive = true;
+            for (int i = 0; i < cached.Length; i++) if (cached[i] == null) { alive = false; break; }
+            if (alive) return cached;
+        }
+        if (bodyColliders.Count > 512) bodyColliders.Clear();   // 사라진 적 루트가 쌓이지 않게
+
+        Collider[] found = null;
+        if (root.CompareTag("Boss") || root.GetComponentInParent<BossHealth>() != null)
+        {
+            colliderScratch.Clear();
+            foreach (Collider c in root.GetComponents<Collider>()) if (!c.isTrigger) colliderScratch.Add(c);
+            if (colliderScratch.Count == 0)
+                foreach (Collider c in root.GetComponentsInChildren<Collider>()) if (!c.isTrigger) colliderScratch.Add(c);
+            if (colliderScratch.Count > 0) found = colliderScratch.ToArray();
+        }
+        bodyColliders[root] = found;
+        return found;
     }
 
     /// <summary>
@@ -167,7 +225,7 @@ public static class CombatFx
         });
 
         if (SoundManager.Instance != null)
-            SoundManager.Instance.ReportHit(critical, sound);
+            SoundManager.Instance.ReportHit(critical, sound, root);
     }
 
     /// <summary>경직 (보스는 경직이 없다 — 넘어간다).</summary>

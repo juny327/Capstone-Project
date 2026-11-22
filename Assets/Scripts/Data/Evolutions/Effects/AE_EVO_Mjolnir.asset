@@ -1,0 +1,76 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ddadb78ae7992e46b4b2d2756d852ed, type: 3}
+  m_Name: AE_EVO_Mjolnir
+  m_EditorClassIdentifier: Assembly-CSharp::HammerEffect
+  stun: 0.4
+  finisherStun: 0.8
+  slamRadius: 2
+  slamDamageMul: 0.5
+  material: {fileID: 2100000, guid: b6310812509a3ab46bf4e098541a27ab, type: 2}
+  color: {r: 0.72, g: 0.9, b: 1, a: 1}
+  starColor: {r: 1, g: 0.9, b: 0.5, a: 1}
+  kit: 1
+  lightning: 1
+  chainChance: 0.4
+  chainTargets: 2
+  chainRange: 5
+  chainDamageMul: 0.4
+  strikeRadius: 3
+  strikeDamageMul: 1.5
+  strikeStun: 1
+  boltHeight: 14
+  idleSparks: 14
+  throwAfterFinisher: 1
+  throwDelay: 0.14
+  throwDistance: 9
+  flySpeed: 26
+  returnSpeed: 30
+  throwDamageMul: 1.2
+  returnDamageMul: 1
+  hitRadius: 1.1
+  throwStun: 0.3
+  spinSpeed: 1080
+  flyHeight: 1.1
+  slamSound:
+    clips:
+    - {fileID: 8300000, guid: 8804d0db2e0e158498903ca0e708ba6f, type: 3}
+    - {fileID: 8300000, guid: cb383d4b592d01d419379ad0b1320451, type: 3}
+    volume: 0.504
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0.08
+  chainSound:
+    clips:
+    - {fileID: 8300000, guid: 469d4d3886edf4a4aad9c7c24d8a634a, type: 3}
+    - {fileID: 8300000, guid: 3e0ee23367a8a534aaed1119ac513835, type: 3}
+    - {fileID: 8300000, guid: b1c34f331d94b524e914a9aa00d5c4d0, type: 3}
+    volume: 0.35
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0.08
+  strikeSound:
+    clips:
+    - {fileID: 8300000, guid: 27389e6aed9fc974a91b170130d32cd5, type: 3}
+    volume: 0.75
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0.2
+  throwSound:
+    clips:
+    - {fileID: 8300000, guid: a2016a2cd3fccc94e9e75630f91ea9b6, type: 3}
+    volume: 0.5
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0.1
+  catchSound:
+    clips:
+    - {fileID: 8300000, guid: a1a9272e87670c14abb9269b5ab5ab72, type: 3}
+    volume: 0.55
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0.1

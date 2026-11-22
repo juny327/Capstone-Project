@@ -360,7 +360,7 @@ public class ChargeBeamWeapon : WeaponBase
 
             // 관통이라 한 프레임에 여러 명이 들어온다. 소리는 프레임 끝에 한 번만.
             if (SoundManager.Instance != null)
-                SoundManager.Instance.ReportHit(isCritical, HitSound.Laser);
+                SoundManager.Instance.ReportHit(isCritical, HitSound.Laser, root);
             PlayHitLayer();   // 상위 무기 전용 적중음 (최소 간격으로 한 번)
         }
 

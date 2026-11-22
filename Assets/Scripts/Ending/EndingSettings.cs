@@ -150,7 +150,7 @@ public class EndingSettings : ScriptableObject
     [Tooltip("음악(Torone · TeknoAXE · Aila Scott)은 CC BY 4.0 이라 표기가 의무다 — Assets/AUDIO_LICENSES.md 의 문구 그대로. 그 줄들은 지우지 말 것")]
     [TextArea(10, 40)] public string credits =
         "# 심우주\n캡스톤 디자인 2\n\n" +
-        "# 사용한 에셋\nCethiel Dragon 3D\nSciFi Warrior PBR HP Polyart\nFutura Weapon Pack\nGunPack\nKayKit Character Animations\nKevin Iglesias Animations\nLowPoly Fantasy Monsters Pack\nMini Simple Characters Skeleton\nGabriel Aguiar Productions — Free Quick Effects Vol.1\nSolodream — Black Hole Effect\nShurikens Pack\nLightning Bolt\nSpace Exploration GUI Kit\n3D Sci-fi Asteroid Belt\nSkySeries Freebie\n\n" +
+        "# 사용한 에셋\nCethiel Dragon 3D\nSciFi Warrior PBR HP Polyart\nFutura Weapon Pack\nSCI-FI Hammer — Qubzy (poly.pizza) — CC BY 3.0\nSecurity Baton — Dylan Kowertz (sketchfab.com) — CC BY 4.0\nLow-poly Tetsubo — Yavuz Temel (sketchfab.com) — CC BY 4.0\nGunPack\nKayKit Character Animations\nKevin Iglesias Animations\nLowPoly Fantasy Monsters Pack\nMini Simple Characters Skeleton\nGabriel Aguiar Productions — Free Quick Effects Vol.1\nSolodream — Black Hole Effect\nShurikens Pack\nLightning Bolt\nSpace Exploration GUI Kit\n3D Sci-fi Asteroid Belt\nSkySeries Freebie\n\n" +
         "# 음악\n\"Music loops pack 2 - Sci-Fi\" by Chris \"Torone\" CB (torone.itch.io) — CC BY 4.0\n" +
         "\"Running Rage\" by TeknoAXE (teknoaxe.com) — CC BY 4.0, 반복용으로 잘라 씀\n" +
         "\"Sear The Time Vortex\" © 2024 by Aila Scott (ailascott.com) — CC BY 4.0\n" +

@@ -16,10 +16,13 @@ using UnityEngine;
 /// </summary>
 public class FxKit : MonoBehaviour
 {
-    /// <summary>채널 — 적힌 순서대로 그린다 (뒤가 위). 2026-11-20 나머지 10종으로 넓히며 7개 더함 (빛 원반 · 소용돌이 · 베기 호 · 기운 · 빛기둥 · 할퀸 자국 · 반짝임).</summary>
-    public enum Ch { Shade, Scorch, Magic, Ring, Wave, Twirl, Slash, Smoke, Shard, Fire, Flame, Wisp, Twig, Bolt, Beam, Ember, Spark, Claw, Star, Burst, Flare }
+    /// <summary>
+    /// 채널 — 적힌 순서대로 그린다 (뒤가 위). 2026-11-20 나머지 10종으로 넓히며 7개 더함 (빛 원반 · 소용돌이 · 베기 호 · 기운 · 빛기둥 · 할퀸 자국 · 반짝임).
+    /// 같은 날 도깨비불 2개 (불 · 솟는 불길과 같은 그림, 색을 그대로 쓴다 — 그리는 순서는 불 · 불길 자리).
+    /// </summary>
+    public enum Ch { Shade, Scorch, Magic, Ring, Wave, Twirl, Slash, Smoke, Shard, Fire, Flame, Wisp, Twig, Bolt, Beam, Ember, Spark, Claw, Star, Burst, Flare, GhostFire, GhostFlame }
 
-    const int Channels = 21;
+    const int Channels = 23;
 
     static FxKitSet set;
     static bool loaded;
@@ -174,6 +177,15 @@ public class FxKit : MonoBehaviour
 
         // 솟는 불길 — 바닥에서 위로 선다 (돌지 않는다)
         Put(Ch.Flame, Make(Ch.Flame, s.flame, 320, Facing, -0.25f, 1f, 2, 2, s.flameGlow, hot, Curve((0f, 0.45f), (0.3f, 1f), (1f, 1.15f)), 0f, true));
+
+        // 도깨비불 (2026-11-20 도깨비 방망이) — 불 · 솟는 불길과 같은 그림, 색을 그대로 쓴다 (불은 주황 그라디언트라 연두로 칠할 수 없다)
+        Gradient ghost = Fade((0f, 0f), (0.1f, 1f), (0.55f, 0.75f), (1f, 0f));
+        ParticleSystem ghostFire = Make(Ch.GhostFire, s.fire, 600, Facing, -0.2f, 2.5f, 2, 2, s.fireGlow, ghost, Curve((0f, 0.45f), (0.25f, 0.95f), (1f, 1.2f)), 55f);
+        ghostFire.GetComponent<ParticleSystemRenderer>().sortingOrder = (int)Ch.Fire;
+        Put(Ch.GhostFire, ghostFire);
+        ParticleSystem ghostFlame = Make(Ch.GhostFlame, s.flame, 320, Facing, -0.3f, 1f, 2, 2, s.flameGlow, ghost, Curve((0f, 0.45f), (0.3f, 1f), (1f, 1.15f)), 0f, true);
+        ghostFlame.GetComponent<ParticleSystemRenderer>().sortingOrder = (int)Ch.Flame;
+        Put(Ch.GhostFlame, ghostFlame);
 
         // 일렁이는 기운 — 색을 그대로 쓰는 불 (피 · 바람 · 중력 · 빛). 흔들리며 오른다
         Put(Ch.Wisp, Make(Ch.Wisp, s.wisp, 480, Facing, -0.18f, 1.2f, 2, 2, s.wispGlow,
@@ -1136,6 +1148,94 @@ public class FxKit : MonoBehaviour
             if ((i & 1) == 0) Emit(Ch.Spark, start, (to - start) / t + Vector3.up * 1.5f, Random.Range(0.07f, 0.11f), t, A(color, 1f));
             else Emit(Ch.Ember, start, (to - start) / t, Random.Range(0.09f, 0.15f), t, A(Color.Lerp(color, Color.white, 0.3f), 1f));
         }
+    }
+
+    // ───────── 도깨비불 (2026-11-20 도깨비 방망이) — 색을 그대로 쓰는 불 ─────────
+
+    /// <summary>도깨비불 한 덩이 — 날아가는 타구 · 맴도는 불 · 홀린 기운이 프레임마다 부른다.</summary>
+    public static void GhostPuff(Vector3 at, Vector3 vel, float size, float life, Color color)
+    {
+        if (!Ready) return;
+        Emit(Ch.GhostFire, at, vel, size * Scale, life, color);
+    }
+
+    /// <summary>솟는 도깨비불 하나 — 아래 끝이 at (바닥 · 무기 머리).</summary>
+    public static void GhostLick(Vector3 at, float width, float height, float life, Color color)
+    {
+        if (!Ready) return;
+        Emit(Ch.GhostFlame, at, Vector3.up * Random.Range(0.3f, 0.9f), width * Scale, life, color, 0f, 0f, height * Scale);
+    }
+
+    /// <summary>둘레에서 솟는 도깨비불 (FlameRing 의 도깨비불판).</summary>
+    public static void GhostFlameRing(Vector3 ground, float radius, Color color, float count, float height, float life = 0.45f)
+    {
+        if (!Ready) return;
+        int n = Count(count);
+        float turn = Random.Range(0f, 360f);
+        for (int i = 0; i < n; i++)
+        {
+            Vector3 d = Quaternion.AngleAxis(turn + i * 360f / Mathf.Max(1, n) + Random.Range(-12f, 12f), Vector3.up) * Vector3.forward;
+            Emit(Ch.GhostFlame, ground + d * radius * Random.Range(0.85f, 1.1f) + Vector3.up * 0.05f, Vector3.up * Random.Range(0.4f, 1.2f), height * Random.Range(0.38f, 0.55f),
+                life * Random.Range(0.8f, 1.2f), A(color, 0.9f), Random.Range(0f, 0.08f), 0f, height * Random.Range(0.8f, 1.2f));
+        }
+    }
+
+    /// <summary>
+    /// 도깨비불 폭발 — 섬광 · 도깨비불 덩어리 · 솟는 도깨비불 고리 · 혼불 기운 · 불티 · 반짝임 · 충격파 두 겹 · 그을음.
+    /// at 은 바닥 자리, radius 는 폭발 판정 반경(m). 모습만 — 피해와 무관.
+    /// </summary>
+    public static void GhostBlast(Vector3 at, float radius, Color color, float scale = 1f)
+    {
+        if (!Ready) return;
+        Explosions++;
+        float crowd = Crowd();
+        float r = radius * scale * Scale;
+        Vector3 center = at + Vector3.up * 0.6f;
+        Color white = A(Color.Lerp(color, Color.white, 0.65f), 1f);
+        Color tint = A(color, 0.95f);
+
+        Emit(Ch.Burst, center, Vector3.zero, r * 2.2f, 0.16f, white);
+        if (burstCount <= 4) Emit(Ch.Flare, center, Vector3.zero, r * 2.8f, 0.14f, A(white, 0.9f));
+
+        int n = Count(16f * crowd);
+        for (int i = 0; i < n; i++)
+        {
+            Vector3 d = Burst(0.8f);
+            Emit(Ch.GhostFire, center + d * r * Random.Range(0.05f, 0.3f), d * r * Random.Range(1f, 2.4f) + Vector3.up * 1.1f, r * Random.Range(0.45f, 0.8f),
+                Random.Range(0.4f, 0.65f), tint, Random.Range(0f, 0.05f));
+        }
+        GhostFlameRing(at, r * 0.8f, color, 14f * crowd, r * 1.2f, 0.55f);
+
+        n = Count(6f * crowd);
+        for (int i = 0; i < n; i++)
+        {
+            Vector3 d = Burst(1f);
+            Emit(Ch.Wisp, center + d * r * 0.2f, d * r * Random.Range(0.8f, 2f) + Vector3.up, r * Random.Range(0.7f, 1.2f), Random.Range(0.5f, 0.8f), A(color, 0.8f));
+        }
+
+        n = Count(26f * scale);
+        for (int i = 0; i < n; i++)
+            Emit(Ch.Spark, center, Burst(0.9f) * r * Random.Range(3f, 7f), Random.Range(0.08f, 0.13f), Random.Range(0.3f, 0.6f), Color.Lerp(tint, white, Random.value * 0.5f));
+
+        n = Count(20f * scale);
+        for (int i = 0; i < n; i++)
+            Emit(Ch.Ember, center + Around(r * 0.7f), Around(1.2f) + Vector3.up * Random.Range(0.6f, 2f), Random.Range(0.1f, 0.18f), Random.Range(0.7f, 1.4f), tint,
+                Random.Range(0f, 0.25f));
+
+        n = Count(8f);
+        for (int i = 0; i < n; i++)
+            Emit(Ch.Star, center + Around(r), Vector3.zero, r * Random.Range(0.3f, 0.55f), Random.Range(0.3f, 0.6f), white, Random.Range(0.05f, 0.35f));
+
+        Shockwave(at, r * 2.6f, color, 0.32f, 0.95f);
+        Wave(at, r * 3.4f, color, 0.5f, 0.6f);
+        Scorch(at, r * 1.5f, 0.7f);
+    }
+
+    /// <summary>별 하나 — 그 자리에 잠깐 (기절 표시 · 반짝임). 돌지 않게 0도로 시작한다.</summary>
+    public static void Spot(Vector3 at, Color color, float size, float life)
+    {
+        if (!Ready) return;
+        Emit(Ch.Star, at, Vector3.zero, size * Scale, life, A(color, 1f), 0f, 0f);
     }
 
     /// <summary>튀어 오르는 파편 뭉치 (붕괴 · 큰 충격).</summary>

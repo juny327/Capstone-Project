@@ -24,6 +24,9 @@ public struct WeaponHit
 
     /// <summary>이 피해로 적이 죽었는가 (맞기 전에 살아 있었고 지금은 죽었다).</summary>
     public bool Killed;
+
+    /// <summary>근접 마무리 타격(망치 세 번째 내려찍기 · 방망이 풀스윙)으로 맞혔는가 (2026-11-20). 총은 항상 false.</summary>
+    public bool Finisher;
 }
 
 /// <summary>
@@ -40,6 +43,12 @@ public struct WeaponAttack
 
     /// <summary>사거리.</summary>
     public float Range;
+
+    /// <summary>근접 마무리 타격인가 (2026-11-20 — 망치 세 번째 내려찍기 · 방망이 풀스윙). 총은 항상 false.</summary>
+    public bool Finisher;
+
+    /// <summary>근접 — 이 휘두르기로 맞힌 적 수 (2026-11-20). 총은 0 (쏘는 순간에 알리므로 모른다).</summary>
+    public int Hits;
 }
 
 /// <summary>

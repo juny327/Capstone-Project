@@ -21,6 +21,7 @@ MonoBehaviour:
   socket: 0
   fireInterval: 2.2
   damage: 43.12
+  damageUpgradeFlatPerLevel: -1
   critChance: 0.15
   critMultiplier: 2.5
   maxLevel: 3
@@ -44,8 +45,13 @@ MonoBehaviour:
   evolvedFrom: {fileID: 11400000, guid: 74ca696becb4fb443800afef14778251, type: 2}
   innateEffects: []
   themeColor: {r: 1, g: 0.95, b: 0.82, a: 1}
+  supportOnly: 0
+  supportTarget: 0
+  supportTint: {r: 1, g: 1, b: 1, a: 0}
   fireSounds:
-  - {fileID: 8300000, guid: dadd291a9954d8d4789092de4813473f, type: 3}
+  - {fileID: 8300000, guid: 8f2b327902e12124c832330739b0e401, type: 3}
+  - {fileID: 8300000, guid: d10a5b0a81cc0104ba681cb201abc895, type: 3}
+  - {fileID: 8300000, guid: e87f5373ea7791f468a7df0403fb9500, type: 3}
   fireVolume: 0.48
   firePitchRange: {x: 0.96, y: 1.04}
   reloadStartSound: {fileID: 8300000, guid: 36381054e71469145833f1167c65ffa4, type: 3}
@@ -60,6 +66,9 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 9345ce759e018b1b887cc4b918ea7e24, type: 3}
   hitLayerVolume: 0.18
   hitLayerMinInterval: 0.09
+  meleeBodySounds: []
+  meleeBodyVolume: 1
+  fireStack: []
   range: 18
   beamRadius: 0.25
   beamDuration: 0.35
@@ -105,6 +114,7 @@ MonoBehaviour:
     sustainShake: 0.09
     sustainShakeInterval: 0.08
     lineMaterial: {fileID: 2100000, guid: b6310812509a3ab46bf4e098541a27ab, type: 2}
+    kitFx: 1
     moteMaterial: {fileID: 2100000, guid: ae39686096520d44bbce285605330eb4, type: 2}
     scatterSound:
       clips:
@@ -121,8 +131,8 @@ MonoBehaviour:
       minInterval: 0
     beamSound:
       clips:
-      - {fileID: 8300000, guid: 54abc8062e119984fa2555813ef202b2, type: 3}
-      volume: 0.6
+      - {fileID: 8300000, guid: 4fe9b963bf1346b4ca176e8c9a288c4b, type: 3}
+      volume: 0.686
       pitchRange: {x: 0.96, y: 1.04}
       minInterval: 0
     beamBassSound:
@@ -159,6 +169,7 @@ MonoBehaviour:
     lineMaterial: {fileID: 0}
     color: {r: 1, g: 0.86, b: 0.45, a: 1}
     scorchColor: {r: 1, g: 0.35, b: 0.08, a: 0.8}
+    kitFx: 1
     gatherSound:
       clips: []
       volume: 1
@@ -172,7 +183,12 @@ MonoBehaviour:
     beamLoop: {fileID: 0}
     beamLoopVolume: 0.5
     beamLoopPitch: {x: 0.75, y: 1}
-  chargeSound: {fileID: 8300000, guid: 3ca2d41d3f7d72a42a124c6debd80346, type: 3}
-  chargeVolume: 0.41
+  chargeSound: {fileID: 8300000, guid: 7f6c1ae3232ac004aa3ef25eb1e887b3, type: 3}
+  chargeVolume: 0.484
   muzzleFlashPrefab: {fileID: 2916273817513264348, guid: 95044fb3908b36c46bc62060360f7ba6, type: 3}
   hitEffectPrefab: {fileID: 4324968127605537629, guid: c694cdd4158a7394bb9c62a42fc6bd6b, type: 3}
+  coreWidth: 0
+  coreColor: {r: 1, g: 1, b: 1, a: 1}
+  firePunch: 1
+  fireRing: 0
+  hitRing: 0

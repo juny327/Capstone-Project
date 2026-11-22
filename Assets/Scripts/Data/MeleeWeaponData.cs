@@ -1,5 +1,13 @@
 using UnityEngine;
 
+/// <summary>떠 있는 근접 무기(보조 칸)가 뛰쳐나가 치는 모양 (2026-11-20).</summary>
+public enum MeleeSupportPose
+{
+    Auto = 0,    // 무기 종류대로 — 검 좌우 베기 · 대검 휘두르기와 내려찍기를 번갈아 · 창 찌르기
+    Slam = 1,    // 언제나 머리 위에서 내려찍기 (전투 망치)
+    Sweep = 2,   // 언제나 넓게 휘두르기 (방망이)
+}
+
 /// <summary>
 /// 근접 무기 데이터 (검).
 ///
@@ -31,6 +39,29 @@ public class MeleeWeaponData : WeaponData
 
     [Tooltip("피격 시 카메라 흔들림. 근접은 흔들어야 타격감이 난다")]
     [Min(0f)] public float cameraShake = 0.15f;
+
+    [Header("마무리 타격 (2026-11-20 전투 망치 · 방망이) — finisherEvery 0 이면 없음")]
+    [Tooltip("이 횟수째 공격마다 마무리 타격 — 망치 3 (내려찍기), 방망이 3 (풀스윙). 손에 든 공격 · 떠 있는 공격이 같은 수를 센다. 0 이면 없음 (검 · 대검 · 창)")]
+    [Min(0)] public int finisherEvery;
+    [Tooltip("마무리 타격이 내려찍기인가 (망치). 끄면 가로 풀스윙 (방망이)")]
+    public bool finisherVertical = true;
+    [Tooltip("마무리 타격 피해 배율")]
+    [Min(0f)] public float finisherDamage = 1.3f;
+    [Tooltip("마무리 타격 판정 각도(정면 기준 좌우 합산). 0 이면 그 모션의 각도 그대로")]
+    [Range(0f, 360f)] public float finisherArc;
+    [Tooltip("마무리 타격 사거리에 더하는 값 (m)")]
+    public float finisherRangeAdd;
+    [Tooltip("마무리 타격 흔들림. 0 이면 cameraShake")]
+    [Min(0f)] public float finisherShake;
+
+    [Tooltip("기절(경직) · 느려진 적은 언제나 치명타 (방망이 — 2026-11-20). 보스는 기절 · 느려짐이 없어 해당 없음")]
+    public bool critOnWeakened;
+
+    [Tooltip("떠 있을 때(보조 칸) 뛰쳐나가 치는 모양 — Auto 는 무기 종류대로")]
+    public MeleeSupportPose supportPose = MeleeSupportPose.Auto;
+
+    /// <summary>마무리 타격이 있는 무기인가.</summary>
+    public bool HasFinisher => finisherEvery > 0;
 
     [Header("Effects")]
     public GameObject slashEffectPrefab;

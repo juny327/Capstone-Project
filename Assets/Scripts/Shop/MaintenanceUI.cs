@@ -269,7 +269,8 @@ public class MaintenanceUI : MonoBehaviour
                 : $"스테이지 {stage} 클리어 — 크레딧으로 무기를 갖추고 출발하세요";
             if (nextLabel != null) nextLabel.text = midStage ? "전투로 돌아가기  ▶" : stage >= bossAfterStage ? "보스전으로  ▶" : "다음 스테이지  ▶";
 
-            ShowMessage(null);
+            // 도깨비 빚 (2026-11-22) — 도깨비 방망이로 막을 때 꾼 코인을 돌려받는다
+            ShowMessage(DokkaebiDebt.Repay(player));
             if (window != null) window.SetActive(true);
             if (hud != null) hud.SetActive(false);
 

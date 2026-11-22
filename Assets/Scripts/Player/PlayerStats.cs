@@ -63,9 +63,12 @@ public class PlayerStats : MonoBehaviour, IDamageable
     // 피해 가로채기 (방패 등). 무적 확인 뒤, 체력을 깎기 전에 차례로 묻는다
     readonly List<IDamageFilter> damageFilters = new List<IDamageFilter>();
 
-    public void AddDamageFilter(IDamageFilter filter)
+    /// <summary>askLast — 다른 가로채기(방패)가 다 지나간 뒤 마지막에 묻는다 (도깨비 빚: 방패가 막은 피해에 코인을 쓰지 않게).</summary>
+    public void AddDamageFilter(IDamageFilter filter, bool askLast = false)
     {
-        if (filter != null && !damageFilters.Contains(filter)) damageFilters.Add(filter);
+        if (filter == null || damageFilters.Contains(filter)) return;
+        if (askLast) damageFilters.Insert(0, filter);   // 뒤에서부터 묻는다 — 맨 앞이 마지막
+        else damageFilters.Add(filter);
     }
 
     public void RemoveDamageFilter(IDamageFilter filter) => damageFilters.Remove(filter);

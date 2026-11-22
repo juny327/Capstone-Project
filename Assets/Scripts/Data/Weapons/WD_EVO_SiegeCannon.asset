@@ -13,12 +13,14 @@ MonoBehaviour:
   m_Name: WD_EVO_SiegeCannon
   m_EditorClassIdentifier: Assembly-CSharp::ProjectileWeaponData
   weaponName: "\uACF5\uC131\uD3EC"
-  description: "\uC801\uC5D0\uAC8C \uBD80\uB52A\uD788\uBA74 \uADF8 \uC790\uB9AC\uC5D0\uC11C \uD130\uC9C0\uB294 \uD3EC\uD0C4 \u2014 \uB458\uB808 3m \uD3ED\uBC1C"
+  description: "\uC801\uC5D0\uAC8C \uBD80\uB52A\uD788\uBA74 \uADF8 \uC790\uB9AC\uC5D0\uC11C
+    \uD130\uC9C0\uB294 \uD3EC\uD0C4 \u2014 \uB458\uB808 3m \uD3ED\uBC1C"
   icon: {fileID: 21300000, guid: 9a0def7e8c1267640b88110544e0df97, type: 3}
   weaponPrefab: {fileID: 904226512922559315, guid: 4bc1890132649e24ba38d8fadff3ab34, type: 3}
   socket: 0
   fireInterval: 0.9
   damage: 2.002
+  damageUpgradeFlatPerLevel: -1
   critChance: 0.05
   critMultiplier: 2
   maxLevel: 3
@@ -43,15 +45,19 @@ MonoBehaviour:
   innateEffects:
   - {fileID: 11400000, guid: 9e756b6eb93d6444088df27cb09f8d7d, type: 2}
   themeColor: {r: 1, g: 0.75, b: 0.25, a: 1}
+  supportOnly: 0
+  supportTarget: 0
+  supportTint: {r: 1, g: 1, b: 1, a: 0}
   fireSounds:
-  - {fileID: 8300000, guid: c36a4edc0c65c4d44b9da54900b77773, type: 3}
+  - {fileID: 8300000, guid: 2decdfb955bdbf34ba95f11675db4c93, type: 3}
+  - {fileID: 8300000, guid: f60a8b19796b56d4faf329fbdb87b991, type: 3}
+  - {fileID: 8300000, guid: 65dba0eb3a4c38048a56c331479c7a12, type: 3}
   fireVolume: 0.45
   firePitchRange: {x: 0.96, y: 1.04}
   reloadStartSound: {fileID: 8300000, guid: 3a53496cd83eb9f40be9483501eddeac, type: 3}
   reloadEndSound: {fileID: 8300000, guid: a01efaa59bca5a244baf035fdc624c32, type: 3}
   reloadVolume: 0.6
-  fireLayerSounds:
-  - {fileID: 8300000, guid: 38c0a9a4a0aa957c5e4721d3dbdee125, type: 3}
+  fireLayerSounds: []
   fireLayerVolume: 0.3
   fireLayerPitchRange: {x: 0.97, y: 1.03}
   fireLayerMinInterval: 0
@@ -59,6 +65,9 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 285ea6e32f744eda627524ff3c2a18a0, type: 3}
   hitLayerVolume: 0.18
   hitLayerMinInterval: 0.09
+  meleeBodySounds: []
+  meleeBodyVolume: 1
+  fireStack: []
   aimMode: 0
   projectilePrefab: {fileID: 5875018044698817663, guid: aeb8ad19eaf5dc04dbad61c4e2775d2c, type: 3}
   projectileSpeed: 18
@@ -90,6 +99,11 @@ MonoBehaviour:
     sparkLines: 2
     sparkRing: 0
     fireShake: 0
+    flashSwing: 0
+    hotFlashSize: 0
+    hotTracerLength: 0
+    hotTracerWidth: 0
+    hotColor: {r: 0, g: 0, b: 0, a: 0}
     smokeMaterial: {fileID: 2100000, guid: 34344ea80e234d84eb0e7a92d1b29673, type: 2}
     smokeTime: 0.55
     smokeWidth: 1.3

@@ -285,7 +285,7 @@ public class Bullet : MonoBehaviour, IPoolable
 
             // 프레임 끝에 한 번만 난다 — 관통이면 같은 프레임에 여러 번 들어온다
             if (SoundManager.Instance != null)
-                SoundManager.Instance.ReportHit(isCritical, HitSound.Bullet);
+                SoundManager.Instance.ReportHit(isCritical, HitSound.Bullet, root);
             if (source != null) source.PlayHitLayer();   // 상위 무기 전용 적중음 (있을 때만)
 
             // 착탄 후 파생 효과(전격 연쇄 · 파열 · 폭발)가 끼어드는 자리.
