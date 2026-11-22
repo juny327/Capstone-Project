@@ -207,7 +207,7 @@ public class MeleeWeapon : WeaponBase
 
         for (int i = 0; i < count; i++)
         {
-            Vector3 dir = nearby[i].position - origin;
+            Vector3 dir = CombatFx.TargetPoint(nearby[i], origin) - origin;   // 보스는 몸 표면까지 (2026-11-22)
             dir.y = 0f;
 
             // 가까운 순으로 정렬되어 있으므로 여기서 멀면 나머지도 멀다
@@ -399,7 +399,7 @@ public class MeleeWeapon : WeaponBase
             // 플레이어 자신은 제외 (hitLayers 를 잘못 잡았을 때의 안전장치 — 떠 있는 무기는 판정 기준이 플레이어가 아니다)
             if (root == ownerRoot || (Owner != null && root == Owner.transform)) continue;
 
-            Vector3 dir = root.position - origin;
+            Vector3 dir = CombatFx.TargetPoint(root, origin) - origin;   // 보스는 몸 표면의 가장 가까운 점 — 큰 몸 어디를 베어도 (2026-11-22)
             dir.y = 0f;
             float distance = dir.sqrMagnitude;
 
@@ -762,7 +762,7 @@ public class MeleeWeapon : WeaponBase
 
         Vector3 Aim()
         {
-            Vector3 a = target != null && target.gameObject.activeInHierarchy ? target.position : point;
+            Vector3 a = target != null && target.gameObject.activeInHierarchy ? CombatFx.TargetPoint(target, start) : point;   // 보스는 몸 표면으로 뛰쳐나간다
             return a;
         }
 

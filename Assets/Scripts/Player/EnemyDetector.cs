@@ -64,7 +64,7 @@ public class EnemyDetector : MonoBehaviour, ITargetProvider
 
         foreach (Transform t in targets)
         {
-            float sqr = (t.position - from).sqrMagnitude;
+            float sqr = (CombatFx.TargetPoint(t, from) - from).sqrMagnitude;   // 보스는 몸 표면까지 (2026-11-22)
             if (sqr > bestSqr) continue;
 
             bestSqr = sqr;
@@ -102,8 +102,8 @@ public class EnemyDetector : MonoBehaviour, ITargetProvider
 
     int CompareByDistance(Transform a, Transform b)
     {
-        float da = (a.position - sortOrigin).sqrMagnitude;
-        float db = (b.position - sortOrigin).sqrMagnitude;
+        float da = (CombatFx.TargetPoint(a, sortOrigin) - sortOrigin).sqrMagnitude;
+        float db = (CombatFx.TargetPoint(b, sortOrigin) - sortOrigin).sqrMagnitude;
         return da.CompareTo(db);
     }
 

@@ -39,7 +39,7 @@ public static class SupportTargeting
         for (int i = candidates.Count - 1; i >= 0; i--)
         {
             Transform t = candidates[i];
-            if (t == null || !CombatFx.IsAlive(t) || Flat(t.position - from).sqrMagnitude > rangeSqr)
+            if (t == null || !CombatFx.IsAlive(t) || Flat(CombatFx.TargetPoint(t, from) - from).sqrMagnitude > rangeSqr)   // 보스는 몸 표면까지
                 candidates.RemoveAt(i);
         }
 
@@ -127,7 +127,7 @@ public static class SupportTargeting
 
         for (int i = 0; i < candidates.Count; i++)
         {
-            float sqr = Flat(candidates[i].position - player.position).sqrMagnitude;
+            float sqr = Flat(CombatFx.TargetPoint(candidates[i], player.position) - player.position).sqrMagnitude;
             if (sqr <= bestSqr) { bestSqr = sqr; best = candidates[i]; }
         }
 
@@ -222,7 +222,7 @@ public static class SupportTargeting
             if (target == null) return null;
             if (float.IsInfinity(maxDistance)) return target;
 
-            Vector3 d = target.position - from;
+            Vector3 d = CombatFx.TargetPoint(target, from) - from;
             d.y = 0f;
             return d.sqrMagnitude <= maxDistance * maxDistance ? target : null;
         }
