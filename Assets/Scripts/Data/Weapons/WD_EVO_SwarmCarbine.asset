@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: WD_EVO_SwarmCarbine
   m_EditorClassIdentifier: Assembly-CSharp::ProjectileWeaponData
   weaponName: "\uC2A4\uC6DC \uCE74\uBE48"
+  brief: "\uC810\uC0AC\uAC00 \uC720\uB3C4 \uBBF8\uC0AC\uC77C\uB85C"
   description: "\uC810\uC0AC \uC138 \uBC1C\uC774 \uC720\uB3C4 \uBBF8\uC0AC\uC77C
     \u2014 \uBC1C\uB9C8\uB2E4 \uB2E4\uB978 \uC801\uC744 \uCAD3\uC544\uAC00 \uC791\uC740
     \uD3ED\uBC1C"

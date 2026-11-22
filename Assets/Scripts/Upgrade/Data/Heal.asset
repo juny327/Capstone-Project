@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: Heal
   m_EditorClassIdentifier: Assembly-CSharp::UpgradeData
   upgradeName: "\uCCB4\uB825 \uD68C\uBCF5"
-  description: "\uCCB4\uB825\uC744 10 \uD68C\uBCF5\uD55C"
+  brief: "\uCCB4\uB825 10 \uD68C\uBCF5"
+  description: "\uCCB4\uB825\uC744 10 \uD68C\uBCF5\uD55C\uB2E4"
   icon: {fileID: 2715409951904314068, guid: 97da73e1e810d264792bc5a70ff6e6b4, type: 3}
   costExp: 3
   maxLevel: 0

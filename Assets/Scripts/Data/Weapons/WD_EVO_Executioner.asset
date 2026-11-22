@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: WD_EVO_Executioner
   m_EditorClassIdentifier: Assembly-CSharp::ProjectileWeaponData
   weaponName: "\uCC98\uD615\uC790"
+  brief: "\uCC98\uCE58\uD55C \uC801\uC774 \uC5F0\uC1C4 \uD3ED\uBC1C"
   description: "\uCC98\uCE58\uD55C \uC801\uC774 \uD130\uC9C0\uACE0, \uADF8 \uD3ED\uBC1C\uC5D0
     \uC8FD\uC740 \uC801\uB3C4 \uC5F0\uC1C4\uB85C \uD130\uC9C4\uB2E4"
   icon: {fileID: 21300000, guid: bd2e1eb1a27ecde4bb6e002b703ee675, type: 3}

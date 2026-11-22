@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: AT_Ricochet
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentData
   displayName: "\uD295\uAE40\uD0C4"
+  brief: "\uC606 \uC801\uC5D0\uAC8C \uD55C \uBC88 \uD295\uAE34\uB2E4"
   description: "\uB9DE\uC740 \uC801\uC5D0\uC11C \uAC00\uAE4C\uC6B4 \uC801\uC5D0\uAC8C
     \uD55C \uBC88 \uD295\uAE34\uB2E4"
   icon: {fileID: 21300000, guid: 4db9803b07f17d04086337f1559f5c11, type: 3}

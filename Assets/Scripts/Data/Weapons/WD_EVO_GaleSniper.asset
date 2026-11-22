@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: WD_EVO_GaleSniper
   m_EditorClassIdentifier: Assembly-CSharp::ProjectileWeaponData
   weaponName: "\uB3CC\uD48D \uC800\uACA9\uCD1D"
+  brief: "\uC9C0\uB098\uAC04 \uAE38\uC5D0 \uBCA0\uB294 \uBC14\uB78C"
   description: "\uD0C4 \uB458\uB808\uB85C \uBC14\uB78C\uC774 \uD718\uAC10\uAE30\uACE0,
     \uC9C0\uB098\uAC04 \uAE38\uC5D0 2\uCD08 \uB3D9\uC548 \uBC14\uB78C\uC774 \uBD84\uB2E4
     \u2014 \uAE38 \uC704\uC758 \uC801\uC740 40% \uB290\uB824\uC9C0\uACE0 0.3\uCD08\uB9C8\uB2E4

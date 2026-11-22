@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: AT_GrenadeLauncher
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentData
   displayName: "\uC720\uD0C4 \uBC1C\uC0AC\uAE30"
+  brief: "E: \uCEE4\uC11C \uCABD\uC73C\uB85C \uC720\uD0C4 \uBC1C\uC0AC"
   description: "E \u2014 \uCEE4\uC11C \uCABD\uC73C\uB85C \uC720\uD0C4, \uB5A8\uC5B4\uC9C4
     \uC790\uB9AC\uC5D0\uC11C \uD3ED\uBC1C"
   icon: {fileID: 21300000, guid: 5bdb12705f8fc944b8e7887db4e7b596, type: 3}

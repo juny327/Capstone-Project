@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: WD_EVO_SiegeCannon
   m_EditorClassIdentifier: Assembly-CSharp::ProjectileWeaponData
   weaponName: "\uACF5\uC131\uD3EC"
+  brief: "\uB2FF\uC73C\uBA74 \uD130\uC9C0\uB294 \uD3EC\uD0C4"
   description: "\uC801\uC5D0\uAC8C \uBD80\uB52A\uD788\uBA74 \uADF8 \uC790\uB9AC\uC5D0\uC11C
     \uD130\uC9C0\uB294 \uD3EC\uD0C4 \u2014 \uB458\uB808 3m \uD3ED\uBC1C"
   icon: {fileID: 21300000, guid: 9a0def7e8c1267640b88110544e0df97, type: 3}

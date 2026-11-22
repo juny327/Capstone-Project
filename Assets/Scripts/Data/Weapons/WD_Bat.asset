@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: WD_Bat
   m_EditorClassIdentifier: Assembly-CSharp::MeleeWeaponData
   weaponName: "\uBC29\uB9DD\uC774"
+  brief: "\uC801\uC744 \uB0A0\uB824 \uC11C\uB85C \uBD80\uB52A\uD788\uAC8C"
   description: "\uB9DE\uD78C \uC801\uC744 \uBA40\uB9AC \uB0A0\uB824 \uBD80\uB52A\uD788\uAC8C
     \uD558\uACE0, \uC138 \uBC88\uC9F8 \uACF5\uACA9\uC740 \uD480\uC2A4\uC719. \uAE30\uC808
     \xB7 \uB290\uB824\uC9C4 \uC801\uC740 \uD655\uC815 \uCE58\uBA85"

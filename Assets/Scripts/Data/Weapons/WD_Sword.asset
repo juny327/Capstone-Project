@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: WD_Sword
   m_EditorClassIdentifier: Assembly-CSharp::MeleeWeaponData
   weaponName: "\uAC80"
+  brief: "\uC55E\uCABD\uC744 \uB113\uAC8C \uBCA4\uB2E4"
   description: "\uC804\uBC29 \uBD80\uCC44\uAF34 \uAD11\uC5ED \uBCA0\uAE30"
   icon: {fileID: 21300000, guid: e9edf3a17d810e44cbaa436df8f381f1, type: 3}
   weaponPrefab: {fileID: 5825881266557484979, guid: 9c5da29612edc2c4fbe7d00bb3457f60, type: 3}

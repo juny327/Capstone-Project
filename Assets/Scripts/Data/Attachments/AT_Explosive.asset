@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: AT_Explosive
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentData
   displayName: "\uD3ED\uBC1C\uD0C4"
+  brief: "\uB9DE\uC740 \uC790\uB9AC\uC5D0\uC11C \uC791\uAC8C \uD3ED\uBC1C"
   description: "\uBA85\uC911 \uC9C0\uC810\uC5D0\uC11C \uC791\uAC8C \uD130\uC9C4\uB2E4"
   icon: {fileID: 21300000, guid: 7237c522b87dba946ab36dee90cc499e, type: 3}
   slot: 4

@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: AT_ExtendedMag
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentData
   displayName: "\uD655\uC7A5 \uD0C4\uCC3D"
+  brief: "\uD0C4\uCC3D +50% \xB7 \uC7A5\uC804 \uC870\uAE08 \uB290\uB9BC"
   description: "\uD0C4\uC774 \uB9CE\uC774 \uB4E4\uC5B4\uAC04\uB2E4 \u2014 \uAC08\uC544
     \uB07C\uC6B0\uAE30\uB294 \uB290\uB9AC\uB2E4"
   icon: {fileID: 21300000, guid: c86dbd4beee457541af7230c0137c138, type: 3}

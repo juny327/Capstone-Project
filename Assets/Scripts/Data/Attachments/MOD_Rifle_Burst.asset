@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: MOD_Rifle_Burst
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentData
   displayName: "3\uC810\uC0AC"
+  brief: "\uD55C \uBC88\uC5D0 \uC138 \uBC1C"
   description: "\uD55C \uBC88\uC5D0 \uC138 \uBC1C \u2014 \uAC04\uACA9\uC740 \uAE38\uC5B4\uC9C4\uB2E4"
   icon: {fileID: 21300000, guid: 19b91839d37b8ce408ee63d7a868a4b2, type: 3}
   slot: 5

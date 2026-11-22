@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: BlackHoleUpgrade
   m_EditorClassIdentifier: Assembly-CSharp::UpgradeData
   upgradeName: "\uBE14\uB799\uD640"
+  brief: "\uC801\uC744 \uB04C\uC5B4\uBAA8\uC544 \uD130\uB728\uB9B0\uB2E4"
   description: "\uBE14\uB799\uD640\uC744 \uC0DD\uC131\uD574 \uC801\uC744 \uB04C\uC5B4\uB2F9\uACA8
     \uBB36\uACE0 \uD3ED\uBC1C\uD55C\uB2E4\n\uB808\uBCA8\uB9C8\uB2E4 \uC9C0\uC18D
     +1\uCD08"

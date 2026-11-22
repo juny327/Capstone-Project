@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: AT_PlasmaSuppressor
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentData
   displayName: "\uD50C\uB77C\uC988\uB9C8 \uC18C\uC74C\uAE30"
+  brief: "\uCE58\uBA85\uD0C0 \uD53C\uD574\uAC00 \uCEE4\uC9C4\uB2E4"
   description: "\uCD1D\uAD6C \uC5D0\uB108\uC9C0\uB97C \uBAA8\uC544 \uAE09\uC18C\uB97C
     \uB178\uB9B0\uB2E4"
   icon: {fileID: 21300000, guid: b272c78f6f5cd3d428c2f79bc3622616, type: 3}

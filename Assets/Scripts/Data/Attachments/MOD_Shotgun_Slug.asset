@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: MOD_Shotgun_Slug
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentData
   displayName: "\uC2AC\uB7EC\uADF8"
+  brief: "\uBB34\uAC70\uC6B4 \uD55C \uBC1C\uC774 \uAFF0\uB6AB\uB294\uB2E4"
   description: "\uC0B0\uD0C4 \uB300\uC2E0 \uBB34\uAC70\uC6B4 \uD55C \uBC1C \u2014
     \uAFF0\uB6AB\uB294\uB2E4"
   icon: {fileID: 21300000, guid: b5bbd12b820aeaf439acfcc99f12680f, type: 3}

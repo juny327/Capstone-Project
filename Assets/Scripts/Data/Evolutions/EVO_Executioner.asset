@@ -21,6 +21,7 @@ MonoBehaviour:
   requiredSkill: {fileID: 0}
   result: {fileID: 11400000, guid: 5bf1a17a2f9df52498213f720d705e50, type: 2}
   title: "\uCC98\uD615\uC790"
+  brief: "\uCC98\uCE58\uD55C \uC801\uC774 \uC5F0\uC1C4 \uD3ED\uBC1C"
   flavor: "\uCC98\uCE58\uD55C \uC801\uC774 \uD130\uC9C0\uACE0, \uADF8 \uD3ED\uBC1C\uC5D0
     \uC8FD\uC740 \uC801\uB3C4 \uC5F0\uC1C4\uB85C \uD130\uC9C4\uB2E4 (3\uB2E8)"
   color: {r: 1, g: 0.16, b: 0.24, a: 1}
