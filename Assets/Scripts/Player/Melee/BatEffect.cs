@@ -9,6 +9,10 @@ using UnityEngine.SceneManagement;
 ///    맴도는 도깨비불이 맞힐 때마다 하나씩 늘어 다섯이 되면 뚝딱 (카운터 겸용)
 ///  · 도깨비 방망이 (ghostfire) — 마무리 풀스윙이 도깨비불 타구를 날린다 (곧게 · 첫 적에서 폭발 2.5m · 멀리 갈수록 최대 2배 ·
 ///    맞은 적 2초 느려짐 → 확정 치명과 이어진다)
+///  · 도깨비 방망이 (coinBounce, 2026-11-22) — 엽전 튕기기: 타구가 바닥 코인을 스치면 코인을 튕겨 올리고 가장 가까운 적에게 꺾여 들어가
+///    적 사이를 지그재그로 꿰뚫는다 (코인마다 +25% · 최대 네 번, 코인은 잃지 않는다) — GhostfireBall
+///  · 도깨비 방망이 (debt, 2026-11-22) — 도깨비 빚: 갖춘 동안 맞으면 피해 40% 를 지갑 코인이 대신 맞고(체력은 1 이상 깎인다),
+///    그 코인은 다음 정비 때 돌려받는다 (가끔 건망증으로 1.5배) — DokkaebiDebt
 /// 기본 방망이는 단촐하게 (바닥을 긁는 꼬리 · 부딪힘 섬광), 도깨비 방망이는 화려하게 (연두 도깨비불 · 금빛 코인 · 큰 순간).
 /// </summary>
 [CreateAssetMenu(menuName = "Weapons/Melee Effects/Bat", fileName = "AE_Bat")]
@@ -66,12 +70,44 @@ public class BatEffect : AttachmentEffect
     [Range(0.1f, 1f)] public float slowFactor = 0.5f;
     [Min(0f)] public float slowSeconds = 2f;
 
+    [Header("도깨비 방망이 — 엽전 튕기기 (도깨비불 타구가 바닥 코인을 스치면)")]
+    [Tooltip("타구가 바닥 코인 옆을 지나면 코인을 튕겨 올리고 가장 가까운 적에게 꺾여 들어간다. 코인은 잃지 않는다")]
+    public bool coinBounce;
+    [Tooltip("코인을 스치는 거리 (m)")]
+    [Min(0.2f)] public float coinBounceRadius = 1f;
+    [Tooltip("최대 꺾임 (= 튕길 수 있는 코인 수)")]
+    [Min(1)] public int coinBounceMax = 4;
+    [Tooltip("코인 하나마다 피해 배율 + 이 값 (네 번이면 ×2)")]
+    [Min(0f)] public float coinBounceDamage = 0.25f;
+    [Tooltip("꺾일 적을 찾는 거리 (m)")]
+    [Min(1f)] public float coinBounceSeek = 12f;
+
+    [Header("도깨비 방망이 — 도깨비 빚 (갖춘 동안 맞으면)")]
+    [Tooltip("맞으면 피해 일부를 지갑 코인이 대신 맞는다 — 코인 일부 + 체력 일부 (다 막지 않는다). 대신 낸 코인은 다음 정비 때 돌려받는다")]
+    public bool debt;
+    [Tooltip("코인이 대신 맞는 몫 (0.4 = 피해의 40%). 체력은 언제나 1 이상 깎인다")]
+    [Range(0f, 0.9f)] public float debtShare = 0.4f;
+    [Tooltip("코인 하나가 막는 체력")]
+    [Min(0.1f)] public float debtHpPerCoin = 2f;
+    [Tooltip("다음 정비 때 돌려받는 배율 (1 = 꾼 만큼, 0 = 돌려받지 않는다)")]
+    [Min(0f)] public float debtRepayRate = 1f;
+    [Tooltip("건망증 — 이 확률로 더 갚는다")]
+    [Range(0f, 1f)] public float debtForgetChance = 0.25f;
+    [Tooltip("건망증일 때 돌려받는 배율")]
+    [Min(1f)] public float debtForgetBonus = 1.5f;
+    [Tooltip("맞을 때 뜨는 글자 ({0} = 대신 낸 코인)")]
+    public string debtWord = "−{0} 냥";
+
     [Header("소리")]
     public GameSoundSet.Entry collideSound = new GameSoundSet.Entry();
     public GameSoundSet.Entry wallSound = new GameSoundSet.Entry();
     public GameSoundSet.Entry tukSound = new GameSoundSet.Entry();
     public GameSoundSet.Entry ghostLaunchSound = new GameSoundSet.Entry();
     public GameSoundSet.Entry ghostBlastSound = new GameSoundSet.Entry();
+    [Tooltip("엽전 튕기기 — 타구가 코인을 튕길 때")]
+    public GameSoundSet.Entry coinBounceSound = new GameSoundSet.Entry();
+    [Tooltip("도깨비 빚 — 코인이 피해를 대신 맞을 때")]
+    public GameSoundSet.Entry debtSound = new GameSoundSet.Entry();
 
     public bool UsesKit => kit && FxKit.Ready;
 
@@ -92,8 +128,23 @@ public class BatEffect : AttachmentEffect
         float wispAngle;
         float wispTimer;
         float lickTimer;
+        GameObject debtOwner;   // 도깨비 빚에 올린 플레이어 (뗄 때 내린다)
 
         public Runtime(BatEffect cfg) => this.cfg = cfg;
+
+        /// <summary>도깨비 빚 — 갖춘 동안 플레이어 피해 통로에 올린다 (컨트롤러가 늦게 붙을 수 있어 매 프레임 확인).</summary>
+        void EnsureDebt()
+        {
+            if (!cfg.debt || debtOwner != null || Weapon == null || Weapon.Controller == null) return;
+            GameObject owner = Weapon.Controller.gameObject;
+            if (DokkaebiDebt.Join(owner, cfg)) debtOwner = owner;
+        }
+
+        public override void Dispose()
+        {
+            if (debtOwner != null) DokkaebiDebt.Leave(debtOwner, cfg);
+            debtOwner = null;
+        }
 
         float Scale => Weapon != null ? Weapon.EvoFxScale : 1f;
 
@@ -175,6 +226,7 @@ public class BatEffect : AttachmentEffect
         /// <summary>도깨비 방망이 — 둘레를 맴도는 도깨비불(뚝딱까지 남은 수) · 방망이 끝에서 일렁이는 불.</summary>
         public override void Tick(float deltaTime)
         {
+            EnsureDebt();
             if (!cfg.dokkaebi || !cfg.UsesKit || Weapon == null || !Weapon.IsActive || Weapon.Controller == null) return;
 
             wispAngle += deltaTime * 2.4f;

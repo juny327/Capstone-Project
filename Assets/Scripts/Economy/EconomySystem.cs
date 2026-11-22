@@ -28,6 +28,9 @@ public class EconomySystem : MonoBehaviour
     readonly List<CoinPickup> coins = new List<CoinPickup>();
     readonly List<CoinPickup> buffer = new List<CoinPickup>();
 
+    /// <summary>땅에 있는 코인 (튀는 중 · 날아오는 중 포함 — 놓인 것만은 CoinPickup.IsResting). 도깨비불 타구의 엽전 튕기기가 본다.</summary>
+    public IReadOnlyList<CoinPickup> Coins => coins;
+
     // 클리어 보너스를 이미 준 씬 — StageManager 는 목표를 넘긴 뒤에도 처치할 때마다 클리어를 다시 보낸다
     int bonusGivenScene = -1;
 
