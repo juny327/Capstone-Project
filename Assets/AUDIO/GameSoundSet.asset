@@ -14,14 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GameSoundSet
   levelUp:
     clips:
-    - {fileID: 8300000, guid: 10656d2c7bf4f364eb420a6bc39516b7, type: 3}
-    volume: 0.9
+    - {fileID: 8300000, guid: 2cc7cbfa6d6e0da4ea5896563bf60fea, type: 3}
+    volume: 0.277
     pitchRange: {x: 0.96, y: 1.04}
     minInterval: 0
   upgradeOpen:
     clips:
-    - {fileID: 8300000, guid: 0561ebbc46d9d9546b7f68b82f2f1d97, type: 3}
-    volume: 0.7
+    - {fileID: 8300000, guid: c36b5a8bea3f85e40a9236a8b6706fa0, type: 3}
+    volume: 0.926
     pitchRange: {x: 0.96, y: 1.04}
     minInterval: 0
   weaponAcquired:
@@ -87,13 +87,13 @@ MonoBehaviour:
   fireBallHit:
     clips:
     - {fileID: 8300000, guid: c11a85a2014670a41b7eb5d74283dfda, type: 3}
-    volume: 1
+    volume: 0.306
     pitchRange: {x: 0.96, y: 1.04}
     minInterval: 0
   chainLightningHit:
     clips:
     - {fileID: 8300000, guid: f8d63b0a35736da4a8c130ca653ba2d8, type: 3}
-    volume: 1
+    volume: 0.181
     pitchRange: {x: 0.96, y: 1.04}
     minInterval: 0
   blackHoleHit:
@@ -110,19 +110,19 @@ MonoBehaviour:
   shurikenHit:
     clips:
     - {fileID: 8300000, guid: d8e7350367160344baa52b7e8b656e32, type: 3}
-    volume: 0.3
+    volume: 0.229
     pitchRange: {x: 0.92, y: 1.08}
     minInterval: 0.09
   electricShotHit:
     clips:
-    - {fileID: 8300000, guid: 907967d654b094a469f68754e71bf535, type: 3}
-    volume: 1
+    - {fileID: 8300000, guid: 0881742b5752b6b4b9e4fc86197184ee, type: 3}
+    volume: 0.39
     pitchRange: {x: 0.96, y: 1.04}
     minInterval: 0
   fireBallCast:
     clips:
     - {fileID: 8300000, guid: d8677c93bf7c6b7408cf40f1fa950460, type: 3}
-    volume: 1
+    volume: 0.253
     pitchRange: {x: 0.96, y: 1.04}
     minInterval: 0
   chainLightningCast:
@@ -139,7 +139,7 @@ MonoBehaviour:
   tornadoCast:
     clips:
     - {fileID: 8300000, guid: 714894bb663fda348a47fcbe5dd258a2, type: 3}
-    volume: 1
+    volume: 0.336
     pitchRange: {x: 0.96, y: 1.04}
     minInterval: 0
   shurikenCast:
@@ -150,7 +150,7 @@ MonoBehaviour:
   electricShotCast:
     clips:
     - {fileID: 8300000, guid: 0ac9f93855da78b47843f6e13e94fac2, type: 3}
-    volume: 1
+    volume: 0.79
     pitchRange: {x: 0.96, y: 1.04}
     minInterval: 0
   drainHeal:
@@ -248,37 +248,37 @@ MonoBehaviour:
       minInterval: 0.05
   weaponSwap:
     clips:
-    - {fileID: 8300000, guid: 994c076fc23aa294c8858a051afef90a, type: 3}
-    volume: 0.7
+    - {fileID: 8300000, guid: d3d177a2ae2aca547b1c8bebd14bb119, type: 3}
+    volume: 0.957
     pitchRange: {x: 0.96, y: 1.04}
     minInterval: 0
   playerDead:
     clips:
     - {fileID: 8300000, guid: 670987b1567025e45a709ee09df2bcb8, type: 3}
-    volume: 1
+    volume: 0.642
     pitchRange: {x: 0.96, y: 1.04}
     minInterval: 0
   stageClear:
     clips:
     - {fileID: 8300000, guid: bd0282eb3e3c9c944a3b08abcf8a1c04, type: 3}
-    volume: 0.9
+    volume: 0.241
     pitchRange: {x: 0.96, y: 1.04}
     minInterval: 0
   stageRewardOpen:
     clips:
-    - {fileID: 8300000, guid: f3abd364bbdd71645b933fd5370e004d, type: 3}
-    volume: 0.8
+    - {fileID: 8300000, guid: ccf89bc9e5f55c64ca445e9d324e4803, type: 3}
+    volume: 0.416
     pitchRange: {x: 0.96, y: 1.04}
     minInterval: 0
   stageRewardSelect:
     clips:
     - {fileID: 8300000, guid: 8ea5d9f3e6577b948a8d24873f84a20a, type: 3}
-    volume: 0.7
+    volume: 0.374
     pitchRange: {x: 0.96, y: 1.04}
     minInterval: 0
   bossSpawn:
     clips:
     - {fileID: 8300000, guid: 7464c16cdf354f94a9d16d5aea57efa6, type: 3}
-    volume: 1
+    volume: 0.291
     pitchRange: {x: 0.96, y: 1.04}
     minInterval: 0
