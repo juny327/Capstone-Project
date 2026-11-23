@@ -346,7 +346,11 @@ public class EnemyManager : MonoBehaviour
     void OnEnemyDeath(Enemy enemy)
     {
         enemies.Remove(enemy);
-        if (enemy == null || enemy.countsTowardKillGoal)
+
+        // 실제로 쓰러진 몬스터만 처치로 센다 (2026-11-23) — 자폭 몬스터(D)는 돌진해 터질 때 쓰러지지 않고(Die 를 거치지 않음)
+        // OnDeath 만 알리고 풀로 돌아가는데, 예전엔 그것도 플레이어가 잡은 것으로 세어 스테이지 처치 목표 · 판 기록이 올라갔다.
+        // (경험치 · 코인은 Die 에서만 나오므로 원래 안 나왔다)
+        if (enemy != null && enemy.state == EnemyState.Dead && enemy.countsTowardKillGoal)
             GameEvents.OnEnemyKilled?.Invoke();
     }
 }
