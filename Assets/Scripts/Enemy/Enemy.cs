@@ -107,6 +107,27 @@ public class Enemy : MonoBehaviour, IDamageable, IPoolable
     /// <summary>이번에 나왔을 때의 최대 체력 — 몬스터 데이터 × 스테이지 배율 (2026-11-12).</summary>
     public float MaxHp { get; private set; }
 
+    // 쓰러질 때 끈 충돌체 — 다시 나올 때 이것만 켠다 (원래 꺼져 있던 것은 그대로)
+    readonly System.Collections.Generic.List<Collider> disabledColliders = new System.Collections.Generic.List<Collider>();
+
+    /// <summary>쓰러진 몬스터의 충돌체를 모두 끈다 — 시체가 플레이어를 막지 않고, 총알 · 칼도 시체에 걸리지 않는다.</summary>
+    void DisableBodyColliders()
+    {
+        foreach (Collider c in GetComponentsInChildren<Collider>())
+        {
+            if (c == null || !c.enabled) continue;
+            c.enabled = false;
+            disabledColliders.Add(c);
+        }
+    }
+
+    void RestoreBodyColliders()
+    {
+        foreach (Collider c in disabledColliders)
+            if (c != null) c.enabled = true;
+        disabledColliders.Clear();
+    }
+
     /// <summary>이번에 나온 몬스터의 체력을 배율만큼 (가득 찬 채로) — 보스의 부하 중 근접 몬스터 ×3 (2026-11-23). 다음에 풀에서 나올 때는 OnSpawn 이 원래대로 돌린다.</summary>
     public void ScaleHealth(float multiplier)
     {
@@ -117,6 +138,8 @@ public class Enemy : MonoBehaviour, IDamageable, IPoolable
 
     public void OnSpawn()
     {
+        RestoreBodyColliders();   // 지난번에 쓰러지며 끈 충돌체를 다시 (2026-11-23)
+
         float multiplier = EnemyManager.Instance != null ? EnemyManager.Instance.healthMultiplier : 1f;
         MaxHp = data.maxHp * multiplier;
         currentHp = MaxHp;
@@ -405,6 +428,10 @@ public class Enemy : MonoBehaviour, IDamageable, IPoolable
 
 
         ChangeState(EnemyState.Dead);
+
+        // 시체가 길을 막지 않게 (2026-11-23 사용자 제보) — 몸 충돌체(키네마틱 몸 + 막힌 캡슐)가 죽음 동작이 끝나 풀로 돌아갈 때까지
+        // (최대 약 2.3초, 안전장치 4초) 켜져 있어 플레이어가 시체에 걸렸다. 쓰러지는 순간 끄고, 풀에서 다시 나올 때 켠다 (OnSpawn)
+        DisableBodyColliders();
 
         GetComponent<MonsterFController>()?.ClearEffects();
         GetComponent<MonsterGController>()?.ClearEffects();
