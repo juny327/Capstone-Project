@@ -39,8 +39,10 @@ public class EconomySettings : ScriptableObject
 
     // 2026-11-17 — 뒤 스테이지로 갈수록 수입을 키운다 (밸런스 결정 4 "넉넉하게"). 처치 목표 60 · 85 · 110 과
     // 스테이지별 몬스터(1 = A · B, 2 = C · D 추가, 3 = 다섯 종)에 맞춰 한 판 약 407 (스테이지 65 · 130 · 214)이 되게 잡은 값.
+    // 2026-11-23 — 스테이지 2 · 3 원거리 몬스터(코인 3)를 줄이고 근접(A 1 · B 2)을 늘려 처치당 코인이 약 14% 줄었다 → 같은 수입이 되게
+    //              0.65 · 0.8 → 0.76 · 0.93 (스테이지 2 처치당 2.1 → 1.8 · 스테이지 3 2.2 → 1.9 의 역수)
     [Tooltip("스테이지별 몬스터 코인 배율 [스테이지 1, 2, 3 …]. 표보다 큰 스테이지는 마지막 값, 비우면 coinMultiplier 하나")]
-    public float[] stageCoinMultipliers = { 0.6f, 0.65f, 0.8f };
+    public float[] stageCoinMultipliers = { 0.6f, 0.76f, 0.93f };
 
     [Tooltip("한 번에 떨어뜨리는 코인 오브젝트 수의 상한. 넘으면 한 개가 여러 크레딧을 갖는다")]
     [Min(1)] public int maxCoinObjects = 4;

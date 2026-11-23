@@ -30,8 +30,8 @@ MonoBehaviour:
   coinMultiplier: 0.7
   stageCoinMultipliers:
   - 0.6
-  - 0.65
-  - 0.8
+  - 0.76
+  - 0.93
   maxCoinObjects: 4
   scatterRadius: {x: 0.4, y: 1.3}
   magnetRadius: 3.5
