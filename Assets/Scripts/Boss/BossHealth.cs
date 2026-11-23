@@ -10,6 +10,7 @@ public class BossHealth : MonoBehaviour, IDamageable
     public int maxHp = 300;
     int currentHp;
     bool dead;
+    float carry;   // 정수로 아직 못 깎은 소수 피해 (2026-11-23)
 
     public event Action<int, int> OnHpChanged;
     public event Action OnBossDamaged;
@@ -28,7 +29,12 @@ public class BossHealth : MonoBehaviour, IDamageable
         // 쓰러진 뒤 들어오는 지속 피해(화상 등)는 무시한다 — 체력바가 다시 뜨거나 죽음 알림이 또 가지 않게
         if (dead) return;
 
-        currentHp -= (int)info.damage;
+        // 소수 피해를 모아 깎는다 (2026-11-23) — 예전엔 (int) 로 버려 한 방이 작은 무기가 보스에게만 손해를 봤다
+        // (회전 기관포 보조 2.3 → 2 · 뇌운 보조 2.8 → 2 · 기관단총 2.2 → 2). 체력바 · 알림은 그대로 정수
+        float total = Mathf.Max(0f, info.damage) + carry;
+        int whole = Mathf.FloorToInt(total);
+        carry = total - whole;
+        currentHp -= whole;
 
         if (currentHp < 0)
             currentHp = 0;
