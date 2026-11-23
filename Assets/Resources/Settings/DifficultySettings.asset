@@ -21,6 +21,7 @@ MonoBehaviour:
     enemyDamage: 0.75
     killTarget: 0.5
     coinMultiplier: 2
+    expMultiplier: 2
     bossHealth: 3
   hard:
     displayName: "\uD558\uB4DC"
@@ -31,4 +32,5 @@ MonoBehaviour:
     enemyDamage: 1
     killTarget: 1
     coinMultiplier: 1
+    expMultiplier: 1
     bossHealth: 3.5

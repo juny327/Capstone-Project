@@ -434,7 +434,8 @@ public class Enemy : MonoBehaviour, IDamageable, IPoolable
 
     void SpawnExpOrb()
     {
-        int expAmount = data.expDrop;
+        // 난이도 경험치 배율 (2026-11-23 — 이지 ×2, 처치 목표가 절반이라)
+        int expAmount = Mathf.Max(0, Mathf.RoundToInt(data.expDrop * Difficulty.Values.expMultiplier));
 
 
         GameObject orbGO = PoolManager.Instance.Get(expOrb);
