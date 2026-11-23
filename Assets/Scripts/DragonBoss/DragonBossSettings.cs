@@ -63,6 +63,9 @@ public class DragonBossSettings : ScriptableObject
         [Min(0)] public int minionsPhase3 = 4;
         [Tooltip("살아 있는 부하가 이만큼이면 더 부르지 않는다")]
         [Min(0)] public int minionCap = 6;
+        // 2026-11-23 사용자: "보스가 패턴으로 소환하는 근접 몬스터 체력 3배 정도"
+        [Tooltip("부하 중 근접 몬스터(A 근접 · B 돌진 · D 자폭)의 체력 배율 — 보스 스테이지 체력 배율(×2.5) · 난이도 배율 위에 곱한다. 원거리(C · E)는 그대로")]
+        [Min(0.1f)] public float minionMeleeHealth = 1f;
         [Min(0.5f)] public float firePatchLife = 6f;
         [Min(0)] public int firePatchMax = 14;
 
@@ -159,6 +162,7 @@ public class DragonBossSettings : ScriptableObject
         comboChance = new Vector3(0f, 0f, 0.25f),
         rainCount = 5,
         minionsPhase2 = 2, minionsPhase3 = 3, minionCap = 4,
+        minionMeleeHealth = 3f,
         firePatchLife = 4f, firePatchMax = 8,
     };
 
@@ -172,6 +176,7 @@ public class DragonBossSettings : ScriptableObject
         sweepMeets = true,
         rainRing = true,
         newPatterns = true,
+        minionMeleeHealth = 3f,
         enrageTempo = 1.1f,
     };
 }

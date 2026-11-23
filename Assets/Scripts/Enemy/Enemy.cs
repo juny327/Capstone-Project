@@ -107,6 +107,14 @@ public class Enemy : MonoBehaviour, IDamageable, IPoolable
     /// <summary>이번에 나왔을 때의 최대 체력 — 몬스터 데이터 × 스테이지 배율 (2026-11-12).</summary>
     public float MaxHp { get; private set; }
 
+    /// <summary>이번에 나온 몬스터의 체력을 배율만큼 (가득 찬 채로) — 보스의 부하 중 근접 몬스터 ×3 (2026-11-23). 다음에 풀에서 나올 때는 OnSpawn 이 원래대로 돌린다.</summary>
+    public void ScaleHealth(float multiplier)
+    {
+        if (multiplier <= 0f || Mathf.Approximately(multiplier, 1f) || state == EnemyState.Dead) return;
+        MaxHp *= multiplier;
+        currentHp = MaxHp;
+    }
+
     public void OnSpawn()
     {
         float multiplier = EnemyManager.Instance != null ? EnemyManager.Instance.healthMultiplier : 1f;
