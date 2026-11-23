@@ -23,7 +23,7 @@ MonoBehaviour:
     clips:
     - {fileID: 8300000, guid: 9f77b19527f3d5247a7e535fd573f78c, type: 3}
     - {fileID: 8300000, guid: 47bca926e0093bf4dba410c8a594c904, type: 3}
-    volume: 0.7
+    volume: 0.61
     pitchRange: {x: 0.96, y: 1.04}
     minInterval: 0.05
   kitBlast: 1

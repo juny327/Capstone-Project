@@ -30,7 +30,7 @@ MonoBehaviour:
   frenzySound:
     clips:
     - {fileID: 8300000, guid: 6f0fd072993ca754e8ff678030d36181, type: 3}
-    volume: 0.6
+    volume: 0.573
     pitchRange: {x: 0.96, y: 1.04}
     minInterval: 0
   flurryCount: 12

@@ -53,7 +53,7 @@ MonoBehaviour:
   supportTint: {r: 1, g: 1, b: 1, a: 0}
   fireSounds:
   - {fileID: 8300000, guid: 0c03edc4efa519a439adaf03a0af417a, type: 3}
-  fireVolume: 0.6
+  fireVolume: 0.56
   firePitchRange: {x: 1.08, y: 1.16}
   reloadStartSound: {fileID: 0}
   reloadEndSound: {fileID: 0}
