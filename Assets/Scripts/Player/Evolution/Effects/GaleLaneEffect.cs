@@ -39,6 +39,10 @@ public class GaleLaneEffect : AttachmentEffect
     [Min(0f)] public float gustSpeed = 9f;
     [Tooltip("바닥 띠 진하기 — 길이 어디까지인지 보이게")]
     [Range(0f, 1f)] public float bandAlpha = 0.35f;
+    [Tooltip("공통 재료(FxKit)로 바람 줄기 · 소용돌이 · 바람 칼날을 더한다 (2026-11-20). 끄면 예전 연출")]
+    public bool kitWind = true;
+
+    public bool UsesKit => kitWind && FxKit.Ready;
 
     [Header("소리")]
     [Tooltip("길이 있는 동안 나는 바람 소리 (팀원 토네이도 스킬 소리) — 길마다 하나, 끝날 때 줄어든다")]
@@ -77,7 +81,7 @@ public class GaleLaneEffect : AttachmentEffect
             Vector3 start = attack.Origin;
             start.y = Weapon.Controller != null ? Weapon.Controller.transform.position.y : attack.Origin.y - 1.2f;
 
-            GaleLane.Spawn(cfg, start, dir, reach, stats.Damage * cfg.tickDamageMul);
+            GaleLane.Spawn(cfg, start, dir, reach, stats.Damage * cfg.tickDamageMul, Weapon.EvoFxScale);
             Spawned++;
         }
     }

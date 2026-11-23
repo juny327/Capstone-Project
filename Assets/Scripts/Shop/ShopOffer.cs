@@ -12,6 +12,9 @@ public class ShopContext
     /// <summary>방금 클리어한 스테이지 번호 (1 · 2 · 3). 가격 배율에 쓴다.</summary>
     public int StageIndex = 1;
 
+    /// <summary>캐릭터 가격 배율 (CharacterData.shopPriceMultiplier — 검사 2026-11-23). 상품 가격 계산에 곱한다.</summary>
+    public float PriceMultiplier = 1f;
+
     /// <summary>
     /// 앞 공급원이 이미 진열한 상품 (부착물 · 서브 능력 · 스킬 카드) — 뒤 공급원이 같은 것을 또 올리지 않게.
     /// 진화 짝(EvolutionPairSource)이 먼저 자리를 잡는다. 진열을 새로 만들 때마다 비운다.
@@ -27,9 +30,8 @@ public enum ShopOfferKind
     Attachment,   // 총기 부착물
     Consumable,   // 회복 등 (나중)
     SubAbility,   // 검사 서브 능력
-    Evolution,    // 상위 무기 진화 (무기 줄)
+    Evolution,    // 상위 무기 진화 (줄 밖 — 정비 창 오른쪽 '상위 무기' 칸, 2026-11-17)
     Skill,        // 레벨업 카드 스킬 — 상위 무기 짝 (장비 줄, 2026-11-04)
-    Shortcut,     // 상위 무기 바로 갖추기 (줄 밖 — 따로 여는 창, 2026-11-04)
 }
 
 /// <summary>
@@ -82,4 +84,10 @@ public abstract class ShopOffer
 
     /// <summary>내 장비 판에서 깜빡일 부착물 부위. 없으면 −1.</summary>
     public virtual int HighlightSlot => -1;
+
+    /// <summary>
+    /// 이 상품으로 얻는 물건 (부착물 · 서브 능력 · 스킬 카드) — 가진 무기의 상위 무기 짝이면 카드에 금색 테두리를 두른다
+    /// (EvolutionPairs, 2026-11-17). 무기 · 강화처럼 짝이 될 수 없는 상품은 null.
+    /// </summary>
+    public virtual Object PairItem => null;
 }

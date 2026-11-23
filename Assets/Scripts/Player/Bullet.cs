@@ -5,6 +5,7 @@ public class Bullet : MonoBehaviour, IPoolable
 {
     float speed;
     float damage;
+    float effectDamage;
 
     bool isCritical;
 
@@ -79,6 +80,7 @@ public class Bullet : MonoBehaviour, IPoolable
         rb.linearVelocity = Vector3.zero;
         alreadyHit.Clear();       // ★ 반드시
         pierceRemaining = 0;
+        effectDamage = 0f;
         source = null;
         tint = default;
         homingTarget = null;
@@ -95,6 +97,7 @@ public class Bullet : MonoBehaviour, IPoolable
     {
         speed = info.Speed;
         damage = info.Damage;
+        effectDamage = info.EffectDamage;
         isCritical = info.IsCritical;
         pierceRemaining = Mathf.Max(0, info.PierceCount);
         source = info.Source;
@@ -119,7 +122,7 @@ public class Bullet : MonoBehaviour, IPoolable
     void BeginShotFx()
     {
         shotFx = source != null && source.Data != null ? source.Data.ShotFx : null;
-        fxScale = source != null && source.IsSupport ? ShotFxDraw.SupportScale : 1f;
+        fxScale = source != null ? source.ShotFxScale : 1f;   // 보조 칸 ×0.8 · 강화 레벨 (Lv2 ×1.1 · Lv3 ×1.2)
 
         // 휘어 날아가는 길에 남는 연기 (스웜 카빈 미사일) — 탄과 따로 돌려 쓴다
         if (smoke != null) { smoke.Release(); smoke = null; }
@@ -282,12 +285,12 @@ public class Bullet : MonoBehaviour, IPoolable
 
             // 프레임 끝에 한 번만 난다 — 관통이면 같은 프레임에 여러 번 들어온다
             if (SoundManager.Instance != null)
-                SoundManager.Instance.ReportHit(isCritical, HitSound.Bullet);
+                SoundManager.Instance.ReportHit(isCritical, HitSound.Bullet, root);
             if (source != null) source.PlayHitLayer();   // 상위 무기 전용 적중음 (있을 때만)
 
             // 착탄 후 파생 효과(전격 연쇄 · 파열 · 폭발)가 끼어드는 자리.
             // 여기 한 곳만 열어 두면 무기마다 Bullet 을 복사하지 않아도 된다.
-            OnHit(root, transform.position, damage);
+            OnHit(root, transform.position, effectDamage);
 
             // 쏜 무기의 부착물 명중 효과 (소이탄 · 전격탄 · 튕김탄 · 폭발탄)
             if (source != null && source.HasHitEffects)
@@ -299,6 +302,7 @@ public class Bullet : MonoBehaviour, IPoolable
                     Point = transform.position,
                     Direction = transform.forward,
                     Damage = damage,
+                    EffectDamage = effectDamage,
                     IsCritical = isCritical,
                     Killed = killed,
                 });
@@ -338,7 +342,7 @@ public class Bullet : MonoBehaviour, IPoolable
     /// </summary>
     /// <param name="target">맞은 적의 루트 (IDamageable 을 가진 오브젝트)</param>
     /// <param name="point">착탄 위치</param>
-    /// <param name="dealtDamage">치명타가 반영된 실제 피해량</param>
+    /// <param name="dealtDamage">치명타 반영, 직접 공격 카드 증가분 제외한 파생 효과 기준 피해</param>
     protected virtual void OnHit(Transform target, Vector3 point, float dealtDamage) { }
 
     void SpawnHitEffect(Collider other)

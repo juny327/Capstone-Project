@@ -57,6 +57,9 @@ public enum SupportTarget
 
     /// <summary>가장 가까운 무리 — 둘레에 적이 가장 많이 모인 적 (대검 — 넓게 휘두르기).</summary>
     Crowd,
+
+    /// <summary>원거리 공격을 하는 적 먼저 — 없으면 가장 가까운 적 (전투 망치, 2026-11-20).</summary>
+    Ranged,
 }
 
 /// <summary>
@@ -71,6 +74,9 @@ public abstract class WeaponData : ScriptableObject
 {
     [Header("Identity")]
     public string weaponName = "New Weapon";
+    [Tooltip("간단 설명 — 카드 · 로비에 기본으로 보이는 핵심 한 줄 (20자 안팎). 비우면 description. '상세 설명' 을 켜면 description + 능력치 (DescText, 2026-11-22)")]
+    public string brief;
+    [Tooltip("상세 설명 — '상세 설명' 을 켰을 때 (DescText)")]
     [TextArea(2, 4)] public string description;
     public Sprite icon;
 
@@ -83,6 +89,31 @@ public abstract class WeaponData : ScriptableObject
     [Tooltip("발사 간격(초). 작을수록 빠르다")]
     public float fireInterval = 0.5f;
     public float damage = 10f;
+
+    [Header("Direct Damage Upgrade")]
+    [Tooltip("공격력 증가 카드 1레벨당 주무기 기본 타격에 더할 고정 피해. -1 = 무기 이름별 기본값. 진화 시 원본 무기의 값을 계승합니다.")]
+    [Min(-1f)] public float damageUpgradeFlatPerLevel = -1f;
+
+    /// <summary>상위 무기는 진화 전 원본 무기의 레벨당 고정 증가량을 사용한다.</summary>
+    public float GetDamageUpgradeFlatPerLevel()
+    {
+        WeaponData original = Root;
+        if (original.damageUpgradeFlatPerLevel >= 0f)
+            return original.damageUpgradeFlatPerLevel;
+
+        switch (original.name)
+        {
+            case "WD_Rifle": return 1f;
+            case "WD_SMG": return 1f;
+            case "WD_Sniper": return 3f;
+            case "WD_Sword": return 2f;
+            case "WD_Greatsword": return 4f;
+            case "WD_Spear": return 2f;
+        }
+        // 새로운 주무기 에셋에 증가량이 지정되지 않았다면 기본 +1.
+        // 드론/보조 무기는 WeaponController.ResolveDirectDamage 에서 걸러진다.
+        return 1f;
+    }
 
     [Header("Critical")]
     [Range(0f, 1f)] public float critChance = 0.05f;
@@ -186,8 +217,21 @@ public abstract class WeaponData : ScriptableObject
     [Tooltip("적중음을 다시 내기까지의 최소 간격(초) — 여러 명을 한꺼번에 맞혀도 한 번")]
     [Min(0f)] public float hitLayerMinInterval = 0.09f;
 
+    [Tooltip("근접 몸통 적중음 (2026-11-22 효과음 2단계) — 있으면 공용 근접 적중음(GameSoundSet.meleeHit) 대신 이 무기의 소리. "
+           + "치명타일 때는 그대로 공용 치명타 소리. 상위 무기는 원래 무기 것을 따른다 (검 → 거울칼날 · 혈검 등)")]
+    public AudioClip[] meleeBodySounds;
+    [Range(0f, 1f)] public float meleeBodyVolume = 1f;
+
     public bool HasFireLayer => fireLayerSounds != null && fireLayerSounds.Length > 0;
     public bool HasHitLayer => hitLayerSounds != null && hitLayerSounds.Length > 0;
+    public bool HasMeleeBody => meleeBodySounds != null && meleeBodySounds.Length > 0;
+
+    [Header("소리 층 (2026-11-19 효과음 재정비)")]
+    [Tooltip("쏠 때(근접은 적에게 들어갈 때) 발사음과 함께 내는 층들 — 순간음 · 저음 몸통 · 꼬리를 한꺼번에, delay 가 있으면 그만큼 뒤에. " +
+             "층마다 소리 · 음량 · 피치 범위를 따로 둔다. 비우면 지금처럼 발사음(+ 덧소리)만")]
+    public SoundLayer[] fireStack;
+
+    public bool HasFireStack => fireStack != null && fireStack.Length > 0;
 
     public AudioClip PickFireSound()
     {

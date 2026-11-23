@@ -275,7 +275,7 @@ public static class CharacterSetup
 
     // 캐릭터별 무기 — 이 순서가 로비 버튼 · LobyManager.selectableWeapons 순서다
     static readonly string[] RangedWeapons = { "WD_Rifle", "WD_SMG", "WD_Sniper", "WD_Shotgun", "WD_TeslaRifle", "WD_ChargeLaser" };
-    static readonly string[] MeleeWeapons = { "WD_Sword", "WD_Greatsword", "WD_Spear" };
+    static readonly string[] MeleeWeapons = { "WD_Sword", "WD_Hammer", "WD_Bat" };   // 2026-11-22 로비: 대검 → 전투 망치 · 창 → 방망이 (대검 · 창은 정비 창 · 보상에서)
 
     const string GunnerPath = CharacterDir + "/CH_Gunner.asset";
     const string SwordsmanPath = CharacterDir + "/CH_Swordsman.asset";

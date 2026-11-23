@@ -43,6 +43,9 @@ public class AttachmentData : ScriptableObject
 {
     public string displayName = "부착물";
 
+    [Tooltip("간단 설명 — 카드에 기본으로 보이는 핵심 한 줄 (20자 안팎). 비우면 상세. '상세 설명' 을 켜면 description + 수치(EffectText) (DescText, 2026-11-22)")]
+    public string brief;
+
     [TextArea(1, 3)] public string description;
 
     [Tooltip("카드 · HUD 에 보이는 그림")]
@@ -157,6 +160,12 @@ public class AttachmentData : ScriptableObject
 
     /// <summary>탄 색을 쓰는가.</summary>
     public bool HasTint => tint.a > 0.01f;
+
+    /// <summary>
+    /// 비어 있으면 화면(오른쪽 아래 장비 HUD · 정비 창 내 장비 판)에서 숨기는 부위 — 상점에서 파는 부착물이 없는 총구 · 탄창 (2026-11-17).
+    /// 테스트 룸처럼 무언가 달려 있으면 보인다.
+    /// </summary>
+    public static bool HiddenWhenEmpty(AttachmentSlot slot) => slot == AttachmentSlot.Muzzle || slot == AttachmentSlot.Magazine;
 
     public static string SlotName(AttachmentSlot slot)
     {

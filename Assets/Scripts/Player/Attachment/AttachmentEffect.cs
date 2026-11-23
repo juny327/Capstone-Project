@@ -11,10 +11,22 @@ public struct WeaponHit
 
     /// <summary>치명타까지 반영된 실제 피해.</summary>
     public float Damage;
+
+    // 기존 WeaponHit 생성 경로는 Damage 를 기본값으로 쓴다.
+    private float? effectDamage;
+    /// <summary>직접 공격 카드 증가분을 제외한 파생 효과의 기준 피해.</summary>
+    public float EffectDamage
+    {
+        get => effectDamage ?? Damage;
+        set => effectDamage = value;
+    }
     public bool IsCritical;
 
     /// <summary>이 피해로 적이 죽었는가 (맞기 전에 살아 있었고 지금은 죽었다).</summary>
     public bool Killed;
+
+    /// <summary>근접 마무리 타격(망치 세 번째 내려찍기 · 방망이 풀스윙)으로 맞혔는가 (2026-11-20). 총은 항상 false.</summary>
+    public bool Finisher;
 }
 
 /// <summary>
@@ -31,6 +43,12 @@ public struct WeaponAttack
 
     /// <summary>사거리.</summary>
     public float Range;
+
+    /// <summary>근접 마무리 타격인가 (2026-11-20 — 망치 세 번째 내려찍기 · 방망이 풀스윙). 총은 항상 false.</summary>
+    public bool Finisher;
+
+    /// <summary>근접 — 이 휘두르기로 맞힌 적 수 (2026-11-20). 총은 0 (쏘는 순간에 알리므로 모른다).</summary>
+    public int Hits;
 }
 
 /// <summary>

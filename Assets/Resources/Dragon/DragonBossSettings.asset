@@ -14,3 +14,76 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DragonBossSettings
   playEntrance: 1
   bossPrefab: {fileID: 3586289985083865050, guid: 1e2dae8277c81da458a6f1d732855388, type: 3}
+  staging:
+    enabled: 1
+    shakeScale: 1
+    nearRange: 8
+    farRange: 16
+    farShake: 0.5
+    stepShake: {x: 0.05, y: 0.16}
+    stepRange: 15
+    zoom: 0.035
+    edgeFlash: 0.12
+    tremor: 0.16
+    attackFx: 1
+    fxScale: 1
+    bodyMarks: 1
+    flinch: 1
+    flinchDamage: 0.012
+    telegraphBlink: 1
+    pressure: 1
+    cameraWide: 1.1
+    windupLean: 0.035
+    edgeDark: {x: 0, y: 0.28, z: 0.5}
+    edgePulse: 0.22
+    windupDuck: 1
+    dangerRing: 1
+    edgeArrow: 1
+    barBreak: 1
+    enrageAt: 0.1
+  easy:
+    tempo: 0.85
+    recoverScale: {x: 1.4, y: 1.4, z: 1.4}
+    cooldownScale: 1.25
+    sweepTime: 2.3
+    comboChance: {x: 0, y: 0, z: 0.25}
+    lateLock: 0
+    biteLock: {x: 0.75, y: 0.57, z: 0.46}
+    chargeLock: 0.7
+    trackTurn: 200
+    leadFireballs: 0
+    breathTrack: 0
+    sweepMeets: 0
+    rainRing: 0
+    rainCount: 5
+    minionsPhase2: 2
+    minionsPhase3: 3
+    minionCap: 4
+    minionMeleeHealth: 3
+    firePatchLife: 4
+    firePatchMax: 8
+    newPatterns: 0
+    enrageTempo: 1
+  hard:
+    tempo: 1
+    recoverScale: {x: 1, y: 0.85, z: 0.7}
+    cooldownScale: 1
+    sweepTime: 1.9
+    comboChance: {x: 0, y: 0.35, z: 0.55}
+    lateLock: 1
+    biteLock: {x: 0.75, y: 0.57, z: 0.46}
+    chargeLock: 0.7
+    trackTurn: 200
+    leadFireballs: 1
+    breathTrack: 15
+    sweepMeets: 1
+    rainRing: 1
+    rainCount: 7
+    minionsPhase2: 3
+    minionsPhase3: 4
+    minionCap: 6
+    minionMeleeHealth: 3
+    firePatchLife: 6
+    firePatchMax: 14
+    newPatterns: 1
+    enrageTempo: 1.1

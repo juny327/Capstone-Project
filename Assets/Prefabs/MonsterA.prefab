@@ -157,7 +157,7 @@ MonoBehaviour:
   attackCooldown: 1
   attackSound: {fileID: 8300000, guid: a1b7d949ed534ca3b1454ca1b86b7f01, type: 3}
   attackSoundDuration: 1.5
-  attackSoundVolume: 0.8
+  attackSoundVolume: 0.6
 --- !u!114 &4772981019857328543
 MonoBehaviour:
   m_ObjectHideFlags: 0

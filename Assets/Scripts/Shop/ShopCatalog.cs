@@ -56,6 +56,11 @@ public class ShopCatalog : ScriptableObject
     [Tooltip("진열 공급원. 위에서부터 칸을 채운다. 새 상품 종류(부품 등)는 공급원 에셋을 하나 더 만들어 넣는다")]
     public ShopOfferSource[] sources;
 
+    [Header("상위 무기 칸 (2026-11-17)")]
+    [Tooltip("정비 창 오른쪽 '상위 무기' 칸에 올릴 진화. 진열(새로고침)과 따로 — 무기 레벨 · 짝을 갖추는 순간 그 자리에서 켜진다. " +
+             "slots = 칸 수. 위 진열 공급원 목록에는 넣지 않는다")]
+    public EvolutionSource evolutionSource;
+
     /// <summary>무기의 기본 가격 (Stage1).</summary>
     public int BasePriceOf(WeaponData weapon)
     {
@@ -71,18 +76,18 @@ public class ShopCatalog : ScriptableObject
         return defaultWeaponPrice;
     }
 
-    /// <summary>스테이지 배율을 곱한 가격 (반올림).</summary>
-    public int Scaled(int basePrice, int stageIndex)
+    /// <summary>스테이지 배율 × 캐릭터 가격 배율(ShopContext.PriceMultiplier — 검사 2026-11-23)을 곱한 가격 (반올림).</summary>
+    public int Scaled(int basePrice, int stageIndex, float priceMultiplier = 1f)
     {
-        float multiplier = 1f + priceStepPerStage * Mathf.Max(0, stageIndex - 1);
+        float multiplier = (1f + priceStepPerStage * Mathf.Max(0, stageIndex - 1)) * Mathf.Max(0f, priceMultiplier);
         return Mathf.Max(0, Mathf.RoundToInt(basePrice * multiplier));
     }
 
     /// <summary>보유 무기를 currentLevel 에서 한 단계 올리는 가격.</summary>
-    public int UpgradePriceOf(WeaponData weapon, int currentLevel, int stageIndex)
+    public int UpgradePriceOf(WeaponData weapon, int currentLevel, int stageIndex, float priceMultiplier = 1f)
     {
         float rate = upgradeBaseRate + upgradeRatePerLevel * Mathf.Max(0, currentLevel - 1);
-        return Scaled(Mathf.RoundToInt(BasePriceOf(weapon) * rate), stageIndex);
+        return Scaled(Mathf.RoundToInt(BasePriceOf(weapon) * rate), stageIndex, priceMultiplier);
     }
 
     /// <summary>이번 정비에서 usedThisVisit 번 새로고침한 뒤의 다음 새로고침 값.</summary>
@@ -99,5 +104,39 @@ public class ShopCatalog : ScriptableObject
             cached = Resources.Load<ShopCatalog>(ResourcePath);
 
         return cached;
+    }
+
+    // ───────── 정비 창에서 얻을 수 있는 부착물 부위 (2026-11-17) ─────────
+
+    static readonly System.Collections.Generic.Dictionary<(WeaponData, AttachmentSlot), bool> sold =
+        new System.Collections.Generic.Dictionary<(WeaponData, AttachmentSlot), bool>();
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetSold() => sold.Clear();
+
+    /// <summary>
+    /// 정비 창에서 이 무기의 이 부위에 달 부착물을 파는가 — 장비 HUD · 정비 창 '내 장비'는 파는 부위만 보인다
+    /// (2026-11-17 사용자 결정 "정비 창에서 얻을 수 있는 것만 HUD 에서 보여 주기"). 달려 있는 칸은 이와 상관없이 보인다.
+    /// 예: 스나이퍼 전용 개조는 팔지 않으므로 스나이퍼에서는 개조 칸이 비어 있으면 숨는다. 총구 · 탄창은 파는 것이 없다.
+    /// </summary>
+    public static bool SellsAttachment(WeaponData weapon, AttachmentSlot slot)
+    {
+        if (weapon == null) return false;
+        if (sold.TryGetValue((weapon, slot), out bool value)) return value;
+
+        ShopCatalog catalog = Load();
+        if (catalog == null || catalog.sources == null) return !AttachmentData.HiddenWhenEmpty(slot);   // 카탈로그가 없으면 예전 규칙
+
+        value = false;
+        foreach (ShopOfferSource source in catalog.sources)
+        {
+            if (!(source is AttachmentSource shop) || shop.attachments == null) continue;
+            foreach (AttachmentData a in shop.attachments)
+                if (a != null && a.slot == slot && a.Fits(weapon)) { value = true; break; }
+            if (value) break;
+        }
+
+        sold[(weapon, slot)] = value;
+        return value;
     }
 }

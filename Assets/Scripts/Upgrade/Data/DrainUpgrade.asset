@@ -13,8 +13,10 @@ MonoBehaviour:
   m_Name: DrainUpgrade
   m_EditorClassIdentifier: Assembly-CSharp::UpgradeData
   upgradeName: "\uD761\uD608"
-  description: "\uBB34\uAE30\uB85C \uC801\uC744 \uCC98\uCE58\uD558\uBA74 \uCCB4\uB825 3 \uD68C\uBCF5\n\uB808\uBCA8\uB9C8\uB2E4 \uD68C\uBCF5 +1"
+  brief: "\uCC98\uCE58\uD558\uBA74 \uAC00\uB054 \uCCB4\uB825 \uD68C\uBCF5"
+  description: "\uBB34\uAE30\uB85C \uC801\uC744 \uCC98\uCE58\uD558\uBA74 10% \uD655\uB960\uB85C \uCCB4\uB825\uC744 6 \uD68C\uBCF5\uD55C\uB2E4\n\uB808\uBCA8\uB9C8\uB2E4 \uD655\uB960 +3%, \uD68C\uBCF5\uB7C9 +2"
   icon: {fileID: 21300000, guid: dd9553335d5e8ac4f8cd1bf7715b004f, type: 3}
   costExp: 10
   maxLevel: 5
+  fixedCost: 0
   effect: {fileID: 11400000, guid: a2984e9dca604eb4ab262b105a1f20db, type: 2}

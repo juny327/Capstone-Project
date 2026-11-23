@@ -27,18 +27,13 @@ public partial class DragonBoss
     [Tooltip("포효하며 머리를 든 채 버티는 시간 (초)")]
     [SerializeField] float roarHold = 0.9f;
 
-    [Header("부하 소환 (2페이즈부터)")]
-    [SerializeField] int minionsPhase2 = 3;
-    [SerializeField] int minionsPhase3 = 4;
-    [Tooltip("살아 있는 부하가 이만큼이면 더 부르지 않는다")]
-    [SerializeField] int minionCap = 6;
+    [Header("부하 소환 (2페이즈부터) — 마릿수 · 상한은 난이도 값(DragonBossSettings.Tuning)")]
     [Tooltip("표시가 차오른 뒤 나오기까지 (초)")]
     [SerializeField] float summonDelay = 1.0f;
     [Tooltip("보스에게서 이 거리 사이에 나온다 (m)")]
     [SerializeField] Vector2 summonRadius = new Vector2(5.5f, 8.5f);
 
-    [Header("불비 (2페이즈)")]
-    [SerializeField] int rainCount = 7;
+    [Header("불비 (2페이즈) — 원 수 · 둘러싸기는 난이도 값")]
     [SerializeField] float rainRadius = 2.2f;
     [Tooltip("원이 차오르는 시간 = 떨어지기 전 예고")]
     [SerializeField] float rainWarn = 1.2f;
@@ -72,12 +67,11 @@ public partial class DragonBoss
     [Tooltip("물리지는 않았지만 충격파 안에 있을 때")]
     [SerializeField] float groundShockDamage = 15f;
 
-    [Header("휩쓸기 브레스 (3페이즈)")]
+    [Header("휩쓸기 브레스 (3페이즈) — 휩쓰는 시간은 난이도 값")]
     [Tooltip("휩쓰는 각도 (좌우 합)")]
     [SerializeField] float sweepAngle = 110f;
     [Tooltip("휩쓰는 동안의 불 폭 (반각) — 보통 브레스보다 좁다")]
     [SerializeField] float sweepHalfAngle = 26f;
-    [SerializeField] float sweepDuration = 1.9f;
 
     [Header("연속 물기 (3페이즈)")]
     [SerializeField] Vector2Int chainBites = new Vector2Int(2, 3);
@@ -87,23 +81,22 @@ public partial class DragonBoss
     [SerializeField] float chainLunge = 0.46f;
     [SerializeField] float chainDamage = 15f;
 
-    [Header("불 장판 (3페이즈)")]
-    [SerializeField] float firePatchLife = 6f;
+    [Header("불 장판 (3페이즈) — 남는 시간 · 최대 수는 난이도 값")]
     [SerializeField] float firePatchTick = 0.5f;
     [SerializeField] float firePatchDamage = 5f;
     [SerializeField] float firePatchRadius = 2.1f;
     [Tooltip("돌진 길 위 불 사이 간격 (m)")]
     [SerializeField] float firePatchSpacing = 3.2f;
-    [SerializeField] int firePatchMax = 14;
-
-    [Header("연계 (3페이즈)")]
-    [Range(0f, 1f)] [SerializeField] float comboChance = 0.55f;
 
     readonly List<Enemy> minions = new List<Enemy>();
     bool chargeBlocked;   // 돌진이 벽에 막혔다 — 휘청이는 중이라 연계하지 않는다
 
-    /// <summary>연계 확률 (시험용으로 바꿀 수 있다).</summary>
-    public float ComboChance { get => comboChance; set => comboChance = Mathf.Clamp01(value); }
+    /// <summary>연계 확률 — 난이도 값의 지금 페이즈 것. 시험용으로 덮어쓸 수 있다 (덮어쓴 값은 예전처럼 3페이즈에서만 쓴다).</summary>
+    public float ComboChance
+    {
+        get => comboOverride >= 0f ? (phase >= 3 ? comboOverride : 0f) : ByPhase(tune.comboChance);
+        set => comboOverride = Mathf.Clamp01(value);
+    }
     /// <summary>살아 있는 부하 수.</summary>
     public int Minions => AliveMinions();
 
@@ -151,21 +144,24 @@ public partial class DragonBoss
         Sfx(DragonSfx.Roar);
         bool roared = false, echoed = false;
         float total = rise + roarHold;
-        for (float t = 0f; t < total; t += Time.deltaTime)
+        for (float t = 0f; t < total; t += Dt)
         {
             Scrub(DieState, RoarClip(t, rise));
+            if (roared) FxRoarTick(1.4f);
             if (!roared && t >= rise * 0.8f)
             {
                 roared = true;
                 phase = next;
                 OnPhaseChanged?.Invoke(phase);
-                Shake(1.0f);
+                Quake(1.25f, transform.position, 1.0f);
+                FxRoar(transform.position, true);
                 Ring(transform.position, 14f * areaScale, 0.8f);
             }
             if (roared && !echoed && t >= rise + 0.3f)
             {
                 echoed = true;
-                Shake(0.5f);
+                Jolt(0.6f, transform.position, 0.5f);
+                FxRoar(transform.position, false);
                 Ring(transform.position, 10f * areaScale, 0.6f);
             }
             yield return null;
@@ -189,7 +185,7 @@ public partial class DragonBoss
     {
         if (phase < 2 || EnemyManager.Instance == null || PoolManager.Instance == null) return false;
         Enemy[] prefabs = EnemyManager.Instance.enemyPrefabs;
-        return prefabs != null && prefabs.Length > 0 && AliveMinions() < minionCap;
+        return prefabs != null && prefabs.Length > 0 && AliveMinions() < tune.minionCap;
     }
 
     IEnumerator Summon()
@@ -197,12 +193,13 @@ public partial class DragonBoss
         yield return TurnToTarget(0.25f);
         const float rise = 0.6f;
         Sfx(DragonSfx.Roar, 0.8f);
-        for (float t = 0f; t < rise; t += Time.deltaTime)
+        for (float t = 0f; t < rise; t += Dt)
         {
             Scrub(DieState, RoarClip(t, rise));
             yield return null;
         }
-        Shake(0.5f);
+        Jolt(0.55f, transform.position, 0.5f);
+        FxRoar(transform.position, false);
         Ring(transform.position, 8f * areaScale, 0.6f);
         if (CanSummon()) yield return SummonCore(rise, rise);
         BackToIdle(0.4f);
@@ -212,14 +209,14 @@ public partial class DragonBoss
     /// <summary>포효 자세를 이어 가며(elapsed 부터) 표시 → 등장.</summary>
     IEnumerator SummonCore(float elapsed, float rise)
     {
-        int count = Mathf.Min(phase >= 3 ? minionsPhase3 : minionsPhase2, minionCap - AliveMinions());
+        int count = Mathf.Min(phase >= 3 ? tune.minionsPhase3 : tune.minionsPhase2, tune.minionCap - AliveMinions());
         Enemy[] prefabs = EnemyManager.Instance.enemyPrefabs;
         if (count <= 0 || target == null) yield break;
 
         List<Vector3> points = SummonPoints(count);
         var marks = new List<DragonTelegraph>();
         foreach (Vector3 p in points) marks.Add(Track(DragonTelegraph.Circle(telegraphMaterial, p, 1.3f)));
-        for (float t = 0f; t < summonDelay; t += Time.deltaTime)
+        for (float t = 0f; t < summonDelay; t += Dt)
         {
             Scrub(DieState, RoarClip(elapsed + t, rise));
             foreach (DragonTelegraph m in marks) m.SetProgress(t / summonDelay);
@@ -230,9 +227,10 @@ public partial class DragonBoss
         {
             marks[i].Flash();
             SpawnMinion(PickMinion(prefabs), points[i]);
+            FxSummon(points[i]);
             if (fireMaterial != null) DragonFx.Burst(points[i] + Vector3.up * 0.4f, fireMaterial, 1.3f);
         }
-        readyAt[Pattern.Summon] = Time.time + Cooldown(Pattern.Summon);
+        readyAt[Pattern.Summon] = Time.time + Cooldown(Pattern.Summon) * tune.cooldownScale;
     }
 
     List<Vector3> SummonPoints(int count)
@@ -276,6 +274,7 @@ public partial class DragonBoss
         Enemy enemy = go.GetComponent<Enemy>();
         if (enemy == null) return;
         enemy.Initialize(target, EnemyManager.Instance);
+        if (IsMeleeMinion(enemy)) enemy.ScaleHealth(tune.minionMeleeHealth);   // 근접 부하 체력 ×3 (2026-11-23, 난이도 값)
 
         // 보스 스테이지는 처치 목표가 0 이다 — 부하가 처치 수에 들어가면 한 마리만 잡아도 스테이지 클리어가 뜬다.
         // 죽을 때 EnemyManager 가 이 값을 보고(먼저 등록됨) 그다음 여기서 원래 값으로 돌려놓는다 (풀에서 다시 쓰이므로)
@@ -291,6 +290,10 @@ public partial class DragonBoss
         enemy.OnDeath += onDeath;
         minions.Add(enemy);
     }
+
+    /// <summary>붙어서 때리는 몬스터인가 — A 근접 · B 돌진 · D 자폭. 원거리(C 투사체 · E 레이저)는 아니다.</summary>
+    static bool IsMeleeMinion(Enemy enemy) =>
+        enemy.attack is MeleeAttack || enemy.attack is DashAttack || enemy.attack is SuicideAttack;
 
     /// <summary>보스가 쓰러지면 부하도 같이 쓰러진다.</summary>
     void DismissMinions()
@@ -314,13 +317,14 @@ public partial class DragonBoss
         var landed = new bool[points.Count];
         float begin = -1f, lastHit = -1f;
         float total = rise * 0.7f + rainWarn + rainStagger * points.Count + 0.3f;
-        for (float t = 0f; t < total; t += Time.deltaTime)
+        for (float t = 0f; t < total; t += Dt)
         {
             Scrub(DieState, RoarClip(t, rise));
             if (begin < 0f && t >= rise * 0.7f)
             {
                 begin = t;
-                Shake(0.5f);
+                Jolt(0.55f, transform.position, 0.5f);
+                FxRoar(transform.position, false);
                 Ring(transform.position, 7f * areaScale, 0.5f);
                 foreach (Vector3 p in points) marks.Add(Track(DragonTelegraph.Circle(telegraphMaterial, p, rainRadius)));
             }
@@ -329,16 +333,18 @@ public partial class DragonBoss
                 if (landed[i]) continue;
                 float u = (t - begin - i * rainStagger) / rainWarn;
                 marks[i].SetProgress(u);
-                if (!falling[i] && u >= 1f - fall / rainWarn)
+                if (!falling[i] && u >= 1f - fall * tune.tempo / rainWarn)
                 {
                     falling[i] = true;
                     if (fireMaterial != null) DragonMeteor.Drop(fireMaterial, points[i], fall, rainRadius);
                     Sfx(DragonSfx.Rain);
+                    FxRainFall(points[i]);
                 }
                 if (u < 1f) continue;
                 landed[i] = true;
                 marks[i].Flash();
-                Shake(0.18f);
+                Jolt(0.28f, points[i], 0.18f);
+                FxRainLand(points[i]);
                 if (PlayerInCircle(points[i], rainRadius) && Time.time - lastHit > 0.35f)   // 겹친 원 두 개에 한꺼번에 맞지 않게
                 {
                     lastHit = Time.time;
@@ -357,14 +363,29 @@ public partial class DragonBoss
         var points = new List<Vector3>();
         if (target == null) return points;
         Vector3 player = target.position;
-        AddRainPoint(points, player, 0f);
 
         Vector3 heading = Vector3.zero;
         var body = target.GetComponentInParent<Rigidbody>();
         if (body != null) heading = Flat(body.linearVelocity);
         if (heading.sqrMagnitude < 0.25f) heading = Quaternion.Euler(0f, Random.Range(0f, 360f), 0f) * Vector3.forward;
+
+        if (tune.rainRing)
+        {
+            // 둘러싸기 (하드 — 2026-11-20) — 둘레 여섯 칸 가운데 다섯 칸이 먼저 떨어지고 가운데(지금 자리)가 마지막에 떨어진다.
+            // 빈 칸 하나가 살 길이다. 가는 쪽과 그 양옆은 늘 막으므로(빈 칸은 옆 · 뒤) 걷던 대로 걸으면 맞는다
+            float ringRadius = rainRadius * 1.9f;
+            float yaw = Mathf.Atan2(heading.x, heading.z) * Mathf.Rad2Deg;
+            int gap = Random.Range(2, 5);
+            for (int i = 0; i < 6; i++)
+                if (i != gap) AddRainPoint(points, player + Quaternion.Euler(0f, yaw + i * 60f, 0f) * Vector3.forward * ringRadius, 0.5f);
+            AddRainPoint(points, player, 0f);
+            return points;
+        }
+
+        AddRainPoint(points, player, 0f);
         AddRainPoint(points, player + heading.normalized * (rainRadius * 1.5f), 1.5f);
 
+        int rainCount = Mathf.Max(1, tune.rainCount);
         for (int tries = 0; tries < rainCount * 8 && points.Count < rainCount; tries++)
         {
             Vector2 r = Random.insideUnitCircle * rainSpread;
@@ -396,7 +417,7 @@ public partial class DragonBoss
         // 몸을 반대로 틀며 웅크린다
         Sfx(DragonSfx.Windup);
         float crouch = Motion.WindupEnd * 0.8f;
-        for (float t = 0f; t < tailWindup; t += Time.deltaTime)
+        for (float t = 0f; t < tailWindup; t += Dt)
         {
             float u = t / tailWindup;
             Scrub(AttackState, Mathf.Lerp(0f, crouch, u));
@@ -406,13 +427,14 @@ public partial class DragonBoss
         }
 
         warning.Flash();
-        Shake(0.55f);
+        Shove(0.65f, target != null ? target.position : center + transform.forward, center, 0.55f);
+        FxTailSweep(center, dir);
         Sfx(DragonSfx.Tail);
         Ring(center, tailRadius, 0.35f);
         if (dustFx != null) dustFx.Play(true);
         bool hit = false;
         float from = startYaw - dir * tailTwist, turn = dir * (360f + tailTwist);
-        for (float t = 0f; t < tailSpin; t += Time.deltaTime)
+        for (float t = 0f; t < tailSpin; t += Time.deltaTime)   // 도는 시간은 실제 시간 — 진행 속도는 예고만 늘린다
         {
             float u = t / tailSpin;
             Scrub(AttackState, crouch);
@@ -428,7 +450,7 @@ public partial class DragonBoss
         if (dustFx != null) dustFx.Stop(true, ParticleSystemStopBehavior.StopEmitting);
         agent.updateRotation = true;
 
-        for (float r = 0f; r < 0.3f; r += Time.deltaTime)
+        for (float r = 0f; r < 0.3f; r += Dt)
         {
             Scrub(AttackState, Mathf.Lerp(crouch, 0f, r / 0.3f));
             yield return null;
@@ -448,7 +470,7 @@ public partial class DragonBoss
             travel = Mathf.Min(retreatDistance, edge.distance - 2f * bodyScale);
 
         // 웅크림 — 목을 당기고 날개를 편다 (공격 ①)
-        for (float t = 0f; t < 0.22f; t += Time.deltaTime)
+        for (float t = 0f; t < 0.22f; t += Dt)
         {
             Scrub(AttackState, Mathf.Lerp(0f, Motion.WindupEnd, t / 0.22f));
             yield return null;
@@ -460,13 +482,14 @@ public partial class DragonBoss
             agent.ResetPath();
             agent.updateRotation = false;
             if (dustFx != null) dustFx.Play(true);
-            Shake(0.2f);
+            Jolt(0.26f, start, 0.2f);
+            FxRetreat(start, back);
             Sfx(DragonSfx.Wing);
             float moved = 0f;
-            for (float t = 0f; t < retreatTime; t += Time.deltaTime)
+            for (float t = 0f; t < retreatTime; t += Dt)
             {
                 Scrub(AttackState, Motion.WindupEnd);
-                float u = Mathf.Clamp01((t + Time.deltaTime) / retreatTime);
+                float u = Mathf.Clamp01((t + Dt) / retreatTime);
                 float want = travel * (1f - (1f - u) * (1f - u));   // 처음에 빠르고 끝에 느려진다
                 float step = want - moved;
                 moved = want;
@@ -498,7 +521,7 @@ public partial class DragonBoss
             float from = i == 0 ? 0f : Motion.BiteClose + 0.05f;
             float warn = pull + chainLunge;
             DragonTelegraph warning = Track(DragonTelegraph.Rect(telegraphMaterial, transform.position, transform.forward, biteWidth, biteNear, biteFar));
-            for (float t = 0f; t < pull; t += Time.deltaTime)
+            for (float t = 0f; t < pull; t += Dt)
             {
                 Scrub(AttackState, Mathf.Lerp(from, Motion.WindupEnd, t / pull));
                 if (target != null) Face(target.position, 260f);
@@ -508,23 +531,25 @@ public partial class DragonBoss
                 yield return null;
             }
             Vector3 origin = transform.position, forward = transform.forward;
-            for (float t = 0f; t < chainLunge; t += Time.deltaTime)
+            LockAim(warning);   // 여기서부터 방향이 굳는다 — 색 · 소리로 알린다 (2026-11-20)
+            for (float t = 0f; t < chainLunge; t += Dt)
             {
                 Scrub(AttackState, Mathf.Lerp(Motion.WindupEnd, Motion.BiteClose, t / chainLunge));
                 warning.SetProgress((pull + t) / warn);
                 yield return null;
             }
             warning.Flash();
-            Shake(0.25f);
+            Shove(0.4f, origin + Flat(forward).normalized * (biteFar * 0.7f), origin, 0.25f);
+            FxBite(origin, forward, true);
             Sfx(DragonSfx.Bite);
             if (PlayerInRect(origin, forward, biteWidth, biteNear, biteFar)) HitPlayer(chainDamage, origin, 0.45f);
-            for (float h = 0f; h < 0.08f; h += Time.deltaTime)
+            for (float h = 0f; h < 0.08f; h += Dt)
             {
                 Scrub(AttackState, Motion.BiteClose + 0.05f);
                 yield return null;
             }
         }
-        for (float r = 0f; r < 0.42f; r += Time.deltaTime)
+        for (float r = 0f; r < 0.42f; r += Dt)
         {
             Scrub(AttackState, Mathf.Lerp(Motion.BiteClose + 0.05f, attackLength, r / 0.42f));
             yield return null;
@@ -537,9 +562,9 @@ public partial class DragonBoss
 
     void LeaveFire(Vector3 at, float radius)
     {
-        if (phase < 3 || DragonFirePatch.Count >= firePatchMax) return;
+        if (phase < 3 || DragonFirePatch.Count >= tune.firePatchMax) return;
         if (!NavMesh.SamplePosition(at, out NavMeshHit hit, 1.5f, NavMesh.AllAreas)) return;   // 길 밖(벽 너머)에는 남기지 않는다
-        DragonFirePatch.Spawn(this, telegraphMaterial, fireMaterial, hit.position, radius, firePatchLife, firePatchTick, firePatchDamage);
+        DragonFirePatch.Spawn(this, telegraphMaterial, fireMaterial, hit.position, radius, tune.firePatchLife, firePatchTick, firePatchDamage);
         Sfx(DragonSfx.Ignite);   // 여러 개가 한꺼번에 생겨도 최소 간격으로 한 번만 난다
     }
 
@@ -571,15 +596,22 @@ public partial class DragonBoss
     /// <summary>방금 끝난 패턴 뒤에 빈틈 없이 이을 패턴 (없으면 None).</summary>
     Pattern ComboAfter(Pattern done)
     {
-        if (phase < 3 || Passive || forced != Pattern.None || pendingPhase > phase || target == null || state == State.Dead) return Pattern.None;
-        if (Random.value > comboChance) return Pattern.None;
+        float chance = ComboChance;
+        if (chance <= 0f || Passive || forced != Pattern.None || pendingPhase > phase || target == null || state == State.Dead) return Pattern.None;
         float distance = FlatDistance(target.position);
+        // 도약 내려찍기 → 꼬리 휩쓸기 (3페이즈 · 늘 절반) — 착지 뒤 빈틈이 진짜인지 읽게 한다. 붙어서 때리던 사람을 벌한다
+        if (done == Pattern.Leap) return phase >= 3 && distance <= tailRadius + 1.5f && Random.value < 0.5f ? Pattern.TailSweep : Pattern.None;
+        if (Random.value > chance) return Pattern.None;
+        Pattern next;
         switch (done)
         {
-            case Pattern.Charge: return !chargeBlocked && distance <= tailRadius + 1.5f ? Pattern.TailSweep : Pattern.None;
-            case Pattern.Fireball: return distance >= 6f ? Pattern.Charge : Pattern.None;
-            case Pattern.TailSweep: return distance <= groundBiteReach ? Pattern.GroundBite : Pattern.None;
-            default: return Pattern.None;
+            // 퍼지는 고리 → 불비 (3페이즈) — 고리가 아직 퍼지는 동안 불비가 둘러싼다. 틈으로 가는 길과 불비의 빈 칸을 같이 읽어야 한다
+            case Pattern.RingWave: next = phase >= 3 ? Pattern.FireRain : Pattern.None; break;
+            case Pattern.Charge: next = !chargeBlocked && distance <= tailRadius + 1.5f ? Pattern.TailSweep : Pattern.None; break;
+            case Pattern.Fireball: next = distance >= 6f ? Pattern.Charge : Pattern.None; break;
+            case Pattern.TailSweep: next = distance <= groundBiteReach ? Pattern.GroundBite : Pattern.None; break;
+            default: next = Pattern.None; break;
         }
+        return next != Pattern.None && IntroducedIn(next) <= phase ? next : Pattern.None;
     }
 }

@@ -36,6 +36,9 @@ public class LoadoutPanelView : MonoBehaviour
     [SerializeField] EquipmentRowView[] abilityRows;
 
     [SerializeField] Color emptyFrame = new Color(1f, 1f, 1f, 0.18f);
+
+    // 부착물 칸 자리 (Tools / 재화 · 상점 이 만든 칸 — 첫 칸 x 92, 52 간격)
+    const float SlotX0 = 92f, SlotStep = 52f;
     [SerializeField] Color highlightColor = new Color(0.6f, 1f, 0.9f, 1f);
 
     /// <summary>대상 고르기 중 총을 클릭했을 때.</summary>
@@ -48,6 +51,88 @@ public class LoadoutPanelView : MonoBehaviour
     int highlightSlot = -1;
     bool targeting;
     float blink;
+
+    // 강화한 무기 칸 반짝임 (2026-11-17 강화 연출) — 정비 창은 시간이 멈춰 있어 실제 시간으로
+    const float UpgradeFlashTime = 0.8f;
+    static readonly Color UpgradeFlashColor = new Color(1f, 0.83f, 0.35f, 0.6f);
+    readonly List<WeaponBase> flashPending = new List<WeaponBase>();
+    readonly Dictionary<WeaponBlock, (Image image, float age)> flashing = new Dictionary<WeaponBlock, (Image, float)>();
+
+    /// <summary>지금 반짝이는 칸 수 (시험용).</summary>
+    public int FlashingCount => flashing.Count;
+
+    void OnEnable() => WeaponBase.LevelRaised += OnLevelRaised;
+    void OnDisable()
+    {
+        WeaponBase.LevelRaised -= OnLevelRaised;
+        foreach (var pair in flashing)
+        {
+            if (pair.Value.image != null) pair.Value.image.enabled = false;
+            if (pair.Key.root != null) pair.Key.root.transform.localScale = Vector3.one;
+        }
+        flashing.Clear();
+        flashPending.Clear();
+    }
+
+    void OnLevelRaised(WeaponBase weapon, int from)
+    {
+        if (weapon != null && !flashPending.Contains(weapon)) flashPending.Add(weapon);
+    }
+
+    void UpdateUpgradeFlash()
+    {
+        // 강화 직후 판이 다시 그려지면(Refresh) 그 무기 칸을 찾아 반짝인다
+        for (int i = flashPending.Count - 1; i >= 0; i--)
+        {
+            WeaponBlock b = blocks == null ? null : System.Array.Find(blocks, x => x != null && x.root != null && x.root.activeInHierarchy && ReferenceEquals(x.weapon, flashPending[i]));
+            if (b == null) continue;
+            flashPending.RemoveAt(i);
+            flashing[b] = (FlashImage(b), 0f);
+        }
+
+        if (flashing.Count == 0) return;
+        var done = new List<WeaponBlock>();
+        foreach (WeaponBlock b in new List<WeaponBlock>(flashing.Keys))
+        {
+            (Image image, float age) = flashing[b];
+            age += Time.unscaledDeltaTime;
+            float t = Mathf.Clamp01(age / UpgradeFlashTime);
+            if (image != null)
+            {
+                image.enabled = t < 1f;
+                image.color = new Color(UpgradeFlashColor.r, UpgradeFlashColor.g, UpgradeFlashColor.b, UpgradeFlashColor.a * (1f - t) * (1f - t));
+            }
+            if (b.root != null) b.root.transform.localScale = Vector3.one * (1f + 0.05f * Mathf.Sin(Mathf.Min(1f, t * 2.5f) * Mathf.PI));
+            if (t >= 1f) done.Add(b);
+            else flashing[b] = (image, age);
+        }
+        foreach (WeaponBlock b in done)
+        {
+            if (b.root != null) b.root.transform.localScale = Vector3.one;
+            flashing.Remove(b);
+        }
+    }
+
+    /// <summary>칸 위에 덮는 금빛 판 (처음 쓸 때 만든다).</summary>
+    static Image FlashImage(WeaponBlock b)
+    {
+        Transform existing = b.root.transform.Find("UpgradeFlash");
+        Image image = existing != null ? existing.GetComponent<Image>() : null;
+        if (image == null)
+        {
+            var go = new GameObject("UpgradeFlash", typeof(RectTransform), typeof(Image));
+            go.transform.SetParent(b.root.transform, false);
+            var rt = (RectTransform)go.transform;
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.offsetMin = rt.offsetMax = Vector2.zero;
+            image = go.GetComponent<Image>();
+            image.raycastTarget = false;
+        }
+        image.transform.SetAsLastSibling();
+        image.enabled = true;
+        return image;
+    }
 
     void Awake()
     {
@@ -115,14 +200,20 @@ public class LoadoutPanelView : MonoBehaviour
         bool attachable = family != WeaponFamily.None && family != WeaponFamily.Melee;
         var names = new StringBuilder();
 
+        int shownSlots = 0;
         for (int s = 0; s < AttachmentData.SlotCount; s++)
         {
             AttachmentData a = attachable ? b.weapon.GetAttachment((AttachmentSlot)s) : null;
 
             if (b.slotFrames != null && s < b.slotFrames.Length && b.slotFrames[s] != null)
             {
-                // 보조 무기는 개조 칸만 보인다 (다른 부위는 달 수 없다)
-                b.slotFrames[s].transform.parent.gameObject.SetActive(attachable && (!support || s == (int)AttachmentSlot.Mod));
+                // 보조 무기는 개조 칸만 보인다 (다른 부위는 달 수 없다).
+                // 정비 창에서 이 무기에 파는 부위만 보이고(비어 있을 때), 보이는 칸을 앞으로 당긴다 (2026-11-17)
+                bool show = attachable && (!support || s == (int)AttachmentSlot.Mod)
+                            && !(a == null && !ShopCatalog.SellsAttachment(data, (AttachmentSlot)s));
+                var cell = (RectTransform)b.slotFrames[s].transform.parent;
+                cell.gameObject.SetActive(show);
+                if (show) cell.anchoredPosition = new Vector2(SlotX0 + shownSlots++ * SlotStep, cell.anchoredPosition.y);
                 b.slotFrames[s].color = a != null ? AttachmentData.TierColor(a.tier) : emptyFrame;
             }
 
@@ -138,7 +229,8 @@ public class LoadoutPanelView : MonoBehaviour
         if (b.parts != null)
             b.parts.text = !attachable ? "근접 무기 — 부착물 없음"
                          : names.Length > 0 ? names.ToString()
-                         : support ? "보조 무기 — 전용 개조 칸만" : "부착물 없음";
+                         : support ? (ShopCatalog.SellsAttachment(data, AttachmentSlot.Mod) ? "보조 무기 — 전용 개조 칸만" : "보조 무기 — 부착물 없음")
+                         : "부착물 없음";
     }
 
     void RefreshAbilities(ShopContext ctx)
@@ -202,6 +294,7 @@ public class LoadoutPanelView : MonoBehaviour
 
     void Update()
     {
+        UpdateUpgradeFlash();
         if (!targeting || blocks == null || highlightSlot < 0) return;
 
         // 고르는 중인 부위 칸을 깜빡인다

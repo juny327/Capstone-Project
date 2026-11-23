@@ -23,7 +23,7 @@ public class AttachmentSource : ShopOfferSource
         {
             if (a == null || ctx.Reserved.Contains(a)) continue;   // 진화 짝으로 이미 진열됐다
 
-            var offer = new AttachmentOffer(a, ctx.Catalog.Scaled(a.basePrice, ctx.StageIndex));
+            var offer = new AttachmentOffer(a, ctx.Catalog.Scaled(a.basePrice, ctx.StageIndex, ctx.PriceMultiplier));
             targets.Clear();
             offer.CollectTargets(ctx, targets);
             if (targets.Count > 0) into.Add(offer);
@@ -46,13 +46,14 @@ public class AttachmentOffer : ShopOffer
     public AttachmentData Attachment => attachment;
 
     public override string Title => attachment.displayName;
-    public override string Description => attachment.EffectText;
+    public override string Description => DescText.Attachment(attachment);   // 간단 = 한 줄 · 상세 = 설명 + 수치 (2026-11-22)
     public override Sprite Icon => attachment.icon;
     public override string Tag => $"{AttachmentData.SlotName(attachment.slot)} · {AttachmentData.TierName(attachment.tier)}";
     public override ShopOfferKind Kind => ShopOfferKind.Attachment;
 
     public override bool NeedsTarget => true;
     public override int HighlightSlot => (int)attachment.slot;
+    public override Object PairItem => attachment;
 
     /// <summary>달 수 있고, 같은 부착물이 아직 없는 손 무기.</summary>
     public override void CollectTargets(ShopContext ctx, List<IWeapon> into)

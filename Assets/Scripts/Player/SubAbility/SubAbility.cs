@@ -178,9 +178,9 @@ public abstract class SubAbility : MonoBehaviour
         return Mathf.Clamp(along, minDistance, maxDistance);
     }
 
-    protected static void PlaySound(GameSoundSet.Entry entry)
+    protected static void PlaySound(GameSoundSet.Entry entry, SoundKind kind = SoundKind.Ability)
     {
-        if (entry != null && SoundManager.Instance != null) SoundManager.Instance.Play(entry);
+        if (entry != null && SoundManager.Instance != null) SoundManager.Instance.Play(entry, SoundManager.Instance.SfxGroup, 1f, 1f, kind);
     }
 
     /// <summary>애니메이터에 그 파라미터가 있을 때만 — 모션을 아직 안 넣었어도 경고 없이 넘어간다.</summary>

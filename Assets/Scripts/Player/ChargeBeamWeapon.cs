@@ -172,6 +172,7 @@ public class ChargeBeamWeapon : WeaponBase
     }
 
     /// <summary>프리즘 노바 한 번 맞힐 피해 — 무기 공격력 × mul, 치명타 판정 포함.</summary>
+    // 구형 호출부 호환: 강화 전 피해를 반환하고 DealPrismDamage 에서 직접 피해를 계산한다.
     public float RollPrismDamage(float mul, out bool critical)
     {
         WeaponRuntimeStats stats = Stats;
@@ -179,8 +180,23 @@ public class ChargeBeamWeapon : WeaponBase
         return ApplyCritical(in stats, critical) * mul;
     }
 
+    public float RollPrismDamage(float mul, out bool critical, out float effectDamage)
+    {
+        WeaponRuntimeStats stats = Stats;
+        critical = RollCritical(in stats);
+        effectDamage = ApplyCritical(in stats, critical) * mul;
+        return ResolveDirectDamage(effectDamage, mul * (critical ? stats.CritMultiplier : 1f));
+    }
+
     /// <summary>프리즘 노바 피해 주기 — 명중 알림(처치 판정 포함)까지 다른 탄 · 빔과 같은 규칙.</summary>
     public void DealPrismDamage(Transform target, float damage, bool critical, Vector3 point, Vector3 direction)
+    {
+        WeaponRuntimeStats stats = Stats;
+        float additiveScale = stats.Damage > 0f ? damage / stats.Damage : (critical ? stats.CritMultiplier : 1f);
+        DealPrismDamage(target, ResolveDirectDamage(damage, additiveScale), critical, point, direction, damage);
+    }
+
+    public void DealPrismDamage(Transform target, float damage, bool critical, Vector3 point, Vector3 direction, float effectDamage)
     {
         if (target == null || damage <= 0f) return;
 
@@ -197,6 +213,7 @@ public class ChargeBeamWeapon : WeaponBase
                 Point = point,
                 Direction = direction,
                 Damage = damage,
+                EffectDamage = effectDamage,
                 IsCritical = critical,
                 Killed = killed,
             });
@@ -305,7 +322,9 @@ public class ChargeBeamWeapon : WeaponBase
             if (point == Vector3.zero) point = col.ClosestPoint(origin);
 
             bool isCritical = RollCritical(in stats);
-            float dealt = ApplyCritical(in stats, isCritical) * damageScale;
+            float effectDamage = FloorSupportDamage(ApplyCritical(in stats, isCritical) * damageScale);
+            float dealt = ResolveDirectDamage(effectDamage,
+                damageScale * (isCritical ? stats.CritMultiplier : 1f));
             bool wasAlive = CombatFx.IsAlive(root);
 
             target.TakeDamage(new DamageInfo
@@ -328,6 +347,7 @@ public class ChargeBeamWeapon : WeaponBase
                     Point = point,
                     Direction = dir,
                     Damage = dealt,
+                    EffectDamage = effectDamage,
                     IsCritical = isCritical,
                     Killed = killed,
                 });
@@ -340,7 +360,7 @@ public class ChargeBeamWeapon : WeaponBase
 
             // 관통이라 한 프레임에 여러 명이 들어온다. 소리는 프레임 끝에 한 번만.
             if (SoundManager.Instance != null)
-                SoundManager.Instance.ReportHit(isCritical, HitSound.Laser);
+                SoundManager.Instance.ReportHit(isCritical, HitSound.Laser, root);
             PlayHitLayer();   // 상위 무기 전용 적중음 (최소 간격으로 한 번)
         }
 

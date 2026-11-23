@@ -39,7 +39,7 @@ public static class SupportTargeting
         for (int i = candidates.Count - 1; i >= 0; i--)
         {
             Transform t = candidates[i];
-            if (t == null || !CombatFx.IsAlive(t) || Flat(t.position - from).sqrMagnitude > rangeSqr)
+            if (t == null || !CombatFx.IsAlive(t) || Flat(CombatFx.TargetPoint(t, from) - from).sqrMagnitude > rangeSqr)   // 보스는 몸 표면까지
                 candidates.RemoveAt(i);
         }
 
@@ -52,6 +52,7 @@ public static class SupportTargeting
             case SupportTarget.NearPlayer:    return NearPlayer(player);
             case SupportTarget.MostInLine:    return MostInLine(from, range);
             case SupportTarget.Crowd:         return Crowd();
+            case SupportTarget.Ranged:        return RangedFirst() ?? candidates[0];
             default:                          return candidates[0];   // 가까운 순으로 들어 있다
         }
     }
@@ -126,7 +127,7 @@ public static class SupportTargeting
 
         for (int i = 0; i < candidates.Count; i++)
         {
-            float sqr = Flat(candidates[i].position - player.position).sqrMagnitude;
+            float sqr = Flat(CombatFx.TargetPoint(candidates[i], player.position) - player.position).sqrMagnitude;
             if (sqr <= bestSqr) { bestSqr = sqr; best = candidates[i]; }
         }
 
@@ -182,6 +183,17 @@ public static class SupportTargeting
         return best;
     }
 
+    /// <summary>원거리 공격(탄 · 레이저)을 하는 적 중 가장 가까운 적 — 후보가 가까운 순이라 처음 만난 것. 없으면 null.</summary>
+    static Transform RangedFirst()
+    {
+        for (int i = 0; i < candidates.Count; i++)
+        {
+            Enemy enemy = candidates[i].GetComponentInParent<Enemy>();
+            if (enemy != null && (enemy.attack is RangedAttack || enemy.attack is LaserAttack)) return candidates[i];
+        }
+        return null;
+    }
+
     static Vector3 Flat(Vector3 v) { v.y = 0f; return v; }
 
     /// <summary>
@@ -210,7 +222,7 @@ public static class SupportTargeting
             if (target == null) return null;
             if (float.IsInfinity(maxDistance)) return target;
 
-            Vector3 d = target.position - from;
+            Vector3 d = CombatFx.TargetPoint(target, from) - from;
             d.y = 0f;
             return d.sqrMagnitude <= maxDistance * maxDistance ? target : null;
         }

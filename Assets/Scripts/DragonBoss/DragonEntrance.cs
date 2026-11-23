@@ -129,6 +129,9 @@ public class DragonEntrance : MonoBehaviour
     {
         yield return null;   // GameAppManager 가 플레이어를 시작 자리에 세운 뒤
         Setup();
+        // 2026-11-18 성능 — 준비(장면 훑기 · 캔버스 · 조명 찾기 · 연출 오브젝트 만들기, 80 ~ 100ms)는 입장 가림막이
+        // 덮인 동안 끝내고, 연출은 가림막이 걷히기 시작할 때 시작한다 (가림막 없이 들어오면 바로)
+        while (SceneCurtain.Covering) yield return null;
         run = StartCoroutine(Run());
     }
 
@@ -157,10 +160,12 @@ public class DragonEntrance : MonoBehaviour
 
         LockPlayer();
         // HUD 를 모두 숨긴다 — 이 장면 것 + 씬을 넘어 남는 것(코인 · 스킬 · 조합식 · 장비, 11-13 화면 점검에서 코인이 연출 위에 남았다).
-        // 설정창(ESC)은 남긴다
+        // 설정창(ESC)은 남긴다. 입장 가림막도 건드리지 않는다 (2026-11-18) — 이 준비는 가림막이 덮인 동안 도는데,
+        // 가림막을 끄면 가리던 화면이 드러나고, 끝나고 되켜면 투명한 가림막이 모든 버튼 위에 남아 클릭을 막았다
         foreach (Canvas c in FindObjectsByType<Canvas>(FindObjectsSortMode.None))
             if (c.isRootCanvas && c.enabled && c.renderMode != RenderMode.WorldSpace
-                && c.GetComponentInChildren<GameSettingsUI>(true) == null && c.GetComponentInParent<GameSettingsUI>(true) == null)
+                && c.GetComponentInChildren<GameSettingsUI>(true) == null && c.GetComponentInParent<GameSettingsUI>(true) == null
+                && c.GetComponent<SceneCurtain>() == null)
             { c.enabled = false; hiddenHud.Add(c); }
         hpUi = scene.GetRootGameObjects().SelectMany(r => r.GetComponentsInChildren<BossHPUI>(true)).FirstOrDefault();
 
@@ -169,6 +174,7 @@ public class DragonEntrance : MonoBehaviour
         SetupVolume();
         BuildOverlay();
         BuildFx();
+        PrepareCopy();   // 낙하 때 만들지 않게 미리 (11-18 성능)
     }
 
     void LockPlayer()
@@ -489,18 +495,31 @@ public class DragonEntrance : MonoBehaviour
 
     // ───────── 드래곤 ─────────
 
-    void SpawnCopy()
+    /// <summary>
+    /// 연출용 몸을 미리 만들어 꺼 둔다 (2026-11-18 성능 — Setup 에서, 입장 가림막이 덮인 동안).
+    /// 낙하 순간에 만들면 그 프레임이 72ms 끊겼다.
+    /// </summary>
+    void PrepareCopy()
     {
-        if (modelPrefab == null) return;
+        if (modelPrefab == null || copy != null) return;
         copy = Instantiate(modelPrefab, core + Vector3.up * landHeight, Quaternion.LookRotation(toPlayer));
         copy.name = "DragonEntranceBody";
         SceneManager.MoveGameObjectToScene(copy, gameObject.scene);
         temp.Add(copy);
-        copyAnim = copy.GetComponentInChildren<Animator>();
+        copyAnim = copy.GetComponentInChildren<Animator>();   // 끄기 전에 (꺼진 자식은 못 찾는다)
         if (copyAnim != null && copyAnim.runtimeAnimatorController != null)
             foreach (AnimationClip clip in copyAnim.runtimeAnimatorController.animationClips)
                 foreach (string s in new[] { DragonBoss.IdleState, DragonBoss.WalkState, DragonBoss.AttackState, DragonBoss.DieState })
                     if (clip.name.EndsWith("_" + s)) lengths[s] = clip.length;
+        copy.SetActive(false);
+    }
+
+    void SpawnCopy()
+    {
+        PrepareCopy();
+        if (copy == null) return;
+        copy.transform.SetPositionAndRotation(core + Vector3.up * landHeight, Quaternion.LookRotation(toPlayer));
+        copy.SetActive(true);
     }
 
     void CopyPose(string state, float time, float speed)

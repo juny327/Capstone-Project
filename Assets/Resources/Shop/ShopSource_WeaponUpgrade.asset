@@ -15,3 +15,4 @@ MonoBehaviour:
   slots: 1
   maxSlotsWhenNoNewWeapon: 3
   weaponRowSize: 3
+  alwaysMainWeapon: 1

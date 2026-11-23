@@ -531,7 +531,7 @@ public class ParryController : MonoBehaviour
     {
         if (entry == null || SoundManager.Instance == null) return;
 
-        SoundManager.Instance.Play(entry);
+        SoundManager.Instance.Play(entry, SoundManager.Instance.SfxGroup, 1f, 1f, SoundKind.Parry);
     }
 
     void OnDrawGizmosSelected()

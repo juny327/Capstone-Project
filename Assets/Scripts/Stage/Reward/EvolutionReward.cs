@@ -25,8 +25,7 @@ public class EvolutionReward : StageReward
             if (!string.IsNullOrEmpty(descriptionOverride)) return descriptionOverride;
             if (evolution == null || evolution.from == null) return string.Empty;
 
-            string head = $"{evolution.from.weaponName} → {evolution.Title}";
-            return string.IsNullOrEmpty(evolution.flavor) ? head : $"{head}\n{evolution.flavor}";
+            return DescText.Evolution(evolution);   // 간단 = 한 줄 · 상세 = 조건 → 이름 + 전체 설명 (2026-11-22)
         }
     }
 

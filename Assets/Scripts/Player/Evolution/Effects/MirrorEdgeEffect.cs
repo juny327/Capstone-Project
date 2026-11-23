@@ -45,6 +45,10 @@ public class MirrorEdgeEffect : AttachmentEffect
     [Range(0.05f, 0.45f)] public float waveThickness = 0.3f;
     [Tooltip("앞날을 따라가는 심지 색 — 희게 하면 빛나는 칼날처럼 보인다")]
     public Color coreColor = new Color(0.92f, 1f, 1f, 1f);
+    [Tooltip("공통 재료(FxKit)로 반짝임 · 빛 폭발 · 검기의 빛 꼬리를 더한다 (2026-11-20). 끄면 예전 연출")]
+    public bool kitGlint = true;
+
+    public bool UsesKit => kitGlint && FxKit.Ready;
     [Tooltip("넓은 빛무리 진하기 (몸통 색 × 이 값)")]
     [Range(0f, 1f)] public float glowAlpha = 0.35f;
     [Tooltip("뒤따르는 잔상 수 (0 ~ 6)")]
@@ -102,6 +106,11 @@ public class MirrorEdgeEffect : AttachmentEffect
             CombatFx.PlaySound(cfg.swingEdgeSound);
             CombatFx.PlaySound(cfg.swingMagicSound);
 
+            // 공통 재료 (2026-11-20) — 휘두를 때마다 칼끝에 반짝임
+            bool kit = cfg.UsesKit;
+            float ks = Weapon.EvoFxScale;
+            if (kit) FxKit.Glints(attack.Origin + forward * Mathf.Max(1f, attack.Range * 0.7f) + Vector3.up * 0.9f, 0.9f, cfg.color, 6f * ks, 0.8f);
+
             swings++;
             if (swings % cfg.waveEvery != 0) return;
 
@@ -111,12 +120,19 @@ public class MirrorEdgeEffect : AttachmentEffect
             // 날아가기 전 칼끝에서 한 번 번쩍 (세 갈래가 같은 자리에서 나간다)
             FxLine.Ring(cfg.sparkMaterial, start - Vector3.up * 0.8f, 0.2f, 1.8f, cfg.coreColor, 0.12f, 0.18f);
             FxLine.Ring(cfg.sparkMaterial, start - Vector3.up * 0.8f, 0.4f, 2.6f, cfg.color, 0.16f, 0.24f);
+            if (kit)
+            {
+                // 검기가 나가는 순간 — 빛 폭발 · 앞으로 밀려 나가는 큰 초승달 · 반짝임
+                FxKit.EnergyBurst(start - Vector3.up * 0.9f, 1.2f * ks, cfg.color, ks);
+                FxKit.SlashArc(start, forward, 3.6f * ks, cfg.coreColor, 7f, 0.26f);
+                FxKit.Glints(start, 1.6f, Color.white, 14f * ks, 0.9f);
+            }
 
             for (int i = 0; i < cfg.waveCount; i++)
             {
                 float angle = cfg.waveCount > 1 ? -cfg.waveSpread * (cfg.waveCount - 1) * 0.5f + cfg.waveSpread * i : 0f;
                 Vector3 dir = Quaternion.Euler(0f, angle, 0f) * forward;
-                CrescentWave.Launch(cfg, start, dir, damage);
+                CrescentWave.Launch(cfg, start, dir, damage, ks);
                 WavesLaunched++;
             }
 
@@ -154,6 +170,12 @@ public class MirrorEdgeEffect : AttachmentEffect
                 Deflected++;
                 any = true;
                 FxLine.Ring(cfg.sparkMaterial, at, 0.1f, 0.7f, cfg.color, 0.1f, 0.15f);
+                if (cfg.UsesKit && EvoStrikes.Take(6))
+                {
+                    // 탄을 튕겨 낸 자리 — 섬광 · 튕겨 나가는 쪽으로 불꽃 · 반짝임
+                    FxKit.Hit(at, outgoing.normalized, cfg.color, 1.3f);
+                    FxKit.Glints(at, 0.7f, Color.white, 6f, 0.9f);
+                }
             }
 
             if (any)

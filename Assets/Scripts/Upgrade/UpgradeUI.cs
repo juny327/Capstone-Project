@@ -59,10 +59,21 @@ public class UpgradeUI : MonoBehaviour
                 continue;
 
             card.Setup(data, manager.GetNextUpgradeLevel(data), manager.GetUpgradeCost(data));
+            card.ShowPairMark(EvolutionPairs.LabelFor(Player(), data));   // 샀으면 짝을 갖춰 테두리가 꺼진다
 
             if (data.IsMaxed(manager.GetCurrentUpgradeLevel(data)))
                 card.ShowMaxed();
         }
+    }
+
+    /// <summary>지금 플레이어 — 상위 무기 짝 표시에 쓴다 (2026-11-17).</summary>
+    static GameObject Player()
+    {
+        if (GameAppManager.Instance != null && GameAppManager.Instance.Player != null)
+            return GameAppManager.Instance.Player;
+
+        PlayerStats stats = FindFirstObjectByType<PlayerStats>();
+        return stats != null ? stats.gameObject : null;
     }
 
     void Open()
@@ -75,6 +86,41 @@ public class UpgradeUI : MonoBehaviour
         successfulRefreshCount = 0; // 새 업그레이드 창마다 1코인부터 시작
         UpdateRefreshCostLabel();
         DrawCards();
+        ShowDetailToggle();
+        ShowExpBadge();
+    }
+
+    /// <summary>
+    /// 보유 경험치 — 맨 왼쪽 카드의 왼쪽 위 바로 위 (2026-11-23 사용자: "남은 경험치를 구석이 아니라 선택 창 왼쪽 위에").
+    /// 오른쪽의 '상세 설명' 스위치와 마주 본다. 창이 떠 있는 동안 HUD 왼쪽 아래 경험치는 숨는다 (ExpBadge).
+    /// </summary>
+    void ShowExpBadge()
+    {
+        if (panel == null || cards == null) return;
+
+        UpgradeCard left = null;
+        foreach (UpgradeCard card in cards)
+            if (card != null && card.gameObject.activeSelf && (left == null || card.transform.position.x < left.transform.position.x)) left = card;
+        if (left == null) return;
+
+        Canvas.ForceUpdateCanvases();
+        ExpBadge.EnsureAbove((RectTransform)panel.transform, (RectTransform)left.transform, new Vector2(0f, 8f),
+            left.title != null ? left.title.font : null, new Color(0.55f, 0.32f, 0.95f, 1f));
+    }
+
+    /// <summary>'상세 설명' 스위치 — 맨 오른쪽 카드의 오른쪽 위 바로 위 (2026-11-22). 카드는 토글이 바뀌면 스스로 설명을 다시 쓴다.</summary>
+    void ShowDetailToggle()
+    {
+        if (panel == null || cards == null) return;
+
+        UpgradeCard right = null;
+        foreach (UpgradeCard card in cards)
+            if (card != null && card.gameObject.activeSelf && (right == null || card.transform.position.x > right.transform.position.x)) right = card;
+        if (right == null) return;
+
+        Canvas.ForceUpdateCanvases();
+        DetailToggle.EnsureAbove((RectTransform)panel.transform, (RectTransform)right.transform, new Vector2(0f, 8f),
+            right.title != null ? right.title.font : null, new Color(0.78f, 0.55f, 1f, 1f));
     }
 
     // Inspector: 새로고침 Button -> On Click() -> UpgradeUI.OnRefreshButton
@@ -120,6 +166,7 @@ public class UpgradeUI : MonoBehaviour
                 StopCoroutine(insufficientCoinRoutine);
 
             insufficientCoinText.text = "코인이 부족합니다";
+            insufficientCoinText.raycastTarget = false;   // 문구가 떠 있는 동안에도 아래를 누를 수 있게 (2026-11-23)
             insufficientCoinText.gameObject.SetActive(true);
             insufficientCoinRoutine = StartCoroutine(HideInsufficientCoinsAfterDelay());
         }
@@ -185,6 +232,9 @@ public class UpgradeUI : MonoBehaviour
 
             UpgradeData data = upgrades[i];
             card.Setup(data, manager.GetNextUpgradeLevel(data), manager.GetUpgradeCost(data));
+
+            // 가진 무기의 상위 무기 짝 스킬이면 금색 테두리 (2026-11-17 밸런스 결정 6)
+            card.ShowPairMark(EvolutionPairs.LabelFor(Player(), data));
         }
     }
 

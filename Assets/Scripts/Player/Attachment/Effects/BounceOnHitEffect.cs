@@ -35,7 +35,7 @@ public class BounceOnHitEffect : AttachmentEffect
             Vector3 from = hit.Point;
             Vector3 to = CombatFx.Body(next);
 
-            CombatFx.Damage(next, hit.Damage * cfg.damageRatio, to, (to - from).normalized, hit.IsCritical);
+            CombatFx.Damage(next, hit.EffectDamage * cfg.damageRatio, to, (to - from).normalized, hit.IsCritical);
             FxLine.Line(cfg.material, from, to, cfg.color, 0.06f, 0.1f);
             CombatFx.PlaySound(cfg.bounceSound);
         }

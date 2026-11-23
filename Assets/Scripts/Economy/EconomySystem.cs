@@ -28,11 +28,21 @@ public class EconomySystem : MonoBehaviour
     readonly List<CoinPickup> coins = new List<CoinPickup>();
     readonly List<CoinPickup> buffer = new List<CoinPickup>();
 
+    /// <summary>땅에 있는 코인 (튀는 중 · 날아오는 중 포함 — 놓인 것만은 CoinPickup.IsResting). 도깨비불 타구의 엽전 튕기기가 본다.</summary>
+    public IReadOnlyList<CoinPickup> Coins => coins;
+
     // 클리어 보너스를 이미 준 씬 — StageManager 는 목표를 넘긴 뒤에도 처치할 때마다 클리어를 다시 보낸다
     int bonusGivenScene = -1;
 
+    // 코인 배율을 고를 스테이지 번호 — 처치마다 StageManager 를 찾지 않게 씬마다 한 번 (2026-11-17 스테이지별 배율)
+    int stageScene = -1;
+    int stageIndexCache = 1;
+
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-    static void ResetStatics() => Instance = null;
+    static void ResetStatics() { Instance = null; BonusCoinsDropped = 0; }
+
+    /// <summary>보너스 코인으로 떨어뜨린 양 (시험 — 도깨비 방망이 '뚝딱').</summary>
+    public static int BonusCoinsDropped { get; private set; }
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void Bootstrap()
@@ -146,8 +156,11 @@ public class EconomySystem : MonoBehaviour
         ResolvePlayer();
         if (!HasLivePlayer) return;
 
-        // 배율 (0.7) — 소수 부분은 확률로 (코인 1 × 0.7 = 70% 확률로 1)
-        float scaled = Settings.CoinsFor(enemy.data) * Settings.coinMultiplier;
+        // 보스 스테이지 몬스터(잡몹 · 보스의 부하)는 코인을 떨어뜨리지 않는다 (2026-11-23, StageData.enemyRewards)
+        if (EnemyManager.Instance != null && !EnemyManager.Instance.dropRewards) return;
+
+        // 스테이지별 배율 (0.6 · 0.65 · 0.8) × 난이도 배율 (이지 ×2 — 처치 목표가 절반이라) — 소수 부분은 확률로 (코인 1 × 0.6 = 60% 확률로 1)
+        float scaled = Settings.CoinsFor(enemy.data) * Settings.CoinMultiplierFor(CurrentStageIndex()) * Difficulty.Values.coinMultiplier;
         int total = Mathf.FloorToInt(scaled);
         if (Random.value < scaled - total) total++;
         if (total <= 0) return;
@@ -168,6 +181,36 @@ public class EconomySystem : MonoBehaviour
 
             coin.Launch(origin, origin + new Vector3(dir.x, 0f, dir.y), each + (i < extra ? 1 : 0));
         }
+    }
+
+    /// <summary>
+    /// 보너스 코인 (2026-11-20 도깨비 방망이 '뚝딱') — origin 에서 튀어 나와 둘레에 떨어진다. 줍는 규칙은 처치 코인과 같다 (가까이 가면 날아온다).
+    /// 플레이어 · 코인 프리팹이 없으면 아무것도 하지 않고 false.
+    /// </summary>
+    public bool DropBonusCoins(Vector3 origin, int amount)
+    {
+        if (amount <= 0 || Settings == null || Settings.coinPrefab == null) return false;
+
+        ResolvePlayer();
+        if (!HasLivePlayer) return false;
+
+        int count = Mathf.Clamp(amount, 1, Mathf.Max(1, Settings.maxCoinObjects));
+        int each = amount / count;
+        int extra = amount % count;
+        for (int i = 0; i < count; i++)
+        {
+            Vector2 dir = Random.insideUnitCircle;
+            if (dir.sqrMagnitude < 0.0001f) dir = Vector2.right;
+            dir = dir.normalized * Random.Range(Settings.scatterRadius.x, Settings.scatterRadius.y);
+
+            CoinPickup coin = Spawn();
+            if (coin == null) continue;
+
+            coin.Launch(origin, origin + new Vector3(dir.x, 0f, dir.y), each + (i < extra ? 1 : 0));
+        }
+
+        BonusCoinsDropped += amount;
+        return true;
     }
 
     CoinPickup Spawn()
@@ -232,7 +275,7 @@ public class EconomySystem : MonoBehaviour
     void PlayPickupSound()
     {
         if (SoundManager.Instance != null && Settings.pickupSound != null)
-            SoundManager.Instance.Play(Settings.pickupSound);
+            SoundManager.Instance.Play(Settings.pickupSound, SoundManager.Instance.SfxGroup, 1f, 1f, SoundKind.Pickup);
     }
 
     // ───────── 스테이지 ─────────
@@ -261,6 +304,22 @@ public class EconomySystem : MonoBehaviour
     {
         // 코인은 씬의 풀과 함께 사라진다
         coins.Clear();
+    }
+
+    /// <summary>지금 씬의 스테이지 번호 — 씬마다 한 번만 찾는다.</summary>
+    int CurrentStageIndex()
+    {
+        int scene = SceneManager.GetActiveScene().handle;
+        if (scene != stageScene)
+        {
+            StageManager stage = FindFirstObjectByType<StageManager>();
+            if (stage == null || stage.currentStage == null) return 1;   // 아직 준비 전 — 다음 처치에 다시 찾는다
+
+            stageScene = scene;
+            stageIndexCache = Mathf.Max(1, stage.currentStage.stageIndex);
+        }
+
+        return stageIndexCache;
     }
 
     /// <summary>지금 스테이지 번호 (1 · 2 · 3). 스테이지가 아니면 1.</summary>

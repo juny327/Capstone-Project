@@ -26,7 +26,7 @@ public class SubAbilityReward : StageReward
         get
         {
             if (!string.IsNullOrEmpty(descriptionOverride)) return descriptionOverride;
-            return ability != null ? $"서브 능력 · {ability.description}" : string.Empty;
+            return ability != null ? DescriptionMode.Pick(ability.brief, $"서브 능력 · {ability.description}") : string.Empty;   // 간단 / 상세 (2026-11-22)
         }
     }
 

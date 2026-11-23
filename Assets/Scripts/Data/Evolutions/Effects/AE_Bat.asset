@@ -1,0 +1,93 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c53612cdcb507540ac3cde9bc377804, type: 3}
+  m_Name: AE_Bat
+  m_EditorClassIdentifier: Assembly-CSharp::BatEffect
+  knockback: 2.5
+  finisherKnockback: 5
+  knockTime: 0.22
+  collideRadius: 0.9
+  collideDamageMul: 0.5
+  wallDamageMul: 0.5
+  wallStun: 0.5
+  material: {fileID: 2100000, guid: b6310812509a3ab46bf4e098541a27ab, type: 2}
+  color: {r: 0.45, g: 0.82, b: 1, a: 1}
+  dustColor: {r: 0.78, g: 0.72, b: 0.62, a: 1}
+  kit: 0
+  dokkaebi: 0
+  tukEvery: 5
+  tukCoins: 1
+  tukStageCap: 12
+  ghostColor: {r: 0.62, g: 1, b: 0.25, a: 1}
+  goldColor: {r: 1, g: 0.84, b: 0.32, a: 1}
+  font: {fileID: 0}
+  tukWord: "\uB69D\uB531!"
+  wispOrbit: {x: 1.15, y: 1.6}
+  ghostfire: 0
+  ghostSpeed: 18
+  ghostDistance: 14
+  ghostBlastRadius: 2.5
+  ghostDamage: {x: 1, y: 2}
+  slowFactor: 0.5
+  slowSeconds: 2
+  coinBounce: 0
+  coinBounceRadius: 1
+  coinBounceMax: 4
+  coinBounceDamage: 0.25
+  coinBounceSeek: 12
+  debt: 0
+  debtShare: 0.4
+  debtHpPerCoin: 2
+  debtRepayRate: 1
+  debtForgetChance: 0.25
+  debtForgetBonus: 1.5
+  debtWord: "\u2212{0} \uB0E5"
+  collideSound:
+    clips:
+    - {fileID: 8300000, guid: ee80ea2e92f085b46afe0e146ea0b7fe, type: 3}
+    - {fileID: 8300000, guid: 70255b8422f59dd40a922f5f65e6f6d7, type: 3}
+    - {fileID: 8300000, guid: 27eaa6bb1f79b5542b785f64a02cf1fc, type: 3}
+    volume: 0.4
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0.06
+  wallSound:
+    clips:
+    - {fileID: 8300000, guid: e8dabd1bd93142a40b8165897c1fa560, type: 3}
+    - {fileID: 8300000, guid: 1224ec30bcf0b9c4985355bdc5c9f06b, type: 3}
+    volume: 0.45
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0.08
+  tukSound:
+    clips: []
+    volume: 1
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0
+  ghostLaunchSound:
+    clips: []
+    volume: 1
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0
+  ghostBlastSound:
+    clips: []
+    volume: 1
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0
+  coinBounceSound:
+    clips: []
+    volume: 1
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0
+  debtSound:
+    clips: []
+    volume: 1
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0

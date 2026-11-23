@@ -52,6 +52,10 @@ public class SpinUpEffect : AttachmentEffect
     [Min(0f)] public float maxSpinShake = 0.04f;
     [Min(1)] public int shakeEvery = 4;
 
+    [Header("공통 재료 (2026-11-20)")]
+    [Tooltip("공통 재료(FxKit)로 총구 불 · 과열 기운을 더한다. 끄면 예전 연출")]
+    public bool kitMuzzle = true;
+
     /// <summary>마지막으로 걸린 연사 배율 (테스트).</summary>
     public static float LastBoost { get; private set; } = 1f;
     /// <summary>총열 빛의 진하기 0~1 · 지금 떠 있는 총구 연기 뭉치 수 (테스트).</summary>
@@ -84,10 +88,37 @@ public class SpinUpEffect : AttachmentEffect
         public override void OnAttack(in WeaponAttack attack)
         {
             sinceAttack = 0f;
+            if (cfg.kitMuzzle && FxKit.Ready) KitShot(attack);
 
             // 최고 연사 — 몇 발에 한 번 가볍게 흔든다. 보조 칸에서는 흔들지 않는다 (스스로 계속 쏘니 끊이지 않는 잔떨림이 된다)
             if (spin < 0.95f || cfg.maxSpinShake <= 0f || Weapon.IsSupport) return;
             if (++hotShots % Mathf.Max(1, cfg.shakeEvery) == 0) WeaponBase.ShakeCamera(Weapon, cfg.maxSpinShake);
+        }
+
+        bool wasHot;
+
+        /// <summary>공통 재료 (2026-11-20) — 쏠 때마다 총구에서 불을 뿜는다. 달아오를수록 크고, 최고 연사에 들어서는 순간 한 번 크게 터진다.</summary>
+        void KitShot(in WeaponAttack attack)
+        {
+            float scale = Weapon.EvoFxScale;
+            FxKit.MuzzleJet(attack.Origin, attack.Direction, spin, cfg.heatColor, scale);
+
+            bool hot = spin >= 0.95f;
+            if (hot && !wasHot)
+            {
+                Vector3 floor = attack.Origin;
+                floor.y = Weapon.Controller != null ? Weapon.Controller.transform.position.y : floor.y - 1.2f;
+                FxKit.EnergyBurst(floor, 1.8f, cfg.heatColor, scale);
+                FxKit.MuzzleBlast(attack.Origin, attack.Direction, 1f * scale, cfg.heatColor, floor.y);
+            }
+            wasHot = hot;
+        }
+
+        public override void OnHit(in WeaponHit hit)
+        {
+            // 공통 재료 (2026-11-20) — 맞은 자리마다 섬광과 불꽃이 튄다 (달아오를수록 크게). 총알 세례가 보이게
+            if (!cfg.kitMuzzle || !FxKit.Ready || !EvoStrikes.Take(6)) return;
+            FxKit.Hit(hit.Point, -hit.Direction, cfg.heatColor, (1f + 0.8f * spin) * Weapon.EvoFxScale);
         }
 
         public override void Tick(float deltaTime)
@@ -107,6 +138,13 @@ public class SpinUpEffect : AttachmentEffect
             Weapon.ShotHeat = Weapon.IsActive ? spin : 0f;
             UpdateHeat();
             UpdateSmoke();
+
+            // 공통 재료 (2026-11-20) — 달아오른 총열에서 불티가 계속 날린다
+            if (cfg.kitMuzzle && Weapon.IsActive && spin > 0.6f && FxKit.Ready && Weapon.MuzzlePoint != null)
+            {
+                Transform muzzle = Weapon.MuzzlePoint;
+                FxKit.TrailDust(muzzle.position - muzzle.forward * 0.3f, cfg.heatColor, 40f * spin * deltaTime * Weapon.EvoFxScale, 0.09f);
+            }
 
             UpdateHum(firing);
         }
@@ -177,7 +215,7 @@ public class SpinUpEffect : AttachmentEffect
             smoke.transform.position = muzzle.position + muzzle.forward * 0.3f;
 
             ParticleSystem.EmissionModule emission = smoke.emission;
-            emission.rateOverTime = cfg.smokeRate * amount * (Weapon.IsSupport ? 0.5f : 1f);
+            emission.rateOverTime = cfg.smokeRate * amount * Weapon.EvoFxScale;
             if (Weapon.IsActive) SmokeAlive = smoke.particleCount;
         }
 

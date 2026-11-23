@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.AI;
 using UnityEngine.InputSystem;
 
@@ -20,6 +21,11 @@ using UnityEngine.InputSystem;
 ///                                F6 가만히 켜고 끄기 — 스스로 공격 · 추적하지 않는다 (고른 패턴만 쓴다)
 ///                                F7 불비 · F8 꼬리 휩쓸기 · F9 물러나서 브레스 · F10 땅 물어뜯기 · F11 휩쓸기 브레스 · F12 연속 물기
 ///                                Home 부하 소환 · PageUp 다음 페이즈(포효) · PageDown 앞 페이즈로
+///                                H 보스 값만 이지 ↔ 하드 (2026-11-20 — 화면 왼쪽 아래에 지금 값이 보인다)
+///
+/// 난이도 (2026-11-20 보스 패턴 개선) — 패턴의 조준 · 흐름은 DragonBossSettings 의 이지 · 하드 묶음(Tuning)을 따른다.
+///   하드: 물기 · 돌진이 늦게까지 따라오다 굳힌다 · 불덩이 앞질러 쏘기 · 둘러싸는 불비 · 2페이즈부터 연계
+///   이지: 조준은 예고 시작 때 그대로 · 패턴 진행 0.85배 · 쉴 틈 1.4배
 ///
 /// 보스 판정 부품:
 ///  · BossHealth — 체력바(BossHPUI) · 보스 등장음 · 플레이어 무기의 보스 처리(조준 · 갈고리 · 패링)가 이걸 본다
@@ -39,6 +45,8 @@ public partial class DragonBoss : MonoBehaviour
         GroundBite, SweepBreath, BiteChain,
         // 고르지 않는 것 — 페이즈 전환 포효 · 불 장판 피해(알림용)
         Roar, FirePatch,
+        // 새 패턴 (2026-11-20 · 하드 2페이즈부터 — DragonBoss.NewPatterns.cs). 번호가 밀리지 않게 끝에 둔다
+        FireWall, RingWave, Leap,
     }
 
     [SerializeField] Animator animator;
@@ -54,6 +62,16 @@ public partial class DragonBoss : MonoBehaviour
     [SerializeField] Material smokeMaterial;
     [Tooltip("불덩이 — 몬스터 투사체(RangedProjectile)라 검사 패링으로 되받아칠 수 있다")]
     [SerializeField] GameObject fireballPrefab;
+
+    /// <summary>
+    /// 불덩이 풀을 미리 채운다 (2026-11-18 성능 2단계) — 입장 가림막 아래에서 StageWarmup 이 부른다.
+    /// 풀 설정에 불덩이가 없어, 처음 쏘는 순간 풀을 만들며 5개를 한꺼번에 생성해 끊겼다.
+    /// </summary>
+    public void PrewarmPools(int fireballs = 6)
+    {
+        if (fireballPrefab != null && PoolManager.Instance != null)
+            PoolManager.Instance.Prewarm(fireballPrefab, fireballs);
+    }
 
     [Header("크기")]
     [Tooltip("몸 크기 배율 = 모델 크기 ÷ 6 (프리팹 도구가 넣는다). 아래 거리 값들은 '×6 크기 기준'으로 적혀 있고, 깨어날 때 이 배율에 맞춰 늘어난다 — "
@@ -117,6 +135,32 @@ public partial class DragonBoss : MonoBehaviour
     int phase = 1, pendingPhase = 1;
     float bodyScale = 1f, areaScale = 1f;   // 크기 배율 — 몸에 붙은 것 / 전장에 깔리는 것
 
+    // 난이도별 값 (2026-11-20 보스 패턴 개선) — DragonBossSettings 의 이지 · 하드 묶음. 깨어날 때 고른 난이도의 것을 읽는다
+    DragonBossSettings.Tuning tune = DragonBossSettings.Legacy();
+    DifficultyMode tuneMode;
+    float comboOverride = -1f;
+
+    /// <summary>지금 쓰는 난이도별 값.</summary>
+    public DragonBossSettings.Tuning Tuning => tune;
+    /// <summary>값 묶음을 바꾼다 (시험 · 측정용 — 예: DragonBossSettings.Legacy() 로 고치기 전 움직임).</summary>
+    public void SetTuning(DragonBossSettings.Tuning value) => tune = value ?? DragonBossSettings.Legacy();
+
+    /// <summary>그 난이도의 값을 설정 에셋(Resources/Dragon/DragonBossSettings)에서 읽는다.</summary>
+    public void LoadTuning(DifficultyMode mode)
+    {
+        var settings = Resources.Load<DragonBossSettings>(DragonBossSettings.ResourcePath);
+        tune = settings != null ? settings.Get(mode)
+             : mode == DifficultyMode.Hard ? DragonBossSettings.DefaultHard() : DragonBossSettings.DefaultEasy();
+        tuneMode = mode;
+    }
+
+    /// <summary>패턴 안의 시간 흐름 — 난이도의 패턴 진행 속도를 곱한다 (동작 · 예고 · 판정이 같이 느려진다).</summary>
+    float Dt => Time.deltaTime * tune.tempo * (Enraged ? tune.enrageTempo : 1f);
+    /// <summary>페이즈별 값 (x · y · z = 1 · 2 · 3페이즈).</summary>
+    float ByPhase(Vector3 v) => phase <= 1 ? v.x : phase == 2 ? v.y : v.z;
+    /// <summary>따라오던 예고가 방향을 굳혔다 (패턴) — 이때부터가 피하는 시간.</summary>
+    public event System.Action<Pattern> OnAimLocked;
+
     /// <summary>몸 크기 배율 (모델 크기 ÷ 6).</summary>
     public float SizeFactor => bodyScale;
     float nextGrowl = 5f, stepPhase;
@@ -145,6 +189,9 @@ public partial class DragonBoss : MonoBehaviour
         // 몸통과 플레이어는 물리로 부딪히지 않는다 — 수평으로만 막고 밀어낸다 (바닥으로 꺼지던 버그, DragonBodyBlock)
         if (GetComponent<DragonBodyBlock>() == null) gameObject.AddComponent<DragonBodyBlock>();
         ApplySize();
+        LoadTuning(Difficulty.Current);
+        LoadStaging();
+        if (GetComponent<DragonPressure>() == null) gameObject.AddComponent<DragonPressure>().Init(this);   // 압박감 (카메라 · 화면 가장자리 · 위험 표시 — 연출)
         agent.speed = moveSpeed;
         agent.angularSpeed = turnSpeed;
         agent.acceleration = 12f;
@@ -200,6 +247,7 @@ public partial class DragonBoss : MonoBehaviour
 
     void OnHpChanged(int hp, int max)
     {
+        OnHurtStaging(hp, max);   // 큰 한 방이면 번쩍 + 움찔 (연출)
         if (max <= 0 || hp <= 0) return;
         float left = hp / (float)max;
         int reached = left <= phase3At ? 3 : left <= phase2At ? 2 : 1;
@@ -213,6 +261,7 @@ public partial class DragonBoss : MonoBehaviour
         ResolveTarget();
         ReadTestKeys();
         TickGrowl();
+        TickStaging();
 
         switch (state)
         {
@@ -220,7 +269,11 @@ public partial class DragonBoss : MonoBehaviour
                 if (!placed) placed = PlaceAwayFromPlayer();
                 Animate(IdleState);
                 if (target != null) Face(target.position, turnSpeed * 0.5f);
-                if (stateTime >= wakeDelay && target != null) Enter(State.Chase);
+                if (stateTime >= wakeDelay && target != null)
+                {
+                    Enter(State.Chase);
+                    if (EnemyManager.Instance != null) EnemyManager.Instance.BeginBossFight();   // 보스전 잡몹 시작 (2026-11-23, BossStage.asset)
+                }
                 break;
 
             case State.Chase:
@@ -308,6 +361,7 @@ public partial class DragonBoss : MonoBehaviour
             Add(Pattern.TailSweep, behind ? 6f : 2.5f);   // 뒤에 붙어 때리면 꼬리가 나온다
             Add(Pattern.Retreat, 2f);
             Add(Pattern.GroundBite, 2.5f); Add(Pattern.BiteChain, 2.5f); Add(Pattern.SweepBreath, 1.5f);
+            Add(Pattern.RingWave, 2f);   // 붙어서 도는 것을 떼어 낸다
         }
         else if (distance <= midRange)
         {
@@ -315,11 +369,14 @@ public partial class DragonBoss : MonoBehaviour
             Add(Pattern.FireRain, 2f);
             Add(Pattern.SweepBreath, 2.5f);
             if (distance <= groundBiteReach) Add(Pattern.GroundBite, 1.5f);
+            Add(Pattern.FireWall, 2f); Add(Pattern.RingWave, 1.5f);
+            if (distance >= leapMinRange) Add(Pattern.Leap, 1.5f);
         }
         else
         {
             Add(Pattern.Charge, 3f); Add(Pattern.Fireball, 3f);
             Add(Pattern.FireRain, 3f);
+            Add(Pattern.Leap, 3.5f); Add(Pattern.FireWall, 2f);   // 멀리서 걷기만 하면 뛰어든다
         }
         if (CanSummon()) Add(Pattern.Summon, 2f);
         if (candidates.Count == 0) return Pattern.None;
@@ -344,15 +401,20 @@ public partial class DragonBoss : MonoBehaviour
     {
         int from = IntroducedIn(p);
         if (from > phase) return;
+        if (IsNewPattern(p) && !tune.newPatterns) return;   // 새 패턴은 하드 값 묶음에서만
         if (readyAt.TryGetValue(p, out float at) && Time.time < at) return;
         if (from == phase && phase > 1) weight *= newPatternBoost;
         candidates.Add((p, weight));
     }
 
+    /// <summary>2026-11-20 에 더한 패턴인가 (하드 전용).</summary>
+    public static bool IsNewPattern(Pattern p) => p == Pattern.FireWall || p == Pattern.RingWave || p == Pattern.Leap;
+
     /// <summary>그 패턴이 처음 나오는 페이즈.</summary>
     public static int IntroducedIn(Pattern p) => p switch
     {
         Pattern.FireRain or Pattern.TailSweep or Pattern.Retreat or Pattern.Summon => 2,
+        Pattern.FireWall or Pattern.RingWave or Pattern.Leap => 2,
         Pattern.GroundBite or Pattern.SweepBreath or Pattern.BiteChain => 3,
         _ => 1,
     };
@@ -370,6 +432,9 @@ public partial class DragonBoss : MonoBehaviour
         Pattern.GroundBite => 6f,
         Pattern.SweepBreath => 9f,
         Pattern.BiteChain => 7f,
+        Pattern.FireWall => 12f,
+        Pattern.RingWave => 10f,
+        Pattern.Leap => 9f,
         _ => 0f,
     };
 
@@ -381,7 +446,7 @@ public partial class DragonBoss : MonoBehaviour
         stateTime = 0f;
         current = p;
         lastPattern = p;
-        readyAt[p] = Time.time + Cooldown(p);
+        readyAt[p] = Time.time + Cooldown(p) * tune.cooldownScale;
         nextRecover = 0.8f;
         OnPatternStart?.Invoke(p);
         running = StartCoroutine(RunPattern(p));
@@ -400,7 +465,7 @@ public partial class DragonBoss : MonoBehaviour
             OnCombo?.Invoke(p, follow);
             current = follow;
             lastPattern = follow;
-            readyAt[follow] = Time.time + Cooldown(follow);
+            readyAt[follow] = Time.time + Cooldown(follow) * tune.cooldownScale;
             nextRecover = 0.8f;
             OnPatternStart?.Invoke(follow);
             body = Body(follow);
@@ -409,7 +474,7 @@ public partial class DragonBoss : MonoBehaviour
         running = null;
         CleanupPattern();
         current = Pattern.None;
-        recoverTime = nextRecover;
+        recoverTime = nextRecover * ByPhase(tune.recoverScale);
         Enter(State.Recover);
     }
 
@@ -427,6 +492,9 @@ public partial class DragonBoss : MonoBehaviour
         Pattern.GroundBite => Bite(false, true),
         Pattern.SweepBreath => Breath(0f, sweepAngle),
         Pattern.BiteChain => BiteChain(),
+        Pattern.FireWall => FireWall(),
+        Pattern.RingWave => RingWave(),
+        Pattern.Leap => Leap(),
         Pattern.Roar => PhaseShift(),
         _ => null,
     };
@@ -448,6 +516,7 @@ public partial class DragonBoss : MonoBehaviour
         breathing = false;
         StopBreathSound(0.2f);
         SetBreathCone(breathHalfAngle);
+        SetAirborne(false);   // 도약 중에 끊겼으면 바닥으로 (길 찾기 위치 · 몸 막기를 되돌린다)
         if (agent != null) agent.updateRotation = true;
         if (animator != null && state != State.Dead) animator.speed = 1f;
     }
@@ -469,9 +538,30 @@ public partial class DragonBoss : MonoBehaviour
         else if (k.f10Key.wasPressedThisFrame) forced = Pattern.GroundBite;
         else if (k.f11Key.wasPressedThisFrame) forced = Pattern.SweepBreath;
         else if (k.f12Key.wasPressedThisFrame) forced = Pattern.BiteChain;
-        else if (k.homeKey.wasPressedThisFrame) forced = Pattern.Summon;
-        else if (k.pageUpKey.wasPressedThisFrame) AdvancePhase();
-        else if (k.pageDownKey.wasPressedThisFrame) SetPhase(phase - 1);
+        // 새 패턴: B 불의 벽 · G 퍼지는 고리 · J 도약 내려찍기 (시험 키는 값 묶음과 상관없이 나온다 — 스스로 고르는 것은 하드 값에서만)
+        else if (k.bKey.wasPressedThisFrame) forced = Pattern.FireWall;
+        else if (k.gKey.wasPressedThisFrame) forced = Pattern.RingWave;
+        else if (k.jKey.wasPressedThisFrame) forced = Pattern.Leap;
+        // Home · PageUp · PageDown · End 는 숫자패드 7 · 9 · 3 · 1 로도 받는다 — 이 키들이 따로 없는 자판은
+        // Shift + 숫자패드로 누르는데, 그러면 입력이 '숫자패드 키'로 들어와 homeKey · endKey 가 눌리지 않는다 (2026-11-16)
+        // 보스 값만 이지 ↔ 하드 (2026-11-20) — 체력 · 받는 피해는 로비에서 고른 난이도 그대로 남는다
+        else if (k.hKey.wasPressedThisFrame) LoadTuning(tuneMode == DifficultyMode.Hard ? DifficultyMode.Easy : DifficultyMode.Hard);
+        else if (k.homeKey.wasPressedThisFrame || k.numpad7Key.wasPressedThisFrame) forced = Pattern.Summon;
+        else if (k.pageUpKey.wasPressedThisFrame || k.numpad9Key.wasPressedThisFrame) AdvancePhase();
+        else if (k.pageDownKey.wasPressedThisFrame || k.numpad3Key.wasPressedThisFrame) SetPhase(phase - 1);
+        else if (k.endKey.wasPressedThisFrame || k.numpad1Key.wasPressedThisFrame || k.kKey.wasPressedThisFrame)
+        {
+            // 바로 처치 — 엔딩 연출을 보려고 (테스트 룸 경로에서만 켜진다)
+            BossHealth health = GetComponent<BossHealth>();
+            if (health != null && state != State.Dead) health.TakeDamage(new DamageInfo { damage = 999999f });
+        }
+    }
+
+    void OnGUI()
+    {
+        // 시험 경로(테스트 룸 → 보스)에서만 — 지금 어느 난이도 값으로 움직이는지
+        if (!testKeys || state == State.Dead) return;
+        GUI.Label(new Rect(12f, Screen.height - 28f, 900f, 24f), $"보스 패턴 값: {(tuneMode == DifficultyMode.Hard ? "하드" : "이지")}   (H 키로 바꿈 — 시험용)   새 패턴: B 불의 벽 · G 퍼지는 고리 · J 도약");
     }
 
     // ───────── 등장 ─────────
@@ -519,23 +609,89 @@ public partial class DragonBoss : MonoBehaviour
     {
         if (state == State.Dead) return;
         CancelPattern();
+        ResetStaging();
         StopAllCoroutines();
         DragonSound.StopAll(0.15f);
         Sfx(DragonSfx.Death);
         DragonFirePatch.ClearAll();
+        DragonFireWall.ClearAll();
+        DragonRingWave.ClearAll();
         DismissMinions();   // 부하도 같이 쓰러진다 — 승리 처리까지 몇 초 동안 플레이어를 때리지 않게
+        if (EnemyManager.Instance != null) EnemyManager.Instance.EndBossFight(true);   // 보스전 잡몹도 멈추고 같이 쓰러진다 (2026-11-23)
         Enter(State.Dead);
         StopAgent();
         // 더는 맞지 않게 — 조준 · 탄 · 근접 판정이 모두 콜라이더를 본다
         foreach (Collider c in GetComponentsInChildren<Collider>()) c.enabled = false;
         Animate(DieState, 1f, true);
+
+        // 엔딩 ① 마지막 한 방 — 히트 스톱 · 줌 · 번쩍 · 쿵 (ImpactFxSettings.bossKill), 배경음은 서서히 꺼진다
+        EndingSettings ending = EndingSettings.Current;
+        if (ending != null)
+        {
+            ImpactFx.Play(ImpactMoment.BossKill, null, Color.Lerp(ending.lightColor, Color.white, 0.5f));
+            if (ending.musicFade > 0f && SoundManager.Instance != null) SoundManager.Instance.FadeOutMusic(ending.musicFade);
+
+            // 이긴 뒤의 연출 동안 남은 불덩이 · 불비에 죽지 않게 (연출이 예전보다 길다)
+            PlayerStats winner = WinnerStats();
+            if (winner != null) winner.SetInvulnerable(dieLength + ending.chargeSeconds + ending.burstHold + ending.moteSeconds + ending.fadeOut + 4f);
+        }
+
         StartCoroutine(FinishDeath());
     }
 
     IEnumerator FinishDeath()
     {
-        yield return new WaitForSeconds(dieLength + winDelay);
+        EndingSettings ending = EndingSettings.Current;
+        if (ending != null && ending.deathShow)
+        {
+            // 엔딩 ② 그 자리의 여운 — 몸에서 빛이 새다 터진다 (DragonDeathShow).
+            // 균열 엔딩(2026-11-15): 빛 조각이 방 가운데로 가서 균열을 열고, 캐릭터가 그 안으로 걸어 들어간다 (RiftEnding, 자동 재생)
+            PlayerStats winner = WinnerStats();
+            bool rift = ending.riftEnding && winner != null;
+            Vector3 anchor = rift ? RiftEnding.FindAnchor(gameObject.scene, ending, transform.position, winner.transform.position.y) : Vector3.zero;
+            yield return DragonDeathShow.Run(this, DeathShowLength(), dieLength, ending, rift ? anchor : (Vector3?)null);
+            if (rift && WinnerStats() != null) yield return RiftEnding.Run(this, ending, anchor);
+        }
+        else
+        {
+            yield return new WaitForSeconds(dieLength + winDelay);
+        }
+
+        // 화면을 덮고 (이번 판 기록도 여기서 찍는다) 엔딩 씬으로 — 플레이어가 먼저 죽은 판은 덮지 않는다 (게임 오버 화면이 떠 있다)
+        if (WinnerStats() != null) yield return EndingFlow.FadeToEnding();
+        Scene before = gameObject.scene;
         GameEvents.OnGameWin?.Invoke();   // 플레이어가 먼저 죽었으면 GameManager 가 무시한다
+
+        // 엔딩으로 넘어가지 않았으면 (무시된 경우) 덮은 화면을 걷는다
+        yield return new WaitForSecondsRealtime(1.5f);
+        if (gameObject.scene == before)
+        {
+            EndingFlow.Release();
+            DragonDeathShow.Restore();   // 카메라 · 조작을 돌려준다
+        }
+    }
+
+    /// <summary>살아서 이긴 플레이어 — 없거나 먼저 죽었으면 null.</summary>
+    static PlayerStats WinnerStats()
+    {
+        GameAppManager app = GameAppManager.Instance;
+        PlayerStats stats = app != null && app.Player != null ? app.Player.GetComponent<PlayerStats>() : null;
+        return stats != null && !stats.IsDead ? stats : null;
+    }
+
+    /// <summary>쓰러지는 연출의 크기 기준 — 몸 길이(m). 콜라이더가 꺼져 있어 렌더러 범위로 잰다.</summary>
+    float DeathShowLength()
+    {
+        Bounds? all = null;
+        foreach (Renderer r in GetComponentsInChildren<Renderer>())
+        {
+            if (r is ParticleSystemRenderer || r is LineRenderer || r is TrailRenderer) continue;
+            if (all == null) all = r.bounds;
+            else { Bounds b = all.Value; b.Encapsulate(r.bounds); all = b; }
+        }
+        if (all == null) return 6f * bodyScale;
+        Vector3 size = all.Value.size;
+        return Mathf.Clamp(Mathf.Max(size.x, size.z), 3f, 20f);
     }
 
     void OnPlayerDead()
@@ -543,6 +699,9 @@ public partial class DragonBoss : MonoBehaviour
         if (state == State.Dead) return;
         CancelPattern();
         DragonFirePatch.ClearAll();
+        DragonFireWall.ClearAll();
+        DragonRingWave.ClearAll();
+        if (EnemyManager.Instance != null) EnemyManager.Instance.EndBossFight(false);   // 더 내보내지 않는다 (남은 잡몹은 그대로)
         StopAgent();
         Enter(State.Idle);
         Animate(IdleState, 1f, true);
@@ -647,6 +806,7 @@ public partial class DragonBoss : MonoBehaviour
         rainRadius *= slight;
         firePatchRadius *= slight;
         firePatchSpacing *= slight;
+        ApplySizeNewPatterns();
     }
 
     // ───────── 소리 (DragonSound · 2026-11-14) ─────────
@@ -676,7 +836,8 @@ public partial class DragonBoss : MonoBehaviour
         stepPhase += Time.deltaTime * animationRate / length * 2f;
         if (stepPhase < 1f) return;
         stepPhase -= 1f;
-        Sfx(DragonSfx.Step);
+        leftStep = !leftStep;
+        Sfx(DragonSfx.Step, StepFx(leftStep));   // 가까울수록 크게 울리고 화면이 떨린다 (연출)
     }
 
     static void Shake(float force)

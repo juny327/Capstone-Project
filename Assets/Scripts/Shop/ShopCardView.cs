@@ -65,8 +65,9 @@ public class ShopCardView : MonoBehaviour
         }
 
         if (tagText != null) { tagText.text = offer.Tag; tagText.color = kindColor; }
+        CardDetailLayout.Apply(icon, title, description, DescriptionMode.Detail);   // 상세 설명이면 그림을 접고 설명 칸을 넓힌다 (2026-11-22)
         if (title != null) { UiTextFit.Line(title); title.text = offer.Title; }
-        if (description != null) { UiTextFit.Box(description); description.text = offer.Description; }   // 긴 설명이 가격을 덮지 않게
+        if (description != null) { UiTextFit.Box(description); description.text = UiTextFit.KeepWords(offer.Description); }   // 긴 설명이 가격을 덮지 않게
 
         if (priceIcon != null)
         {
@@ -102,6 +103,21 @@ public class ShopCardView : MonoBehaviour
         gameObject.SetActive(false);
     }
 
+    /// <summary>
+    /// 가진 무기의 상위 무기 짝이면 금색 테두리 + 꼬리표 글을 "★ 처형자 짝" 으로 (2026-11-17). label 이 null 이면 끈다.
+    /// Show 다음에 부른다 — 꼬리표 글을 덮어쓴다.
+    /// </summary>
+    public void SetPairMark(string label)
+    {
+        PairHighlight.Set((RectTransform)transform, label);
+
+        if (!string.IsNullOrEmpty(label) && tagText != null && Offer != null && !Offer.Sold)
+        {
+            tagText.text = label;
+            tagText.color = PairHighlight.Gold;
+        }
+    }
+
     /// <summary>대상 고르기 중인 카드 표시 — 테두리를 밝게.</summary>
     public void SetSelected(bool selected)
     {
@@ -118,8 +134,7 @@ public class ShopCardView : MonoBehaviour
             case ShopOfferKind.Consumable: return consumableColor;
             case ShopOfferKind.SubAbility: return subAbilityColor;
             case ShopOfferKind.Evolution:
-            case ShopOfferKind.Skill:
-            case ShopOfferKind.Shortcut: return evolutionColor;
+            case ShopOfferKind.Skill: return evolutionColor;
             default: return weaponColor;
         }
     }

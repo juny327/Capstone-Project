@@ -41,6 +41,10 @@ public class GravityWellEffect : AttachmentEffect
     public GameObject collapsePrefab;
     [Min(0f)] public float collapseScale = 1.2f;
     [Min(0f)] public float cameraShake = 0.6f;
+    [Tooltip("공통 재료(FxKit)로 빨려드는 기운 · 소용돌이 · 붕괴의 빛 폭발과 빛기둥을 더한다 (2026-11-20). 끄면 예전 연출")]
+    public bool kitGravity = true;
+
+    public bool UsesKit => kitGravity && FxKit.Ready;
     public GameSoundSet.Entry openSound = new GameSoundSet.Entry();
     public GameSoundSet.Entry collapseSound = new GameSoundSet.Entry();
 

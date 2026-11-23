@@ -5,7 +5,7 @@ using UnityEditor;
 using UnityEngine;
 
 /// <summary>
-/// 배경음을 SF 하이브리드 오케스트라(Torone — Music loops pack 2 - Sci-Fi, CC BY 4.0)로 바꾼다.
+/// 씬별 배경음(AUDIO/MusicSet)을 정한 곡 · 음량으로 채운다. (처음 2026-09 에는 Torone SF 오케스트라 곡으로 바꾸려고 만들었다 — 메뉴 이름은 그때 그대로)
 /// 메뉴: Tools / Audio / 배경음 — SF 오케스트라 적용
 ///
 /// 왜 따로 만들었나
@@ -14,38 +14,36 @@ using UnityEngine;
 ///  · SoundManagerSetup(기존 도구)이 MusicSet 을 Abstraction 곡으로 채우므로 그 도구는 고치지 않고 여기서 덮는다.
 ///    ⚠ SoundManagerSetup 을 다시 실행하면 예전 곡으로 돌아간다 — 그때는 이 도구를 다시 실행한다
 ///
-/// 곡 배치 (한 작곡가의 6곡 — 타이틀 1 · 탐험 3 · 전투 2 가 씬 6개와 맞는다)
-///  · 로비    title-menu-credit — 서서히 커져 중반에 웅장해지는 타이틀
-///  · Stage1  explo-1 — 숨 쉬듯 부풀었다 가라앉는 불길한 맥동 (긴장의 시작)
-///  · Stage2  explo-3 — 겹겹이 쌓이는 파도, 가장 긴 곡(192초)
-///  · Stage3  action-2 — 큰 북이 몰아치다 중반에 절정
-///  · 보스    action-1 — 쉼 없이 몰아붙이는 타악 · 저음
-///  · 엔딩    explo-2 — 고요하게 길게 끄는 소리
-///  · 테스트 룸 (2026-11-02 사용자 요청 — "정비창에서 나올 법한 잔잔한 곡") — Abstraction 'Seaside CORAL REEF' (CC0, 53초).
-///    남은 곡 35개를 박자 세기 · 타격감 · 밝기로 재서 가장 잔잔한 곡 (박자 0.10 · 타격 0.87 — 'Workshop' 은 밝고 박자가 세서 뺐다).
-///    시험 중 효과음이 계속 나므로 로비와 같은 체감 크기(-25 dBFS)로 낮게
-/// 볼륨은 곡마다 원래 음량(-13 ~ -19 dBFS)이 달라 체감 크기가 비슷하도록(-23 dBFS 기준) 맞췄다. 보스만 조금 크게.
+/// 곡 배치 (2026-11-22 — 사용자가 미리듣기 페이지에서 7칸 모두 다시 고름, Logs/bgm/pick2)
+///  · 로비    Torone 'Music pack Feb 2024' Loop 4 (CC BY 4.0, 128초) — 신스웨이브
+///  · Stage1  Ragnar Random 'Welcome to Warp Zone' (CC0, 63초)
+///  · Stage2  Ragnar Random 'Victory of the Swine' (CC0) — 반복판 187.4초: 앞의 드럼 스틱 카운트 1.65초를 빼고 첫 박부터,
+///            끝은 잦아든 0.82초를 잘라 0.25초 페이드 (그대로 두면 '울림 + 카운트' 로 4초 넘게 비었다)
+///  · Stage3  Woffelson 'Noitavaino' KK3 — Kaos (CC BY, 79초) — 프로그레시브 메탈 반복 곡
+///  · 보스    Woffelson 'Noitavaino' KK1b — Assault · Darkness · Riser (CC BY, 170초)
+///  · 엔딩    Torone 'Music pack Feb 2024' Loop 1 (CC BY 4.0, 209초) — 관현악
+///  · 테스트 룸 Abstraction 'Week 18 - Distant Skyline NIGHT DRIVE' (CC0, 24초)
+///  (예전 곡 — Torone 팩 2 · Rock City Ransom · Lobsters · TeknoAXE · Aila Scott · CORAL REEF — 은 파일만 남아 있다)
+/// 음량은 씬마다 예전 곡과 같은 게임 안 크기(통합 LUFS + 20·log10(음량))가 되도록 계산했다 — 배경음은 normalize 를 끈다.
 ///
 /// 여러 번 실행해도 결과가 같다(멱등). 배치: -executeMethod BgmSetup.RunBatch
 /// </summary>
 public static class BgmSetup
 {
     const string Tag = "[BgmSetup]";
-    const string MusicDir = "Assets/Torone/Music Loops Pack 2 - Sci-Fi";
-    const string Prefix = "231006-torone-loop-pack-02-sf-";
     const string MusicSetPath = "Assets/AUDIO/MusicSet.asset";
 
-    static string Torone(string track) => $"{MusicDir}/{Prefix}{track}.ogg";
-
+    // 2026-11-22 7칸 모두 사용자가 다시 고름. 음량 계산 · 반복판 만들기는 Logs/bgm/pick2/tools/install_picks.py
+    // (11-19 곡: 로비 title-menu-credit 0.32 · S1 Rock City Ransom 0.64 · S2 Lobsters 0.39 · S3 Running_Rage_loop 0.29 · 보스 Sear The Time Vortex 0.54 · 엔딩 explo-2 0.48 · 테스트 룸 CORAL REEF 0.38)
     static readonly (string scene, string path, float volume)[] Tracks =
     {
-        ("Loby", Torone("title-menu-credit"), 0.32f),
-        ("Stage1", Torone("explo-1"), 0.65f),
-        ("Stage2", Torone("explo-3"), 0.53f),
-        ("Stage3", Torone("action-2"), 0.40f),
-        ("StageBoss", Torone("action-1"), 0.42f),
-        ("EndingScene", Torone("explo-2"), 0.48f),
-        ("TestRoom", "Assets/Abstraction/MusicLoops/Week 26 - Seaside CORAL REEF.ogg", 0.38f),
+        ("Loby", "Assets/Torone/Music Pack Feb 2024/torone-lotm-06-loop4.ogg", 0.232f),
+        ("Stage1", "Assets/RagnarRandom/Rock Music For Games/13 - Welcome to Warp Zone.ogg", 0.462f),
+        ("Stage2", "Assets/RagnarRandom/Rock Music For Games/27 - Victory of the Swine loop.ogg", 0.432f),
+        ("Stage3", "Assets/Woffelson/Noitavaino/2-KK3-kaos.ogg", 0.265f),
+        ("StageBoss", "Assets/Woffelson/Noitavaino/2-KK1b-assault-darkness-riser.ogg", 0.305f),
+        ("EndingScene", "Assets/Torone/Music Pack Feb 2024/torone-lotm-06-loop1.ogg", 0.39f),
+        ("TestRoom", "Assets/Abstraction/MusicLoops/Week 18 - Distant Skyline NIGHT DRIVE.ogg", 0.3f),
     };
 
     [MenuItem("Tools/Audio/배경음 — SF 오케스트라 적용")]
@@ -106,7 +104,7 @@ public static class BgmSetup
 
             entry.FindPropertyRelative("clip").objectReferenceValue = clips[path];
             entry.FindPropertyRelative("volume").floatValue = volume;
-            log.Append($" {scene}={Path.GetFileNameWithoutExtension(path).Replace(Prefix, "")}({volume:F2})");
+            log.Append($" {scene}={Path.GetFileNameWithoutExtension(path)}({volume:F2})");
         }
 
         so.ApplyModifiedPropertiesWithoutUndo();
@@ -122,9 +120,13 @@ public static class BgmSetup
     {
         if (!(AssetImporter.GetAtPath(path) is AudioImporter importer))
         {
-            Debug.LogError($"{Tag} {path} 가 없습니다. Torone 'Music loops pack 2 - Sci-Fi' (itch.io) 의 ogg 를 원래 이름 그대로 넣으세요.");
+            Debug.LogError($"{Tag} {path} 가 없습니다. Assets/AUDIO_LICENSES.md 의 배경음 출처에서 받아 같은 이름으로 넣으세요.");
             return false;
         }
+
+        // normalize 는 공개 속성이 없어 직렬화 칸으로 읽고 쓴다 — 음량을 파일 그대로의 크기(LUFS)로 계산했으므로 끈다 (2026-11-19 · 11-22)
+        var iso = new SerializedObject(importer);
+        SerializedProperty normalize = iso.FindProperty("m_Normalize") ?? iso.FindProperty("normalize");
 
         AudioImporterSampleSettings s = importer.defaultSampleSettings;
         bool same = s.loadType == AudioClipLoadType.Streaming
@@ -132,7 +134,8 @@ public static class BgmSetup
                     && Mathf.Approximately(s.quality, 0.7f)
                     && !s.preloadAudioData
                     && !importer.forceToMono
-                    && importer.loadInBackground;
+                    && importer.loadInBackground
+                    && (normalize == null || !normalize.boolValue);
 
         if (same) return true;
 
@@ -143,9 +146,15 @@ public static class BgmSetup
         importer.defaultSampleSettings = s;
         importer.forceToMono = false;
         importer.loadInBackground = true;
+        if (normalize != null && normalize.boolValue)
+        {
+            iso.Update();
+            iso.FindProperty(normalize.propertyPath).boolValue = false;
+            iso.ApplyModifiedPropertiesWithoutUndo();
+        }
         importer.SaveAndReimport();
 
-        Debug.Log($"{Tag} 임포트 설정: {Path.GetFileName(path)} → Streaming · Vorbis 0.7 · 스테레오");
+        Debug.Log($"{Tag} 임포트 설정: {Path.GetFileName(path)} → Streaming · Vorbis 0.7 · 스테레오 · normalize 끔");
         return true;
     }
 }

@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: MOD_Sniper_SemiAuto
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentData
   displayName: "\uBC18\uC790\uB3D9"
+  brief: "\uB450 \uBC30 \uBE60\uB974\uAC8C, \uD55C \uBC1C\uC740 \uC57D\uD558\uAC8C"
   description: "\uB450 \uBC30 \uBE60\uB974\uAC8C \u2014 \uD55C \uBC1C\uC740 \uC57D\uD558\uB2E4"
   icon: {fileID: 21300000, guid: f21c8f720e79fe34ba78b97a5c9bd379, type: 3}
   slot: 5

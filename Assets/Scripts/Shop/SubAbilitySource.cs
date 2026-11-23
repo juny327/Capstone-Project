@@ -29,7 +29,7 @@ public class SubAbilitySource : ShopOfferSource
 
             int index = slot.IndexOf(data);
             int level = index >= 0 ? slot.Get(index).Level : 0;
-            int price = ctx.Catalog.Scaled(level > 0 ? data.LevelUpPrice(level) : data.basePrice, ctx.StageIndex);
+            int price = ctx.Catalog.Scaled(level > 0 ? data.LevelUpPrice(level) : data.basePrice, ctx.StageIndex, ctx.PriceMultiplier);
 
             if (level > 0 && data.HasVariants(level + 1))
             {
@@ -105,10 +105,11 @@ public class SubAbilityOffer : ShopOffer
     {
         get
         {
-            if (Info != null) return Info.description;
-            if (fromLevel <= 0) return data.description;
+            // 간단 / 상세 (2026-11-22)
+            if (Info != null) return DescText.Variant(Info);
+            if (fromLevel <= 0) return DescText.SubAbility(data);
             string note = data.LevelNote(fromLevel + 1);
-            return string.IsNullOrEmpty(note) ? data.description : note;
+            return string.IsNullOrEmpty(note) ? DescText.SubAbility(data) : note;
         }
     }
 
@@ -119,6 +120,7 @@ public class SubAbilityOffer : ShopOffer
         : $"Lv.{fromLevel} → {fromLevel + 1}";
 
     public override ShopOfferKind Kind => ShopOfferKind.SubAbility;
+    public override Object PairItem => data;
 
     public override bool IsAvailable(ShopContext ctx, out string reason)
     {

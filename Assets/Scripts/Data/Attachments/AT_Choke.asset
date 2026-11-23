@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: AT_Choke
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentData
   displayName: "\uCD08\uD06C"
+  brief: "\uC0B0\uD0C4\uC744 \uC881\uAC8C \uBAA8\uC740\uB2E4"
   description: "\uC0B0\uD0C4\uC744 \uC881\uAC8C \uBAA8\uC740\uB2E4"
   icon: {fileID: 21300000, guid: 5e9c12fc355b88d4795a0429e0c7f402, type: 3}
   slot: 1

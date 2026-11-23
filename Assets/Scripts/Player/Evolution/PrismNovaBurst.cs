@@ -227,6 +227,7 @@ public class PrismNovaBurst : MonoBehaviour
         // 보이는 자리는 옆으로 조금 흔들린다 — "무작위로 움직이는 빛"
         Vector3 side = Vector3.Cross(Vector3.up, m.heading);
         m.body.position = m.position + side * Mathf.Sin(Time.time * 18f + m.wobble) * 0.18f;
+        if (UsesKit) FxKit.TrailDust(m.body.position, m.color, 90f * dt * KitScale, 0.24f, true, 0.8f);   // 빛이 지나간 자리에 알갱이 · 반짝임
     }
 
     void Strike(Mote m)
@@ -241,12 +242,56 @@ public class PrismNovaBurst : MonoBehaviour
         Vector3 dir = m.heading;
         if (weapon != null)
         {
-            float dealt = weapon.RollPrismDamage(cfg.moteDamageMul, out bool crit);
-            weapon.DealPrismDamage(target, dealt, crit, m.position, dir);
+            float dealt = weapon.RollPrismDamage(cfg.moteDamageMul, out bool crit, out float effectDamage);
+            weapon.DealPrismDamage(target, dealt, crit, m.position, dir, effectDamage);
         }
         MoteHits++;
 
         FxLine.Ring(cfg.lineMaterial, target.position, 0.1f, 0.8f, m.color, 0.12f, 0.18f);
+        if (UsesKit && EvoStrikes.Take(6)) FxKit.EnergyBurst(target.position, 0.7f, m.color, KitScale);
+    }
+
+    // ───────── 공통 재료 (2026-11-20) ─────────
+
+    bool UsesKit => cfg != null && cfg.kitFx && FxKit.Ready;
+    float KitScale => weapon != null ? weapon.EvoFxScale : 1f;
+
+    /// <summary>빛이 총구로 모여 합쳐지는 순간 — 흰 빛 폭발 · 빛기둥 · 반짝임 · 세 색 충격파가 차례로.</summary>
+    void KitConverge(Vector3 at, Vector3 floor)
+    {
+        float s = KitScale;
+        FxKit.EnergyBurst(floor, 1.6f, Color.white, 1.2f * s);
+        FxKit.Pillar(floor, 0.9f * s, 5f, Color.white, 0.5f, 7);
+        FxKit.Glints(at, 1.8f * s, Color.white, 16f * s, 0.6f);
+        if (cfg.colors == null) return;
+
+        for (int i = 0; i < cfg.colors.Length; i++)
+        {
+            FxKit.Shockwave(floor, (4f + i * 1.6f) * s, cfg.colors[i], 0.3f + 0.09f * i, 0.9f);
+            FxKit.Wave(floor, (5f + i * 1.8f) * s, cfg.colors[i], 0.45f + 0.1f * i, 0.5f);
+        }
+    }
+
+    /// <summary>빔이 나가는 동안 (틱마다) — 빔을 따라 세 색 알갱이 · 반짝임이 흩어지고, 총구와 끝에서 계속 튄다.</summary>
+    void KitBeam(Vector3 origin, Vector3 end)
+    {
+        float s = KitScale;
+        Color c = cfg.colors != null && cfg.colors.Length > 0 ? cfg.colors[BeamTicks % cfg.colors.Length] : Color.white;
+        float length = (end - origin).magnitude;
+        FxKit.BeamDust(origin, end, c, Mathf.Clamp(length * 2.2f, 8f, 36f) * s, 0.6f, true, 1f);
+        FxKit.Hit(end, beamDir, c, 1.3f * s);
+        if (BeamTicks % 2 == 0) FxKit.EnergyBurst(new Vector3(end.x, OwnerPosition().y, end.z), 0.9f, c, 0.9f * s);   // 빔 끝에서 색이 바뀌며 계속 터진다
+        FxKit.Spray(origin, beamDir, c, 6f * s, 12f, 0.35f);
+
+        // 빔이 굵고 밝아 둘레의 알갱이가 묻힌다 — 빔 옆으로 큰 반짝임을 뿌리고, 바닥에는 색 고리가 번갈아 퍼진다
+        float ground = OwnerPosition().y;
+        Vector3 side = Vector3.Cross(Vector3.up, beamDir);
+        for (int i = 0; i < 3; i++)
+        {
+            Vector3 p = Vector3.Lerp(origin, end, UnityEngine.Random.Range(0.1f, 0.95f));
+            FxKit.Glints(p + side * UnityEngine.Random.Range(-1.6f, 1.6f), 0.5f, c, 2f * s, 1.5f, 0.1f);
+            if (i == 0) FxKit.Shockwave(new Vector3(p.x, ground, p.z), UnityEngine.Random.Range(2.4f, 3.6f) * s, c, 0.3f, 0.8f);
+        }
     }
 
     Transform FindTarget(Vector3 from, float radius, Mote m)
@@ -320,6 +365,7 @@ public class PrismNovaBurst : MonoBehaviour
         Vector3 floor = new Vector3(at.x, OwnerPosition().y, at.z);
         GroundGlow.Flash(floor, 2.6f, Color.white, 0.3f);
         FlashLight.Flash(floor, Color.white, 6f, 0.2f);
+        if (UsesKit) KitConverge(at, floor);
         CombatFx.PlaySound(cfg.beamSound);
         CombatFx.PlaySound(cfg.beamBassSound);
         CombatFx.PlaySound(cfg.beamHumSound);
@@ -359,14 +405,20 @@ public class PrismNovaBurst : MonoBehaviour
             foreach (Transform t in found)
             {
                 if (weapon == null) break;
-                float dealt = weapon.RollPrismDamage(cfg.tickDamageMul, out bool crit);
-                weapon.DealPrismDamage(t, dealt, crit, CombatFx.Body(t), beamDir);
+                float dealt = weapon.RollPrismDamage(cfg.tickDamageMul, out bool crit, out float effectDamage);
+                weapon.DealPrismDamage(t, dealt, crit, CombatFx.Body(t), beamDir, effectDamage);
                 BeamHits++;
 
                 // 맞은 자리에 세 색이 번갈아 터지는 작은 고리 (세 틱마다)
                 if (spark && cfg.colors != null && cfg.colors.Length > 0)
-                    FxLine.Ring(cfg.lineMaterial, t.position, 0.2f, 1.1f, cfg.colors[colorIndex++ % cfg.colors.Length], 0.18f, 0.2f);
+                {
+                    Color hitColor = cfg.colors[colorIndex++ % cfg.colors.Length];
+                    FxLine.Ring(cfg.lineMaterial, t.position, 0.2f, 1.1f, hitColor, 0.18f, 0.2f);
+                    if (UsesKit && EvoStrikes.Take(5)) FxKit.EnergyBurst(t.position, 0.6f, hitColor, 0.8f * KitScale);
+                }
             }
+
+            if (UsesKit) KitBeam(origin, end);
         }
 
         DrawBeam(origin, end);

@@ -26,7 +26,7 @@ public class BurnOnHitEffect : AttachmentEffect
         public override void OnHit(in WeaponHit hit)
         {
             if (hit.Target == null || Random.value > cfg.chance) return;
-            if (BurnTicker.Apply(hit.Target, hit.Damage * cfg.dpsRatio, cfg.duration)) CombatFx.PlaySound(cfg.igniteSound);
+            if (BurnTicker.Apply(hit.Target, hit.EffectDamage * cfg.dpsRatio, cfg.duration)) CombatFx.PlaySound(cfg.igniteSound);
         }
     }
 }

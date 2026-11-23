@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2662010bedd19e446bee1b80f14d2eee, type: 3}
+  m_Name: FxKitSet
+  m_EditorClassIdentifier: Assembly-CSharp::FxKitSet
+  fire: {fileID: 2100000, guid: b35f70030f4fb84489cc78e9171b1627, type: 2}
+  flame: {fileID: 2100000, guid: 62c9f365488f69442bf2c35f2f8090fd, type: 2}
+  spark: {fileID: 2100000, guid: d7254f6bcb7ce42489428f3342250a64, type: 2}
+  glow: {fileID: 2100000, guid: fb5f670925362764c8fcda11a1a53306, type: 2}
+  ring: {fileID: 2100000, guid: 567c0a18f297c0c4dba5f60b477f7dc3, type: 2}
+  wave: {fileID: 2100000, guid: 6ddf048ecddaa804699cc236e1dd4828, type: 2}
+  flare: {fileID: 2100000, guid: 5a7d159c46e81c148b9ba00429409fcf, type: 2}
+  burst: {fileID: 2100000, guid: 5d7dcd72359f387469c56b50ef580ba7, type: 2}
+  twig: {fileID: 2100000, guid: a496a358f9976cc48b1eb762ae28b325, type: 2}
+  bolt: {fileID: 2100000, guid: bde5df914c6bfa24b83e80682f3db9d9, type: 2}
+  slash: {fileID: 2100000, guid: 93174ee3c0fa8104498850582032b6cd, type: 2}
+  twirl: {fileID: 2100000, guid: 62e753a1665ffc348ab728f84320a05e, type: 2}
+  beam: {fileID: 2100000, guid: 7437d28ddbf59874ebf752c3c47397d5, type: 2}
+  star: {fileID: 2100000, guid: a8e4abbc0e666a241bc5874dfb1a6ebf, type: 2}
+  magic: {fileID: 2100000, guid: dad8f02ce36416a4d8d16bae7319f219, type: 2}
+  wisp: {fileID: 2100000, guid: df52bb123e1019849ab63a9bc78af62b, type: 2}
+  claw: {fileID: 2100000, guid: ffb78722778561a4baecae00dc944991, type: 2}
+  smoke: {fileID: 2100000, guid: 4f50def6b063b974abb55a8f481d16a6, type: 2}
+  scorch: {fileID: 2100000, guid: 26ecd427fd17bc74894db85c6bdb81f9, type: 2}
+  shard: {fileID: 2100000, guid: e2eaa31050e23634dae854012e4906bf, type: 2}
+  shade: {fileID: 2100000, guid: 0c87429f5ebfecb438329b18e2eb86b6, type: 2}
+  amount: 1
+  mediumAmount: 0.6
+  lowAmount: 0.35
+  scale: 1
+  smokeAlpha: 0.6
+  smokeLife: 1.15
+  scorchAlpha: 0.6
+  scorchLife: 4
+  fireGlow: 1.4
+  flameGlow: 1.6
+  sparkGlow: 2.6
+  emberGlow: 2.2
+  ringGlow: 1.6
+  waveGlow: 1.2
+  flareGlow: 2
+  burstGlow: 2.2
+  twigGlow: 2.8
+  boltGlow: 3
+  slashGlow: 2.4
+  twirlGlow: 1.6
+  beamGlow: 2.6
+  starGlow: 2.6
+  magicGlow: 1.6
+  wispGlow: 1.7
+  clawGlow: 2.6

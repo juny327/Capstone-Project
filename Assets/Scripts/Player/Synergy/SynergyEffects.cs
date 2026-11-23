@@ -69,7 +69,7 @@ public static class SynergyEffects
         if (s == null) return;
 
         EvoStrikes.Blast(runner, s.lineMaterial, s.color, at, s.radius, weaponDamage * s.damageRatio, 1.5f, null, s.vfxPrefab, 1.1f, 0.35f);
-        CombatFx.PlaySound(s.sound);
+        CombatFx.PlaySound(s.sound, SoundKind.Explosion);   // 폭파 돌격
         BlastCharges++;
     }
 

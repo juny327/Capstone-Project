@@ -2046,7 +2046,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6216311896340534446}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4f57c38812287de4a8b969554ee3ff41, type: 3}
   m_Name: 
@@ -2735,7 +2735,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMove
   detector: {fileID: 1129838663952604652}
-  baseSpeed: 3
+  baseSpeed: 3.3
   jumpPower: 3
   GroundCheckDis: 0.4
   groundLayer:
@@ -2757,7 +2757,7 @@ MonoBehaviour:
   exhaustedRecoverRatio: 0.25
   rollDistance: 4
   rollDuration: 0.75
-  rollReferenceSpeed: 3
+  rollReferenceSpeed: 3.3
   rollMaxScale: 1.25
   rollClipDuration: 1.5
   rollCooldown: 3.25

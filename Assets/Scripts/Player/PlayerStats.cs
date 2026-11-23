@@ -37,6 +37,9 @@ public class PlayerStats : MonoBehaviour, IDamageable
     public event Action<int> OnDamaged;
     private Animator anim;
 
+    // 피격 연출 (화면 가장자리 붉은 빛 · 깜빡임 · 체력바 · 최소 흔들림, 2026-11-17) — 없으면 Awake 에서 붙인다
+    PlayerHurtFx hurtFx;
+
     // 사망 가드 - 사망 후 추가 피격으로 Die()가 반복 호출되는 것을 막는다
     bool isDead;
     public bool IsDead => isDead;
@@ -60,9 +63,12 @@ public class PlayerStats : MonoBehaviour, IDamageable
     // 피해 가로채기 (방패 등). 무적 확인 뒤, 체력을 깎기 전에 차례로 묻는다
     readonly List<IDamageFilter> damageFilters = new List<IDamageFilter>();
 
-    public void AddDamageFilter(IDamageFilter filter)
+    /// <summary>askLast — 다른 가로채기(방패)가 다 지나간 뒤 마지막에 묻는다 (도깨비 빚: 방패가 막은 피해에 코인을 쓰지 않게).</summary>
+    public void AddDamageFilter(IDamageFilter filter, bool askLast = false)
     {
-        if (filter != null && !damageFilters.Contains(filter)) damageFilters.Add(filter);
+        if (filter == null || damageFilters.Contains(filter)) return;
+        if (askLast) damageFilters.Insert(0, filter);   // 뒤에서부터 묻는다 — 맨 앞이 마지막
+        else damageFilters.Add(filter);
     }
 
     public void RemoveDamageFilter(IDamageFilter filter) => damageFilters.Remove(filter);
@@ -88,6 +94,9 @@ public class PlayerStats : MonoBehaviour, IDamageable
     {
         currentHp = maxHp;
         anim = GetComponent<Animator>();
+
+        hurtFx = GetComponent<PlayerHurtFx>();
+        if (hurtFx == null) hurtFx = gameObject.AddComponent<PlayerHurtFx>();
     }
 
     public void AddExp(int amount)
@@ -157,7 +166,8 @@ public class PlayerStats : MonoBehaviour, IDamageable
             if (i < damageFilters.Count && damageFilters[i] != null && damageFilters[i].Absorb(ref info)) return;
 
         // 배율 1 이면 예전과 같다. 배율로 1 미만이 되어도 1 이상의 피해는 최소 1 로 둔다
-        int amount = (int)(info.damage * damageTakenMultiplier);
+        // 난이도 (2026-11-17) — 이지는 받는 피해가 줄어든다 (하드 ×1)
+        int amount = (int)(info.damage * damageTakenMultiplier * Difficulty.Values.enemyDamage);
         if (amount < 1 && info.damage >= 1f) amount = 1;
 
         currentHp -= amount;
@@ -168,11 +178,18 @@ public class PlayerStats : MonoBehaviour, IDamageable
         OnHpChanged?.Invoke(currentHp, maxHp);
 
         // 피격 소리 (PlayerMove) — 죽는 한 방은 사망 소리가 따로 난다
-        if (amount > 0 && currentHp > 0) OnDamaged?.Invoke(amount);
-
-        if (info.cameraShake > 0f)
+        float shake = info.cameraShake;
+        if (amount > 0 && currentHp > 0)
         {
-            CameraShakeManager.Instance?.Shake(info.cameraShake);
+            OnDamaged?.Invoke(amount);
+
+            // 피격 연출 — 모든 공격에 최소 흔들림 0.15, 큰 피해(최대 체력 15% 이상)는 ×1.5 + 잠깐 멈춤, 0.1초 안에 겹친 피해는 흔들지 않는다
+            if (hurtFx != null) shake = hurtFx.Play(amount, shake);
+        }
+
+        if (shake > 0f)
+        {
+            CameraShakeManager.Instance?.Shake(shake);
         }
 
         if (currentHp == 0)

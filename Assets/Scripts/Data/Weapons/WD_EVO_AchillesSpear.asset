@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: WD_EVO_AchillesSpear
   m_EditorClassIdentifier: Assembly-CSharp::MeleeWeaponData
   weaponName: "\uC544\uD0AC\uB808\uC6B0\uC2A4\uC758 \uCC3D"
+  brief: "4\uBC88\uC9F8 \uCC0C\uB974\uAE30\uC5D0 \uCC3D \uD22C\uCC99"
   description: "\uB124 \uBC88\uC9F8 \uCC0C\uB974\uAE30\uB9C8\uB2E4 \uCC3D\uC744 \uB358\uC9C4\uB2E4
     \u2014 \uAFF0\uB6AB\uACE0, \uB358\uC9C4 \uAC70\uB9AC \uB05D\uC5D0\uC11C \uCE90\uB9AD\uD130
     \uB458\uB808\uB97C \uB450 \uBC14\uD034 \uB3CC\uBA70 \uBCA4 \uB4A4 \uC190\uC73C\uB85C
@@ -21,12 +22,13 @@ MonoBehaviour:
   weaponPrefab: {fileID: 5825881266557484979, guid: 8ad3475308e11584d9baf539eef8da7e, type: 3}
   socket: 0
   fireInterval: 0.9
-  damage: 15.9
+  damage: 15.74
+  damageUpgradeFlatPerLevel: -1
   critChance: 0.1
   critMultiplier: 2
   maxLevel: 3
   perLevelBonus:
-    damageAdd: 1.35
+    damageAdd: 1.34
     damageMul: 1
     fireIntervalMul: 1
     critChanceAdd: 0
@@ -46,9 +48,12 @@ MonoBehaviour:
   innateEffects:
   - {fileID: 11400000, guid: 11dbc5daba3663d408e84333f031a7fb, type: 2}
   themeColor: {r: 1, g: 0.62, b: 0.28, a: 1}
+  supportOnly: 0
+  supportTarget: 0
+  supportTint: {r: 1, g: 1, b: 1, a: 0}
   fireSounds:
   - {fileID: 8300000, guid: 0c03edc4efa519a439adaf03a0af417a, type: 3}
-  fireVolume: 0.6
+  fireVolume: 0.56
   firePitchRange: {x: 1.08, y: 1.16}
   reloadStartSound: {fileID: 0}
   reloadEndSound: {fileID: 0}
@@ -62,20 +67,36 @@ MonoBehaviour:
   - {fileID: 8300000, guid: c15ea2e34cca60310580574ac96589e1, type: 3}
   hitLayerVolume: 0.18
   hitLayerMinInterval: 0.09
+  meleeBodySounds:
+  - {fileID: 8300000, guid: 4b1d8d056c4cf8a40848c0eb31c0d46f, type: 3}
+  - {fileID: 8300000, guid: ae42a2833ac4b434189b2282c6bc5d18, type: 3}
+  - {fileID: 8300000, guid: 70ef4ebae51ba904e88e891005554cf7, type: 3}
+  - {fileID: 8300000, guid: 54cd2eaae0f23164d93863cda9f2548e, type: 3}
+  meleeBodyVolume: 1
+  fireStack: []
   range: 5
   arcAngle: 40
   maxTargets: 4
+  extraTargetDamage: 0.7
   hitDelay: 0.42
   hitLayers:
     serializedVersion: 2
     m_Bits: 129
   cameraShake: 0.15
+  finisherEvery: 0
+  finisherVertical: 1
+  finisherDamage: 1.3
+  finisherArc: 0
+  finisherRangeAdd: 0
+  finisherShake: 0
+  critOnWeakened: 0
+  supportPose: 0
   slashEffectPrefab: {fileID: 0}
   slashMaterial: {fileID: 2100000, guid: b6310812509a3ab46bf4e098541a27ab, type: 2}
-  slashColor: {r: 1.0, g: 0.62, b: 0.28, a: 0.9}
-  slashCoreColor: {r: 1.0, g: 0.95, b: 0.8, a: 1}
+  slashColor: {r: 1, g: 0.62, b: 0.28, a: 0.9}
+  slashCoreColor: {r: 1, g: 0.95, b: 0.8, a: 1}
   slashWidth: 0.32
-  slashReach: 1.0
+  slashReach: 1
   slashSweep: 0.07
   slashFade: 0.18
   slashThrust: 1

@@ -65,7 +65,7 @@ public class LobyWeaponSelectUI : MonoBehaviour
         WeaponData weapon = manager.Selected;
 
         descriptionText.text = weapon != null
-            ? $"{weapon.weaponName}\n{weapon.description}"
+            ? $"{weapon.weaponName}\n{DescriptionMode.Pick(weapon.brief, weapon.description)}"   // 간단 / 상세 (2026-11-22)
             : string.Empty;
     }
 }

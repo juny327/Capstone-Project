@@ -743,18 +743,17 @@ public static partial class EvolutionSetup
         if (created)
         {
             source = ScriptableObject.CreateInstance<EvolutionSource>();
-            source.slots = 1;
+            source.slots = 2;
             AssetDatabase.CreateAsset(source, ShopSourcePath);
         }
 
         var catalog = Load<ShopCatalog>(ShopCatalogPath);
         if (catalog == null) { Debug.LogError($"{Tag} {ShopCatalogPath} 가 없습니다."); return; }
 
-        var list = new List<ShopOfferSource>(catalog.sources ?? new ShopOfferSource[0]);
-        if (created && !list.Contains(source))
+        // 2026-11-17 — 진화는 진열(무기 줄)이 아니라 정비 창 '상위 무기' 칸. 칸이 비어 있을 때만 채운다
+        if (catalog.evolutionSource == null)
         {
-            list.Insert(0, source);   // 무기 줄 맨 앞 — 진화가 있으면 먼저 보인다
-            catalog.sources = list.ToArray();
+            catalog.evolutionSource = source;
             EditorUtility.SetDirty(catalog);
         }
     }

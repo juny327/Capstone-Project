@@ -14,5 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StageData
   stageIndex: 3
   killTarget: 0
-  maxEnemyCount: 0
+  maxEnemyCount: 8
+  spawnInterval: 2.5
   enemyHealthMultiplier: 2.5
+  spawnDuringBossFight: 1
+  enemyRewards: 0

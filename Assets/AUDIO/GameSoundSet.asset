@@ -1,0 +1,284 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c43c9f0d34639224d94d3184e849544a, type: 3}
+  m_Name: GameSoundSet
+  m_EditorClassIdentifier: Assembly-CSharp::GameSoundSet
+  levelUp:
+    clips:
+    - {fileID: 8300000, guid: 2cc7cbfa6d6e0da4ea5896563bf60fea, type: 3}
+    volume: 0.277
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0
+  upgradeOpen:
+    clips:
+    - {fileID: 8300000, guid: c36b5a8bea3f85e40a9236a8b6706fa0, type: 3}
+    volume: 0.926
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0
+  weaponAcquired:
+    clips:
+    - {fileID: 8300000, guid: 7e5dbe951060c1b4da370b840ee96145, type: 3}
+    volume: 0.8
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0
+  hit:
+    clips:
+    - {fileID: 8300000, guid: c386e507c4fa5a2449893ef52fa03ab7, type: 3}
+    - {fileID: 8300000, guid: e41c4405d5ab82f46a9c020e6342647a, type: 3}
+    - {fileID: 8300000, guid: 16d1118492a9f294383160f8e3ca9a37, type: 3}
+    - {fileID: 8300000, guid: d5bb80e18d1c85e458aae1a2b0ae1848, type: 3}
+    - {fileID: 8300000, guid: b8c8c1931eb111545abda9695c6fa112, type: 3}
+    volume: 0.3
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0.04
+  criticalHit:
+    clips:
+    - {fileID: 8300000, guid: 8ce1836c1da809844bc05cc542967539, type: 3}
+    - {fileID: 8300000, guid: fa8862e27c12eb94b8288543bf3a7b40, type: 3}
+    - {fileID: 8300000, guid: 085a4030eeeaa154f95338b2c179a073, type: 3}
+    volume: 1
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0.04
+  laserHit:
+    clips:
+    - {fileID: 8300000, guid: e885179ae27a2bc4c995ed0fcb3c0bb0, type: 3}
+    - {fileID: 8300000, guid: 57463db61bce6364b92c05352d5f65c4, type: 3}
+    - {fileID: 8300000, guid: 4e5a4f5dac886f1468c4ba662481afc3, type: 3}
+    volume: 0.26
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0.05
+  bulletHit:
+    clips:
+    - {fileID: 8300000, guid: 9d3d456be27836842b39ee4ea42f1dd4, type: 3}
+    - {fileID: 8300000, guid: 1c46650fb4dd71c43869e049a045119a, type: 3}
+    - {fileID: 8300000, guid: 1fbaa012b14979d47a9c28bea58cf68a, type: 3}
+    - {fileID: 8300000, guid: 99089fc6df3e3a8428463cbc35e3ffb6, type: 3}
+    - {fileID: 8300000, guid: af0e097adb8051a4c8f4aea8c4c0c2a1, type: 3}
+    volume: 1
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0.04
+  meleeHit:
+    clips:
+    - {fileID: 8300000, guid: e2315b22763605347b5874fc46c2aea3, type: 3}
+    - {fileID: 8300000, guid: 442b32841e4124f4a867397f67e7a495, type: 3}
+    - {fileID: 8300000, guid: 4f7a058f42df22841a029b88e4a57e46, type: 3}
+    - {fileID: 8300000, guid: 7530c4e3d1fe5024689895450d205369, type: 3}
+    - {fileID: 8300000, guid: db374580e595f594383d6a9a5a7cbc6b, type: 3}
+    volume: 0.4
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0.04
+  electricHit:
+    clips:
+    - {fileID: 8300000, guid: 469d4d3886edf4a4aad9c7c24d8a634a, type: 3}
+    - {fileID: 8300000, guid: 3e0ee23367a8a534aaed1119ac513835, type: 3}
+    - {fileID: 8300000, guid: b1c34f331d94b524e914a9aa00d5c4d0, type: 3}
+    volume: 0.26
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0.05
+  fireBallHit:
+    clips:
+    - {fileID: 8300000, guid: c11a85a2014670a41b7eb5d74283dfda, type: 3}
+    volume: 0.306
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0
+  chainLightningHit:
+    clips:
+    - {fileID: 8300000, guid: f8d63b0a35736da4a8c130ca653ba2d8, type: 3}
+    volume: 0.181
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0
+  blackHoleHit:
+    clips:
+    - {fileID: 0}
+    volume: 1
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0
+  tornadoHit:
+    clips: []
+    volume: 1
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0
+  shurikenHit:
+    clips:
+    - {fileID: 8300000, guid: d8e7350367160344baa52b7e8b656e32, type: 3}
+    volume: 0.229
+    pitchRange: {x: 0.92, y: 1.08}
+    minInterval: 0.09
+  electricShotHit:
+    clips:
+    - {fileID: 8300000, guid: 0881742b5752b6b4b9e4fc86197184ee, type: 3}
+    volume: 0.39
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0
+  fireBallCast:
+    clips:
+    - {fileID: 8300000, guid: d8677c93bf7c6b7408cf40f1fa950460, type: 3}
+    volume: 0.253
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0
+  chainLightningCast:
+    clips: []
+    volume: 1
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0
+  blackHoleCast:
+    clips:
+    - {fileID: 8300000, guid: 8b0ae6f03d2bf95408c00bdbaf9b026f, type: 3}
+    volume: 1
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0
+  tornadoCast:
+    clips:
+    - {fileID: 8300000, guid: 714894bb663fda348a47fcbe5dd258a2, type: 3}
+    volume: 0.336
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0
+  shurikenCast:
+    clips: []
+    volume: 1
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0
+  electricShotCast:
+    clips:
+    - {fileID: 8300000, guid: 0ac9f93855da78b47843f6e13e94fac2, type: 3}
+    volume: 0.79
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0
+  drainHeal:
+    clips: []
+    volume: 1
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0
+  obstacleHit:
+    clips:
+    - {fileID: 8300000, guid: 41d69101215b99b4c9044f9569f43d6a, type: 3}
+    - {fileID: 8300000, guid: e8663f88da1db124b9bc4abb3d57111a, type: 3}
+    - {fileID: 8300000, guid: 72acd4d054d72264593b768f793c63d1, type: 3}
+    - {fileID: 8300000, guid: ea8d153fc39680f4182fbf0a72ecacd4, type: 3}
+    - {fileID: 8300000, guid: 20e2bbb35df941e4f9884e62132247e9, type: 3}
+    volume: 0.21
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0.07
+  enemyKilled:
+    clips:
+    - {fileID: 8300000, guid: 5d729e298e8e210489f55be034292ce1, type: 3}
+    - {fileID: 8300000, guid: 9663d5f7a4936ee49aeab5c4665aa544, type: 3}
+    - {fileID: 8300000, guid: a6e5f9cd72652174ea8a480831aa5d90, type: 3}
+    - {fileID: 8300000, guid: b37840112e76c324ca81d19018a3ce14, type: 3}
+    volume: 1
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0.06
+  bigEnemyKilled:
+    clips:
+    - {fileID: 8300000, guid: c764d011d61d2d846867f272ef002637, type: 3}
+    - {fileID: 8300000, guid: 84d12885c56646641ab8cc876f5520a5, type: 3}
+    - {fileID: 8300000, guid: 9d78a1eece92aa144994630f3eb9c190, type: 3}
+    volume: 1
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0.12
+  bigEnemyMinHp: 18
+  enemyVoices:
+  - label: "\uACE0\uBE14\uB9B0 \xB7 \uD649\uACE0\uBE14\uB9B0 (A \xB7 B)"
+    enemies:
+    - {fileID: 11400000, guid: 9f06c567617c12046bd90f15e64b6016, type: 2}
+    - {fileID: 11400000, guid: 742d827480606064b8ac3e80266c83a3, type: 2}
+    hurt:
+      clips:
+      - {fileID: 8300000, guid: d8878b0d38401c3429245fdcda5876cc, type: 3}
+      - {fileID: 8300000, guid: 83fdf1d3432e33249aca36802a5fd511, type: 3}
+      - {fileID: 8300000, guid: 85346db0d1ec0fe459ce8df782eb59c5, type: 3}
+      volume: 1
+      pitchRange: {x: 0.96, y: 1.04}
+      minInterval: 0.07
+    death:
+      clips:
+      - {fileID: 8300000, guid: 965ab1f30045d5e4a830ba83e96f3f65, type: 3}
+      - {fileID: 8300000, guid: 2f1bb3d85f8bc5f4abdbbb13f7f60ba4, type: 3}
+      - {fileID: 8300000, guid: c8c02e27003941e42a8b491690635beb, type: 3}
+      volume: 1
+      pitchRange: {x: 0.96, y: 1.04}
+      minInterval: 0.05
+  - label: "\uC2A4\uCF08\uB808\uD1A4 (D)"
+    enemies:
+    - {fileID: 11400000, guid: 076b9dd40d2fbcd42b9e49add08ce8dc, type: 2}
+    hurt:
+      clips:
+      - {fileID: 8300000, guid: ae0b933e217301740a13003646350738, type: 3}
+      - {fileID: 8300000, guid: 3c4d3bb34ec6e0e498219055c0d1628e, type: 3}
+      - {fileID: 8300000, guid: 6d210b9af1b10af4dbd98e4356ece42f, type: 3}
+      volume: 1
+      pitchRange: {x: 0.96, y: 1.04}
+      minInterval: 0.07
+    death:
+      clips:
+      - {fileID: 8300000, guid: f409407d10de1484f8875ec01c6ce02c, type: 3}
+      - {fileID: 8300000, guid: 4c9ef5535ec023a43b37d916119d1187, type: 3}
+      - {fileID: 8300000, guid: 289ea85b61c3c3343a035501b728c9cd, type: 3}
+      volume: 1
+      pitchRange: {x: 0.96, y: 1.04}
+      minInterval: 0.05
+  - label: "\uB370\uBAAC \uAC78 (C \xB7 E)"
+    enemies:
+    - {fileID: 11400000, guid: 1d39fe5fd498031468a59cdf2f7b1d4b, type: 2}
+    - {fileID: 11400000, guid: 1c680aa537a04e62b484b5016fe797bc, type: 2}
+    hurt:
+      clips:
+      - {fileID: 8300000, guid: 78b3215cc948e524da4bf13fc059fc55, type: 3}
+      - {fileID: 8300000, guid: 682fdfbb6b446af458fcfd5b1b690a67, type: 3}
+      - {fileID: 8300000, guid: ba7228f4c98037648a47b096650c6143, type: 3}
+      volume: 1
+      pitchRange: {x: 0.96, y: 1.04}
+      minInterval: 0.07
+    death:
+      clips:
+      - {fileID: 8300000, guid: 81b556c2f92d9a04f986f9def54b3932, type: 3}
+      - {fileID: 8300000, guid: 362762473e38a9f4e8b189ba06f6fa93, type: 3}
+      - {fileID: 8300000, guid: aba86fbd007e70f44aa0d2d3d9154efc, type: 3}
+      volume: 1
+      pitchRange: {x: 0.96, y: 1.04}
+      minInterval: 0.05
+  weaponSwap:
+    clips:
+    - {fileID: 8300000, guid: d3d177a2ae2aca547b1c8bebd14bb119, type: 3}
+    volume: 0.957
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0
+  playerDead:
+    clips:
+    - {fileID: 8300000, guid: 670987b1567025e45a709ee09df2bcb8, type: 3}
+    volume: 0.642
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0
+  stageClear:
+    clips:
+    - {fileID: 8300000, guid: bd0282eb3e3c9c944a3b08abcf8a1c04, type: 3}
+    volume: 0.241
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0
+  stageRewardOpen:
+    clips:
+    - {fileID: 8300000, guid: ccf89bc9e5f55c64ca445e9d324e4803, type: 3}
+    volume: 0.416
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0
+  stageRewardSelect:
+    clips:
+    - {fileID: 8300000, guid: 8ea5d9f3e6577b948a8d24873f84a20a, type: 3}
+    volume: 0.374
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0
+  bossSpawn:
+    clips:
+    - {fileID: 8300000, guid: 7464c16cdf354f94a9d16d5aea57efa6, type: 3}
+    volume: 0.291
+    pitchRange: {x: 0.96, y: 1.04}
+    minInterval: 0

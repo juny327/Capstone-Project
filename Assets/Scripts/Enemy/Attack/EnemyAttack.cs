@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public abstract class EnemyAttack : MonoBehaviour
@@ -13,6 +14,21 @@ public abstract class EnemyAttack : MonoBehaviour
 
     private AudioSource attackSfxSource;
     private Coroutine attackSfxRoutine;
+
+    // 2026-11-17 — 몰려오면 공격 소리가 겹겹이 쌓여 총소리를 덮었다. 동시에 이 수까지만 낸다
+    const int MaxConcurrentAttackSounds = 3;
+    static readonly List<AudioSource> attackSources = new List<AudioSource>();
+
+    static int PlayingAttackSounds()
+    {
+        int n = 0;
+        for (int i = attackSources.Count - 1; i >= 0; i--)
+        {
+            if (attackSources[i] == null) { attackSources.RemoveAt(i); continue; }
+            if (attackSources[i].isPlaying) n++;
+        }
+        return n;
+    }
     private float baseAttackCooldown;
     private bool baseAttackCooldownCaptured;
 
@@ -61,8 +77,12 @@ public abstract class EnemyAttack : MonoBehaviour
 
         EnsureAttackAudioSource();
         StopAttackSound();
+        if (PlayingAttackSounds() >= MaxConcurrentAttackSounds)
+            return;
+
         attackSfxSource.clip = attackSound;
-        attackSfxSource.volume = attackSoundVolume;
+        // 설정창 효과음 음량을 따른다 (총소리 · 다른 효과음과 같은 손잡이 — 예전에는 늘 그대로 나서 총소리보다 컸다)
+        attackSfxSource.volume = attackSoundVolume * (SoundManager.Instance != null ? SoundManager.Instance.SfxVolume : 1f);
         attackSfxSource.Play();
         float duration = Mathf.Min(attackSoundDuration, attackSound.length);
         if (duration > 0f)
@@ -76,6 +96,8 @@ public abstract class EnemyAttack : MonoBehaviour
 
         attackSfxSource.playOnAwake = false;
         attackSfxSource.loop = false;
+        if (SoundManager.Instance != null) attackSfxSource.outputAudioMixerGroup = SoundManager.Instance.SfxGroup;   // 효과음 믹서로
+        if (!attackSources.Contains(attackSfxSource)) attackSources.Add(attackSfxSource);
         attackSfxSource.spatialBlend = 1f;
         attackSfxSource.minDistance = 3f;
         attackSfxSource.maxDistance = 25f;

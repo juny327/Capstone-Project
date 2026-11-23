@@ -1,0 +1,108 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e9f188fced24a347854d377fb9adfd4, type: 3}
+  m_Name: WD_EVO_Dokkaebi
+  m_EditorClassIdentifier: Assembly-CSharp::MeleeWeaponData
+  weaponName: "\uB3C4\uAE68\uBE44 \uBC29\uB9DD\uC774"
+  brief: "'\uB69D\uB531' \uCF54\uC778 \xB7 \uB3C4\uAE68\uBE44\uBD88"
+  description: "\uB9DE\uD78C \uD718\uB450\uB974\uAE30 \uB2E4\uC12F \uBC88\uC9F8\uB9C8\uB2E4
+    '\uB69D\uB531!' \uCF54\uC778 (\uC2A4\uD14C\uC774\uC9C0\uB9C8\uB2E4 12\uAC1C),
+    \uD480\uC2A4\uC719\uC740 \uB3C4\uAE68\uBE44\uBD88 \uD0C0\uAD6C \u2014 \uBA40\uB9AC
+    \uCE60\uC218\uB85D \uC138\uACE0 \uB9DE\uC740 \uC801\uC774 \uB290\uB824\uC9C4\uB2E4"
+  icon: {fileID: 21300000, guid: 21cfe8675bd9ef24a9f10f898583223e, type: 3}
+  weaponPrefab: {fileID: 5825881266557484979, guid: 5958bb94c80ac2045b0978133d3a889d, type: 3}
+  socket: 0
+  fireInterval: 0.85
+  damage: 10.8
+  damageUpgradeFlatPerLevel: 2
+  critChance: 0.1
+  critMultiplier: 2
+  maxLevel: 3
+  perLevelBonus:
+    damageAdd: 1.08
+    damageMul: 1
+    fireIntervalMul: 1
+    critChanceAdd: 0
+    critMultiplierAdd: 0
+    projectileSpeedAdd: 0
+    projectileCountAdd: 0
+    pierceAdd: 0
+    spreadMul: 1
+    lifeTimeMul: 1
+    burstAdd: 0
+    magazineAdd: 0
+    reloadTimeMul: 1
+    rangeAdd: 0
+    subUnitAdd: 0
+  requiresTarget: 1
+  evolvedFrom: {fileID: 11400000, guid: 0b47d88f78101a24ebd02138e70d13af, type: 2}
+  innateEffects:
+  - {fileID: 11400000, guid: 50d4c6541b71e5f449cf935557cca438, type: 2}
+  themeColor: {r: 0.62, g: 1, b: 0.25, a: 1}
+  supportOnly: 0
+  supportTarget: 3
+  supportTint: {r: 1, g: 1, b: 1, a: 0}
+  fireSounds:
+  - {fileID: 8300000, guid: 1276f0eebc37dd940aa823de45cfdd2e, type: 3}
+  - {fileID: 8300000, guid: ff2fd688188fd524ea1bc50dd8c75e6e, type: 3}
+  - {fileID: 8300000, guid: 73bdfac7519e9684db062183bdf3eb2f, type: 3}
+  fireVolume: 0.727
+  firePitchRange: {x: 0.9, y: 1}
+  reloadStartSound: {fileID: 0}
+  reloadEndSound: {fileID: 0}
+  reloadVolume: 0.8
+  fireLayerSounds:
+  - {fileID: 8300000, guid: 08df0f3b3ce34110a5e1b2d0f021696c, type: 3}
+  - {fileID: 8300000, guid: b0be3748af6d47e7b6828a8ae1cc721f, type: 3}
+  fireLayerVolume: 0.2
+  fireLayerPitchRange: {x: 0.97, y: 1.03}
+  fireLayerMinInterval: 0.2
+  hitLayerSounds:
+  - {fileID: 8300000, guid: c15ea2e34cca60310580574ac96589e1, type: 3}
+  hitLayerVolume: 0.2
+  hitLayerMinInterval: 0.09
+  meleeBodySounds: []
+  meleeBodyVolume: 1
+  fireStack: []
+  range: 3.2
+  arcAngle: 140
+  maxTargets: 6
+  extraTargetDamage: 0.7
+  hitDelay: 0.41
+  hitLayers:
+    serializedVersion: 2
+    m_Bits: 129
+  cameraShake: 0.18
+  finisherEvery: 3
+  finisherVertical: 0
+  finisherDamage: 1.5
+  finisherArc: 160
+  finisherRangeAdd: 0.5
+  finisherShake: 0.35
+  critOnWeakened: 1
+  supportPose: 2
+  slashEffectPrefab: {fileID: 0}
+  slashMaterial: {fileID: 2100000, guid: b6310812509a3ab46bf4e098541a27ab, type: 2}
+  slashColor: {r: 0.62, g: 1, b: 0.3, a: 0.95}
+  slashCoreColor: {r: 0.95, g: 1, b: 0.85, a: 1}
+  slashWidth: 0.75
+  slashReach: 0.92
+  slashSweep: 0.1
+  slashFade: 0.28
+  slashThrust: 0
+  hitSpark: 1
+  swingSounds:
+  - {fileID: 8300000, guid: 27e2277f448a3c147acc99daddaa20c3, type: 3}
+  - {fileID: 8300000, guid: 36cff6a79585bcd4489967bea0f77909, type: 3}
+  - {fileID: 8300000, guid: 33ae7c2f4415f094cb156636c1de0d48, type: 3}
+  swingVolume: 0.679
+  swingPitchRange: {x: 0.94, y: 1.06}

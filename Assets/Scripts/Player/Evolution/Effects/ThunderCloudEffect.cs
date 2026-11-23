@@ -45,6 +45,23 @@ public class ThunderCloudEffect : AttachmentEffect
     [Tooltip("낙뢰가 떨어질 때 구름 안이 번쩍이는 세기 (0 이면 없음)")]
     [Min(0f)] public float cloudFlash = 1f;
 
+    [Header("공통 재료 연출 (2026-11-19 연출 개선) — 판정 · 피해와 무관")]
+    [Tooltip("켜면 낙뢰 자리에 공통 재료(FxKit)를 더한다 — 섬광 · 바닥을 타는 전기 가지 · 튀는 불꽃 · 그을음 · 잔전류. 구름도 뭉게진 그림으로. " +
+             "설정 에셋(Resources/Fx/FxKitSet)이 없으면 예전 그대로")]
+    public bool kitStrike = true;
+    [Tooltip("내려오는 줄기에서 갈라지는 잔가지 수")]
+    [Range(0, 4)] public int skyBranches = 3;
+    [Tooltip("먹구름이 낀 뒤 첫 낙뢰 때 화면이 순간 밝아지는 세기 (0 = 없음). 낙뢰마다가 아니라 한 번만 — 깜박임을 피한다. 보조 칸은 없다")]
+    [Range(0f, 0.4f)] public float stormFlash = 0.2f;
+    [Tooltip("공통 재료 먹구름의 크기 배율 (cloudRadius 에 곱한다 — 모습만, 낙뢰 범위와 무관). 2026-11-20 사용자: \"뇌운이 내리치는구나 느낌이 확 들 정도로\" 크게")]
+    [Range(1f, 4f)] public float kitCloudScale = 2.4f;
+    [Tooltip("공통 재료 먹구름의 진하기 (cloudColor 의 알파에 곱한다)")]
+    [Range(0.2f, 1f)] public float kitCloudAlpha = 0.8f;
+    [Tooltip("먹구름 아래 바닥이 어두워지는 정도 (0 = 없음)")]
+    [Range(0f, 0.8f)] public float kitShade = 0.45f;
+
+    bool UsesKit => kitStrike && FxKit.Ready;
+
     [Header("보조 칸 (무기-개편-개발-계획)")]
     [Tooltip("보조 무기(전격 드론)는 장전하지 않는다 — 대신 이 주기마다 먹구름을 띄운다 (초)")]
     [Min(1f)] public float supportPeriod = 8f;
@@ -79,7 +96,9 @@ public class ThunderCloudEffect : AttachmentEffect
             Transform player = Weapon != null && Weapon.Controller != null ? Weapon.Controller.transform : null;
 
             UpdateCloud(storming, player);
+            if (!storming) { stormFlashed = false; shadeTimer = 0f; flickerTimer = 0f; }
             if (!storming || player == null) return;
+            if (cfg.UsesKit) KitStorm(player, deltaTime);
 
             soundTimer -= deltaTime;
             timer -= deltaTime;
@@ -90,20 +109,22 @@ public class ThunderCloudEffect : AttachmentEffect
             if (found.Count == 0) return;
 
             Transform target = found[Random.Range(0, found.Count)];
+            float spread = cfg.cloudRadius * (cfg.UsesKit ? cfg.kitCloudScale : 1f);   // 큰 구름이면 줄기가 나오는 자리도 넓게
             Vector3 sky = player.position + Vector3.up * cfg.cloudHeight
-                          + new Vector3(Random.Range(-cfg.cloudRadius, cfg.cloudRadius), 0f, Random.Range(-cfg.cloudRadius, cfg.cloudRadius)) * 0.6f;
+                          + new Vector3(Random.Range(-spread, spread), 0f, Random.Range(-spread, spread)) * 0.6f;
 
             // 낙뢰는 맞는 자리 위 높은 곳에서 내려꽂힌다 (구름 쪽으로 조금 기울여서) — 구름에서 비스듬히 뻗으면 기본 사격 줄기와 비슷해 보였다
             Vector3 at = target.position;
             Vector3 top = cfg.strikeHeight > 0f
                 ? Vector3.Lerp(at, new Vector3(sky.x, at.y, sky.z), cfg.strikeLean) + Vector3.up * cfg.strikeHeight
                 : sky;
-            float scale = Weapon.IsSupport ? 0.7f : 1f;   // 보조 칸은 작고 옅게
+            float scale = Weapon.EvoFxScale;   // 보조 칸 배율 (기본 1 — 줄이지 않는다)
 
             EvoStrikes.Lightning(cfg.material, cfg.color, top, at, cfg.radius, Weapon.Stats.Damage * cfg.damageMul, cfg.stun, cfg.impactPrefab,
                 cfg.strikeWidth, cfg.strikeBranches, cfg.strikeGlowRadius, scale);
             WeaponBase.ShakeCamera(Weapon, cfg.strikeShake);   // 보조 무기는 약하게 (WeaponBase.ShakeCamera)
             CloudFlash(sky, scale);
+            if (cfg.UsesKit) KitStrike(top, at, sky, scale);
             Strikes++;
 
             if (soundTimer <= 0f)
@@ -123,6 +144,64 @@ public class ThunderCloudEffect : AttachmentEffect
 
             Vector3 d = Quaternion.AngleAxis(Random.Range(0f, 360f), Vector3.up) * Vector3.forward * cfg.cloudRadius * Random.Range(0.5f, 0.9f);
             FxLine.Bolt(cfg.material, sky - d, sky + d, glow, 0.1f, 0.12f, 0.35f);
+        }
+
+        bool stormFlashed;
+        float shadeTimer, flickerTimer;
+
+        /// <summary>
+        /// 먹구름이 낀 동안 (2026-11-20) — 구름 아래 바닥이 어두워지고, 낙뢰 사이사이에도 구름 속이 계속 깜박인다.
+        /// "뇌운이 내리친다" 가 한눈에 보이게.
+        /// </summary>
+        void KitStorm(Transform player, float deltaTime)
+        {
+            float size = cfg.cloudRadius * cfg.kitCloudScale * Weapon.EvoFxScale;
+
+            shadeTimer -= deltaTime;
+            if (shadeTimer <= 0f && cfg.kitShade > 0f)
+            {
+                shadeTimer = 0.4f;
+                FxKit.Shade(player.position, size * 2.6f, cfg.kitShade * Weapon.EvoFxScale, 1f);
+            }
+
+            flickerTimer -= deltaTime;
+            if (flickerTimer <= 0f)
+            {
+                flickerTimer = Random.Range(0.08f, 0.22f);
+                Vector2 c = Random.insideUnitCircle * size * 0.7f;
+                FxKit.CloudFlash(player.position + Vector3.up * cfg.cloudHeight + new Vector3(c.x, 0f, c.y), size * 0.45f, cfg.color, 0.35f);
+            }
+        }
+
+        /// <summary>
+        /// 공통 재료 (2026-11-19) — 맞은 자리의 섬광 · 전기 가지 · 불꽃 · 그을음 · 잔전류, 줄기에서 갈라지는 잔가지, 구름 속 번개.
+        /// 먹구름이 낀 뒤 첫 낙뢰 때만 화면이 순간 밝아진다.
+        /// </summary>
+        void KitStrike(Vector3 top, Vector3 at, Vector3 sky, float scale)
+        {
+            FxKit.LightningStrike(at, cfg.radius, cfg.color, scale, top.y - at.y);
+            FxKit.CloudFlash(sky, cfg.cloudRadius * cfg.kitCloudScale * 0.6f, cfg.color, 1f);
+
+            // 줄기 중간중간에서 옆으로 갈라졌다 다시 한 번 꺾이는 잔가지
+            Vector3 end = at + Vector3.up * 0.2f;
+            float w = Mathf.Max(0.04f, cfg.strikeWidth * 0.3f * scale);
+            for (int i = 0; i < cfg.skyBranches; i++)
+            {
+                Vector3 from = Vector3.Lerp(top, end, Random.Range(0.15f, 0.75f));
+                Vector3 side = Quaternion.AngleAxis(Random.Range(0f, 360f), Vector3.up) * Vector3.forward;
+                Vector3 mid = from + side * Random.Range(0.6f, 1.3f) + Vector3.down * Random.Range(0.5f, 1.2f);
+                Vector3 tip = mid + side * Random.Range(0.3f, 0.9f) + Vector3.down * Random.Range(0.4f, 1f);
+                FxLine.Bolt(cfg.material, from, mid, cfg.color, w, 0.13f, 0.25f);
+                FxLine.Bolt(cfg.material, mid, tip, cfg.color, w * 0.6f, 0.11f, 0.2f);
+            }
+
+            if (!stormFlashed)
+            {
+                stormFlashed = true;
+                ImpactFxSettings impact = ImpactFx.Settings;
+                if (cfg.stormFlash > 0f && !Weapon.IsSupport && impact != null && impact.flashScale > 0f)
+                    ImpactHost.Get().Flash(Color.Lerp(cfg.color, Color.white, 0.5f), cfg.stormFlash * impact.flashScale);
+            }
         }
 
         /// <summary>보조 칸 — 장전이 없으니 supportPeriod 마다 supportStormTime 동안 먹구름 (8초마다 2초).</summary>
@@ -195,6 +274,31 @@ public class ThunderCloudEffect : AttachmentEffect
 
             var renderer = go.GetComponent<ParticleSystemRenderer>();
             renderer.sharedMaterial = cfg.cloudMaterial;
+            if (cfg.UsesKit && FxKit.Set.smoke != null)
+            {
+                // 공통 재료 (2026-11-19) — 부드러운 점 대신 뭉게진 연기 그림 (네 칸 중 하나씩) · 천천히 돈다. 그림이 점보다 성겨 조금 크게
+                renderer.sharedMaterial = FxKit.Set.smoke;
+                renderer.maxParticleSize = 3f;
+                float big = cfg.cloudRadius * cfg.kitCloudScale;   // 2026-11-20 크게 — 화면에서 한눈에 먹구름으로 보이게
+                Color dense = cfg.cloudColor;
+                dense.a *= cfg.kitCloudAlpha;
+                main.startColor = dense;
+                main.startSize = new ParticleSystem.MinMaxCurve(big * 0.85f, big * 1.4f);
+                main.startLifetime = new ParticleSystem.MinMaxCurve(1.2f, 2f);
+                main.maxParticles = 220;
+                emission.rateOverTime = 55f;
+                shape.radius = big;
+                main.startRotation = new ParticleSystem.MinMaxCurve(0f, Mathf.PI * 2f);
+                ParticleSystem.TextureSheetAnimationModule sheet = ps.textureSheetAnimation;
+                sheet.enabled = true;
+                sheet.numTilesX = 2;
+                sheet.numTilesY = 2;
+                sheet.frameOverTime = new ParticleSystem.MinMaxCurve(0f);
+                sheet.startFrame = new ParticleSystem.MinMaxCurve(0f, 0.9999f);
+                ParticleSystem.RotationOverLifetimeModule spin = ps.rotationOverLifetime;
+                spin.enabled = true;
+                spin.z = new ParticleSystem.MinMaxCurve(-0.3f, 0.3f);
+            }
             renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             renderer.receiveShadows = false;
 

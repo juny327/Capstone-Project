@@ -26,9 +26,7 @@ MonoBehaviour:
   impactPrefab: {fileID: 7834434380170384362, guid: 68101499d07aced4aa0ded4acb624942, type: 3}
   sound:
     clips:
-    - {fileID: 8300000, guid: fe96114fd408e094fabe97de7169a7f3, type: 3}
-    - {fileID: 8300000, guid: 8151d6931ba78374e93b9ba47c6944e6, type: 3}
-    - {fileID: 8300000, guid: 2a973e38617103544a6fa5f7ebb9b843, type: 3}
+    - {fileID: 8300000, guid: fafb36c87d1b5b149a46126e16e86ac3, type: 3}
     volume: 0.42
     pitchRange: {x: 0.96, y: 1.04}
     minInterval: 0.3
@@ -39,3 +37,11 @@ MonoBehaviour:
   strikeGlowRadius: 1.5
   strikeShake: 0.05
   cloudFlash: 1
+  kitStrike: 1
+  skyBranches: 3
+  stormFlash: 0.2
+  kitCloudScale: 2.4
+  kitCloudAlpha: 0.8
+  kitShade: 0.45
+  supportPeriod: 8
+  supportStormTime: 2

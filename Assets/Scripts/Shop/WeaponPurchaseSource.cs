@@ -20,7 +20,7 @@ public class WeaponPurchaseSource : ShopOfferSource
             bool support = ctx.Weapons.UsesSupportWeapons;
             int basePrice = support ? Mathf.Max(1, Mathf.RoundToInt(entry.price * ctx.Catalog.supportPriceMultiplier)) : entry.price;
 
-            into.Add(new WeaponPurchaseOffer(weapon, ctx.Catalog.Scaled(basePrice, ctx.StageIndex), support));
+            into.Add(new WeaponPurchaseOffer(weapon, ctx.Catalog.Scaled(basePrice, ctx.StageIndex, ctx.PriceMultiplier), support));
         }
     }
 }
@@ -41,7 +41,7 @@ public class WeaponPurchaseOffer : ShopOffer
     public WeaponData Weapon => weapon;
 
     public override string Title => weapon.weaponName;
-    public override string Description => weapon.description;
+    public override string Description => DescText.Weapon(weapon);   // 간단 / 상세 (2026-11-22)
     public override Sprite Icon => weapon.icon;
     public override string Tag => !support ? "새 무기" : weapon.SupportOnly ? "보조 · 드론" : "보조 무기";
     public override ShopOfferKind Kind => ShopOfferKind.Weapon;

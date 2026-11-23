@@ -78,7 +78,7 @@ public class TestRoomManager : MonoBehaviour
         Player.name = "TestPlayer";
         Controller = Player.GetComponent<WeaponController>();
         Detector = Player.GetComponentInChildren<EnemyDetector>();
-        // Legacy Gun.Start writes unrelated HUD values. Disable only this scene instance.
+        // Legacy Gun.Start writes unrelated HUD values. 프리팹에서 이미 꺼져 있지만(11-22) 예전 프리팹을 쓸 때를 위해 남겨 둔다.
         Gun legacy = Player.GetComponentInChildren<Gun>();
         if (legacy != null) legacy.enabled = false;
         if (Controller == null || !Controller.ConfigureStartingWeapon(weapons[0]))
@@ -271,9 +271,7 @@ public class TestRoomManager : MonoBehaviour
         if (previousRunPlayer != null && previousRunPlayer != Player) Destroy(previousRunPlayer);
         previousRunPlayer = null;
 
-        // 이 장면에서만 껐던 옛 HUD 스크립트를 되살린다 (스테이지 플레이어와 같게)
-        Gun legacy = Player.GetComponentInChildren<Gun>(true);
-        if (legacy != null) legacy.enabled = true;
+        // 옛 Gun 은 2026-11-22 부터 플레이어 프리팹에서 꺼져 있다 (스테이지 플레이어도 꺼짐) — 되살리지 않는다
 
         app.AdoptPlayer(Player);
         handedOver = true;

@@ -13,19 +13,21 @@ MonoBehaviour:
   m_Name: WD_EVO_Minigun
   m_EditorClassIdentifier: Assembly-CSharp::ProjectileWeaponData
   weaponName: "\uD68C\uC804 \uAE30\uAD00\uD3EC"
+  brief: "\uC7A5\uC804 \uC5C6\uC774, \uC3E0\uC218\uB85D \uBE60\uB974\uAC8C"
   description: "\uC7A5\uC804 \uC5C6\uC774 \uACC4\uC18D \uC3DC\uB2E4 \u2014 \uC3D8\uB294
     \uB3D9\uC548 \uC5F0\uC0AC\uAC00 2\uCD08\uC5D0 \uAC78\uCCD0 3\uBC30\uAE4C\uC9C0
     \uC624\uB978\uB2E4"
   icon: {fileID: 21300000, guid: f592b963fbf8d1042a3b3718b69b4812, type: 3}
   weaponPrefab: {fileID: 4085249434206812143, guid: 91753ff42608e80498c496e2773b302f, type: 3}
   socket: 0
-  fireInterval: 0.12
-  damage: 1.463
+  fireInterval: 0.25
+  damage: 3.6
+  damageUpgradeFlatPerLevel: -1
   critChance: 0.03
   critMultiplier: 2
   maxLevel: 3
   perLevelBonus:
-    damageAdd: 0.2
+    damageAdd: 0.5
     damageMul: 1
     fireIntervalMul: 1
     critChanceAdd: 0
@@ -45,8 +47,13 @@ MonoBehaviour:
   innateEffects:
   - {fileID: 11400000, guid: d17eb8d3dc89cdd4cb7b0c337322e4c6, type: 2}
   themeColor: {r: 1, g: 0.85, b: 0.2, a: 1}
+  supportOnly: 0
+  supportTarget: 0
+  supportTint: {r: 1, g: 1, b: 1, a: 0}
   fireSounds:
-  - {fileID: 8300000, guid: 39e709d10c7c7384185160ccd9940e19, type: 3}
+  - {fileID: 8300000, guid: dc347cc346a2bf9429c5afbb0490c310, type: 3}
+  - {fileID: 8300000, guid: b8b7e1b239cfc694b9c82ba82ce9c4fe, type: 3}
+  - {fileID: 8300000, guid: aa352b9e528c3e54890377e04314d11f, type: 3}
   fireVolume: 0.22
   firePitchRange: {x: 0.96, y: 1.04}
   reloadStartSound: {fileID: 8300000, guid: 0134019f5dd95c640a25be0da776e24f, type: 3}
@@ -61,6 +68,9 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 285ea6e32f744eda627524ff3c2a18a0, type: 3}
   hitLayerVolume: 0.18
   hitLayerMinInterval: 0.09
+  meleeBodySounds: []
+  meleeBodyVolume: 1
+  fireStack: []
   aimMode: 0
   projectilePrefab: {fileID: 5875018044698817663, guid: 614cb4c22e803054abee82ea23183a25, type: 3}
   projectileSpeed: 25
@@ -93,7 +103,12 @@ MonoBehaviour:
     sparkRing: 0
     fireShake: 0
     flashSwing: 0
-    hotFlashSize: 1.0
+    hotFlashSize: 1
     hotTracerLength: 2.4
     hotTracerWidth: 0.15
     hotColor: {r: 1, g: 0.95, b: 0.7, a: 1}
+    smokeMaterial: {fileID: 0}
+    smokeTime: 0
+    smokeWidth: 0.35
+    smokeHeadColor: {r: 1, g: 0.6, b: 0.25, a: 0.9}
+    smokeTailColor: {r: 0.55, g: 0.55, b: 0.58, a: 0.55}

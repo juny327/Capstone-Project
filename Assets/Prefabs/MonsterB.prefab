@@ -255,7 +255,7 @@ MonoBehaviour:
   attackCooldown: 3
   attackSound: {fileID: 8300000, guid: b2c8ea5af61c4d7292565db2aab8f102, type: 3}
   attackSoundDuration: 1.5
-  attackSoundVolume: 0.8
+  attackSoundVolume: 0.45
   warningDuration: 0.9
   dashDistance: 6
   dashSpeed: 8

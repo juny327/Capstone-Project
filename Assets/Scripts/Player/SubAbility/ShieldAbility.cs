@@ -5,7 +5,10 @@ using UnityEngine;
 /// 에너지 방패 — 누르고 있는 동안 몸 앞에 반투명 방패면을 펴서 <b>정면 120°</b> 피해를 막는다 (커스터마이징-구현계획.md 5-3).
 ///
 ///  · 들고 있는 동안 자동 공격이 멈추고 이동이 느려진다 — 무적 버튼이 되지 않게 (라인하르트 · DOOM 방패)
-///  · 막을 때마다 내구도가 준다. 0 이 되면 깨지고 4초 동안 못 편다. 내리면 2초 뒤부터 다시 찬다
+///  · 막을 때마다 내구도가 준다. 0 이 되면 깨지고 12초 쉰 뒤 차기 시작해 약 16초 뒤에 다시 펼 수 있다 (20 이상 차야 편다).
+///    내리면 5초 뒤부터 초당 5씩 다시 찬다 (다 쓴 방패 → 가득 약 15초)
+///    2026-11-23 사용자: "차오르는 주기가 너무 짧아 웬만한 공격은 다 막는다 — 막는 것은 그대로, 쿨타임은 길게"
+///    (예전: 깨지면 4초 · 내리면 2초 뒤 초당 20 — 빈 방패가 4.5초면 가득 찼다 · 다시 펴려면 5 → 20 필요)
 ///  · 0.3초 이상 들고 있다가 떼면 방패 밀치기 — 정면 적을 밀고 경직 (Hades 혼돈의 방패)
 ///
 /// 레벨업 변형 (Lv2 · Lv3 에서 둘 중 하나 — 트라이포드)
@@ -22,12 +25,13 @@ public class ShieldAbility : SubAbility, IDamageFilter
     [Header("막기")]
     [Range(30f, 240f)] [SerializeField] float blockAngle = 120f;
     [Min(1f)] [SerializeField] float durability = 50f;
-    [Min(0f)] [SerializeField] float regenDelay = 2f;
-    [Min(0f)] [SerializeField] float regenPerSecond = 20f;
-    [Tooltip("깨진 뒤 다시 펼 수 있게 되기까지(초)")]
-    [Min(0f)] [SerializeField] float brokenDelay = 4f;
+    [Tooltip("내린 뒤 다시 차기 시작하기까지(초)")]
+    [Min(0f)] [SerializeField] float regenDelay = 5f;
+    [Min(0f)] [SerializeField] float regenPerSecond = 5f;
+    [Tooltip("깨진 뒤 다시 차기 시작하기까지(초)")]
+    [Min(0f)] [SerializeField] float brokenDelay = 12f;
     [Tooltip("이 값 이상 차야 다시 펼 수 있다")]
-    [Min(0f)] [SerializeField] float minimumToRaise = 5f;
+    [Min(0f)] [SerializeField] float minimumToRaise = 20f;
     [Range(0.1f, 1f)] [SerializeField] float moveMultiplier = 0.6f;
 
     [Header("밀치기 (떼면)")]

@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 774e8839cb40ed44f82f525be90550ac, type: 3}
+  m_Name: EVO_Mjolnir
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponEvolutionData
+  from: {fileID: 11400000, guid: 8ae48e8bf008c244f8bc0bbf081269ca, type: 2}
+  requiredLevel: 0
+  requiredAttachment: {fileID: 0}
+  requiredSubAbility: {fileID: 0}
+  requiredAbilityLevel: 1
+  requiredAnyGunAttachment: {fileID: 0}
+  requiredSkill: {fileID: 11400000, guid: ccd08d20b36a1cb41bf39254d1521a65, type: 2}
+  result: {fileID: 11400000, guid: 4eb529a76bb05aa4e833a5b2e39e1c8b, type: 2}
+  title: "\uBB20\uB2C8\uB974"
+  brief: "\uBC88\uAC1C \xB7 \uB099\uB8B0 \xB7 \uB358\uC9C0\uAE30"
+  flavor: "\uB9DE\uD790 \uB54C\uB9C8\uB2E4 \uBC88\uAC1C\uAC00 \uD280\uACE0, \uC138
+    \uBC88\uC9F8 \uB0B4\uB824\uCC0D\uAE30\uC5D0 \uB099\uB8B0 \u2014 \uADF8 \uB4A4
+    \uB9DD\uCE58\uB97C \uB358\uC838 \uC624\uAC00\uB294 \uAE38\uC758 \uC801\uC744
+    \uBAA8\uB450 \uCE5C\uB2E4"
+  color: {r: 0.72, g: 0.9, b: 1, a: 1}
+  sound: {fileID: 8300000, guid: f595650ca3f17154e8de61ccc64e6a00, type: 3}
+  soundVolume: 0.9
+  bodySound: {fileID: 0}
+  bodyVolume: 0.6
+  bassSound: {fileID: 0}
+  bassVolume: 0.7
+  shopPrice: 0

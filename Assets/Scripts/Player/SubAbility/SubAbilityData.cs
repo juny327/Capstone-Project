@@ -11,6 +11,9 @@ public class SubAbilityData : ScriptableObject
 {
     public string displayName = "서브 능력";
 
+    [Tooltip("간단 설명 — 카드에 기본으로 보이는 핵심 한 줄. 비우면 description ('상세 설명' 을 켜면 description, 2026-11-22)")]
+    public string brief;
+
     [TextArea(1, 3)] public string description;
 
     [Tooltip("카드 · HUD 에 보이는 그림")]
@@ -22,10 +25,10 @@ public class SubAbilityData : ScriptableObject
     [Range(1, 3)] public int maxLevel = 3;
 
     [Header("상점 (Stage1 가격)")]
-    [Min(0)] public int basePrice = 25;
+    [Min(0)] public int basePrice = 30;
 
     [Tooltip("레벨업 가격 — [0] = Lv1 → 2, [1] = Lv2 → 3")]
-    public int[] levelPrices = { 15, 22 };
+    public int[] levelPrices = { 25, 35 };
 
     [Tooltip("레벨업으로 좋아지는 것 한 줄 — [0] = Lv2, [1] = Lv3. 변형이 있으면 변형 설명을 쓴다")]
     public string[] levelNotes = { "", "" };
@@ -67,5 +70,7 @@ public class SubAbilityData : ScriptableObject
 public class SubAbilityVariant
 {
     public string name;
+    [Tooltip("간단 설명 — 비우면 description (2026-11-22)")]
+    public string brief;
     [TextArea(1, 3)] public string description;
 }

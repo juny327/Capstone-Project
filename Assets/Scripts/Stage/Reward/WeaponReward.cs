@@ -28,7 +28,7 @@ public class WeaponReward : StageReward
         {
             if (!string.IsNullOrEmpty(descriptionOverride)) return descriptionOverride;
 
-            return weapon != null ? weapon.description : string.Empty;
+            return weapon != null ? DescText.Weapon(weapon) : string.Empty;   // 간단 / 상세 (2026-11-22)
         }
     }
 

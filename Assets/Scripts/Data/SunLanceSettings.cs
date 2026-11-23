@@ -51,6 +51,9 @@ public class SunLanceSettings
     public Color color = new Color(1f, 0.86f, 0.45f, 1f);
     public Color scorchColor = new Color(1f, 0.35f, 0.08f, 0.8f);
 
+    [Tooltip("공통 재료(FxKit)로 모이는 기운 · 불의 길 · 끝 폭발 · 빛기둥을 더한다 (2026-11-20). 끄면 예전 연출")]
+    public bool kitFx = true;
+
     public GameSoundSet.Entry gatherSound = new GameSoundSet.Entry();
     public GameSoundSet.Entry fireSound = new GameSoundSet.Entry();
 

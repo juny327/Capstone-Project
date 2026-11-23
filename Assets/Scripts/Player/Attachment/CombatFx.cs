@@ -36,6 +36,64 @@ public static class CombatFx
     {
         deadBosses.Clear();
         watched.Clear();
+        bodyColliders.Clear();
+    }
+
+    // ───────── 큰 몸(보스)을 겨눌 점 — 2026-11-22 ─────────
+
+    // 루트 → 몸 충돌체 (보스가 아니면 null). 일반 적도 한 번 보고 null 로 기억한다
+    static readonly Dictionary<Transform, Collider[]> bodyColliders = new Dictionary<Transform, Collider[]>();
+    static readonly List<Collider> colliderScratch = new List<Collider>();
+
+    /// <summary>
+    /// 무기가 사거리 · 방향을 잴 점 — 보스처럼 큰 몸은 중심(루트)이 아니라 몸 표면에서 from 에 가장 가까운 점 (높이는 루트 높이),
+    /// 일반 적은 그대로 루트 위치. 드래곤은 길이 8m · 반지름 1.9m 캡슐이라 중심으로 재면 근접 무기가 몸에 딱 붙어야 휘둘렀다.
+    /// </summary>
+    public static Vector3 TargetPoint(Transform root, Vector3 from)
+    {
+        if (root == null) return from;
+        Collider[] cols = BodyColliders(root);
+        if (cols == null) return root.position;
+
+        Vector3 best = root.position;
+        float bestSqr = float.PositiveInfinity;
+        for (int i = 0; i < cols.Length; i++)
+        {
+            Collider c = cols[i];
+            if (c == null || !c.enabled || !c.gameObject.activeInHierarchy) continue;
+            Vector3 p = c is MeshCollider mesh && !mesh.convex ? c.bounds.ClosestPoint(from) : c.ClosestPoint(from);
+            Vector3 d = p - from;
+            d.y = 0f;
+            if (d.sqrMagnitude < bestSqr) { bestSqr = d.sqrMagnitude; best = p; }
+        }
+        if (float.IsPositiveInfinity(bestSqr)) return root.position;
+        best.y = root.position.y;
+        return best;
+    }
+
+    /// <summary>보스(BossHealth · Boss 태그)의 단단한 몸 충돌체. 보스가 아니면 null.</summary>
+    static Collider[] BodyColliders(Transform root)
+    {
+        if (bodyColliders.TryGetValue(root, out Collider[] cached))
+        {
+            if (cached == null) return null;
+            bool alive = true;
+            for (int i = 0; i < cached.Length; i++) if (cached[i] == null) { alive = false; break; }
+            if (alive) return cached;
+        }
+        if (bodyColliders.Count > 512) bodyColliders.Clear();   // 사라진 적 루트가 쌓이지 않게
+
+        Collider[] found = null;
+        if (root.CompareTag("Boss") || root.GetComponentInParent<BossHealth>() != null)
+        {
+            colliderScratch.Clear();
+            foreach (Collider c in root.GetComponents<Collider>()) if (!c.isTrigger) colliderScratch.Add(c);
+            if (colliderScratch.Count == 0)
+                foreach (Collider c in root.GetComponentsInChildren<Collider>()) if (!c.isTrigger) colliderScratch.Add(c);
+            if (colliderScratch.Count > 0) found = colliderScratch.ToArray();
+        }
+        bodyColliders[root] = found;
+        return found;
     }
 
     /// <summary>
@@ -167,7 +225,7 @@ public static class CombatFx
         });
 
         if (SoundManager.Instance != null)
-            SoundManager.Instance.ReportHit(critical, sound);
+            SoundManager.Instance.ReportHit(critical, sound, root);
     }
 
     /// <summary>경직 (보스는 경직이 없다 — 넘어간다).</summary>
@@ -187,9 +245,80 @@ public static class CombatFx
     /// <summary>몸통 높이 (선 · 폭발 연출을 발밑이 아니라 몸에 맞춘다).</summary>
     public static Vector3 Body(Transform root) => root.position + Vector3.up * 0.9f;
 
-    public static void PlaySound(GameSoundSet.Entry entry)
+    /// <summary>
+    /// 부착물 · 상위 무기 효과 · 연계의 소리. 폭발은 kind 에 Explosion 을 넘긴다 (2026-11-19 종류별 동시 발음 제한).
+    /// 상위 무기의 소리(번개 · 폭발 · 칼날 …)면 상위 무기 그룹(+5dB)으로 — 2026-11-23 사용자: "상위 무기 효과음이 배경음에 묻힌다".
+    /// </summary>
+    public static void PlaySound(GameSoundSet.Entry entry, SoundKind kind = SoundKind.Ability)
     {
-        if (entry != null && SoundManager.Instance != null) SoundManager.Instance.Play(entry);
+        if (entry != null && SoundManager.Instance != null)
+            SoundManager.Instance.Play(entry, SoundManager.Instance.GroupFor(IsEvolvedSound(entry)), 1f, 1f, kind);
+    }
+
+    // ───────── 상위 무기 소리 목록 (2026-11-23) ─────────
+
+    static HashSet<GameSoundSet.Entry> evolvedSounds;
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetEvolvedSounds() => evolvedSounds = null;
+
+    /// <summary>
+    /// 이 소리 칸이 상위 무기 것인가 — 상위 무기 데이터(프리즘 노바 · 태양창 설정 포함)와 그 고유 효과 에셋(AE_EVO_* — 묠니르 번개 ·
+    /// 공성포 폭발 · 혈검 …)에 든 소리 칸을 처음 한 번 모아 둔다. 망치 · 방망이처럼 기본 무기와 같은 코드를 쓰는 효과도
+    /// 에셋이 따로라(AE_Hammer ↔ AE_EVO_Mjolnir) 상위 무기 쪽 소리만 걸린다. 호출하는 쪽은 고치지 않는다.
+    /// </summary>
+    public static bool IsEvolvedSound(GameSoundSet.Entry entry)
+    {
+        if (entry == null) return false;
+        if (evolvedSounds == null) BuildEvolvedSounds();
+        return evolvedSounds.Contains(entry);
+    }
+
+    /// <summary>모은 상위 무기 소리 칸 수 (시험).</summary>
+    public static int EvolvedSoundCount { get { if (evolvedSounds == null) BuildEvolvedSounds(); return evolvedSounds.Count; } }
+
+    static void BuildEvolvedSounds()
+    {
+        evolvedSounds = new HashSet<GameSoundSet.Entry>();
+        EvolutionCatalog catalog = EvolutionCatalog.Instance;
+        if (catalog == null || catalog.evolutions == null) return;
+
+        var seen = new HashSet<object>();
+        foreach (WeaponEvolutionData e in catalog.evolutions)
+        {
+            if (e == null || e.result == null) continue;
+            CollectSounds(e.result, 0, seen);
+            if (e.result.innateEffects != null)
+                foreach (AttachmentEffect fx in e.result.innateEffects)
+                    if (fx != null) CollectSounds(fx, 0, seen);
+        }
+    }
+
+    static void CollectSounds(object o, int depth, HashSet<object> seen)
+    {
+        if (o == null || depth > 4 || !seen.Add(o)) return;
+        if (o is GameSoundSet.Entry entry) { evolvedSounds.Add(entry); return; }
+
+        const System.Reflection.BindingFlags flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic;
+        foreach (System.Reflection.FieldInfo f in o.GetType().GetFields(flags))
+        {
+            System.Type t = f.FieldType;
+            if (t == typeof(GameSoundSet.Entry))
+            {
+                if (f.GetValue(o) is GameSoundSet.Entry en) evolvedSounds.Add(en);
+            }
+            else if (t.IsArray)
+            {
+                System.Type el = t.GetElementType();
+                if (el == null || typeof(Object).IsAssignableFrom(el) || el.IsPrimitive || el.IsValueType || el == typeof(string)) continue;
+                if (f.GetValue(o) is System.Array array)
+                    foreach (object item in array) CollectSounds(item, depth + 1, seen);
+            }
+            else if (t.IsClass && t != typeof(string) && !typeof(Object).IsAssignableFrom(t) && t.IsSerializable)
+            {
+                CollectSounds(f.GetValue(o), depth + 1, seen);
+            }
+        }
     }
 
     /// <summary>총알 · 광선이 벽에 막힌 소리 ('탁').</summary>

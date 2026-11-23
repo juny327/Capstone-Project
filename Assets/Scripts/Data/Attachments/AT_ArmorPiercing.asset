@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: AT_ArmorPiercing
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentData
   displayName: "\uCCA0\uAC11\uD0C4"
+  brief: "\uC801\uC744 2\uBA85 \uB354 \uAFF0\uB6AB\uB294\uB2E4"
   description: "\uC801\uC744 \uAFF0\uB6AB\uACE0 \uB4A4\uAE4C\uC9C0 \uB9DE\uD78C\uB2E4"
   icon: {fileID: 21300000, guid: c2a9f8ea6388e9b4abbec7c686005bfa, type: 3}
   slot: 4

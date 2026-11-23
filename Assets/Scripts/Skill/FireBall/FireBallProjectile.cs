@@ -24,8 +24,9 @@ public class FireBallProjectile : MonoBehaviour
         this.damage = damage;
         this.speed = speed;
         this.cameraShake = cameraShake;
+        hasHit = false;   // 풀에서 다시 쓰므로 지난 발의 상태를 지운다 (2026-11-18)
 
-        Destroy(gameObject, lifeTime);
+        PoolManager.DespawnAfter(gameObject, lifeTime);
     }
 
     void Update()
@@ -37,7 +38,7 @@ public class FireBallProjectile : MonoBehaviour
             !target.gameObject.activeInHierarchy ||
             target.state == EnemyState.Dead)
         {
-            Destroy(gameObject);
+            PoolManager.Despawn(gameObject);
             return;
         }
 
@@ -48,6 +49,15 @@ public class FireBallProjectile : MonoBehaviour
 
         if (direction.sqrMagnitude > 0.001f)
             transform.rotation = Quaternion.LookRotation(direction.normalized);
+
+        // 이번 프레임에 지나갈 길에 맵 벽이 있으면 거기서 사라진다 (2026-11-17 — 벽을 뚫고 날아갔다)
+        float step = Mathf.Min(speed * Time.deltaTime, direction.magnitude);
+        if (step > 0.0001f && CombatFx.ObstacleDistance(transform.position, direction, step) < step)
+        {
+            CombatFx.ObstacleHitSound();
+            PoolManager.Despawn(gameObject);
+            return;
+        }
 
         transform.position = Vector3.MoveTowards(
             transform.position,
@@ -81,6 +91,6 @@ public class FireBallProjectile : MonoBehaviour
         target.TakeDamage(info);
         SoundManager.Instance?.ReportHit(false, HitSound.FireBall);
 
-        Destroy(gameObject);
+        PoolManager.Despawn(gameObject);
     }
 }

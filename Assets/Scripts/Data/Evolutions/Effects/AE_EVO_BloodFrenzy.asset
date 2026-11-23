@@ -16,7 +16,7 @@ MonoBehaviour:
   killGain: 10
   gainPerHeal: 1.7
   fullHpMultiplier: 2
-  bossHitGain: 2
+  hitGain: 5
   frenzyDuration: 6
   killExtend: 0.5
   maxFrenzy: 10
@@ -30,7 +30,7 @@ MonoBehaviour:
   frenzySound:
     clips:
     - {fileID: 8300000, guid: 6f0fd072993ca754e8ff678030d36181, type: 3}
-    volume: 0.6
+    volume: 0.573
     pitchRange: {x: 0.96, y: 1.04}
     minInterval: 0
   flurryCount: 12

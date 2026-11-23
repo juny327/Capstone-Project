@@ -5,6 +5,9 @@ public class UpgradeData : ScriptableObject
 {
     public string upgradeName;
 
+    [Tooltip("간단 설명 — 카드에 기본으로 보이는 핵심 한 줄. 비우면 description ('상세 설명' 을 켜면 description, 2026-11-22)")]
+    public string brief;
+
     public string description;
 
     public Sprite icon;
@@ -16,7 +19,7 @@ public class UpgradeData : ScriptableObject
     [Min(0)]
     public int maxLevel = 5;
 
-    [Tooltip("켜면 몇 번을 사도 기본 비용 그대로 (회복처럼 쓰고 없어지는 카드, 2026-11-08)")]
+    [Tooltip("켜면 몇 번을 사도 기본 비용 그대로 (2026-11-08 회복 카드에 썼다 → 2026-11-23 사용자: \"회복도 살수록 비싸게\" — 지금 켠 카드 없음)")]
     public bool fixedCost;
 
     /// <summary>Lv.level 로 올리는 비용 — 기본 비용 × 레벨 (2026-11-04, 키울수록 비싸진다: 스킬 10 → 20 → 30 …). fixedCost 면 늘 기본 비용.</summary>

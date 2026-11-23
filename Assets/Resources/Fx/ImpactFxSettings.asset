@@ -92,3 +92,17 @@ MonoBehaviour:
     thud: 0
     kick: 0
     duck: 0
+  bossKill:
+    hitStop: 1
+    zoom: 0.05
+    flash: 0.16
+    thud: 0.8
+    kick: 0
+    duck: 1
+  bossBurst:
+    hitStop: 0
+    zoom: 0.04
+    flash: 0.2
+    thud: 0.9
+    kick: 0
+    duck: 1

@@ -10,7 +10,8 @@ public class PlayerMove : MonoBehaviour
     private PlayerStats stats;
     public EnemyDetector detector;
 
-    [SerializeField] public float baseSpeed = 3f; // 🔥 기존 moveSpeed → baseSpeed
+    [Tooltip("기본 걷기 속도 (m/s) — 캐릭터 배율(사수 ×1 · 검사 ×1.1)과 업그레이드가 곱해진다. 2026-11-20 3 → 3.3 (보스 패턴이 빨라 구르기 · 스태미나가 없을 때 피하기 힘들다)")]
+    [SerializeField] public float baseSpeed = 3.3f; // 🔥 기존 moveSpeed → baseSpeed
     private List<float> speedModifiers = new List<float>();
 
     bool isDead = false;
@@ -140,8 +141,8 @@ public class PlayerMove : MonoBehaviour
     [Tooltip("구르기 지속 시간(초) — 짧을수록 빠르게. Roll 클립은 이 시간에 맞춰 빨리 재생된다 (2026-10-13 0.55 → 0.75 — 너무 빨라 조금 느리게)")]
     [SerializeField] private float rollDuration = 0.75f;
 
-    [Tooltip("이 이동 속도일 때 rollDistance 만큼 구른다 (플레이어 기본 이동 속도)")]
-    [SerializeField] private float rollReferenceSpeed = 3f;
+    [Tooltip("이 이동 속도일 때 rollDistance 만큼 구른다 (플레이어 기본 이동 속도 — baseSpeed 와 같이 바꾼다. 2026-11-20 3 → 3.3, 구르는 거리는 그대로 4m)")]
+    [SerializeField] private float rollReferenceSpeed = 3.3f;
 
     [Tooltip("이동 속도를 따라 늘어나는 거리의 상한 배율 (달리기여도 4 → 5m 까지)")]
     [SerializeField] private float rollMaxScale = 1.25f;
@@ -709,6 +710,9 @@ public class PlayerMove : MonoBehaviour
         return sounds != null && !isRolling && currentGround && move != Vector2.zero && Time.timeScale > 0.01f;
     }
 
+    /// <summary>발소리 한 번 — 연출이 캐릭터를 직접 걷게 할 때 (엔딩 균열 진입, 2026-11-15). 평소 걸음과 같은 소리.</summary>
+    public void PlayStepSound() => PlaySound(sounds != null ? sounds.footstep : null);
+
     /// <summary>
     /// 예비 방식 — 발 뼈를 못 찾을 때(휴머노이드가 아닌 모델)만 이동 거리로 간격을 잡는다.
     /// </summary>
@@ -754,7 +758,9 @@ public class PlayerMove : MonoBehaviour
     {
         if (entry == null || SoundManager.Instance == null) return;
 
-        SoundManager.Instance.Play(entry);
+        // 발소리는 가장 덜 중요하다 — 전투음이 많으면 먼저 빠진다 (2026-11-19 종류별 동시 발음 제한)
+        SoundManager.Instance.Play(entry, SoundManager.Instance.SfxGroup, 1f, 1f,
+            sounds != null && entry == sounds.footstep ? SoundKind.Footstep : SoundKind.Player);
     }
 
     void OnSprint(InputAction.CallbackContext context)

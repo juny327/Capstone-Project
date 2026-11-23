@@ -107,9 +107,28 @@ public class DragonSound : MonoBehaviour
         voice.volume = Mathf.Clamp01(entry.volume * volumeScale) * SfxVolume;
         voice.pitch = Mathf.Clamp(entry.PickPitch(), 0.1f, 3f);
         voice.outputAudioMixerGroup = SoundManager.Instance != null ? SoundManager.Instance.SfxGroup : null;
+        voice.priority = 16;   // 보스 소리는 무기 · 맞힘 소리보다 먼저 남는다 (유니티 목소리가 모자랄 때)
         voice.Play();
+        DuckMusicFor(sfx);
         OnPlayed?.Invoke(sfx);
         return voice;
+    }
+
+    /// <summary>
+    /// 큰 보스 소리 때 배경음을 잠깐 줄인다 (2026-11-19 효과음 재정비 1단계 — 빽빽한 락 배경음에 포효가 묻히지 않게).
+    /// 다른 효과음은 그대로 둔다 (sfx 1).
+    /// </summary>
+    static void DuckMusicFor(DragonSfx sfx)
+    {
+        SoundManager sm = SoundManager.Instance;
+        if (sm == null) return;
+        switch (sfx)
+        {
+            case DragonSfx.Roar: sm.DuckForImpact(0.5f, 0.6f, 1f); break;
+            case DragonSfx.Land: sm.DuckForImpact(0.45f, 0.6f, 1f); break;
+            case DragonSfx.Crash: sm.DuckForImpact(0.3f, 0.7f, 1f); break;
+            case DragonSfx.Death: sm.DuckForImpact(1.6f, 0.45f, 1f); break;
+        }
     }
 
     /// <summary>그 소리를 seconds 초에 걸쳐 줄인 뒤 끊는다 (브레스가 끝날 때).</summary>

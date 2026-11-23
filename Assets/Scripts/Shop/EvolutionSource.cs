@@ -2,8 +2,9 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 진열 공급원 — 지금 할 수 있는 진화 (상위무기-계획.md 3-2). 무기 줄 맨 앞에 나온다.
-/// 마지막 정비에서 조건을 채운 경우에도 보스전 전에 받을 수 있게 하는 자리다.
+/// 지금 할 수 있는 진화 (상위무기-계획.md 3-2) — 정비 창 오른쪽 '상위 무기' 칸 (2026-11-17 밸런스 결정 6).
+/// 진열 공급원 목록(ShopCatalog.sources)이 아니라 ShopCatalog.evolutionSource 에 넣는다 — ShopService 가 무엇을 살 때마다
+/// 다시 모아, 무기 레벨 · 짝을 갖추는 순간 칸이 켜진다. slots = 칸 수.
 /// </summary>
 [CreateAssetMenu(menuName = "Shop/Sources/Evolution", fileName = "ShopSource_Evolution")]
 public class EvolutionSource : ShopOfferSource
@@ -20,7 +21,7 @@ public class EvolutionSource : ShopOfferSource
 
         foreach (WeaponEvolutionData e in ready)
         {
-            int price = ctx.Catalog != null ? ctx.Catalog.Scaled(e.shopPrice, ctx.StageIndex) : e.shopPrice;
+            int price = ctx.Catalog != null ? ctx.Catalog.Scaled(e.shopPrice, ctx.StageIndex, ctx.PriceMultiplier) : e.shopPrice;
             into.Add(new EvolutionOffer(e, e.shopPrice > 0 ? price : 0));
         }
     }
@@ -49,14 +50,7 @@ public class EvolutionOffer : ShopOffer
 
     public override string Title => $"상위 무기 — {evolution.Title}";
 
-    public override string Description
-    {
-        get
-        {
-            string head = evolution.from != null ? $"{evolution.from.weaponName} → {evolution.Title}" : evolution.Title;
-            return string.IsNullOrEmpty(evolution.flavor) ? head : $"{head} · {evolution.flavor}";
-        }
-    }
+    public override string Description => DescText.Evolution(evolution);   // 간단 = 한 줄 · 상세 = 조건 → 이름 + 전체 설명 (2026-11-22)
 
     public override Sprite Icon => evolution.result != null && evolution.result.icon != null
         ? evolution.result.icon

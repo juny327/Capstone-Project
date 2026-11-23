@@ -237,8 +237,8 @@ public static class SoundManagerSetup
 
         SerializedObject so = new SerializedObject(set);
 
-        Fill(so, "levelUp", 0.9f, 0f, $"{Interface}/confirmation_003.ogg");
-        Fill(so, "upgradeOpen", 0.7f, 0f, $"{Interface}/open_001.ogg");
+        Fill(so, "levelUp", 0.277f, 0f, "Assets/AUDIO/Soft/confirmation_003_soft.wav");   // 11-22 크기 맞춤 (Logs/sndlevel/plan.txt)
+        Fill(so, "upgradeOpen", 0.926f, 0f, "Assets/AUDIO/Soft/open_001_soft.wav");   // 11-22 크기 맞춤 (Logs/sndlevel/plan.txt)
         Fill(so, "weaponAcquired", 0.8f, 0f, $"{Interface}/drop_001.ogg");
 
         FillHitKinds(so);
@@ -267,11 +267,11 @@ public static class SoundManagerSetup
             $"{Impact}/impactPlate_medium_003.ogg",
             $"{Impact}/impactPlate_medium_004.ogg");
 
-        Fill(so, "weaponSwap", 0.7f, 0f, $"{Interface}/switch_001.ogg");
-        Fill(so, "playerDead", 1f, 0f, $"{SciFi}/lowFrequency_explosion_000.ogg");
-        Fill(so, "stageClear", 0.9f, 0f, $"{Interface}/confirmation_004.ogg");
-        Fill(so, "stageRewardOpen", 0.8f, 0f, $"{Interface}/maximize_001.ogg");
-        Fill(so, "bossSpawn", 1f, 0f, $"{SciFi}/forceField_000.ogg");
+        Fill(so, "weaponSwap", 0.957f, 0f, "Assets/AUDIO/Soft/switch_001_soft.wav");   // 11-22 크기 맞춤 (Logs/sndlevel/plan.txt)
+        Fill(so, "playerDead", 0.642f, 0f, $"{SciFi}/lowFrequency_explosion_000.ogg");   // 11-22 크기 맞춤 (Logs/sndlevel/plan.txt)
+        Fill(so, "stageClear", 0.241f, 0f, $"{Interface}/confirmation_004.ogg");   // 11-22 크기 맞춤 (Logs/sndlevel/plan.txt)
+        Fill(so, "stageRewardOpen", 0.416f, 0f, "Assets/AUDIO/Soft/maximize_001_soft.wav");   // 11-22 크기 맞춤 (Logs/sndlevel/plan.txt)
+        Fill(so, "bossSpawn", 0.291f, 0f, $"{SciFi}/forceField_000.ogg");   // 11-22 크기 맞춤 (Logs/sndlevel/plan.txt)
 
         so.ApplyModifiedPropertiesWithoutUndo();
 

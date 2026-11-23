@@ -140,12 +140,14 @@ public class ImpactHost : MonoBehaviour
 
     CinemachineImpulseSource thud, rumble, kick;
 
-    // 줌 펀치
-    CinemachineCamera zoomCam;
-    float zoomBase;
-    float zoomAmount;      // 지금 당겨진 비율 (0 = 원래대로)
+    // 시야 — 원래 값 × 넓히기 × (1 − 줌 − 당김). 처음 건드릴 때 카메라와 원래 값을 잡고, 다 돌아오면 놓는다
+    CinemachineCamera lensCam;
+    float lensBase;
+    bool lensOrtho;
+    float zoomAmount;      // 줌 펀치 — 지금 당겨진 비율 (0 = 원래대로)
     float zoomPeak, zoomAge;
-    bool zoomOrtho;
+    float wide = 1f, wideTarget = 1f, wideSpeed = 1f;   // 넓히기 (보스전 동안 — DragonPressure)
+    float lean, leanTarget, leanUntil = -1f;            // 당김 (큰 공격 준비 — 천천히 당겼다가 놓는다)
 
     // 가장자리 번쩍
     Image vignette;
@@ -271,41 +273,68 @@ public class ImpactHost : MonoBehaviour
     /// <summary>시야를 amount 비율만큼 당겼다가 zoomReturn 초에 돌아온다. 이미 당겨져 있으면 더 큰 쪽으로.</summary>
     public void Zoom(float amount)
     {
-        if (amount <= 0f) return;
-
-        if (zoomCam == null || zoomAmount <= 0f)
-        {
-            CinemachineBrain brain = CinemachineBrain.GetActiveBrain(0);
-            var cam = brain != null ? brain.ActiveVirtualCamera as CinemachineCamera : null;
-            if (cam == null) return;
-            // 보스 등장 연출 카메라가 잡고 있을 때는 건드리지 않는다
-            if (DragonEntrance.Current != null && !DragonEntrance.Current.Finished) return;
-
-            zoomCam = cam;
-            zoomOrtho = cam.Lens.Orthographic;
-            zoomBase = zoomOrtho ? cam.Lens.OrthographicSize : cam.Lens.FieldOfView;
-        }
-
+        if (amount <= 0f || !HoldLens()) return;
         zoomPeak = Mathf.Max(zoomAmount, amount);
         zoomAmount = zoomPeak;
         zoomAge = 0f;
-        ApplyZoom();
+        ApplyLens();
         ImpactFx.Zooms++;
     }
 
-    void ApplyZoom()
+    /// <summary>
+    /// 시야를 scale 배로 넓힌다 (seconds 초에 걸쳐 — 1 이면 원래대로). 보스전 동안 큰 몸이 화면에 들어오게 (2026-11-20).
+    /// 카메라를 아직 못 잡았으면 false — 다음 프레임에 다시 부른다.
+    /// </summary>
+    public bool Widen(float scale, float seconds)
     {
-        if (zoomCam == null) return;
-        float value = zoomBase * (1f - zoomAmount);
-        if (zoomOrtho) zoomCam.Lens.OrthographicSize = value;
-        else zoomCam.Lens.FieldOfView = value;
+        scale = Mathf.Max(0.5f, scale);
+        if (!HoldLens()) return Mathf.Approximately(scale, 1f);
+        wideTarget = scale;
+        wideSpeed = Mathf.Abs(scale - wide) / Mathf.Max(0.05f, seconds);
+        return true;
     }
 
-    void EndZoom()
+    /// <summary>당김 — amount 비율만큼 천천히 당기고 hold 초 뒤에 놓는다 (큰 공격을 준비하는 동안 — 2026-11-20).</summary>
+    public void Lean(float amount, float hold)
     {
-        zoomAmount = 0f;
-        ApplyZoom();
-        zoomCam = null;
+        if (amount <= 0f || !HoldLens()) return;
+        leanTarget = amount;
+        leanUntil = Time.unscaledTime + hold;
+    }
+
+    /// <summary>지금 카메라를 잡는다 (이미 잡았으면 그대로) — 건드리기 전의 시야 값을 기억한다.</summary>
+    bool HoldLens()
+    {
+        if (lensCam != null) return true;
+        CinemachineBrain brain = CinemachineBrain.GetActiveBrain(0);
+        var cam = brain != null ? brain.ActiveVirtualCamera as CinemachineCamera : null;
+        if (cam == null) return false;
+        // 보스 등장 연출 카메라가 잡고 있을 때는 건드리지 않는다
+        if (DragonEntrance.Current != null && !DragonEntrance.Current.Finished) return false;
+        lensCam = cam;
+        lensOrtho = cam.Lens.Orthographic;
+        lensBase = lensOrtho ? cam.Lens.OrthographicSize : cam.Lens.FieldOfView;
+        wide = 1f;
+        lean = 0f;
+        return true;
+    }
+
+    void ApplyLens()
+    {
+        if (lensCam == null) return;
+        float value = lensBase * wide * Mathf.Max(0.5f, 1f - zoomAmount - lean);
+        if (lensOrtho) lensCam.Lens.OrthographicSize = value;
+        else lensCam.Lens.FieldOfView = value;
+    }
+
+    /// <summary>시야를 원래대로 돌려놓고 카메라를 놓는다.</summary>
+    void ReleaseLens()
+    {
+        zoomAmount = lean = leanTarget = 0f;
+        wide = wideTarget = 1f;
+        leanUntil = -1f;
+        ApplyLens();
+        lensCam = null;
     }
 
     // ───────── 가장자리 번쩍 ─────────
@@ -348,8 +377,8 @@ public class ImpactHost : MonoBehaviour
         return image;
     }
 
-    /// <summary>가운데는 투명하고 가장자리로 갈수록 진해지는 그림 (한 번 만들어 쓴다).</summary>
-    static Sprite VignetteSprite()
+    /// <summary>가운데는 투명하고 가장자리로 갈수록 진해지는 그림 (부를 때마다 새로 만든다 — 쓰는 쪽이 한 번 만들어 둔다). 피격 연출(PlayerHurtFx)도 쓴다.</summary>
+    internal static Sprite VignetteSprite()
     {
         const int Size = 128;
         var tex = new Texture2D(Size, Size, TextureFormat.RGBA32, false) { wrapMode = TextureWrapMode.Clamp, hideFlags = HideFlags.HideAndDontSave };
@@ -411,18 +440,36 @@ public class ImpactHost : MonoBehaviour
         float dt = Time.unscaledDeltaTime;
         ImpactFxSettings s = ImpactFx.Settings;
 
+        // 시야 — 줌 펀치 · 넓히기 · 당김을 한꺼번에 굴린다
+        bool moved = false;
         if (zoomAmount > 0f)
         {
-            if (zoomCam == null) zoomAmount = 0f;
-            else
-            {
-                // 처음에 빠르게, 끝에 천천히 돌아온다
-                zoomAge += dt;
-                float t = Mathf.Clamp01(zoomAge / Mathf.Max(0.02f, s != null ? s.zoomReturn : 0.12f));
-                zoomAmount = zoomPeak * (1f - t) * (1f - t);
-                if (t >= 1f) EndZoom();
-                else ApplyZoom();
-            }
+            // 처음에 빠르게, 끝에 천천히 돌아온다
+            zoomAge += dt;
+            float t = Mathf.Clamp01(zoomAge / Mathf.Max(0.02f, s != null ? s.zoomReturn : 0.12f));
+            zoomAmount = t >= 1f ? 0f : zoomPeak * (1f - t) * (1f - t);
+            moved = true;
+        }
+        if (!Mathf.Approximately(wide, wideTarget))
+        {
+            wide = Mathf.MoveTowards(wide, wideTarget, wideSpeed * dt);
+            moved = true;
+        }
+        float leanGoal = Time.unscaledTime < leanUntil ? leanTarget : 0f;
+        if (!Mathf.Approximately(lean, leanGoal))
+        {
+            lean = Mathf.MoveTowards(lean, leanGoal, (leanGoal > lean ? 0.12f : 0.3f) * dt);   // 천천히 당기고 빨리 놓는다
+            moved = true;
+        }
+        if (lensCam == null)
+        {
+            // 카메라가 사라졌다 (씬이 바뀌었다) — 처음부터
+            if (moved || wide != 1f) { zoomAmount = lean = leanTarget = 0f; wide = wideTarget = 1f; leanUntil = -1f; }
+        }
+        else if (moved)
+        {
+            ApplyLens();
+            if (zoomAmount <= 0f && lean <= 0f && leanGoal <= 0f && Mathf.Approximately(wide, 1f) && Mathf.Approximately(wideTarget, 1f)) ReleaseLens();
         }
 
         if (vignette != null && vignette.enabled)
@@ -439,7 +486,7 @@ public class ImpactHost : MonoBehaviour
     // 씬이 바뀌어 사라질 때 — 줌 · 시간을 원래대로 돌려놓는다
     void OnDestroy()
     {
-        if (zoomAmount > 0f && zoomCam != null) EndZoom();
+        if (lensCam != null) ReleaseLens();
         RestoreTime();
         if (instance == this) instance = null;
     }

@@ -34,6 +34,16 @@ public class GameSettingsUI : MonoBehaviour
     [SerializeField] private Slider shakeSlider;
     [SerializeField] private TMP_Text shakeValue;
 
+    // 피격 화면 효과 켜기 / 끄기 (2026-11-17) — 예전 프리팹에는 없을 수 있다 (없으면 그 줄만 빠진다)
+    [SerializeField] private Button hurtFxButton;
+    [SerializeField] private TMP_Text hurtFxValue;
+
+    // 그래픽 품질(높음 → 중간 → 낮음) · FPS 표시 (2026-11-18 성능 3단계) — 예전 프리팹에는 없을 수 있다 (없으면 그 줄만 빠진다)
+    [SerializeField] private Button graphicsButton;
+    [SerializeField] private TMP_Text graphicsValue;
+    [SerializeField] private Button fpsButton;
+    [SerializeField] private TMP_Text fpsValue;
+
     [SerializeField] private Button closeButton;
     [SerializeField] private Button resetButton;
 
@@ -86,6 +96,9 @@ public class GameSettingsUI : MonoBehaviour
         musicSlider.onValueChanged.AddListener(v => { if (!syncing) GameSettings.SetMusic(v); ShowValues(); });
         sfxSlider.onValueChanged.AddListener(v => { if (!syncing) GameSettings.SetSfx(v); ShowValues(); });
         if (shakeSlider != null) shakeSlider.onValueChanged.AddListener(v => { if (!syncing) GameSettings.SetShake(v); ShowValues(); });
+        if (hurtFxButton != null) hurtFxButton.onClick.AddListener(() => { GameSettings.SetHurtFx(!GameSettings.HurtFx); ShowValues(); });
+        if (graphicsButton != null) graphicsButton.onClick.AddListener(() => { GameSettings.SetGraphics((GraphicsLevel)(((int)GameSettings.Graphics + 1) % 3)); ShowValues(); });
+        if (fpsButton != null) fpsButton.onClick.AddListener(() => { GameSettings.SetShowFps(!GameSettings.ShowFps); ShowValues(); });
 
         closeButton.onClick.AddListener(Close);
         resetButton.onClick.AddListener(() => { GameSettings.ResetToDefaults(); SyncSliders(); });
@@ -123,6 +136,7 @@ public class GameSettingsUI : MonoBehaviour
         if (confirmUntil > 0f && Time.unscaledTime > confirmUntil) ResetLobbyConfirm();
 
         if (Keyboard.current == null || !Keyboard.current.escapeKey.wasPressedThisFrame) return;
+        if (GuideUI.HandlesEscape) return;   // 조작 가이드 창이 이 ESC 로 닫힌다 (2026-11-16)
 
         if (IsOpen) Close();
         else Open();
@@ -212,6 +226,9 @@ public class GameSettingsUI : MonoBehaviour
         musicValue.text = Percent(musicSlider.value);
         sfxValue.text = Percent(sfxSlider.value);
         if (shakeSlider != null && shakeValue != null) shakeValue.text = Percent(shakeSlider.value);
+        if (hurtFxValue != null) hurtFxValue.text = GameSettings.HurtFx ? "켜짐" : "꺼짐";
+        if (graphicsValue != null) graphicsValue.text = GraphicsQuality.Name(GameSettings.Graphics);
+        if (fpsValue != null) fpsValue.text = GameSettings.ShowFps ? "켜짐" : "꺼짐";
     }
 
     static string Percent(float v) => $"{Mathf.RoundToInt(v * 100f)}%";

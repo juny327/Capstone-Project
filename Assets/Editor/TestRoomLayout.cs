@@ -29,16 +29,17 @@ internal static class TestRoomLayout
     public static readonly int[] Distances = { 3, 6, 10, 14, 18 };
 
     // ── 무기 선반 (서쪽 한 줄) — TestRoomManager.weapons 순서와 상관없이 이름으로 놓는다 ──
+    //    2026-11-20 근거리 2종(전투 망치 · 방망이)을 더하며 간격 4.5 → 4m (근거리 5종이 방 안에 들게, 발판 사이 빈틈 2.4m)
     public const float RackX = -26f;
     public static readonly (string weapon, float z)[] Rack =
     {
-        ("WD_Rifle", 18f), ("WD_SMG", 13.5f), ("WD_Sniper", 9f),
-        ("WD_Shotgun", 4.5f), ("WD_TeslaRifle", 0f), ("WD_ChargeLaser", -4.5f),
+        ("WD_Rifle", 19f), ("WD_SMG", 15f), ("WD_Sniper", 11f),
+        ("WD_Shotgun", 7f), ("WD_TeslaRifle", 3f), ("WD_ChargeLaser", -1f),
         // ── 간격을 더 벌려 근거리 묶음 ──
-        ("WD_Sword", -11f), ("WD_Greatsword", -15.5f), ("WD_Spear", -20f),
+        ("WD_Sword", -6.5f), ("WD_Greatsword", -10.5f), ("WD_Spear", -14.5f), ("WD_Hammer", -18.5f), ("WD_Bat", -22.5f),
     };
     public static readonly Vector3 RangedLabel = new Vector3(RackX, 0.1f, 21.6f);
-    public static readonly Vector3 MeleeLabel = new Vector3(RackX, 0.1f, -7.8f);
+    public static readonly Vector3 MeleeLabel = new Vector3(RackX, 0.1f, -3.8f);
 
     /// <summary>선반에 없는 무기(새로 더한 것)는 맨 아래 이어서.</summary>
     public static float RackZ(string weapon, int fallbackIndex)
@@ -63,16 +64,21 @@ internal static class TestRoomLayout
     public const float ModStartX = 8f;            // 한 줄 3칸 → x 16.4
     public const float AbilityTopZ = 12f;         // 능력마다 한 줄 (Lv1 · Lv2 A · B · Lv3 A · B) → x 24.8
 
-    // ── 보조 무기 구역 (남쪽 가운데, 2026-11-11) — 상위 무기 구역 아래 · 무리 자리 왼쪽, 4 × 3 ──
+    // ── 보조 무기 구역 (남쪽 가운데, 2026-11-11) — 상위 무기 구역 아래 · 무리 자리 왼쪽, 5 × 3 (2026-11-20 한 칸 늘려 왼쪽으로) ──
     public const float SupportTopZ = -15f;
     public const float SupportRowStep = 3.6f;
-    public const float SupportStartX = -5f;
+    public const float SupportStartX = -9.5f;
     public const float SupportStepX = 4.5f;
 
     // ── 보스 바로 가기 (서남쪽, 2026-11-13) — 무기 선반 근접 묶음과 상위 무기 구역 사이, 무리 자리 위 ──
-    public static readonly Vector3 BossLabel = new Vector3(-19f, 0.1f, -5.6f);
+    public static readonly Vector3 BossLabel = new Vector3(-19f, 1.1f, -5.6f);   // 5줄 — 낮으면 아랫줄이 바닥에 묻힌다 (11-15)
     public static readonly Vector3 BossDirectPad = new Vector3(-19f, 0f, -8.5f);
     public static readonly Vector3 BossIntroPad = new Vector3(-19f, 0f, -12.5f);
+
+    // ── 엔딩 화면 보기 (서남쪽 아래, 2026-11-15) — 보스 바로 가기 바로 아래 한 줄. 오른쪽 무리 발판(x −14)과 5m ──
+    public static readonly Vector3 EndingLabel = new Vector3(-19f, 0.65f, -15.3f);   // 3줄 — 아랫줄이 바닥에 묻히지 않게
+    public static readonly Vector3 EndingResultPad = new Vector3(-19f, 0f, -18f);
+    public static readonly Vector3 EndingCreditsPad = new Vector3(-19f, 0f, -21.6f);
 
     // ── 드래곤 동작 보기 (북쪽 가운데, 2026-11-13) — 부착물 구역(x ≤ −8.7)과 개조 구역(x ≥ 6) 사이 빈자리 ──
     //    드래곤은 남쪽(발판 · 카메라 쪽)을 본다. 발판은 그 앞 한 줄
@@ -87,7 +93,8 @@ internal static class TestRoomLayout
 
     // ── 무리 표적 (남쪽) ──
     public static readonly Vector3 ClusterPoint = new Vector3(14f, 0f, -16f);
-    public static readonly Vector3[] CrowdPads = { new Vector3(-14f, 0f, -18f), new Vector3(-9f, 0f, -18f) };
+    // 2026-11-20 보조 무기 구역이 왼쪽으로 한 칸 늘어 두 발판을 세로로 (엔딩 발판 x −19 와 5m)
+    public static readonly Vector3[] CrowdPads = { new Vector3(-14f, 0f, -18f), new Vector3(-14f, 0f, -21.6f) };
 
     public const float GridStep = 2f;
 }
@@ -195,7 +202,7 @@ public static class TestRoomLayoutSetup
 
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene);
-        Debug.Log($"{Tag} 방 {half.x * 2:0} × {half.y * 2:0}m · 선반 {pickups.Length}개 (간격 4.5m) · 해골 x {dummy.x:0} · 시작 {TestRoomLayout.PlayerSpawn}");
+        Debug.Log($"{Tag} 방 {half.x * 2:0} × {half.y * 2:0}m · 선반 {pickups.Length}개 (간격 4m) · 해골 x {dummy.x:0} · 시작 {TestRoomLayout.PlayerSpawn}");
 
         // ── 4) 상위 무기 구역 · 무리 표적 · 커스터마이징 구역을 새 자리로 (장면을 다시 열고 그 구역만 다시 만든다) ──
         TestRoomEvolutionSetup.BuildBatch();

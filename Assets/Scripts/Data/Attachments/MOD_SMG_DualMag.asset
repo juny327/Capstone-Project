@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: MOD_SMG_DualMag
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentData
   displayName: "\uC774\uC911 \uD0C4\uCC3D"
+  brief: "\uD0C4\uCC3D \uB450 \uBC30 \xB7 \uC7A5\uC804 \uB290\uB9BC"
   description: "\uD0C4\uCC3D \uB450 \uBC30 \u2014 \uC7A5\uC804\uC740 \uB290\uB9AC\uB2E4"
   icon: {fileID: 21300000, guid: 8e3ecb6d5ab98fc4a9ee3803a6e64fcc, type: 3}
   slot: 5

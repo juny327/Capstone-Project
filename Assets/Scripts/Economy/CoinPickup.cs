@@ -38,6 +38,21 @@ public class CoinPickup : MonoBehaviour, IPoolable
     /// <summary>이 코인이 가진 크레딧.</summary>
     public int Value => value;
 
+    /// <summary>바닥에 놓여 있다 (튀는 중 · 날아오는 중이 아니다) — 도깨비불 타구가 튕길 수 있는 코인.</summary>
+    public bool IsResting => state == State.Rest && gameObject.activeInHierarchy;
+
+    /// <summary>놓인 자리의 바닥 높이 좌표.</summary>
+    public Vector3 GroundPosition => to - Vector3.up * restHeight;
+
+    /// <summary>
+    /// 엽전 튕기기 (2026-11-22 도깨비 방망이) — 그 자리에서 튀어 올라 landing 에 다시 놓인다. 값은 그대로 (잃지 않는다).
+    /// </summary>
+    public void Bounce(Vector3 landing)
+    {
+        if (state == State.Fly) return;
+        Launch(GroundPosition, landing, value);
+    }
+
     /// <summary>origin 에서 튀어 나와 landing 에 놓인다. 둘 다 바닥 높이 기준.</summary>
     public void Launch(Vector3 origin, Vector3 landing, int amount)
     {

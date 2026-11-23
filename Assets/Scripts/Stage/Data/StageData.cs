@@ -1,8 +1,17 @@
+using System;
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "Stage/StageData")]
 public class StageData : ScriptableObject
 {
+    /// <summary>이 스테이지에서 한 몬스터의 등장 비율 (2026-11-17).</summary>
+    [Serializable]
+    public struct SpawnWeight
+    {
+        public EnemyData enemy;
+        [Min(0)] public int weight;
+    }
+
     public int stageIndex;
 
     public int killTarget;
@@ -20,4 +29,18 @@ public class StageData : ScriptableObject
     [Tooltip("몬스터 체력 배율 — 몬스터 데이터의 최대 체력 × 이 값")]
     [Min(0.1f)]
     public float enemyHealthMultiplier = 1f;
+
+    // 2026-11-17 — 스테이지마다 나오는 몬스터를 다르게 (스테이지 1 = A · B, 2 = C · D 추가, 3 = 다섯 종 고르게).
+    [Tooltip("이 스테이지의 몬스터 등장 비율. 비워 두면 몬스터 데이터의 spawnWeight 그대로, " +
+             "적어 두면 목록에 없는 몬스터는 나오지 않는다 (특수 몬스터 F · G 와 보스의 부하는 따로)")]
+    public SpawnWeight[] spawnWeights;
+
+    // 2026-11-23 사용자: "보스 중간중간 잡몹이 자연 스폰돼 방해 · 보스룸 몬스터는 경험치 · 코인을 안 떨구게"
+    [Header("보스 스테이지")]
+    [Tooltip("켜면 보스가 깨어난 뒤부터 쓰러질 때까지만 몬스터가 나온다 (등장 연출 동안은 안 나온다). 보스가 쓰러지면 남은 몬스터도 같이 쓰러진다. " +
+             "수 · 간격은 위의 maxEnemyCount · spawnInterval")]
+    public bool spawnDuringBossFight;
+
+    [Tooltip("이 스테이지 몬스터가 경험치 구슬 · 코인을 떨어뜨리는지 (보스 스테이지는 끔 — 보스의 부하도 같다)")]
+    public bool enemyRewards = true;
 }

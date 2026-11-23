@@ -70,6 +70,9 @@ public class WeaponController : MonoBehaviour
     [SerializeField] private float evolvedSupportDamageMul = 0.5f;
     [SerializeField] private float evolvedSupportIntervalMul = 1.4f;
 
+    [Tooltip("보조 무기 한 번 맞힘의 최소 피해 — 위 배율로 1 아래가 되면(기관단총 0.8 · 샷건 0.6) 피해 숫자가 0 으로 떴다. 0 이면 끈다 (2026-11-17)")]
+    [Min(0f)] [SerializeField] private float supportMinDamage = 1f;
+
     [Tooltip("보조 무기 자리 (플레이어 기준). 왼쪽 · 오른쪽 · 뒤. " +
              "높이는 주무기 총구(약 1.1m) 근처로 — 탄 · 빔은 쏜 높이 그대로 날아가므로 너무 높으면 작은 적 머리 위로 지나간다")]
     [SerializeField] private Vector3[] supportOffsets =
@@ -107,6 +110,8 @@ public class WeaponController : MonoBehaviour
     [Min(0f)] [SerializeField] private float supportShakeInterval = 0.2f;
 
     public float SupportShakeMul => supportShakeMul;
+    /// <summary>보조 무기 한 번 맞힘의 최소 피해 (0 = 없음).</summary>
+    public float SupportMinDamage => supportMinDamage;
     public float SupportShakeInterval => supportShakeInterval;
 
     [Header("Support Weapon Sounds (보조 무기 소리, 2026-11-12)")]
@@ -127,7 +132,7 @@ public class WeaponController : MonoBehaviour
 
     static void PlaySupportSound(GameSoundSet.Entry entry)
     {
-        if (entry != null && SoundManager.Instance != null) SoundManager.Instance.Play(entry, SoundManager.Instance.SfxGroup);
+        if (entry != null && SoundManager.Instance != null) SoundManager.Instance.Play(entry, SoundManager.Instance.SfxGroup, 1f, 1f, SoundKind.SupportFire);
     }
 
     [Header("Start")]
@@ -166,6 +171,36 @@ public class WeaponController : MonoBehaviour
 
     /// <summary>지금까지 받은 범용 업그레이드 누적분. 새로 얻는 무기에 그대로 얹어 준다.</summary>
     private WeaponModifier globalModifier = WeaponModifier.Identity;
+
+    // 공격력 증가 카드의 구매 횟수를 플레이어 단위로 저장한다.
+    // 새 무기 획득/상위 무기 진화 후에도 동일한 강화 레벨을 사용한다.
+    private int directDamageUpgradeLevel;
+
+    public int DirectDamageUpgradeLevel => directDamageUpgradeLevel;
+
+    public void AddDirectDamageUpgrade()
+    {
+        directDamageUpgradeLevel++;
+        RaiseLegacyStats();
+    }
+
+    // 직접 타격에만 고정 피해를 더한다. 치명타 등 공격 자체의 배율은 additiveScale 에 반영한다.
+    // 스킬/부착물/명중 파생 효과의 기준 피해(Stats.Damage)는 변경하지 않는다.
+    public float ResolveDirectDamage(WeaponBase source, float damage, float additiveScale = 1f)
+    {
+        if (source == null || source.Data == null || source.IsSupport ||
+            source.Data.IsAlwaysActive || source.Data.SupportOnly || !ReferenceEquals(ActiveWeapon, source))
+            return damage;
+
+        if (source.Data.Kind != WeaponKind.Projectile && source.Data.Kind != WeaponKind.Melee)
+            return damage;
+
+        float bonus = source.Data.GetDamageUpgradeFlatPerLevel() * directDamageUpgradeLevel;
+        return Mathf.Max(0f, damage + bonus * additiveScale);
+    }
+
+    public float ActiveDirectDamage => ActiveWeapon is WeaponBase weapon
+        ? weapon.DirectDamage : (ActiveWeapon != null ? ActiveWeapon.Stats.Damage : 0f);
 
     // 캐릭터 규칙 (CharacterLoadout 이 설정). 비어 있으면 모든 손 무기를 허용한다
     private WeaponKind[] allowedHeldKinds;
@@ -983,6 +1018,9 @@ public class WeaponController : MonoBehaviour
     {
         anim = GetComponent<Animator>();
 
+        // 강화 연출 (2026-11-17) — 무기 레벨이 오르면 전투 화면에서 빛 · "Lv2" 로 보여 준다
+        if (GetComponent<WeaponLevelUpFx>() == null) gameObject.AddComponent<WeaponLevelUpFx>();
+
         if (anim != null)
         {
             shootLayer = anim.GetLayerIndex("ShootLayer");
@@ -1375,7 +1413,7 @@ public class WeaponController : MonoBehaviour
 
         WeaponRuntimeStats s = active.Stats;
 
-        GameEvents.OnBulletDamageChanged?.Invoke(s.Damage);
+        GameEvents.OnBulletDamageChanged?.Invoke(ActiveDirectDamage);
         GameEvents.OnBulletSpeedChanged?.Invoke(s.ProjectileSpeed);
     }
 }

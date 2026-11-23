@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: AT_PrecisionOptic
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentData
   displayName: "\uC815\uBC00 \uAD11\uD559\uC7A5\uCE58"
+  brief: "\uCE58\uBA85\uD0C0 \uD53C\uD574 \uD06C\uAC8C \xB7 \uC870\uAE08 \uB290\uB9BC"
   description: "\uC57D\uC810 \uBD84\uC11D \uC870\uC900\uACBD \u2014 \uCE58\uBA85\uD0C0\uAC00
     \uAE4A\uC5B4\uC9C4\uB2E4"
   icon: {fileID: -6149747092012268127, guid: 85eecb0f489b2f24c95c9d7014c4e817, type: 3}

@@ -13,19 +13,19 @@ MonoBehaviour:
   m_Name: WD_Rifle
   m_EditorClassIdentifier: Assembly-CSharp::ProjectileWeaponData
   weaponName: "\uC18C\uCD1D"
+  brief: "\uADE0\uD615 \uC7A1\uD78C \uAE30\uBCF8 \uCD1D"
   description: "\uADE0\uD615 \uC7A1\uD78C \uAE30\uBCF8 \uBB34\uAE30"
   icon: {fileID: 21300000, guid: 77ba1376519561446b56b3bd4573935c, type: 3}
   weaponPrefab: {fileID: 1885557548371891229, guid: 2f0c901abd97930438438790a16aeffc, type: 3}
   socket: 0
-  supportOnly: 0
-  supportTarget: 2
   fireInterval: 0.3
-  damage: 2
+  damage: 3
+  damageUpgradeFlatPerLevel: 1
   critChance: 0.05
   critMultiplier: 2
   maxLevel: 3
   perLevelBonus:
-    damageAdd: 0.3
+    damageAdd: 1
     damageMul: 1
     fireIntervalMul: 1
     critChanceAdd: 0
@@ -33,18 +33,39 @@ MonoBehaviour:
     projectileSpeedAdd: 0
     projectileCountAdd: 0
     pierceAdd: 0
+    spreadMul: 1
+    lifeTimeMul: 1
+    burstAdd: 0
     magazineAdd: 0
     reloadTimeMul: 1
     rangeAdd: 0
     subUnitAdd: 0
   requiresTarget: 1
+  evolvedFrom: {fileID: 0}
+  innateEffects: []
+  themeColor: {r: 1, g: 1, b: 1, a: 0}
+  supportOnly: 0
+  supportTarget: 2
+  supportTint: {r: 1, g: 1, b: 1, a: 0}
   fireSounds:
-  - {fileID: 8300000, guid: ff857792539ae9f448a64859d12f3195, type: 3}
+  - {fileID: 8300000, guid: a81bd56d83827304c8370f649af48007, type: 3}
+  - {fileID: 8300000, guid: f3f1cc25d452f0c4498c99f7fd9b75d9, type: 3}
+  - {fileID: 8300000, guid: ba73a5dc370870349a4a85615e41832d, type: 3}
   fireVolume: 0.36
   firePitchRange: {x: 0.96, y: 1.04}
   reloadStartSound: {fileID: 8300000, guid: 92b83c009aac5c94b90bfff96f0cdf0b, type: 3}
   reloadEndSound: {fileID: 8300000, guid: ab055f8670e6a9e4fae7ef02f7132f02, type: 3}
   reloadVolume: 0.6
+  fireLayerSounds: []
+  fireLayerVolume: 0.3
+  fireLayerPitchRange: {x: 0.97, y: 1.03}
+  fireLayerMinInterval: 0
+  hitLayerSounds: []
+  hitLayerVolume: 0.25
+  hitLayerMinInterval: 0.09
+  meleeBodySounds: []
+  meleeBodyVolume: 1
+  fireStack: []
   aimMode: 0
   projectilePrefab: {fileID: 5875018044698817663, guid: 47d42afc0830c50448915274e6d3e535, type: 3}
   projectileSpeed: 20
@@ -52,6 +73,9 @@ MonoBehaviour:
   projectileCount: 1
   spreadAngle: 0
   pierceCount: 0
+  spawnProjectiles: 1
+  homingTurnRate: 0
+  homingRange: 14
   magazineSize: 30
   reloadTime: 2
   autoReload: 1
@@ -73,3 +97,13 @@ MonoBehaviour:
     sparkLines: 2
     sparkRing: 0
     fireShake: 0
+    flashSwing: 0
+    hotFlashSize: 0
+    hotTracerLength: 0
+    hotTracerWidth: 0
+    hotColor: {r: 0, g: 0, b: 0, a: 0}
+    smokeMaterial: {fileID: 0}
+    smokeTime: 0
+    smokeWidth: 0.35
+    smokeHeadColor: {r: 1, g: 0.6, b: 0.25, a: 0.9}
+    smokeTailColor: {r: 0.55, g: 0.55, b: 0.58, a: 0.55}

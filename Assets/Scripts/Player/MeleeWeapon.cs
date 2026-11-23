@@ -64,6 +64,9 @@ public class MeleeWeapon : WeaponBase
     [Tooltip("칼끝을 발 높이 + 이 값 아래로 내리지 않는다")]
     [Min(0f)][SerializeField] private float tipMinHeight = 0.05f;
 
+    [Tooltip("머리(망치 머리 · 방망이 끝) 가운데 — 무기 루트 기준 (2026-11-20). 머리에 붙는 연출(번개 · 도깨비불)이 쓴다. 0 이면 칼끝의 85%")]
+    [SerializeField] private Vector3 headPoint;
+
     [Header("Two Hands")]
     [Tooltip("양손 모션에서 왼손이 쥘 수 있는 자루 구간(무기 루트 = 오른손 기준). 검 · 대검은 오른손 아래 손잡이, 창은 오른손 앞 자루. " +
              "CharacterSetup 이 모델에서 재서 넣는다. 둘 다 0 이면 왼손을 붙이지 않는다 (MeleeTwoHandGrip)")]
@@ -88,12 +91,65 @@ public class MeleeWeapon : WeaponBase
     /// <summary>마지막으로 휘두른 방향. 테스트 · 디버그용.</summary>
     public SwingVariant LastVariant => lastVariant;
 
+    // ───────── 마무리 타격 (2026-11-20 전투 망치 · 방망이) ─────────
+    // 데이터의 finisherEvery 번째 공격마다 — 망치는 내려찍기, 방망이는 가로 풀스윙. 손에 든 공격 · 떠 있는 공격이 같은 수를 센다
+
+    private int attackCount;
+
+    /// <summary>지금까지 공격한 수 (손에 든 공격 + 떠 있는 공격) — 마무리 타격 차례를 센다.</summary>
+    public int AttackCount => attackCount;
+
+    /// <summary>다음 공격이 마무리 타격인가 (망치 세 번째 · 방망이 풀스윙). 머리 연출이 세지는 신호로 쓴다.</summary>
+    public bool NextIsFinisher => Config != null && Config.finisherEvery > 0 && (attackCount + 1) % Config.finisherEvery == 0;
+
+    /// <summary>마무리 타격까지 모인 정도 0 ~ 1 (방금 마무리 타격 = 0, 다음이 마무리 타격 = 1).</summary>
+    public float FinisherCharge => Config == null || Config.finisherEvery <= 1 ? 0f : (attackCount % Config.finisherEvery) / (float)(Config.finisherEvery - 1);
+
+    /// <summary>머리 가운데 (월드) — 망치 머리 · 방망이 끝.</summary>
+    public Vector3 HeadWorld => transform.TransformPoint(headPoint.sqrMagnitude > 0.0001f ? headPoint : bladeTip * 0.85f);
+
+    /// <summary>마무리 타격을 한 수 (시험).</summary>
+    public static int FinisherCount { get; private set; }
+
+    /// <summary>이번 공격이 마무리 타격인지 정하고 센다.</summary>
+    bool TakeFinisherTurn()
+    {
+        attackCount++;
+        MeleeWeaponData cfg = Config;
+        bool finisher = cfg != null && cfg.finisherEvery > 0 && attackCount % cfg.finisherEvery == 0;
+        if (finisher) FinisherCount++;
+        return finisher;
+    }
+
+    SwingVariant FinisherVariant()
+    {
+        SwingVariant v = Config != null && Config.finisherVertical ? SwingVariant.Vertical : SwingVariant.Primary;
+        sameVariantCount = v == lastVariant ? sameVariantCount + 1 : 1;
+        lastVariant = v;
+        return v;
+    }
+
+    float FinisherArcOf(in WeaponRuntimeStats stats)
+    {
+        MeleeWeaponData cfg = Config;
+        if (cfg == null) return stats.ArcAngle;
+        return cfg.finisherArc > 0f ? cfg.finisherArc : cfg.finisherVertical ? verticalArcAngle : stats.ArcAngle;
+    }
+
+    /// <summary>기절(경직) · 느려진 적인가 — 방망이의 확정 치명 (critOnWeakened).</summary>
+    static bool IsWeakened(Transform root)
+    {
+        if (root == null || !root.TryGetComponent(out Enemy enemy)) return false;
+        return enemy.IsShocked || EnemySlow.IsSlowed(root);
+    }
+
     private MeleeWeaponData Config => (MeleeWeaponData)data;
 
     // 할당 없이 재사용하는 버퍼. 이 프로젝트는 투사체·이펙트를 전부 풀링할 만큼
     // 할당에 신경 쓰고 있으므로 근접 판정도 같은 기준을 맞춘다.
     private readonly Collider[] hits = new Collider[32];
     private readonly HashSet<Transform> struck = new HashSet<Transform>();
+    struct Candidate { public IDamageable Target; public Transform Root; public Collider Collider; public Vector3 Direction; public float Distance; }
 
     private Coroutine swingRoutine;
 
@@ -125,8 +181,16 @@ public class MeleeWeapon : WeaponBase
 
         WeaponRuntimeStats stats = Stats;
         float arc = CanVary ? Mathf.Max(stats.ArcAngle, verticalArcAngle) : stats.ArcAngle;
+        float reach = stats.Range + ReachMargin;
 
-        return AnyTargetWithin(in context, stats.Range + ReachMargin, arc);
+        // 마무리 타격 차례면 그 각도 · 사거리까지 (망치 내려찍기 · 방망이 풀스윙)
+        if (NextIsFinisher)
+        {
+            arc = Mathf.Max(arc, FinisherArcOf(in stats));
+            reach += Mathf.Max(0f, Config.finisherRangeAdd);
+        }
+
+        return AnyTargetWithin(in context, reach, arc);
     }
 
     bool AnyTargetWithin(in WeaponFireContext context, float reach, float arcAngle)
@@ -143,7 +207,7 @@ public class MeleeWeapon : WeaponBase
 
         for (int i = 0; i < count; i++)
         {
-            Vector3 dir = nearby[i].position - origin;
+            Vector3 dir = CombatFx.TargetPoint(nearby[i], origin) - origin;   // 보스는 몸 표면까지 (2026-11-22)
             dir.y = 0f;
 
             // 가까운 순으로 정렬되어 있으므로 여기서 멀면 나머지도 멀다
@@ -181,12 +245,14 @@ public class MeleeWeapon : WeaponBase
         if (swingRoutine != null)
             StopCoroutine(swingRoutine);
 
-        SwingVariant variant = PickVariant(in stats, in context);
+        // 마무리 타격 (망치 세 번째 내려찍기 · 방망이 풀스윙, 2026-11-20) — 모션을 정해 둔다
+        bool finisher = TakeFinisherTurn();
+        SwingVariant variant = finisher ? FinisherVariant() : PickVariant(in stats, in context);
 
         TriggerSwingAnimation(variant);
-        PlaySwingSound();
+        PlaySwingSound(finisher);
 
-        swingRoutine = StartCoroutine(SwingRoutine(stats, context.OwnerRoot, variant, forceCrit));
+        swingRoutine = StartCoroutine(SwingRoutine(stats, context.OwnerRoot, variant, forceCrit, finisher));
     }
 
     /// <summary>
@@ -264,7 +330,7 @@ public class MeleeWeapon : WeaponBase
         ownerAnim.SetTrigger(HashSlash);
     }
 
-    IEnumerator SwingRoutine(WeaponRuntimeStats stats, Transform ownerRoot, SwingVariant variant, bool forceCrit)
+    IEnumerator SwingRoutine(WeaponRuntimeStats stats, Transform ownerRoot, SwingVariant variant, bool forceCrit, bool finisher)
     {
         MeleeWeaponData cfg = Config;
 
@@ -279,15 +345,21 @@ public class MeleeWeapon : WeaponBase
         if (delay > 0f)
             yield return new WaitForSeconds(delay);
 
-        ApplyHits(in stats, ownerRoot, vertical ? verticalArcAngle : stats.ArcAngle, vertical, forceCrit);
+        ApplyHits(in stats, ownerRoot, vertical ? verticalArcAngle : stats.ArcAngle, vertical, forceCrit, finisher);
 
         swingRoutine = null;
     }
 
-    void ApplyHits(in WeaponRuntimeStats stats, Transform ownerRoot, float arcAngle, bool vertical, bool forceCrit = false)
+    void ApplyHits(in WeaponRuntimeStats stats, Transform ownerRoot, float arcAngle, bool vertical, bool forceCrit = false, bool finisher = false)
     {
         MeleeWeaponData cfg = Config;
         if (cfg == null || ownerRoot == null) return;
+
+        // 마무리 타격 — 각도 · 사거리 · 피해 배율 (망치 세 번째 내려찍기 · 방망이 풀스윙, 2026-11-20)
+        finisher &= cfg.HasFinisher;
+        float range = stats.Range + (finisher ? cfg.finisherRangeAdd : 0f);
+        if (finisher && cfg.finisherArc > 0f) arcAngle = cfg.finisherArc;
+        float finisherMul = finisher ? cfg.finisherDamage : 1f;
 
         struck.Clear();
 
@@ -299,13 +371,17 @@ public class MeleeWeapon : WeaponBase
         else forward.Normalize();
 
         int count = Physics.OverlapSphereNonAlloc(
-            origin, stats.Range, hits, cfg.hitLayers, QueryTriggerInteraction.Collide);
+            origin, range, hits, cfg.hitLayers, QueryTriggerInteraction.Collide);
 
         int applied = 0;
         int crits = 0;
+        int bodyHits = 0;   // 근접 몸통 적중음으로 낼 맞힘 (치명타가 아닌 것) — 2026-11-22
         float halfArc = arcAngle * 0.5f;
 
-        for (int i = 0; i < count && applied < stats.MaxTargets; i++)
+        // 맞힐 적을 먼저 모아 가까운 순서로 친다 (2026-11-17) — 맨 처음 적은 제 피해, 두 번째부터 extraTargetDamage 를 곱한다.
+        // 예전엔 겹침 판정이 돌려준 순서대로 쳐서 최대 수를 넘으면 가까운 적이 빠지기도 했다
+        List<Candidate> candidates = UnityEngine.Pool.ListPool<Candidate>.Get();   // 호출마다 빌린다 — 맞힘 효과가 다시 판정을 불러도 섞이지 않게
+        for (int i = 0; i < count; i++)
         {
             Collider col = hits[i];
             if (col == null) continue;
@@ -323,17 +399,34 @@ public class MeleeWeapon : WeaponBase
             // 플레이어 자신은 제외 (hitLayers 를 잘못 잡았을 때의 안전장치 — 떠 있는 무기는 판정 기준이 플레이어가 아니다)
             if (root == ownerRoot || (Owner != null && root == Owner.transform)) continue;
 
-            Vector3 dir = root.position - origin;
+            Vector3 dir = CombatFx.TargetPoint(root, origin) - origin;   // 보스는 몸 표면의 가장 가까운 점 — 큰 몸 어디를 베어도 (2026-11-22)
             dir.y = 0f;
+            float distance = dir.sqrMagnitude;
 
             if (dir.sqrMagnitude < 0.0001f) dir = forward;
             else dir.Normalize();
 
             if (Vector3.Angle(forward, dir) > halfArc) continue;   // 부채꼴 밖
 
-            bool isCritical = forceCrit || RollCritical(in stats);
-            float dealt = ApplyCritical(in stats, isCritical);
-            Vector3 point = col.ClosestPoint(origin);
+            candidates.Add(new Candidate { Target = target, Root = root, Collider = col, Direction = dir, Distance = distance });
+        }
+        candidates.Sort((a, b) => a.Distance.CompareTo(b.Distance));
+
+        for (int k = 0; k < candidates.Count && applied < stats.MaxTargets; k++)
+        {
+            Candidate c = candidates[k];
+            IDamageable target = c.Target;
+            Transform root = c.Root;
+            Vector3 dir = c.Direction;
+
+            // 방망이 — 기절 · 느려진 적은 확정 치명 (critOnWeakened, 2026-11-20)
+            bool isCritical = forceCrit || (cfg.critOnWeakened && IsWeakened(root)) || RollCritical(in stats);
+            // 두 번째 대상부터 extraTargetDamage (2026-11-17) — 공격력 카드의 고정 증가분에도 같은 배율을 건다. 마무리 타격 배율도 같이
+            float targetScale = (applied > 0 ? cfg.extraTargetDamage : 1f) * finisherMul;
+            float effectDamage = ApplyCritical(in stats, isCritical) * targetScale;
+            float dealt = ResolveDirectDamage(effectDamage,
+                targetScale * (isCritical ? stats.CritMultiplier : 1f));
+            Vector3 point = c.Collider.ClosestPoint(origin);
             bool wasAlive = CombatFx.IsAlive(root);   // 맞히기 전 — 처치 판정 (Drain · 상위 무기)
 
             target.TakeDamage(new DamageInfo
@@ -358,30 +451,42 @@ public class MeleeWeapon : WeaponBase
                     Point = point,
                     Direction = dir,
                     Damage = dealt,
+                    EffectDamage = effectDamage,
                     IsCritical = isCritical,
                     Killed = killed,
+                    Finisher = finisher,
                 });
             }
 
             // 최대 5명을 한 번에 때린다. SoundManager 가 프레임 끝에 한 번만 낸다.
+            // 이 무기의 몸통 적중음이 있으면(검 · 창 · 대검과 그 상위 — 2026-11-22) 공용 근접 적중음 대신 그 소리 — 치명타는 그대로 공용 치명타
             if (SoundManager.Instance != null)
-                SoundManager.Instance.ReportHit(isCritical, HitSound.Melee);
+            {
+                if (data != null && data.HasMeleeBody && !isCritical)
+                {
+                    SoundManager.Instance.ReportEnemyHurt(root);
+                    bodyHits++;
+                }
+                else SoundManager.Instance.ReportHit(isCritical, HitSound.Melee, root);
+            }
 
             SpawnHitSpark(cfg, origin, point, dir, isCritical);
 
             applied++;
             if (isCritical) crits++;
         }
+        UnityEngine.Pool.ListPool<Candidate>.Release(candidates);
 
-        SpawnSlashEffect(cfg, origin, forward, stats.Range, arcAngle, vertical);
+        SpawnSlashEffect(cfg, origin, forward, range, arcAngle, vertical, finisher);
 
         // 베는 소리는 칼이 적에게 닿은 순간에 (2026-11-02 — 예전엔 휘두르기 시작에 나서 0.24 ~ 0.58초 먼저 들렸다)
         if (applied > 0) PlayFireSound();
         if (applied > 0) PlayHitLayer();   // 상위 무기 전용 적중음 (있을 때만)
+        if (bodyHits > 0) PlayMeleeBody(bodyHits);
 
         // 맞히면 한 번 흔든다 (2026-11-12) — 데이터의 cameraShake 는 피해 정보에 실려 적에게 넘어가기만 하고 아무도 쓰지 않아, 근접은 한 번도 흔들리지 않았다.
         // 적 수만큼이 아니라 한 번 휘두름에 한 번
-        if (applied > 0) ShakeCamera(this, cfg.cameraShake);
+        if (applied > 0) ShakeCamera(this, finisher && cfg.finisherShake > 0f ? cfg.finisherShake : cfg.cameraShake);
 
         // 치명타가 들어간 휘두름 — 큰 순간 (히트 스톱 · 줌 · 무기 색 번쩍). 흔들림은 위의 것 그대로. 보조 칸은 없음
         if (crits > 0 && !IsSupport)
@@ -394,7 +499,9 @@ public class MeleeWeapon : WeaponBase
                 Origin = origin,
                 Direction = forward,
                 Vertical = vertical,
-                Range = stats.Range,
+                Range = range,
+                Finisher = finisher,
+                Hits = applied,
             });
         }
     }
@@ -405,8 +512,8 @@ public class MeleeWeapon : WeaponBase
     // 발사음(베는 소리)은 쏘는 순간이 아니라 맞힌 순간에 — ApplyHits 가 낸다
     protected override bool FireSoundOnFire => false;
 
-    /// <summary>휘두르기 시작 '휙' — 맞든 안 맞든.</summary>
-    void PlaySwingSound()
+    /// <summary>휘두르기 시작 '휙' — 맞든 안 맞든. 마무리 타격은 낮고 크게.</summary>
+    void PlaySwingSound(bool finisher = false)
     {
         MeleeWeaponData cfg = Config;
         if (cfg == null || cfg.swingSounds == null || cfg.swingSounds.Length == 0) return;
@@ -416,7 +523,8 @@ public class MeleeWeapon : WeaponBase
 
         float min = Mathf.Min(cfg.swingPitchRange.x, cfg.swingPitchRange.y);
         float max = Mathf.Max(cfg.swingPitchRange.x, cfg.swingPitchRange.y);
-        PlaySound(clip, cfg.swingVolume, Random.Range(min > 0f ? min : 1f, max > 0f ? max : 1f));
+        float pitch = Random.Range(min > 0f ? min : 1f, max > 0f ? max : 1f);
+        PlaySound(clip, cfg.swingVolume * (finisher ? 1.25f : 1f), finisher ? pitch * 0.85f : pitch);
     }
 
     /// <summary>시험용 — 그린 베기 궤적 · 맞은 자리 불꽃 수.</summary>
@@ -433,7 +541,7 @@ public class MeleeWeapon : WeaponBase
     ///  · 찌르기(slashThrust) — 앞으로 뻗는 줄기 두 겹 + 끝의 고리
     /// 떠 있는 보조 무기는 무기가 직접 날아가 치므로 궤적은 그리지 않는다 (맞은 자리 불꽃만).
     /// </summary>
-    void SpawnSlashEffect(MeleeWeaponData cfg, Vector3 origin, Vector3 forward, float range, float arcAngle, bool vertical)
+    void SpawnSlashEffect(MeleeWeaponData cfg, Vector3 origin, Vector3 forward, float range, float arcAngle, bool vertical, bool finisher = false)
     {
         if (cfg.slashEffectPrefab != null)
         {
@@ -446,20 +554,22 @@ public class MeleeWeapon : WeaponBase
 
         Vector3 center = origin + Vector3.up * SlashHeight;
         float reach = range * cfg.slashReach;
-        Color glow = new Color(cfg.slashColor.r, cfg.slashColor.g, cfg.slashColor.b, cfg.slashColor.a * 0.45f);
+        float lv = LevelFxScale;   // 강화 레벨 — Lv2 ×1.1 · Lv3 ×1.2 굵기 · 은은한 빛 (2026-11-17)
+        float width = cfg.slashWidth * lv * (finisher ? 1.6f : 1f);   // 마무리 타격은 굵게
+        Color glow = new Color(cfg.slashColor.r, cfg.slashColor.g, cfg.slashColor.b, Mathf.Clamp01(cfg.slashColor.a * 0.45f * lv));
 
         if (cfg.slashThrust && !vertical)
         {
             Vector3 from = center + forward * 0.8f, to = center + forward * reach;
-            FxLine.Line(cfg.slashMaterial, from, to, cfg.slashColor, cfg.slashWidth, cfg.slashFade);
-            FxLine.Line(cfg.slashMaterial, Vector3.Lerp(from, to, 0.25f), to, cfg.slashCoreColor, cfg.slashWidth * 0.35f, cfg.slashFade * 0.7f);
+            FxLine.Line(cfg.slashMaterial, from, to, cfg.slashColor, width, cfg.slashFade);
+            FxLine.Line(cfg.slashMaterial, Vector3.Lerp(from, to, 0.25f), to, cfg.slashCoreColor, width * 0.35f, cfg.slashFade * 0.7f);
             FxLine.Ring(cfg.slashMaterial, origin + forward * reach, 0.15f, 0.9f, cfg.slashColor, 0.1f, cfg.slashFade);
         }
         else if (vertical)
         {
             // 세로로 선 초승달 — 위에서 아래로. 아래 끝이 바닥을 파고들지 않게 반각을 줄이고 조금 높인다
             BloodSlash.Spawn(cfg.slashMaterial, center + Vector3.up * 0.5f, forward, reach, Mathf.Min(arcAngle * 0.5f, 26f), 78f,
-                             cfg.slashWidth * 1.15f, cfg.slashColor, cfg.slashCoreColor, cfg.slashSweep, cfg.slashFade * 1.2f, true, glow);
+                             width * 1.15f, cfg.slashColor, cfg.slashCoreColor, cfg.slashSweep, cfg.slashFade * 1.2f, true, glow);
             FxLine.Ring(cfg.slashMaterial, origin + forward * (reach * 0.85f), 0.2f, 1.3f, cfg.slashColor, 0.12f, cfg.slashFade);
             GroundGlow.Flash(origin + forward * (reach * 0.85f), 2.0f, cfg.slashColor, 0.22f);   // 내려찍은 자리
         }
@@ -467,7 +577,15 @@ public class MeleeWeapon : WeaponBase
         {
             slashFlip = !slashFlip;
             BloodSlash.Spawn(cfg.slashMaterial, center, forward, reach, arcAngle * 0.5f, slashFlip ? 12f : -9f,
-                             cfg.slashWidth, cfg.slashColor, cfg.slashCoreColor, cfg.slashSweep, cfg.slashFade, true, glow);
+                             width, cfg.slashColor, cfg.slashCoreColor, cfg.slashSweep, cfg.slashFade, true, glow);
+        }
+
+        // 마무리 타격 — 친 자리에 바닥 고리 · 빛 (기본 무기는 이 정도만, 상위 무기는 자기 연출이 따로 있다)
+        if (finisher)
+        {
+            Vector3 at = origin + forward * (reach * (vertical ? 0.85f : 0.55f));
+            FxLine.Ring(cfg.slashMaterial, at, 0.3f, reach * (vertical ? 0.75f : 0.95f), cfg.slashColor, 0.14f, cfg.slashFade * 1.4f);
+            GroundGlow.Flash(at, reach * 0.9f, cfg.slashColor, 0.26f);
         }
         SlashFxCount++;
     }
@@ -537,7 +655,7 @@ public class MeleeWeapon : WeaponBase
     public static int CounterThrustCount { get; private set; }
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-    static void ResetStatics() { SupportStrikeCount = 0; CounterThrustCount = 0; SlashFxCount = 0; HitSparkCount = 0; }
+    static void ResetStatics() { SupportStrikeCount = 0; CounterThrustCount = 0; SlashFxCount = 0; HitSparkCount = 0; FinisherCount = 0; }
 
     /// <summary>떠 있는 무기가 지금 뛰쳐나가 공격하는 중인가.</summary>
     public bool IsSupportStriking => supportRoutine != null;
@@ -551,15 +669,21 @@ public class MeleeWeapon : WeaponBase
         SupportMount mount = SupportMount != null ? SupportMount.GetComponent<SupportMount>() : null;
         if (target == null || mount == null) return;
 
-        // 대검은 휘두르기 · 내려찍기를 번갈아 — 내려찍기가 중력 대검의 중력장을 연다
-        bool vertical = swingStyle == SwingStyle.TwoHanded && supportStrikes % 2 == 1;
-        bool thrust = swingStyle == SwingStyle.Polearm;
+        // 대검은 휘두르기 · 내려찍기를 번갈아 — 내려찍기가 중력 대검의 중력장을 연다.
+        // 망치는 언제나 내려찍기 · 방망이는 언제나 휘두르기 (데이터의 supportPose), 마무리 타격 차례면 그 모션 (2026-11-20)
+        MeleeWeaponData cfg = Config;
+        bool finisher = TakeFinisherTurn();
+        MeleeSupportPose pose = cfg != null ? cfg.supportPose : MeleeSupportPose.Auto;
+        bool vertical = pose == MeleeSupportPose.Slam
+                        || (pose == MeleeSupportPose.Auto && swingStyle == SwingStyle.TwoHanded && supportStrikes % 2 == 1);
+        if (finisher) vertical = cfg.finisherVertical;
+        bool thrust = swingStyle == SwingStyle.Polearm && pose == MeleeSupportPose.Auto && !finisher;
 
         StopSupportStrike();
-        PlaySwingSound();
+        PlaySwingSound(finisher);
         supportStrikes++;
         SupportStrikeCount++;
-        supportRoutine = StartCoroutine(SupportStrikeRoutine(stats, mount, target, target.position, thrust, vertical, forceCrit));
+        supportRoutine = StartCoroutine(SupportStrikeRoutine(stats, mount, target, target.position, thrust, vertical, forceCrit, finisher));
     }
 
     /// <summary>
@@ -584,7 +708,7 @@ public class MeleeWeapon : WeaponBase
         PlaySwingSound();
         supportStrikes++;
         CounterThrustCount++;
-        supportRoutine = StartCoroutine(SupportStrikeRoutine(stats, mount, null, point, true, false, false));
+        supportRoutine = StartCoroutine(SupportStrikeRoutine(stats, mount, null, point, true, false, false, false));
         return true;
     }
 
@@ -620,7 +744,7 @@ public class MeleeWeapon : WeaponBase
     /// 자리(SupportMount)를 통째로 움직인다 — 무기는 자리의 앞을 칼끝으로 두고 붙어 있다.
     /// </summary>
     IEnumerator SupportStrikeRoutine(WeaponRuntimeStats stats, SupportMount mount, Transform target, Vector3 point,
-                                     bool thrust, bool vertical, bool forceCrit)
+                                     bool thrust, bool vertical, bool forceCrit, bool finisher)
     {
         Transform owner = Owner != null ? Owner.transform : transform;
         Transform mountT = mount.transform;
@@ -634,11 +758,11 @@ public class MeleeWeapon : WeaponBase
         // 폭주(혈검) 등 연사 가속이 걸리면 그만큼 빠르게
         float speed = Mathf.Max(1f, FireRateBoost);
         float approach = 0.15f / speed;
-        float act = (thrust ? 0.08f : swingStyle == SwingStyle.TwoHanded ? 0.16f : 0.1f) / speed;
+        float act = (thrust ? 0.08f : swingStyle == SwingStyle.TwoHanded || vertical ? 0.16f : 0.1f) / speed;
 
         Vector3 Aim()
         {
-            Vector3 a = target != null && target.gameObject.activeInHierarchy ? target.position : point;
+            Vector3 a = target != null && target.gameObject.activeInHierarchy ? CombatFx.TargetPoint(target, start) : point;   // 보스는 몸 표면으로 뛰쳐나간다
             return a;
         }
 
@@ -673,7 +797,7 @@ public class MeleeWeapon : WeaponBase
                 return;
             }
 
-            float arc = swingStyle == SwingStyle.TwoHanded ? 150f : 110f;
+            float arc = (swingStyle == SwingStyle.TwoHanded ? 150f : 110f) * (finisher ? 1.3f : 1f);   // 풀스윙은 더 크게
             float sweep = Mathf.Lerp(-arc * 0.5f, arc * 0.5f, Mathf.SmoothStep(0f, 1f, u)) * sweepSign;
             Vector3 pv = tp - dir * (len * 0.55f);
             outRot = Quaternion.LookRotation(Quaternion.Euler(0f, sweep, 0f) * dir, Vector3.up);
@@ -699,13 +823,13 @@ public class MeleeWeapon : WeaponBase
             float u = Mathf.Clamp01(t / act);
             Pose(u, out pos, out rot);
             mount.OverridePose(pos, rot);
-            if (!hit && u >= hitAt) { StrikeHits(stats, Aim(), dir, len, thrust, vertical, forceCrit); hit = true; }
+            if (!hit && u >= hitAt) { StrikeHits(stats, Aim(), dir, len, thrust, vertical, forceCrit, finisher); hit = true; }
             yield return null;
         }
 
         Pose(1f, out pos, out rot);
         mount.OverridePose(pos, rot);
-        if (!hit) StrikeHits(stats, Aim(), dir, len, thrust, vertical, forceCrit);
+        if (!hit) StrikeHits(stats, Aim(), dir, len, thrust, vertical, forceCrit, finisher);
 
         // 3) 잠깐 멈췄다가 제자리로
         for (float t = 0f; t < 0.06f; t += Time.deltaTime)
@@ -720,7 +844,7 @@ public class MeleeWeapon : WeaponBase
     }
 
     /// <summary>뛰쳐나간 자리에서의 판정 — 기준점은 발 높이(손에 든 무기와 같다 · 검기 · 중력장이 그 높이를 기준으로 난다).</summary>
-    void StrikeHits(in WeaponRuntimeStats stats, Vector3 aim, Vector3 dir, float len, bool thrust, bool vertical, bool forceCrit)
+    void StrikeHits(in WeaponRuntimeStats stats, Vector3 aim, Vector3 dir, float len, bool thrust, bool vertical, bool forceCrit, bool finisher = false)
     {
         if (strikeOrigin == null)
         {
@@ -733,7 +857,7 @@ public class MeleeWeapon : WeaponBase
         strikeOrigin.SetPositionAndRotation(origin, Quaternion.LookRotation(dir, Vector3.up));
 
         float arc = vertical ? verticalArcAngle : thrust ? Mathf.Max(stats.ArcAngle, 40f) : stats.ArcAngle;
-        ApplyHits(in stats, strikeOrigin, arc, vertical, forceCrit);
+        ApplyHits(in stats, strikeOrigin, arc, vertical, forceCrit, finisher);
     }
 
     /// <summary>무기 루트(쥔 손) 기준 칼끝 방향.</summary>

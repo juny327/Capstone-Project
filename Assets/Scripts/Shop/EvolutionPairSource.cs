@@ -55,7 +55,7 @@ public class EvolutionPairSource : ShopOfferSource
         {
             AttachmentData a = e.requiredAttachment;
             if (!ctx.Reserved.Add(a)) return null;
-            return new EvolutionPairAttachmentOffer(a, ctx.Catalog.Scaled(a.basePrice, ctx.StageIndex), e);
+            return new EvolutionPairAttachmentOffer(a, ctx.Catalog.Scaled(a.basePrice, ctx.StageIndex, ctx.PriceMultiplier), e);
         }
 
         if (e.requiredSubAbility != null)
@@ -65,14 +65,14 @@ public class EvolutionPairSource : ShopOfferSource
 
             int index = slot.IndexOf(data);
             int level = index >= 0 ? slot.Get(index).Level : 0;
-            int price = ctx.Catalog.Scaled(level > 0 ? data.LevelUpPrice(level) : data.basePrice, ctx.StageIndex);
+            int price = ctx.Catalog.Scaled(level > 0 ? data.LevelUpPrice(level) : data.basePrice, ctx.StageIndex, ctx.PriceMultiplier);
             return new EvolutionPairSubAbilityOffer(data, level, price, e);
         }
 
         if (e.requiredSkill != null)
         {
             if (!ctx.Reserved.Add(e.requiredSkill)) return null;
-            return new SkillPairOffer(e.requiredSkill, ctx.Catalog.Scaled(ctx.Catalog.skillPairPrice, ctx.StageIndex), e);
+            return new SkillPairOffer(e.requiredSkill, ctx.Catalog.Scaled(ctx.Catalog.skillPairPrice, ctx.StageIndex, ctx.PriceMultiplier), e);
         }
 
         return null;
@@ -124,10 +124,13 @@ public class SkillPairOffer : ShopOffer
     public UpgradeData Card => card;
 
     public override string Title => SkillPairs.NameOf(card);
-    public override string Description => $"{evolution.Title} 의 짝 스킬 — 지금 바로 얻는다 (레벨업 카드 Lv1 과 같다)";
+    // 간단 = 스킬이 하는 일 (짝이라는 것은 꼬리표가 알려 준다) · 상세 = 스킬 설명 + 짝 안내 (2026-11-22)
+    public override string Description => DescriptionMode.Pick(card.brief,
+        DescText.Join(card.description, $"{evolution.Title} 의 짝 스킬 — 지금 바로 얻는다 (레벨업 카드 Lv1 과 같다)"));
     public override Sprite Icon => card.icon;
     public override string Tag => $"진화 짝 · {evolution.Title}";
     public override ShopOfferKind Kind => ShopOfferKind.Skill;
+    public override Object PairItem => card;
 
     public override bool IsAvailable(ShopContext ctx, out string reason)
     {

@@ -164,7 +164,7 @@ public class GrenadeLauncherAbility : SubAbility
             sparks.Clash(to + Vector3.up * 0.5f, Vector3.up);
         }
 
-        PlaySound(blastSound);
+        PlaySound(blastSound, SoundKind.Explosion);
     }
 
     void OnDestroy()

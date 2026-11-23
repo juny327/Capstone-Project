@@ -49,7 +49,7 @@ public class UpgradeCard : MonoBehaviour
             title.text = $"{upgrade.upgradeName} Lv.{Mathf.Max(1, nextLevel)}";
 
         if (description != null)
-            description.text = upgrade.description;
+            description.text = UiTextFit.KeepWords(DescText.Skill(upgrade));   // 간단 / 상세 — '상세 설명' 토글 · 낱말 가운데에서 꺾이지 않게 (2026-11-22)
 
         if (cost != null)
         {
@@ -62,13 +62,36 @@ public class UpgradeCard : MonoBehaviour
     {
         GameEvents.OnUpgradeSuccess += OnSuccess;
         GameEvents.OnUpgradeFailed += OnFailed;
+        DescriptionMode.Changed += OnDescriptionMode;
     }
 
     void OnDisable()
     {
         GameEvents.OnUpgradeSuccess -= OnSuccess;
         GameEvents.OnUpgradeFailed -= OnFailed;
+        DescriptionMode.Changed -= OnDescriptionMode;
     }
+
+    // '상세 설명' 토글이 바뀌면 설명만 다시 (2026-11-22)
+    void OnDescriptionMode(bool detail)
+    {
+        if (data != null && description != null)
+            description.text = UiTextFit.KeepWords(DescText.Skill(data));
+    }
+
+    /// <summary>
+    /// 상위 무기 짝 표시 (2026-11-17 밸런스 결정 6) — 지금 가진 무기의 짝 스킬이면 금색 테두리와 위쪽 꼬리표("★ 혈검 짝").
+    /// label 이 null 이면 끈다. 테두리는 카드 아래에 스스로 만든다 (PairHighlight — 프리팹은 그대로).
+    /// </summary>
+    public void ShowPairMark(string label)
+    {
+        // 꼬리표는 위쪽 '스킬 강화' 탭 자리 — 탭은 몸통 위 가장자리보다 조금 아래(몸통 높이의 2.6%)가 가운데, 너비 58%
+        PairHighlight.Set((RectTransform)transform, label, true, title, 0.58f, CardArtInsets, 0.026f);
+    }
+
+    // 카드 그림(Space_Exploration_GUI_Kit/Containers/Small/UpgradeCard.png)의 투명한 여백 — 왼쪽 · 위(탭 아래 몸통) · 오른쪽 · 아래.
+    // 그림을 바꾸면 이 값도 다시 잰다 (알파 40 넘는 칸이 줄의 70% 이상인 곳)
+    static readonly Vector4 CardArtInsets = new Vector4(0.058f, 0.103f, 0.052f, 0.026f);
 
     /// <summary>최대 레벨 — 더 살 수 없다 (2026-11-04).</summary>
     public void ShowMaxed()

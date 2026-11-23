@@ -121,6 +121,29 @@ public partial class DragonBoss
         }
     }
 
+    /// <summary>예고를 그 자리 · 방향으로 옮긴다 (플레이어를 따라오는 동안).</summary>
+    void Follow(DragonTelegraph t, Vector3 origin, Vector3 forward)
+    {
+        if (t == null) return;
+        t.transform.SetPositionAndRotation(new Vector3(origin.x, t.transform.position.y, origin.z), Quaternion.LookRotation(Flat(forward).normalized));
+    }
+
+    /// <summary>방향을 굳혔다 — 예고 색이 바뀌고 짧은 소리가 난다. 이때부터가 피하는 시간.</summary>
+    void LockAim(params DragonTelegraph[] marks)
+    {
+        foreach (DragonTelegraph m in marks) if (m != null) m.Lock();
+        Sfx(DragonSfx.Alarm, 0.45f);
+        OnAimLocked?.Invoke(current);
+    }
+
+    /// <summary>플레이어가 지금 가는 방향 · 빠르기 (수평).</summary>
+    Vector3 PlayerVelocity()
+    {
+        if (target == null) return Vector3.zero;
+        var body = target.GetComponentInParent<Rigidbody>();
+        return body != null ? Flat(body.linearVelocity) : Vector3.zero;
+    }
+
     bool PlayerInRect(Vector3 origin, Vector3 forward, float width, float near, float far)
     {
         if (target == null) return false;
@@ -170,11 +193,36 @@ public partial class DragonBoss
         Vector3 slam = origin + Flat(forward).normalized * groundBiteCenter;
         DragonTelegraph ring = ground ? Track(DragonTelegraph.Circle(telegraphMaterial, slam, groundBiteRadius)) : null;
 
+        // 늦게 굳히기 (하드 — 2026-11-20) — 목을 당기는 동안(지연 물기는 멈춘 동안에도) 플레이어를 따라 돌다가 판정 조금 전에 방향을 굳힌다.
+        // 굳힌 뒤가 피하는 시간이다: 물기는 페이즈마다 짧아지고, 지연 물기는 멈춤이 끝나는 순간(내미는 0.57초) 굳힌다.
+        // 꺼져 있으면(이지) 예고 시작 때의 방향 그대로 — 예고를 보고 옆으로 걸으면 피해진다
+        float lockLead = delayed ? Motion.BiteClose - Motion.WindupEnd : ByPhase(tune.biteLock);
+        float lockAt = Mathf.Max(0f, hitAt - lockLead * tune.tempo);
+        // 땅 물어뜯기는 따라오지 않는다 — 충격파(반경 5m) 때문에 이미 옆걸음으로 못 피한다. 따라오기까지 하면 구르기 말고는 답이 없어진다
+        bool aimLocked = !tune.lateLock || ground;
+
         bool hit = false;
-        for (float t = 0f; t < end; t += Time.deltaTime)
+        for (float t = 0f; t < end; t += Dt)
         {
             float clip = t < Motion.WindupEnd ? t : t < Motion.WindupEnd + hold ? Motion.WindupEnd : t - hold;
             Scrub(AttackState, clip);
+            if (!aimLocked)
+            {
+                if (t >= lockAt)
+                {
+                    aimLocked = true;
+                    LockAim(warning, ring);
+                }
+                else if (target != null)
+                {
+                    Face(target.position, tune.trackTurn);
+                    origin = transform.position;
+                    forward = transform.forward;
+                    Follow(warning, origin, forward);
+                    slam = origin + Flat(forward).normalized * groundBiteCenter;
+                    Follow(ring, slam, forward);
+                }
+            }
             if (!hit)
             {
                 warning.SetProgress(t / hitAt);
@@ -183,7 +231,10 @@ public partial class DragonBoss
                 {
                     hit = true;
                     warning.Flash();
-                    Shake(ground ? 0.7f : 0.25f);
+                    if (ground) Quake(0.95f, slam, 0.7f);
+                    else Shove(0.45f, origin + Flat(forward).normalized * (biteFar * 0.7f), origin, 0.25f);
+                    FxBite(origin, forward, false);
+                    if (ground) FxGroundSlam(slam, groundBiteRadius);
                     Sfx(DragonSfx.Bite);
                     if (ground) Sfx(DragonSfx.Slam);
                     bool bitten = PlayerInRect(origin, forward, biteWidth, biteNear, biteFar);
@@ -217,6 +268,12 @@ public partial class DragonBoss
         Vector3 aim = Flat(transform.forward).normalized;
         float aimYaw = transform.eulerAngles.y;
         float side = Random.value < 0.5f ? -1f : 1f;
+        if (sweeping && tune.sweepMeets)
+        {
+            // 마주 오기 (하드) — 플레이어가 가는 쪽에서 시작해 반대로 휩쓴다. 한쪽으로 계속 걸으면 불과 마주친다 (서 있으면 무작위)
+            float lateral = Vector3.Dot(PlayerVelocity(), transform.right);
+            if (Mathf.Abs(lateral) > 0.6f) side = lateral > 0f ? -1f : 1f;
+        }
         float startYaw = aimYaw - side * sweep * 0.5f, endYaw = aimYaw + side * sweep * 0.5f;
         Vector3 aimApex = transform.position + aim * breathApex;
 
@@ -234,7 +291,7 @@ public partial class DragonBoss
 
         float open = Mathf.Max(0.05f, Motion.MouthWide - clipStart);
         float windup = Mathf.Max(sweeping ? 1.15f : 0.9f, open + breathHold);
-        for (float t = 0f; t < windup; t += Time.deltaTime)
+        for (float t = 0f; t < windup; t += Dt)
         {
             float u = t / windup;
             Scrub(AttackState, Mathf.Lerp(clipStart, Motion.MouthWide, Mathf.Clamp01(t / open)));
@@ -249,15 +306,16 @@ public partial class DragonBoss
         }
 
         warning.Hold();
-        Shake(0.35f);
+        Shove(0.45f, transform.position + transform.forward * (breathApex + breathRadius * 0.5f), transform.position, 0.35f);
+        FxBreathStart(transform.position + transform.forward * breathApex, transform.forward);
         SetBreathCone(half);
         breathing = true;
         LateUpdate();
         if (breathFx != null) breathFx.Play(true);
         breathVoice = Sfx(DragonSfx.Breath);
-        float duration = sweeping ? sweepDuration : breathDuration;
+        float duration = sweeping ? tune.sweepTime : breathDuration;
         float tick = 0f;
-        for (float t = 0f; t < duration; t += Time.deltaTime)
+        for (float t = 0f; t < duration; t += Time.deltaTime)   // 뿜는 시간은 실제 시간 — 진행 속도는 예고만 늘린다
         {
             Scrub(AttackState, Motion.MouthWide);
             if (sweeping)
@@ -265,6 +323,14 @@ public partial class DragonBoss
                 transform.rotation = Quaternion.Euler(0f, Mathf.LerpAngle(startYaw, endYaw, Mathf.SmoothStep(0f, 1f, t / duration)), 0f);
                 FollowBreath(warning);
             }
+            else if (tune.breathTrack > 0f && phase >= 2 && target != null)
+            {
+                // 따라 도는 불 (하드 · 2페이즈부터) — 뿜는 동안 천천히 따라 돈다. 바짝 붙어 옆구리로 돌면 벗어난다
+                Face(target.position, tune.breathTrack);
+                FollowBreath(warning);
+            }
+            Vector3 fireForward = Flat(transform.forward).normalized;
+            FxBreathTick(transform.position + fireForward * breathApex, fireForward, breathRadius, half);   // 가장자리 불길 · 그을음 · 이어지는 떨림
             tick -= Time.deltaTime;
             if (tick <= 0f)
             {
@@ -284,7 +350,7 @@ public partial class DragonBoss
 
         // 3페이즈 — 불이 지나간 자리에 불 장판이 남는다
         if (sweeping) LeaveFireArc(transform.position, startYaw, endYaw, breathApex + breathRadius * 0.6f, 5);
-        else LeaveFireFan(aimApex, aim);
+        else LeaveFireFan(transform.position + Flat(transform.forward).normalized * breathApex, transform.forward);   // 따라 돌았으면 끝난 방향
 
         BackToIdle(0.4f);
         nextRecover = sweeping ? 1.3f : 1.1f;
@@ -297,7 +363,7 @@ public partial class DragonBoss
     {
         yield return TurnToTarget(0.35f, fromWindup);
         if (!fromWindup) Sfx(DragonSfx.Windup);
-        for (float t = fromWindup ? Motion.WindupEnd : 0f; t < Motion.WindupEnd; t += Time.deltaTime)
+        for (float t = fromWindup ? Motion.WindupEnd : 0f; t < Motion.WindupEnd; t += Dt)
         {
             Scrub(AttackState, t);
             yield return null;
@@ -309,7 +375,7 @@ public partial class DragonBoss
             DragonTelegraph line = null;
             Vector3 from = Vector3.zero, dir = transform.forward;
             float aimDistance = 8f;
-            for (float a = 0f; a < fireballAim; a += Time.deltaTime)
+            for (float a = 0f; a < fireballAim; a += Dt)
             {
                 if (target == null) break;
                 bool locked = a >= fireballAim - fireballLock;
@@ -319,7 +385,7 @@ public partial class DragonBoss
                     Face(target.position, 260f);
                     Vector3 mouth = Mouth();
                     from = new Vector3(mouth.x, transform.position.y, mouth.z);
-                    dir = Flat(target.position - from);
+                    dir = Flat(target.position + FireballLead(shot, from) - from);
                     aimDistance = Mathf.Max(2f, dir.magnitude);
                     if (dir.sqrMagnitude < 0.01f) dir = transform.forward;
                     dir.Normalize();
@@ -333,15 +399,27 @@ public partial class DragonBoss
             Launch(from + dir * aimDistance);
 
             if (shot < fireballCount - 1)
-                for (float b = 0f; b < 0.16f; b += Time.deltaTime)
+                for (float b = 0f; b < 0.16f; b += Dt)
                 {
                     Scrub(AttackState, Mathf.Lerp(Motion.MouthWide, Motion.WindupEnd, b / 0.16f));
                     yield return null;
                 }
         }
-        for (float r = 0f; r < 0.3f; r += Time.deltaTime) { Scrub(AttackState, Motion.MouthWide); yield return null; }
+        for (float r = 0f; r < 0.3f; r += Dt) { Scrub(AttackState, Motion.MouthWide); yield return null; }
         BackToIdle(0.35f);
         nextRecover = 0.9f;
+    }
+
+    /// <summary>
+    /// 앞질러 쏘기 (하드 — 2026-11-20) — 첫 발은 지금 자리, 둘째 발은 날아가는 동안 플레이어가 갈 자리, 셋째 발은 그 절반.
+    /// 같은 속도로 걸으면 둘째 발, 멈칫하면 셋째 발, 가만히 있으면 첫 발에 맞는다 — 조준선이 멈춘 뒤 방향을 꺾어야 한다.
+    /// </summary>
+    Vector3 FireballLead(int shot, Vector3 from)
+    {
+        if (!tune.leadFireballs || shot <= 0 || target == null) return Vector3.zero;
+        float flight = Flat(target.position - from).magnitude / Mathf.Max(1f, fireballSpeed) + fireballLock;
+        Vector3 lead = PlayerVelocity() * flight * (shot == 1 ? 1f : 0.5f);
+        return Vector3.ClampMagnitude(lead, 6f);
     }
 
     /// <summary>입에서 groundPoint(조준선 위, 멈춘 순간 플레이어가 있던 거리) 의 가슴 높이로 쏜다.</summary>
@@ -355,25 +433,31 @@ public partial class DragonBoss
         var projectile = go.GetComponent<RangedProjectile>();
         if (projectile == null) { Destroy(go); return; }
         projectile.Initialize(mouth, dir, fireballSpeed, fireballDamage, new VolleyHitGroup());
-        Shake(0.12f);
+        Jolt(0.16f, mouth, 0.12f);
+        FxFireballLaunch(go, mouth, dir);
         Sfx(DragonSfx.Fireball);
     }
 
     // ───────── 돌진 ─────────
 
+    /// <summary>그 방향으로 달릴 수 있는 거리 — 길 끝(벽)까지. 머리가 벽을 뚫지 않게 몸 앞쪽 절반만큼 덜 간다.</summary>
+    float ChargeReach(Vector3 start, Vector3 forward, out bool wall)
+    {
+        wall = false;
+        if (agent.isOnNavMesh && NavMesh.Raycast(start, start + forward * (chargeMaxLength + chargeFront * 0.5f), out NavMeshHit edge, NavMesh.AllAreas))
+        {
+            wall = true;
+            return Mathf.Max(0f, Mathf.Min(chargeMaxLength, edge.distance - chargeFront * 0.5f));
+        }
+        return chargeMaxLength;
+    }
+
     IEnumerator Charge()
     {
         yield return TurnToTarget(0.4f);
         Vector3 forward = Flat(transform.forward).normalized, start = transform.position;
-        float travel = chargeMaxLength;
-        bool wall = false;
         chargeBlocked = true;   // 끝까지 가서야 풀린다 (벽에 막히거나 못 떠났으면 연계하지 않는다)
-        // 길 끝(벽)까지 — 머리가 벽을 뚫지 않게 몸 앞쪽 절반만큼 덜 간다
-        if (agent.isOnNavMesh && NavMesh.Raycast(start, start + forward * (chargeMaxLength + chargeFront * 0.5f), out NavMeshHit edge, NavMesh.AllAreas))
-        {
-            travel = Mathf.Min(chargeMaxLength, edge.distance - chargeFront * 0.5f);
-            wall = true;
-        }
+        float travel = ChargeReach(start, forward, out bool wall);
         if (travel < 3f)
         {
             readyAt[Pattern.Charge] = Time.time + 1.5f;   // 벽에 붙어 있다 — 곧 다른 패턴
@@ -383,14 +467,48 @@ public partial class DragonBoss
 
         DragonTelegraph warning = Track(DragonTelegraph.Rect(telegraphMaterial, start, forward, chargeWidth, -1f * bodyScale, travel + chargeFront));
         Sfx(DragonSfx.Windup);
-        for (float t = 0f; t < chargeWindup; t += Time.deltaTime)
+        // 늦게 굳히기 (하드 — 2026-11-20) — 웅크린 동안 플레이어를 따라 돌다가, 플레이어 자리에 닿기 chargeLock 초 전에 방향을 굳힌다.
+        // 멀리 있으면 달려오는 시간이 기니 그만큼 늦게 굳힌다 — 어느 거리에서나 피할 시간이 같다 (굳히고 나서 출발까지는 적어도 0.2초).
+        // 굳힌 뒤에는 걸어서 못 벗어난다 (폭 5m) — 달리기 · 구르기, 또는 벽 앞에 서서 박게 한다
+        float LockLead()
+        {
+            float gap = target != null ? Flat(target.position - start).magnitude - chargeFront : 0f;
+            return Mathf.Clamp(tune.chargeLock - Mathf.Max(0f, gap) / chargeSpeed, Mathf.Min(0.2f, tune.chargeLock), tune.chargeLock);
+        }
+        bool aimLocked = !tune.lateLock;
+        for (float t = 0f; t < chargeWindup; t += Dt)
         {
             Scrub(AttackState, Mathf.Min(t, Motion.WindupEnd));
+            if (!aimLocked)
+            {
+                if (t >= chargeWindup - LockLead() * tune.tempo)
+                {
+                    aimLocked = true;
+                    // 굳힌 방향으로 길 끝을 다시 잰다 — 예고 길이가 달라지면 새로 깐다
+                    float reach = ChargeReach(start, forward, out wall);
+                    if (Mathf.Abs(reach - travel) > 0.5f)
+                    {
+                        telegraphs.Remove(warning);
+                        warning.Remove();
+                        warning = Track(DragonTelegraph.Rect(telegraphMaterial, start, forward, chargeWidth, -1f * bodyScale, reach + chargeFront));
+                    }
+                    travel = reach;
+                    LockAim(warning);
+                }
+                else if (target != null)
+                {
+                    Face(target.position, tune.trackTurn);
+                    forward = Flat(transform.forward).normalized;
+                    Follow(warning, start, forward);
+                }
+            }
             warning.SetProgress(t / chargeWindup);
+            FxChargeWindup(t / chargeWindup);
             yield return null;
         }
         warning.Hold();
-        Shake(0.4f);
+        Shove(0.5f, start + forward * 6f, start, 0.4f);
+        FxChargeLaunch(forward);
         Sfx(DragonSfx.Charge);
         if (dustFx != null) dustFx.Play(true);
         agent.isStopped = true;
@@ -401,7 +519,7 @@ public partial class DragonBoss
         bool hitDone = false;
         while (moved < travel - 0.01f)
         {
-            lunge += Time.deltaTime;
+            lunge += Dt;
             Scrub(AttackState, Mathf.Lerp(Motion.WindupEnd, Motion.HeadLow, lunge / 0.2f));
             float step = Mathf.Min(chargeSpeed * Time.deltaTime, travel - moved);
             Vector3 before = transform.position;
@@ -410,6 +528,8 @@ public partial class DragonBoss
             transform.rotation = Quaternion.LookRotation(forward);
             float actual = Flat(transform.position - before).magnitude;
             moved += step;
+            FxChargeRun(forward, step);
+            if (travel - moved < chargeSpeed * 0.1f) Hush(0.12f);   // 길 끝 직전에는 떨림을 멈춘다 — 박는 순간이 더 크게 느껴진다
             // 3페이즈 — 지나간 길에 불이 남는다
             sinceFire += step;
             if (sinceFire >= firePatchSpacing)
@@ -431,12 +551,13 @@ public partial class DragonBoss
 
         if (wall)
         {
-            Shake(0.9f);
+            Quake(1.1f, transform.position, 0.9f);
+            FxChargeCrash(forward);
             Sfx(DragonSfx.Crash);
         }
         chargeBlocked = wall;
         // 머리를 거둬들이며 멈춘다 (④ 회수)
-        for (float r = 0f; r < 0.45f; r += Time.deltaTime)
+        for (float r = 0f; r < 0.45f; r += Dt)
         {
             Scrub(AttackState, Mathf.Lerp(Motion.HeadLow, attackLength, r / 0.45f));
             yield return null;

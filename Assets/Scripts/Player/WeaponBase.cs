@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Audio;
 
 /// <summary>
 /// 모든 무기의 공통 구현. 쿨다운, 스탯 합성, 크리티컬 판정, 이펙트 스폰을 담당한다.
@@ -46,6 +47,25 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
     public WeaponData Data => data;
     public int Level => level;
 
+    /// <summary>
+    /// 레벨이 오른 무기 · 오르기 전 레벨 (2026-11-17 강화 연출) — 정비 창 강화 · 레벨업 카드 · 테스트 룸.
+    /// 진화로 레벨을 넘겨받는 것(InheritFrom)은 알리지 않는다 — 진화 연출이 따로 있다.
+    /// </summary>
+    public static event System.Action<WeaponBase, int> LevelRaised;
+    bool inheritingLevel;
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetLevelEvent() => LevelRaised = null;
+
+    /// <summary>강화 레벨에 따른 탄 · 궤적 크기 (Lv1 ×1 · Lv2 ×1.1 · Lv3 ×1.2). 상위 무기는 자기 연출이 따로 있어 ×1.</summary>
+    public float LevelFxScale => data == null || data.IsEvolved ? 1f : 1f + 0.1f * (level - 1);
+
+    /// <summary>상위 무기 연출 배율 — 보조 칸이면 FxKit.SupportScale (기본 1 = 주무기와 같다, 2026-11-20). 주무기 · 기본 무기는 1.</summary>
+    public float EvoFxScale => IsSupport && data != null && data.IsEvolved ? FxKit.SupportScale : 1f;
+
+    /// <summary>탄 · 총구 연출 크기 — 보조 칸 ×0.8 (상위 무기는 EvoFxScale) · 강화 레벨.</summary>
+    public float ShotFxScale => (!IsSupport ? 1f : data != null && data.IsEvolved ? EvoFxScale : ShotFxDraw.SupportScale) * LevelFxScale;
+
     /// <summary>쿨다운이 끝나고, 장전 중이 아니며, 탄약이 남아 있어야 쏠 수 있다.</summary>
     public bool CanFire => cooldown <= 0f && IsActive && !IsReloading && HasAmmo && !IsBusy && !HeldAway;
 
@@ -90,6 +110,14 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
 
     /// <summary>화면 흔들림 배율 — 주무기 1, 보조 무기는 WeaponController.SupportShakeMul (약하게).</summary>
     public float ShakeScale => !IsSupport ? 1f : (Owner != null ? Owner.SupportShakeMul : 0.4f);
+
+    /// <summary>보조 무기면 한 번 맞힘 피해를 최소값(WeaponController.SupportMinDamage, 기본 1)까지 올린다. 주무기는 그대로 (2026-11-17).</summary>
+    protected float FloorSupportDamage(float damage)
+    {
+        if (!IsSupport || Owner == null) return damage;
+        float min = Owner.SupportMinDamage;
+        return min > 0f && damage < min ? min : damage;
+    }
 
     /// <summary>한 발이 여러 단계로 이어지는 중인가 (프리즘 노바 빔 · 태양창 모으기) — 보조 무기는 그동안 노린 적을 계속 본다.</summary>
     public bool InSequence => IsBusy;
@@ -227,6 +255,7 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
         get
         {
             WeaponRuntimeStats s = WithOverrides(data.Compose(TotalModifier), projectileCountOverride);
+            s.Damage = FloorSupportDamage(s.Damage);   // 보조 칸 ×0.6 으로 1 아래가 되면 1
             if (RangeBonus != 0f) s.Range = Mathf.Max(0.1f, s.Range + RangeBonus);
 
             // 몬스터 상태 이상 (MonsterF 저주 — monster 브랜치 2026-10-11, 병합 11-04) — 발사 간격이 늘어난다
@@ -429,9 +458,18 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
         if (min <= 0f) min = 1f;
         if (max <= 0f) max = 1f;
 
-        PlaySound(clip, data.fireVolume, Random.Range(min, max));
+        // 강화할수록 조금 더 묵직하게 (2026-11-17) — Lv2 피치 ×0.96 · 소리 ×1.05, Lv3 ×0.92 · ×1.1. 상위 무기는 그대로
+        float heavy = data.IsEvolved ? 0f : level - 1;
+        PlaySound(clip, data.fireVolume * (1f + 0.05f * heavy), Random.Range(min, max) * (1f - 0.04f * heavy));
         PlayFireLayer();
+
+        // 소리 층 (2026-11-19 효과음 재정비) — 순간음 · 저음 몸통 · 꼬리를 데이터로 겹친다. 비어 있으면 아무것도 안 한다
+        if (data.HasFireStack && SoundManager.Instance != null)
+            SoundManager.Instance.PlayStack(data.fireStack, SoundKindOf, SoundScale, 1f - 0.04f * heavy, SoundGroup);
     }
+
+    /// <summary>이 무기 소리의 종류 — 손에 든 무기는 Fire, 보조 칸은 SupportFire (2026-11-19 종류별 동시 발음 제한).</summary>
+    public SoundKind SoundKindOf => IsSupport ? SoundKind.SupportFire : SoundKind.Fire;
 
     float lastFireLayerAt = -99f;
     float lastHitLayerAt = -99f;
@@ -442,7 +480,7 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
     public static int HitLayersPlayed { get; private set; }
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-    static void ResetLayerCounts() { FireLayersPlayed = 0; HitLayersPlayed = 0; }
+    static void ResetLayerCounts() { FireLayersPlayed = 0; HitLayersPlayed = 0; MeleeBodyPlayed = 0; }
 
     /// <summary>발사음 덧소리 (상위 무기) — 원래 발사음과 같은 순간에 한 겹 더. 보조 무기는 PlaySound 가 줄인다.</summary>
     void PlayFireLayer()
@@ -460,6 +498,29 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
         FireLayersPlayed++;
     }
 
+    float lastMeleeBodyAt = -99f;
+
+    /// <summary>
+    /// 근접 몸통 적중음 (2026-11-22 효과음 2단계) — 공용 근접 적중음 대신 이 무기의 소리. 한 번 휘둘러 여럿을 맞혀도 한 번,
+    /// 맞힌 수만큼 조금 크게 (공용 적중음과 같은 규칙 — 1 + 0.08 × (수 − 1), 최대 1.35). 보조 칸이어도 줄이지 않는다 (공용 적중음과 같게).
+    /// </summary>
+    public void PlayMeleeBody(int hits)
+    {
+        if (data == null || !data.HasMeleeBody || SoundManager.Instance == null) return;
+        if (Time.unscaledTime - lastMeleeBodyAt < 0.06f) return;
+
+        AudioClip clip = data.meleeBodySounds[Random.Range(0, data.meleeBodySounds.Length)];
+        if (clip == null) return;
+
+        lastMeleeBodyAt = Time.unscaledTime;
+        float scale = Mathf.Min(1.35f, 1f + (Mathf.Max(1, hits) - 1) * 0.08f);
+        SoundManager.Instance.PlayClip(clip, data.meleeBodyVolume * scale, Random.Range(0.96f, 1.04f), SoundGroup, SoundKind.Hit);
+        MeleeBodyPlayed++;
+    }
+
+    /// <summary>근접 몸통 적중음이 난 수 (시험).</summary>
+    public static int MeleeBodyPlayed;
+
     /// <summary>전용 적중음 (상위 무기) — 맞힌 쪽(탄 · 줄기 · 칼)이 부른다. 공용 적중음은 그대로 나고 그 위에 얹힌다.</summary>
     public void PlayHitLayer()
     {
@@ -470,7 +531,7 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
         if (clip == null) return;
 
         lastHitLayerAt = Time.unscaledTime;
-        PlaySound(clip, data.hitLayerVolume, Random.Range(0.96f, 1.04f));
+        PlaySound(clip, data.hitLayerVolume, Random.Range(0.96f, 1.04f), SoundKind.Hit);
         HitLayersPlayed++;
     }
 
@@ -498,15 +559,19 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
     /// 플레이어 무기 소리는 2D 로 낸다 — 탑다운 카메라라 거리 감쇠가 어색하다.
     /// `SoundManager` 가 없으면 조용히 넘어간다 (씬 구성이 덜 된 경우).
     /// </summary>
-    protected void PlaySound(AudioClip clip, float volume, float pitch = 1f)
+    protected void PlaySound(AudioClip clip, float volume, float pitch = 1f, SoundKind kind = SoundKind.Auto)
     {
         if (clip == null || SoundManager.Instance == null) return;
 
-        SoundManager.Instance.PlayClip(clip, volume * SoundScale, pitch);
+        SoundManager.Instance.PlayClip(clip, volume * SoundScale, pitch, SoundGroup, kind == SoundKind.Auto ? SoundKindOf : kind);
     }
 
-    /// <summary>보조 무기 소리 크기 — 주무기와 보조 셋이 한꺼번에 쏘면 시끄럽다. 주무기 소리가 앞에 선다.</summary>
-    public float SoundScale => IsSupport ? 0.5f : 1f;
+    /// <summary>이 무기 소리가 나갈 믹서 그룹 — 상위 무기는 'Evolved'(+5dB, 2026-11-23 — 배경음에 묻혔다), 그 밖은 효과음(null).</summary>
+    AudioMixerGroup SoundGroup => data != null && data.IsEvolved && SoundManager.Instance != null ? SoundManager.Instance.EvolvedGroup : null;
+
+    /// <summary>보조 무기 소리 크기 — 주무기와 보조 셋이 한꺼번에 쏘면 시끄럽다. 주무기 소리가 앞에 선다.
+    /// 상위 무기는 보조 칸이어도 ×0.7 (2026-11-23 — ×0.5 로는 끝 단계 상위 보조 셋의 소리가 배경음에 묻혔다).</summary>
+    public float SoundScale => IsSupport ? (data != null && data.IsEvolved ? 0.7f : 0.5f) : 1f;
 
     /// <summary>
     /// 손에 든 무기의 탄약 변화를 HUD 에 알린다.
@@ -529,8 +594,10 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
     public virtual void SetLevel(int newLevel)
     {
         int max = data != null ? Mathf.Max(1, data.maxLevel) : 1;
+        int before = level;
         level = Mathf.Clamp(newLevel, 1, max);
         OnStatsChanged();
+        if (level > before && !inheritingLevel) LevelRaised?.Invoke(this, before);
     }
 
     // ───────── 부착물 ─────────
@@ -565,7 +632,9 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
 
         // 레벨업 카드 · 무기 전용 강화로 쌓인 증분 (전역 강화가 이미 들어 있다)
         accumulated = previous.accumulated;
+        inheritingLevel = true;
         SetLevel(previous.level);
+        inheritingLevel = false;
 
         foreach (var pair in previous.attachments)
         {
@@ -670,7 +739,9 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
         WeaponModifier total = WeaponModifier.Combine(WeaponModifier.Combine(WeaponModifier.Combine(accumulated, sum),
                                                                              data.perLevelBonus.Scaled(level - 1)),
                                                       roleModifier);
-        return WithOverrides(data.Compose(total), countOverride);
+        WeaponRuntimeStats preview = WithOverrides(data.Compose(total), countOverride);
+        preview.Damage = FloorSupportDamage(preview.Damage);
+        return preview;
     }
 
     void RebuildAttachmentModifier()
@@ -893,6 +964,14 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
     protected bool RollCritical(in WeaponRuntimeStats stats)
     {
         return Random.value < stats.CritChance;
+    }
+
+    // Stats.Damage 는 스킬/부착물도 읽으므로 직접 공격 카드의 영향을 받지 않는다.
+    public float DirectDamage => ResolveDirectDamage(Stats.Damage);
+
+    public float ResolveDirectDamage(float damage, float additiveScale = 1f)
+    {
+        return Owner != null ? Owner.ResolveDirectDamage(this, damage, additiveScale) : damage;
     }
 
     protected float ApplyCritical(in WeaponRuntimeStats stats, bool isCritical)

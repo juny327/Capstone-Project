@@ -94,6 +94,10 @@ public class GravityWell : MonoBehaviour
         CombatFx.PlaySound(cfg.openSound);
         CombatFx.PlaySound(cfg.openRumbleSound);
 
+        bool kit = cfg.UsesKit;
+        float ks = KitScale;
+        if (kit) KitOpen();
+
         float t = 0f;
         float scan = 0f;
         float ring = 0f;
@@ -135,13 +139,46 @@ public class GravityWell : MonoBehaviour
             {
                 scan = cfg.scanInterval;
                 Pull(cfg.duration - t);
+                if (kit) FxKit.Swirl(transform.position, cfg.pullRadius * Random.Range(1.2f, 2f) * ks, cfg.color, 0.45f, 2, 0.75f);
             }
+
+            // 공통 재료 (2026-11-20) — 둘레의 빛이 가운데로 계속 빨려든다
+            if (kit) FxKit.Inflow(transform.position, cfg.pullRadius, cfg.color, 70f * dt * ks);
 
             yield return null;
         }
 
         Collapse();
         Destroy(gameObject);
+    }
+
+    // ───────── 공통 재료 (2026-11-20) ─────────
+
+    float KitScale => source != null ? source.EvoFxScale : 1f;
+
+    /// <summary>중력장이 열리는 순간 — 바닥의 빛 원반 · 어두워지는 바닥 · 소용돌이.</summary>
+    void KitOpen()
+    {
+        Vector3 at = transform.position;
+        float ks = KitScale;
+        FxKit.Disc(at, cfg.pullRadius * 2.1f * ks, cfg.color, cfg.duration + 0.15f, 0.75f);
+        FxKit.Shade(at, cfg.pullRadius * 2.4f * ks, 0.5f, cfg.duration + 0.3f);
+        FxKit.Swirl(at, cfg.pullRadius * 2f * ks, cfg.color, 0.6f, 3, 0.9f);
+        FxKit.Shockwave(at, cfg.pullRadius * 2f * ks, cfg.color, 0.3f, 0.7f);
+    }
+
+    /// <summary>붕괴 — 보랏빛 폭발 · 빛기둥 · 겹겹의 충격파 · 튀는 파편 · 어두운 기운 · 그을음.</summary>
+    void KitCollapse(Vector3 at)
+    {
+        float r = cfg.collapseRadius * KitScale;
+        FxKit.EnergyBurst(at, r, cfg.color, 1.25f, true);
+        FxKit.Pillar(at, r * 0.5f, 7f, cfg.color, 0.6f, 9);
+        FxKit.Shockwave(at, r * 4.4f, Color.white, 0.4f, 0.9f);
+        FxKit.Wave(at, r * 5.6f, cfg.color, 0.65f, 0.7f);
+        FxKit.Debris(at, r, 8f);
+        FxKit.Mist(at, r, new Color(0.12f, 0.04f, 0.2f), 0.55f, 8f, 1.2f);
+        FxKit.Aura(at, r * 0.9f, cfg.color, 10f, 1.4f);
+        FxKit.Glints(at + Vector3.up, r, Color.white, 14f, 0.6f, 0.5f);
     }
 
     void Pull(float remaining)
@@ -182,21 +219,24 @@ public class GravityWell : MonoBehaviour
         FxLine.Ring(cfg.ringMaterial, at, 0.2f, cfg.collapseRadius * 0.7f, Color.white, 0.2f, 0.22f);
         GroundGlow.Flash(at, cfg.collapseRadius * 1.6f, cfg.color, 0.32f);
         FlashLight.Flash(at, cfg.color, Mathf.Max(5f, cfg.collapseRadius * 3f), 0.22f, 1.3f);
+        if (cfg.UsesKit) KitCollapse(at);
 
         if (cfg.collapsePrefab != null)
         {
-            GameObject fx = Instantiate(cfg.collapsePrefab, at + Vector3.up * 0.3f, Quaternion.identity);
-            fx.transform.localScale = Vector3.one * cfg.collapseScale;
-            foreach (ParticleSystem ps in fx.GetComponentsInChildren<ParticleSystem>(true))
+            // 2026-11-18 성능 — 돌려 쓴다 (FxPool, 색은 새로 만들 때 한 번)
+            GravityWellEffect c = cfg;
+            FxPool.Spawn(cfg.collapsePrefab, cfg.GetInstanceID(), at + Vector3.up * 0.3f, Quaternion.identity, cfg.collapseScale, 2.5f, fx =>
             {
-                ParticleSystem.MainModule main = ps.main;
-                main.startColor = new ParticleSystem.MinMaxGradient(Color.Lerp(cfg.color, Color.white, 0.2f));
-            }
-            Destroy(fx, 2.5f);
+                foreach (ParticleSystem ps in fx.GetComponentsInChildren<ParticleSystem>(true))
+                {
+                    ParticleSystem.MainModule main = ps.main;
+                    main.startColor = new ParticleSystem.MinMaxGradient(Color.Lerp(c.color, Color.white, 0.2f));
+                }
+            });
         }
 
-        CombatFx.PlaySound(cfg.collapseSound);
-        CombatFx.PlaySound(cfg.collapseBassSound);
+        CombatFx.PlaySound(cfg.collapseSound, SoundKind.Explosion);
+        CombatFx.PlaySound(cfg.collapseBassSound, SoundKind.Explosion);
         ImpactFx.Play(ImpactMoment.GravityCollapse, source, cfg.color, cfg.cameraShake);   // 히트 스톱 · 쿵 · 줌 · 번쩍 (보조 칸이면 약한 흔들림만)
     }
 }

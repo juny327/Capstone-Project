@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: AT_LaserSight
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentData
   displayName: "\uB808\uC774\uC800 \uC870\uC900\uAE30"
+  brief: "\uD0C4\uC774 \uBAA8\uC774\uACE0 \uCE58\uBA85\uD0C0 +5%"
   description: "\uCD1D\uAD6C\uC5D0\uC11C \uBD89\uC740 \uC870\uC900\uC120 \u2014 \uD0C4\uC774
     \uBAA8\uC778\uB2E4"
   icon: {fileID: -9095540338600036987, guid: b9a25a9cbb0d4ad4799fe553b6a189a6, type: 3}
