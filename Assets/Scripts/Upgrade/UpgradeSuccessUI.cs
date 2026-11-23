@@ -38,6 +38,8 @@ public class UpgradeSuccessUI : MonoBehaviour
 
         // Inspector에서 설정한 TMP 문구를 그대로 사용
         panel.SetActive(true);
+        // 문구가 떠 있는 동안에도 아래 카드를 누를 수 있게 (2026-11-23 — 가운데 카드 위에 떠서 연달아 사는 클릭을 가로챘다)
+        UiClickThrough.Apply(panel);
 
         // 연속으로 성공하면 표시 시간 초기화
         if (hideCoroutine != null)
