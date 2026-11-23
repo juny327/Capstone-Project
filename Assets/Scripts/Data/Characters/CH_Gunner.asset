@@ -29,4 +29,5 @@ MonoBehaviour:
   useSupportWeapons: 1
   supportSlots: 3
   shopPriceMultiplier: 1
+  coinMultiplier: 1.35
   bodyMaterial: {fileID: 0}

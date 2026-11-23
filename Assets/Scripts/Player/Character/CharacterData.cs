@@ -70,6 +70,10 @@ public class CharacterData : ScriptableObject
     [Tooltip("이 캐릭터가 정비 창에서 사는 모든 상품 가격에 곱한다 (스테이지 배율 위에 — 새로고침 값은 그대로)")]
     [Min(0.1f)] public float shopPriceMultiplier = 1f;
 
+    // 2026-11-24 사용자: "아무리 빨라도 스테이지 2 중간에 상위 무기를 맞출 수 있게 — 사수 · 검사 몬스터당 골드를 따로"
+    [Tooltip("이 캐릭터가 몬스터를 잡을 때 떨어지는 코인 배율 — 스테이지별 · 난이도 코인 배율 위에 곱한다 (사수는 상위 무기 넷 · 검사는 셋)")]
+    [Min(0f)] public float coinMultiplier = 1f;
+
     [Header("Look")]
     [Tooltip("몸 머티리얼. 비우면 프리팹 기본값을 그대로 쓴다")]
     public Material bodyMaterial;
