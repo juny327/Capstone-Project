@@ -219,6 +219,7 @@ public class MaintenanceUI : MonoBehaviour
         Wallet.OnCurrentChanged += OnWalletChanged;
         SceneManager.sceneLoaded += OnSceneLoaded;
         shop.OnChanged += Refresh;
+        DescriptionMode.Changed += OnDescriptionMode;
     }
 
     void OnDisable()
@@ -228,7 +229,11 @@ public class MaintenanceUI : MonoBehaviour
         Wallet.OnCurrentChanged -= OnWalletChanged;
         SceneManager.sceneLoaded -= OnSceneLoaded;
         shop.OnChanged -= Refresh;
+        DescriptionMode.Changed -= OnDescriptionMode;
     }
+
+    // '상세 설명' 토글이 바뀌면 카드 글을 다시 (2026-11-22) — 대상 고르기 중에도 Refresh 는 진열만 다시 그린다
+    void OnDescriptionMode(bool detail) => Refresh();
 
     static Sprite CurrencyIcon
     {
@@ -273,6 +278,13 @@ public class MaintenanceUI : MonoBehaviour
             ShowMessage(DokkaebiDebt.Repay(player));
             if (window != null) window.SetActive(true);
             if (hud != null) hud.SetActive(false);
+
+            // '상세 설명' 스위치 — 창 틀(Frame) 안 왼쪽 위 (제목 · 코인과 겹치지 않는 자리, 2026-11-22). Window 는 화면 전체 크기다
+            if (window != null)
+            {
+                Transform frame = window.transform.Find("Frame");
+                DetailToggle.Ensure((RectTransform)(frame != null ? frame : window.transform), new Vector2(0f, 1f), new Vector2(30f, -26f), title != null ? title.font : null);
+            }
 
             Refresh();
         }

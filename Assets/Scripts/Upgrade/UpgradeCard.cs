@@ -49,7 +49,7 @@ public class UpgradeCard : MonoBehaviour
             title.text = $"{upgrade.upgradeName} Lv.{Mathf.Max(1, nextLevel)}";
 
         if (description != null)
-            description.text = upgrade.description;
+            description.text = UiTextFit.KeepWords(DescText.Skill(upgrade));   // 간단 / 상세 — '상세 설명' 토글 · 낱말 가운데에서 꺾이지 않게 (2026-11-22)
 
         if (cost != null)
         {
@@ -62,12 +62,21 @@ public class UpgradeCard : MonoBehaviour
     {
         GameEvents.OnUpgradeSuccess += OnSuccess;
         GameEvents.OnUpgradeFailed += OnFailed;
+        DescriptionMode.Changed += OnDescriptionMode;
     }
 
     void OnDisable()
     {
         GameEvents.OnUpgradeSuccess -= OnSuccess;
         GameEvents.OnUpgradeFailed -= OnFailed;
+        DescriptionMode.Changed -= OnDescriptionMode;
+    }
+
+    // '상세 설명' 토글이 바뀌면 설명만 다시 (2026-11-22)
+    void OnDescriptionMode(bool detail)
+    {
+        if (data != null && description != null)
+            description.text = UiTextFit.KeepWords(DescText.Skill(data));
     }
 
     /// <summary>

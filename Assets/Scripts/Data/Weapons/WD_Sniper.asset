@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: WD_Sniper
   m_EditorClassIdentifier: Assembly-CSharp::ProjectileWeaponData
   weaponName: "\uC2A4\uB098\uC774\uD37C"
+  brief: "\uB290\uB9AC\uC9C0\uB9CC \uAC15\uD55C \uD55C \uBC1C, 3\uBA85 \uAD00\uD1B5"
   description: "\uB290\uB9AC\uC9C0\uB9CC \uAC15\uD558\uACE0 \uC801 3\uBA85\uC744
     \uAD00\uD1B5"
   icon: {fileID: 21300000, guid: b05703b974c539c4dbcb17f763b24fbe, type: 3}

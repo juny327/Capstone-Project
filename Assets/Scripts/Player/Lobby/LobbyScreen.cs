@@ -163,6 +163,7 @@ public class LobbyScreen : MonoBehaviour
         if (manager == null) return;
 
         manager.OnSelectionChanged += OnSelected;
+        DescriptionMode.Changed += OnDescriptionMode;
         Refresh(manager.SelectedIndex);
 
         // 처음 몇 프레임의 선택(LobyManager 기본 0번 · 돌아왔을 때 이전 선택 되살리기)은 소리 없이
@@ -174,6 +175,16 @@ public class LobbyScreen : MonoBehaviour
     {
         if (manager != null)
             manager.OnSelectionChanged -= OnSelected;
+        DescriptionMode.Changed -= OnDescriptionMode;
+    }
+
+    // '상세 설명' 토글이 바뀌면 무기 상세 칸 · 미리보기 글만 다시 (2026-11-22)
+    void OnDescriptionMode(bool detail)
+    {
+        WeaponData weapon = manager != null ? manager.Selected : null;
+        int c = FindCharacter(weapon);
+        RefreshDetail(c, c >= 0 ? characters[c] : null, weapon);
+        if (hovered != null) SetCaption(hovered);
     }
 
     int soundFromFrame;
@@ -329,7 +340,10 @@ public class LobbyScreen : MonoBehaviour
         if (detailFrame != null) detailFrame.color = character.accentColor;
         SetWeaponIcon(detailIcon, weapon);
         if (detailName != null) detailName.text = weapon.weaponName;
-        if (detailDescription != null) detailDescription.text = weapon.description;
+        if (detailDescription != null) detailDescription.text = UiTextFit.KeepWords(DescriptionMode.Pick(weapon.brief, weapon.description));   // 간단 / 상세 (2026-11-22)
+
+        // '상세 설명' 스위치 — 무기 상세 칸 오른쪽 위 (2026-11-22)
+        DetailToggle.Ensure(detailPanel, new Vector2(1f, 1f), new Vector2(-14f, -14f), detailName != null ? detailName.font : null, character.accentColor, 0.85f);
 
         var lines = new List<(string label, string value)>();
         WeaponStatLines(weapon, lines);
@@ -372,7 +386,7 @@ public class LobbyScreen : MonoBehaviour
                 row.resultName.text = e.Title;
                 row.resultName.color = e.color;
             }
-            if (row.resultLine != null) row.resultLine.text = Short(e.flavor, recipeLineMax);
+            if (row.resultLine != null) row.resultLine.text = Short(!string.IsNullOrWhiteSpace(e.brief) ? e.brief : e.flavor, recipeLineMax);   // 간단 설명 한 줄 (2026-11-22)
             if (row.background != null) row.background.color = rowNormal;
         }
     }
@@ -406,7 +420,7 @@ public class LobbyScreen : MonoBehaviour
         if (previewCaption == null) return;
 
         previewCaption.text = e != null
-            ? string.Format(evolvedCaption, $"<color=#{ColorUtility.ToHtmlStringRGB(e.color)}>{e.Title}</color>", (e.flavor ?? "").Split('\n')[0])
+            ? string.Format(evolvedCaption, $"<color=#{ColorUtility.ToHtmlStringRGB(e.color)}>{e.Title}</color>", DescriptionMode.Pick(e.brief, (e.flavor ?? "").Split('\n')[0]))
             : dragCaption;
     }
 
@@ -432,48 +446,8 @@ public class LobbyScreen : MonoBehaviour
         besideSettings.position = topRight + (Vector3)pivotFromTopRight;
     }
 
-    /// <summary>무기 상세 능력치 줄 (최대 6줄) — 종류마다 중요한 값만.</summary>
-    static void WeaponStatLines(WeaponData w, List<(string, string)> into)
-    {
-        int count = w is ProjectileWeaponData pc ? pc.projectileCount : 1;
-        into.Add(("피해", count > 1 ? $"{Num(w.damage)} × {count}발" : Num(w.damage)));
-        into.Add(("공격 간격", $"{Num(w.fireInterval)}초"));
-
-        switch (w)
-        {
-            case ProjectileWeaponData p:
-                into.Add(("탄창 · 장전", $"{p.magazineSize} · {Num(p.reloadTime)}초"));
-                if (p.pierceCount > 0) into.Add(("관통", $"{p.pierceCount}명"));
-                else if (p.homingTurnRate > 0f) into.Add(("유도", "있음"));
-                else if (p.spreadAngle > 0f) into.Add(("퍼짐", $"{Num(p.spreadAngle)}도"));
-                break;
-            case ChainBeamWeaponData chain:
-                into.Add(("탄창 · 장전", $"{chain.magazineSize} · {Num(chain.reloadTime)}초"));
-                into.Add(("연쇄", $"{chain.chainCount}명"));
-                break;
-            case ChargeBeamWeaponData charge:
-                into.Add(("탄창 · 장전", $"{charge.magazineSize} · {Num(charge.reloadTime)}초"));
-                into.Add(("사거리", $"{Num(charge.range)}m"));
-                break;
-            case MeleeWeaponData melee:
-                into.Add(("사거리", $"{Num(melee.range)}m"));
-                into.Add(("휘두르는 폭", $"{Num(melee.arcAngle)}도"));   // 망치 · 방망이도 로비에 (2026-11-22)
-                break;
-        }
-
-        into.Add(("치명타", $"{Mathf.RoundToInt(w.critChance * 100f)}%"));
-        string level = LevelBonus(w.perLevelBonus);
-        if (!string.IsNullOrEmpty(level)) into.Add(("레벨업", level));
-    }
-
-    static string LevelBonus(WeaponModifier m)
-    {
-        if (m.damageAdd > 0f) return $"피해 +{Num(m.damageAdd)}";
-        if (m.projectileCountAdd > 0) return $"탄 +{m.projectileCountAdd}";
-        if (m.damageMul > 1f) return $"피해 +{Mathf.RoundToInt((m.damageMul - 1f) * 100f)}%";
-        if (m.fireIntervalMul > 0f && m.fireIntervalMul < 1f) return $"연사 +{Mathf.RoundToInt((1f / m.fireIntervalMul - 1f) * 100f)}%";
-        return "";
-    }
+    /// <summary>무기 상세 능력치 줄 (최대 6줄) — 종류마다 중요한 값만. 정비 · 보상 카드 상세와 같은 곳(WeaponStatText)에서 (2026-11-22).</summary>
+    static void WeaponStatLines(WeaponData w, List<(string, string)> into) => WeaponStatText.Lines(w, into);
 
     int FindCharacter(WeaponData weapon)
     {

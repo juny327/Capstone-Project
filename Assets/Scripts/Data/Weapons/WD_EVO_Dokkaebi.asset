@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: WD_EVO_Dokkaebi
   m_EditorClassIdentifier: Assembly-CSharp::MeleeWeaponData
   weaponName: "\uB3C4\uAE68\uBE44 \uBC29\uB9DD\uC774"
+  brief: "'\uB69D\uB531' \uCF54\uC778 \xB7 \uB3C4\uAE68\uBE44\uBD88"
   description: "\uB9DE\uD78C \uD718\uB450\uB974\uAE30 \uB2E4\uC12F \uBC88\uC9F8\uB9C8\uB2E4
     '\uB69D\uB531!' \uCF54\uC778 (\uC2A4\uD14C\uC774\uC9C0\uB9C8\uB2E4 12\uAC1C),
     \uD480\uC2A4\uC719\uC740 \uB3C4\uAE68\uBE44\uBD88 \uD0C0\uAD6C \u2014 \uBA40\uB9AC

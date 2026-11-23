@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: MOD_SMG_Spray
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentData
   displayName: "\uB09C\uC0AC"
+  brief: "\uB354 \uBE60\uB974\uAC8C, \uB354 \uB113\uAC8C"
   description: "\uB354 \uBE60\uB974\uAC8C \u2014 \uB354 \uB113\uAC8C \uD37C\uC9C4\uB2E4"
   icon: {fileID: 21300000, guid: 85c9d43184c5ef14f8a5238c6df7b383, type: 3}
   slot: 5

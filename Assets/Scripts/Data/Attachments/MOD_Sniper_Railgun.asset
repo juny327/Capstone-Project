@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: MOD_Sniper_Railgun
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentData
   displayName: "\uB808\uC77C\uAC74"
+  brief: "\uBAA8\uB450 \uAFF0\uB6AB\uB294 \uCD08\uACE0\uC18D \uD0C4"
   description: "\uBAA8\uB4E0 \uC801\uC744 \uAFF0\uB6AB\uB294 \uCD08\uACE0\uC18D \uD0C4
     \u2014 \uC7A5\uC804\uC774 \uB290\uB9AC\uB2E4"
   icon: {fileID: 21300000, guid: ad5dcdc263a0d474685ad18a3016b266, type: 3}

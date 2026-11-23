@@ -33,7 +33,7 @@ public class AttachmentReward : StageReward
         {
             if (!string.IsNullOrEmpty(descriptionOverride)) return descriptionOverride;
             if (attachment == null) return string.Empty;
-            return $"{AttachmentData.SlotName(attachment.slot)} 부착물 · {attachment.EffectText}";
+            return DescText.Attachment(attachment, true);   // 간단 = 한 줄 · 상세 = "탄창 부착물 · 설명" + 수치 (2026-11-22)
         }
     }
 

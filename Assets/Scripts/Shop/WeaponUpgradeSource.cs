@@ -99,14 +99,7 @@ public class WeaponUpgradeOffer : ShopOffer
 
     public override string Title => $"{weapon.weaponName} 강화";
 
-    public override string Description
-    {
-        get
-        {
-            string bonus = ModifierText.Describe(weapon.perLevelBonus, weapon);
-            return string.IsNullOrEmpty(bonus) ? "무기 레벨이 한 단계 오른다" : bonus;
-        }
-    }
+    public override string Description => DescText.WeaponLevelUp(weapon, fromLevel);   // 간단 = 오르는 값 · 상세 = 레벨 · 규칙 (2026-11-22)
 
     public override Sprite Icon => weapon.icon;
     public override string Tag => $"Lv.{fromLevel} → {fromLevel + 1}";

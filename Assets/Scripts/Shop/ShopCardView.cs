@@ -65,8 +65,9 @@ public class ShopCardView : MonoBehaviour
         }
 
         if (tagText != null) { tagText.text = offer.Tag; tagText.color = kindColor; }
+        CardDetailLayout.Apply(icon, title, description, DescriptionMode.Detail);   // 상세 설명이면 그림을 접고 설명 칸을 넓힌다 (2026-11-22)
         if (title != null) { UiTextFit.Line(title); title.text = offer.Title; }
-        if (description != null) { UiTextFit.Box(description); description.text = offer.Description; }   // 긴 설명이 가격을 덮지 않게
+        if (description != null) { UiTextFit.Box(description); description.text = UiTextFit.KeepWords(offer.Description); }   // 긴 설명이 가격을 덮지 않게
 
         if (priceIcon != null)
         {

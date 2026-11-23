@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: AT_Diffuser
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentData
   displayName: "\uD655\uC0B0\uAE30"
+  brief: "\uC0B0\uD0C4 2\uBC1C \uB354, \uB113\uAC8C"
   description: "\uC0B0\uD0C4\uC744 \uB354 \uB113\uAC8C, \uB354 \uB9CE\uC774"
   icon: {fileID: 21300000, guid: 421669c76bce94f4e935fce71f0568bf, type: 3}
   slot: 1

@@ -50,14 +50,7 @@ public class EvolutionOffer : ShopOffer
 
     public override string Title => $"상위 무기 — {evolution.Title}";
 
-    public override string Description
-    {
-        get
-        {
-            string head = evolution.from != null ? $"{evolution.from.weaponName} → {evolution.Title}" : evolution.Title;
-            return string.IsNullOrEmpty(evolution.flavor) ? head : $"{head} · {evolution.flavor}";
-        }
-    }
+    public override string Description => DescText.Evolution(evolution);   // 간단 = 한 줄 · 상세 = 조건 → 이름 + 전체 설명 (2026-11-22)
 
     public override Sprite Icon => evolution.result != null && evolution.result.icon != null
         ? evolution.result.icon

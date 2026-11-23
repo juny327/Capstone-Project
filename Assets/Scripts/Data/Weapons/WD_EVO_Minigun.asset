@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: WD_EVO_Minigun
   m_EditorClassIdentifier: Assembly-CSharp::ProjectileWeaponData
   weaponName: "\uD68C\uC804 \uAE30\uAD00\uD3EC"
+  brief: "\uC7A5\uC804 \uC5C6\uC774, \uC3E0\uC218\uB85D \uBE60\uB974\uAC8C"
   description: "\uC7A5\uC804 \uC5C6\uC774 \uACC4\uC18D \uC3DC\uB2E4 \u2014 \uC3D8\uB294
     \uB3D9\uC548 \uC5F0\uC0AC\uAC00 2\uCD08\uC5D0 \uAC78\uCCD0 3\uBC30\uAE4C\uC9C0
     \uC624\uB978\uB2E4"

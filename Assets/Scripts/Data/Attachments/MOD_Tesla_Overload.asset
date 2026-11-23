@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: MOD_Tesla_Overload
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentData
   displayName: "\uACFC\uBD80\uD558 \uCF54\uC77C"
+  brief: "\uC804\uAE30\uAC00 \uB450 \uBA85 \uB354 \uD37C\uC9C4\uB2E4"
   description: "\uC804\uAE30\uAC00 \uB450 \uBC88 \uB354 \uD37C\uC9C4\uB2E4 \u2014
     \uC904\uAE30\uB294 \uC57D\uD574\uC9C4\uB2E4"
   icon: {fileID: 21300000, guid: 971bd5c98b4099049ad2ba215cc09f75, type: 3}

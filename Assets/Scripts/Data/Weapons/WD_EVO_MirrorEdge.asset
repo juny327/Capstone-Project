@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: WD_EVO_MirrorEdge
   m_EditorClassIdentifier: Assembly-CSharp::MeleeWeaponData
   weaponName: "\uAC70\uC6B8\uCE7C\uB0A0"
+  brief: "\uD0C4 \uB418\uBC1B\uAE30 \xB7 \uAC80\uAE30 \uBC1C\uC0AC"
   description: "\uD718\uB450\uB97C \uB54C\uB9C8\uB2E4 \uC801 \uD0C4\uC744 \uB418\uB3CC\uB9AC\uACE0,
     \uB124 \uBC88\uC9F8 \uD718\uB450\uB974\uAE30\uB9C8\uB2E4 \uCD08\uC2B9\uB2EC \uAC80\uAE30
     3\uAC1C"

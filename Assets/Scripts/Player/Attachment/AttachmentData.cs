@@ -43,6 +43,9 @@ public class AttachmentData : ScriptableObject
 {
     public string displayName = "부착물";
 
+    [Tooltip("간단 설명 — 카드에 기본으로 보이는 핵심 한 줄 (20자 안팎). 비우면 상세. '상세 설명' 을 켜면 description + 수치(EffectText) (DescText, 2026-11-22)")]
+    public string brief;
+
     [TextArea(1, 3)] public string description;
 
     [Tooltip("카드 · HUD 에 보이는 그림")]

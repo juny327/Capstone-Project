@@ -26,11 +26,39 @@ public class StageRewardCard : MonoBehaviour
     public AudioClip selectSound;
 
     private StageReward reward;
+    private GameObject owner;
     private bool clicked;
+
+    // '상세 설명' 토글이 바뀌면 글만 다시 (2026-11-22)
+    void OnEnable() => DescriptionMode.Changed += OnDescriptionMode;
+    void OnDisable() => DescriptionMode.Changed -= OnDescriptionMode;
+
+    void OnDescriptionMode(bool detail)
+    {
+        if (reward == null || description == null) return;
+        CardDetailLayout.Apply(icon, title, description, detail);
+        description.text = UiTextFit.KeepWords(DescriptionFor(reward, owner));
+        if (tagLabel != null) UiTextFit.KeepAbove(description, tagLabel.rectTransform);
+    }
+
+    /// <summary>
+    /// 카드 설명 — 이미 가진 무기('레벨 업' 카드)면 무기 소개 대신 오르는 값 ("피해 +1"), 아니면 보상의 설명 (2026-11-22).
+    /// </summary>
+    static string DescriptionFor(StageReward data, GameObject player)
+    {
+        if (data is WeaponReward wr && wr.weapon != null && player != null && player.TryGetComponent(out WeaponController wc))
+        {
+            IWeapon owned = wc.Find(wr.weapon);
+            if (owned != null) return DescText.WeaponLevelUp(wr.weapon, owned.Level);
+        }
+
+        return data.Description;
+    }
 
     public void Setup(StageReward data, GameObject player)
     {
         reward = data;
+        owner = player;
         clicked = false;
 
         if (data == null) return;
@@ -43,8 +71,9 @@ public class StageRewardCard : MonoBehaviour
             icon.enabled = data.Icon != null;
         }
 
+        CardDetailLayout.Apply(icon, title, description, DescriptionMode.Detail);   // 상세 설명이면 그림을 접고 설명 칸을 넓힌다 (2026-11-22)
         if (title != null) { UiTextFit.Line(title); title.text = data.Title; }   // 긴 제목이 두 줄로 꺾여 설명을 덮지 않게
-        if (description != null) { UiTextFit.Box(description); description.text = data.Description; }   // 긴 설명이 아래 종류 표시를 덮지 않게
+        if (description != null) { UiTextFit.Box(description); description.text = UiTextFit.KeepWords(DescriptionFor(data, player)); }   // 긴 설명이 아래 종류 표시를 덮지 않게
 
         UpdateTag(data, player);
         if (description != null && tagLabel != null) UiTextFit.KeepAbove(description, tagLabel.rectTransform);   // 설명 칸이 종류 표시 자리까지 내려와 있다
