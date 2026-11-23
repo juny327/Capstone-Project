@@ -14,8 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SubAbilityData
   displayName: "\uC5D0\uB108\uC9C0 \uBC29\uD328"
   brief: "\uB204\uB974\uBA74 \uB9C9\uACE0, \uB5BC\uBA74 \uBC00\uCE5C\uB2E4"
-  description: "\uB204\uB974\uACE0 \uC788\uB294 \uB3D9\uC548 \uC815\uBA74 \uACF5\uACA9\uC744
-    \uB9C9\uB294\uB2E4 \xB7 \uB5BC\uBA74 \uBC00\uCE5C\uB2E4"
+  description: "\uB204\uB974\uACE0 \uC788\uB294 \uB3D9\uC548 \uC815\uBA74 \uACF5\uACA9\uC744 \uB9C9\uB294\uB2E4 \u00B7 \uB5BC\uBA74 \uBC00\uCE5C\uB2E4\n\uB2E4\uC2DC \uCC28\uB294 \uB370 \uC624\uB798 \uAC78\uB9AC\uACE0, \uAE68\uC9C0\uBA74 \uC57D 16\uCD08 \uB3D9\uC548 \uBABB \uD3B8\uB2E4"
   icon: {fileID: 21300000, guid: aa49d417ce7607e4092c1ed4715e1e5c, type: 3}
   prefab: {fileID: 8196350990777663897, guid: c7142e69c0666714bad9ef3d42d3a7f7, type: 3}
   maxLevel: 3

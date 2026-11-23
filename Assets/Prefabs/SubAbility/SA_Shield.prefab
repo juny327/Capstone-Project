@@ -48,10 +48,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ShieldAbility
   blockAngle: 120
   durability: 50
-  regenDelay: 2
-  regenPerSecond: 20
-  brokenDelay: 4
-  minimumToRaise: 5
+  regenDelay: 5
+  regenPerSecond: 5
+  brokenDelay: 12
+  minimumToRaise: 20
   moveMultiplier: 0.6
   bashMinHold: 0.3
   bashRange: 2.5
