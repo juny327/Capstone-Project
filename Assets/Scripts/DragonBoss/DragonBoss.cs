@@ -269,7 +269,11 @@ public partial class DragonBoss : MonoBehaviour
                 if (!placed) placed = PlaceAwayFromPlayer();
                 Animate(IdleState);
                 if (target != null) Face(target.position, turnSpeed * 0.5f);
-                if (stateTime >= wakeDelay && target != null) Enter(State.Chase);
+                if (stateTime >= wakeDelay && target != null)
+                {
+                    Enter(State.Chase);
+                    if (EnemyManager.Instance != null) EnemyManager.Instance.BeginBossFight();   // 보스전 잡몹 시작 (2026-11-23, BossStage.asset)
+                }
                 break;
 
             case State.Chase:
@@ -613,6 +617,7 @@ public partial class DragonBoss : MonoBehaviour
         DragonFireWall.ClearAll();
         DragonRingWave.ClearAll();
         DismissMinions();   // 부하도 같이 쓰러진다 — 승리 처리까지 몇 초 동안 플레이어를 때리지 않게
+        if (EnemyManager.Instance != null) EnemyManager.Instance.EndBossFight(true);   // 보스전 잡몹도 멈추고 같이 쓰러진다 (2026-11-23)
         Enter(State.Dead);
         StopAgent();
         // 더는 맞지 않게 — 조준 · 탄 · 근접 판정이 모두 콜라이더를 본다
@@ -696,6 +701,7 @@ public partial class DragonBoss : MonoBehaviour
         DragonFirePatch.ClearAll();
         DragonFireWall.ClearAll();
         DragonRingWave.ClearAll();
+        if (EnemyManager.Instance != null) EnemyManager.Instance.EndBossFight(false);   // 더 내보내지 않는다 (남은 잡몹은 그대로)
         StopAgent();
         Enter(State.Idle);
         Animate(IdleState, 1f, true);

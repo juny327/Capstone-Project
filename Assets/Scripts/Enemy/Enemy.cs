@@ -417,7 +417,8 @@ public class Enemy : MonoBehaviour, IDamageable, IPoolable
         OnDeath?.Invoke(this);
 
 
-        SpawnExpOrb();
+        // 보스 스테이지 몬스터는 경험치 구슬을 떨어뜨리지 않는다 (2026-11-23, StageData.enemyRewards)
+        if (manager == null || manager.dropRewards) SpawnExpOrb();
         GameEvents.OnEnemyDefeated?.Invoke(this);
     }
 

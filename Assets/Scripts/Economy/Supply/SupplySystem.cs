@@ -123,8 +123,9 @@ public class SupplySystem : MonoBehaviour
         Vector3 at = enemy.transform.position;
         killsSinceMagnet++;
 
-        // 한 처치에 하나만 — 자석이 먼저
-        if (magnetsDropped < Settings.magnetMaxPerStage &&
+        // 한 처치에 하나만 — 자석이 먼저. 경험치 · 코인이 없는 스테이지(보스)에서는 자석이 끌어올 것이 없어 안 떨어뜨린다 (2026-11-23)
+        bool rewards = EnemyManager.Instance == null || EnemyManager.Instance.dropRewards;
+        if (rewards && magnetsDropped < Settings.magnetMaxPerStage &&
             (killsSinceMagnet >= Settings.magnetPity || Random.value < Settings.magnetChance))
         {
             if (Drop(Settings.magnetPrefab, at)) { magnetsDropped++; killsSinceMagnet = 0; }

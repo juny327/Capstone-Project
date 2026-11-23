@@ -23,6 +23,13 @@ public class EnemyManager : MonoBehaviour
     [System.NonSerialized] public StageData.SpawnWeight[] stageSpawnWeights;
     public int maxEnemyCount = 20;
 
+    // 2026-11-23 — 보스 스테이지 잡몹 (StageManager 가 StageData 값으로 채운다)
+    /// <summary>켜져 있으면 보스가 깨어나 싸우는 동안(BeginBossFight ~ EndBossFight)만 몬스터를 내보낸다.</summary>
+    [System.NonSerialized] public bool waitForBossFight;
+    /// <summary>꺼져 있으면 몬스터가 경험치 구슬 · 코인을 떨어뜨리지 않는다 (보스 스테이지).</summary>
+    [System.NonSerialized] public bool dropRewards = true;
+    bool bossFighting;
+
     [Header("Stage Event")]
     [Tooltip("Stage2에서 자동으로 로드되는 특수 몬스터. 다른 스테이지에서는 비워 둔다.")]
     [SerializeField] private Enemy specialStageEnemy;
@@ -89,6 +96,7 @@ public class EnemyManager : MonoBehaviour
     {
         if (player == null) return;
         if (spawners.Count == 0) return;
+        if (waitForBossFight && !bossFighting) return;
 
         spawnTimer += Time.deltaTime;
 
@@ -296,6 +304,26 @@ public class EnemyManager : MonoBehaviour
         }
 
         return closest;
+    }
+
+    /// <summary>보스가 깨어났다 — 보스 스테이지 잡몹을 내보내기 시작한다 (waitForBossFight 가 꺼진 스테이지에서는 아무 일 없음).</summary>
+    public void BeginBossFight()
+    {
+        if (!waitForBossFight || bossFighting) return;
+        bossFighting = true;
+        spawnTimer = 0f;
+    }
+
+    /// <summary>보스가 쓰러졌다 · 플레이어가 쓰러졌다 — 잡몹을 더 내보내지 않는다. defeatRemaining 이면 남은 몬스터도 쓰러뜨린다.</summary>
+    public void EndBossFight(bool defeatRemaining)
+    {
+        if (!waitForBossFight) return;
+        bossFighting = false;
+        if (!defeatRemaining) return;
+
+        foreach (Enemy enemy in enemies.ToArray())
+            if (enemy != null && enemy.gameObject.activeInHierarchy && enemy.state != EnemyState.Dead)
+                enemy.TakeDamage(new DamageInfo { damage = 999999f, hitPoint = enemy.transform.position + Vector3.up });
     }
 
     public void RegisterSpawner(EnemySpawner spawner)

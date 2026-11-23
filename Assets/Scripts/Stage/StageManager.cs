@@ -26,17 +26,24 @@ public class StageManager : MonoBehaviour
         DifficultySettings.Mode mode = Difficulty.Values;
         killTarget = Difficulty.KillTarget(currentStage.killTarget);
 
-        // 보스 스테이지는 일반 몬스터 0 — 0 은 0 그대로 둔다 (1 로 올리면 보스전에 몬스터가 나오고, 잡으면 클리어 흐름이 열린다)
+        // 최대 수 0 인 스테이지는 몬스터 0 그대로 둔다 (배율을 곱해 1 로 올리지 않는다).
+        // 보스 스테이지는 2026-11-23 부터 잡몹이 나온다 (BossStage.asset 최대 수 · 간격) — 처치 목표 0 이라 잡아도 클리어되지 않는다 (OnEnemyKilled)
         EnemyManager.Instance.maxEnemyCount = currentStage.maxEnemyCount <= 0 ? 0 : Mathf.Max(1, Mathf.RoundToInt(currentStage.maxEnemyCount * mode.maxEnemies));
         EnemyManager.Instance.spawnInterval = currentStage.spawnInterval * mode.spawnInterval;
         EnemyManager.Instance.rangedProjectileSpeed = currentStage.rangedProjectileSpeed;
         EnemyManager.Instance.healthMultiplier = currentStage.enemyHealthMultiplier * mode.enemyHealth;
         EnemyManager.Instance.stageSpawnWeights = currentStage.spawnWeights;   // 스테이지별 등장 몬스터 (2026-11-17)
+        // 보스 스테이지 (2026-11-23) — 잡몹은 보스가 깨어난 뒤에만 · 몬스터는 경험치 · 코인을 떨어뜨리지 않는다
+        EnemyManager.Instance.waitForBossFight = currentStage.spawnDuringBossFight;
+        EnemyManager.Instance.dropRewards = currentStage.enemyRewards;
         GameEvents.OnStageProgress?.Invoke(killCount, killTarget);
     }
 
     void OnEnemyKilled()
     {
+        // 처치 목표가 0 인 스테이지(보스)는 처치로 끝나지 않는다 — 보스전 잡몹을 잡아도 클리어 흐름이 열리지 않게 (2026-11-23)
+        if (KillTarget <= 0) return;
+
         killCount++;
         GameEvents.OnStageProgress?.Invoke(killCount, KillTarget);
 
