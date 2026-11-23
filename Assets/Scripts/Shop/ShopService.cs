@@ -47,12 +47,21 @@ public class ShopService
             Wallet = Wallet.Ensure(player),
             Catalog = catalog,
             StageIndex = Mathf.Max(1, stageIndex),
+            PriceMultiplier = PriceMultiplierOf(player),
         };
 
         rerollsThisVisit = 0;
         evolutions.Clear();
         BuildStock();
         return true;
+    }
+
+    /// <summary>플레이어 캐릭터의 가격 배율 (검사 2026-11-23). 캐릭터를 모르면 로비에서 고른 캐릭터, 그것도 없으면 1.</summary>
+    static float PriceMultiplierOf(GameObject player)
+    {
+        CharacterLoadout loadout = player != null ? player.GetComponent<CharacterLoadout>() : null;
+        CharacterData data = loadout != null && loadout.Data != null ? loadout.Data : CharacterSelection.Current;
+        return data != null ? Mathf.Max(0.1f, data.shopPriceMultiplier) : 1f;
     }
 
     /// <summary>이 카드를 지금 살 수 있는가. 아니면 reason 에 이유.</summary>

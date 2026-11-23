@@ -274,6 +274,7 @@ public partial class DragonBoss
         Enemy enemy = go.GetComponent<Enemy>();
         if (enemy == null) return;
         enemy.Initialize(target, EnemyManager.Instance);
+        if (IsMeleeMinion(enemy)) enemy.ScaleHealth(tune.minionMeleeHealth);   // 근접 부하 체력 ×3 (2026-11-23, 난이도 값)
 
         // 보스 스테이지는 처치 목표가 0 이다 — 부하가 처치 수에 들어가면 한 마리만 잡아도 스테이지 클리어가 뜬다.
         // 죽을 때 EnemyManager 가 이 값을 보고(먼저 등록됨) 그다음 여기서 원래 값으로 돌려놓는다 (풀에서 다시 쓰이므로)
@@ -289,6 +290,10 @@ public partial class DragonBoss
         enemy.OnDeath += onDeath;
         minions.Add(enemy);
     }
+
+    /// <summary>붙어서 때리는 몬스터인가 — A 근접 · B 돌진 · D 자폭. 원거리(C 투사체 · E 레이저)는 아니다.</summary>
+    static bool IsMeleeMinion(Enemy enemy) =>
+        enemy.attack is MeleeAttack || enemy.attack is DashAttack || enemy.attack is SuicideAttack;
 
     /// <summary>보스가 쓰러지면 부하도 같이 쓰러진다.</summary>
     void DismissMinions()

@@ -22,13 +22,13 @@ MonoBehaviour:
   weaponPrefab: {fileID: 5825881266557484979, guid: fcd7bbd21a7889a43a5bbb4191f6bd2c, type: 3}
   socket: 0
   fireInterval: 0.7
-  damage: 14.41
+  damage: 12.97
   damageUpgradeFlatPerLevel: -1
   critChance: 0.1
   critMultiplier: 2
   maxLevel: 3
   perLevelBonus:
-    damageAdd: 1.375
+    damageAdd: 1.24
     damageMul: 1
     fireIntervalMul: 1
     critChanceAdd: 0
@@ -54,7 +54,7 @@ MonoBehaviour:
   fireSounds:
   - {fileID: 8300000, guid: e3760d5047edad749ac1e25cd676ab46, type: 3}
   - {fileID: 8300000, guid: 0c03edc4efa519a439adaf03a0af417a, type: 3}
-  fireVolume: 0.65
+  fireVolume: 0.621
   firePitchRange: {x: 0.96, y: 1.04}
   reloadStartSound: {fileID: 0}
   reloadEndSound: {fileID: 0}

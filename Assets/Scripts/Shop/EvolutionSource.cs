@@ -21,7 +21,7 @@ public class EvolutionSource : ShopOfferSource
 
         foreach (WeaponEvolutionData e in ready)
         {
-            int price = ctx.Catalog != null ? ctx.Catalog.Scaled(e.shopPrice, ctx.StageIndex) : e.shopPrice;
+            int price = ctx.Catalog != null ? ctx.Catalog.Scaled(e.shopPrice, ctx.StageIndex, ctx.PriceMultiplier) : e.shopPrice;
             into.Add(new EvolutionOffer(e, e.shopPrice > 0 ? price : 0));
         }
     }

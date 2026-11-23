@@ -245,10 +245,80 @@ public static class CombatFx
     /// <summary>몸통 높이 (선 · 폭발 연출을 발밑이 아니라 몸에 맞춘다).</summary>
     public static Vector3 Body(Transform root) => root.position + Vector3.up * 0.9f;
 
-    /// <summary>부착물 · 상위 무기 효과 · 연계의 소리. 폭발은 kind 에 Explosion 을 넘긴다 (2026-11-19 종류별 동시 발음 제한).</summary>
+    /// <summary>
+    /// 부착물 · 상위 무기 효과 · 연계의 소리. 폭발은 kind 에 Explosion 을 넘긴다 (2026-11-19 종류별 동시 발음 제한).
+    /// 상위 무기의 소리(번개 · 폭발 · 칼날 …)면 상위 무기 그룹(+5dB)으로 — 2026-11-23 사용자: "상위 무기 효과음이 배경음에 묻힌다".
+    /// </summary>
     public static void PlaySound(GameSoundSet.Entry entry, SoundKind kind = SoundKind.Ability)
     {
-        if (entry != null && SoundManager.Instance != null) SoundManager.Instance.Play(entry, SoundManager.Instance.SfxGroup, 1f, 1f, kind);
+        if (entry != null && SoundManager.Instance != null)
+            SoundManager.Instance.Play(entry, SoundManager.Instance.GroupFor(IsEvolvedSound(entry)), 1f, 1f, kind);
+    }
+
+    // ───────── 상위 무기 소리 목록 (2026-11-23) ─────────
+
+    static HashSet<GameSoundSet.Entry> evolvedSounds;
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetEvolvedSounds() => evolvedSounds = null;
+
+    /// <summary>
+    /// 이 소리 칸이 상위 무기 것인가 — 상위 무기 데이터(프리즘 노바 · 태양창 설정 포함)와 그 고유 효과 에셋(AE_EVO_* — 묠니르 번개 ·
+    /// 공성포 폭발 · 혈검 …)에 든 소리 칸을 처음 한 번 모아 둔다. 망치 · 방망이처럼 기본 무기와 같은 코드를 쓰는 효과도
+    /// 에셋이 따로라(AE_Hammer ↔ AE_EVO_Mjolnir) 상위 무기 쪽 소리만 걸린다. 호출하는 쪽은 고치지 않는다.
+    /// </summary>
+    public static bool IsEvolvedSound(GameSoundSet.Entry entry)
+    {
+        if (entry == null) return false;
+        if (evolvedSounds == null) BuildEvolvedSounds();
+        return evolvedSounds.Contains(entry);
+    }
+
+    /// <summary>모은 상위 무기 소리 칸 수 (시험).</summary>
+    public static int EvolvedSoundCount { get { if (evolvedSounds == null) BuildEvolvedSounds(); return evolvedSounds.Count; } }
+
+    static void BuildEvolvedSounds()
+    {
+        evolvedSounds = new HashSet<GameSoundSet.Entry>();
+        EvolutionCatalog catalog = EvolutionCatalog.Instance;
+        if (catalog == null || catalog.evolutions == null) return;
+
+        var seen = new HashSet<object>();
+        foreach (WeaponEvolutionData e in catalog.evolutions)
+        {
+            if (e == null || e.result == null) continue;
+            CollectSounds(e.result, 0, seen);
+            if (e.result.innateEffects != null)
+                foreach (AttachmentEffect fx in e.result.innateEffects)
+                    if (fx != null) CollectSounds(fx, 0, seen);
+        }
+    }
+
+    static void CollectSounds(object o, int depth, HashSet<object> seen)
+    {
+        if (o == null || depth > 4 || !seen.Add(o)) return;
+        if (o is GameSoundSet.Entry entry) { evolvedSounds.Add(entry); return; }
+
+        const System.Reflection.BindingFlags flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic;
+        foreach (System.Reflection.FieldInfo f in o.GetType().GetFields(flags))
+        {
+            System.Type t = f.FieldType;
+            if (t == typeof(GameSoundSet.Entry))
+            {
+                if (f.GetValue(o) is GameSoundSet.Entry en) evolvedSounds.Add(en);
+            }
+            else if (t.IsArray)
+            {
+                System.Type el = t.GetElementType();
+                if (el == null || typeof(Object).IsAssignableFrom(el) || el.IsPrimitive || el.IsValueType || el == typeof(string)) continue;
+                if (f.GetValue(o) is System.Array array)
+                    foreach (object item in array) CollectSounds(item, depth + 1, seen);
+            }
+            else if (t.IsClass && t != typeof(string) && !typeof(Object).IsAssignableFrom(t) && t.IsSerializable)
+            {
+                CollectSounds(f.GetValue(o), depth + 1, seen);
+            }
+        }
     }
 
     /// <summary>총알 · 광선이 벽에 막힌 소리 ('탁').</summary>

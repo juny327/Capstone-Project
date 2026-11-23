@@ -156,8 +156,11 @@ public class EconomySystem : MonoBehaviour
         ResolvePlayer();
         if (!HasLivePlayer) return;
 
-        // 스테이지별 배율 (0.6 · 0.65 · 0.8) — 소수 부분은 확률로 (코인 1 × 0.6 = 60% 확률로 1)
-        float scaled = Settings.CoinsFor(enemy.data) * Settings.CoinMultiplierFor(CurrentStageIndex());
+        // 보스 스테이지 몬스터(잡몹 · 보스의 부하)는 코인을 떨어뜨리지 않는다 (2026-11-23, StageData.enemyRewards)
+        if (EnemyManager.Instance != null && !EnemyManager.Instance.dropRewards) return;
+
+        // 스테이지별 배율 (0.6 · 0.65 · 0.8) × 난이도 배율 (이지 ×2 — 처치 목표가 절반이라) — 소수 부분은 확률로 (코인 1 × 0.6 = 60% 확률로 1)
+        float scaled = Settings.CoinsFor(enemy.data) * Settings.CoinMultiplierFor(CurrentStageIndex()) * Difficulty.Values.coinMultiplier;
         int total = Mathf.FloorToInt(scaled);
         if (Random.value < scaled - total) total++;
         if (total <= 0) return;

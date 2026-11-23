@@ -108,6 +108,31 @@ public class SoundManager : MonoBehaviour
     /// <summary>효과음 그룹. 무기 소리가 여기로 나간다.</summary>
     public AudioMixerGroup SfxGroup => sfxGroup;
 
+    AudioMixerGroup evolvedGroup;
+    bool evolvedLooked;
+
+    /// <summary>
+    /// 상위 무기 소리 그룹 — 효과음(SFX) 아래 'Evolved' (2026-11-23 사용자: "상위 무기 효과음이 배경음에 묻힌다").
+    /// 믹서 스냅숏에서 +5dB (노출 파라미터 EvolvedSfxVolume — 믹서 창에서 바꾼다). 소리 칸 음량은 1 을 넘을 수 없어 그룹으로 키운다.
+    /// 효과음 크기 설정(SfxVolume)은 부모 그룹이라 그대로 따른다. 그룹이 없으면 효과음 그룹.
+    /// </summary>
+    public AudioMixerGroup EvolvedGroup
+    {
+        get
+        {
+            if (!evolvedLooked)
+            {
+                evolvedLooked = true;
+                AudioMixerGroup[] found = sfxGroup != null && sfxGroup.audioMixer != null ? sfxGroup.audioMixer.FindMatchingGroups("SFX/Evolved") : null;
+                evolvedGroup = found != null && found.Length > 0 ? found[0] : null;
+            }
+            return evolvedGroup != null ? evolvedGroup : sfxGroup;
+        }
+    }
+
+    /// <summary>상위 무기 소리면 상위 무기 그룹, 아니면 효과음 그룹.</summary>
+    public AudioMixerGroup GroupFor(bool evolved) => evolved ? EvolvedGroup : sfxGroup;
+
     /// <summary>UI 그룹 — 로비 · 설정창 버튼 소리(UISound)가 여기로 나간다.</summary>
     public AudioMixerGroup UiGroup => uiGroup;
 

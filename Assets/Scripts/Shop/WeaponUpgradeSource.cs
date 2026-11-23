@@ -77,7 +77,7 @@ public class WeaponUpgradeSource : ShopOfferSource
             IWeapon w = weapons[i];
             if (w == null || w.Data == null || w.Level >= Mathf.Max(1, w.Data.maxLevel)) continue;
 
-            into.Add(new WeaponUpgradeOffer(w.Data, w.Level, ctx.Catalog.UpgradePriceOf(w.Data, w.Level, ctx.StageIndex)));
+            into.Add(new WeaponUpgradeOffer(w.Data, w.Level, ctx.Catalog.UpgradePriceOf(w.Data, w.Level, ctx.StageIndex, ctx.PriceMultiplier)));
         }
     }
 }

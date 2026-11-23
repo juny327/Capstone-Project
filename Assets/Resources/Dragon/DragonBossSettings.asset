@@ -59,6 +59,7 @@ MonoBehaviour:
     minionsPhase2: 2
     minionsPhase3: 3
     minionCap: 4
+    minionMeleeHealth: 3
     firePatchLife: 4
     firePatchMax: 8
     newPatterns: 0
@@ -81,6 +82,7 @@ MonoBehaviour:
     minionsPhase2: 3
     minionsPhase3: 4
     minionCap: 6
+    minionMeleeHealth: 3
     firePatchLife: 6
     firePatchMax: 14
     newPatterns: 1

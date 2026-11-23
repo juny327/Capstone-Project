@@ -23,7 +23,7 @@ public class AttachmentSource : ShopOfferSource
         {
             if (a == null || ctx.Reserved.Contains(a)) continue;   // 진화 짝으로 이미 진열됐다
 
-            var offer = new AttachmentOffer(a, ctx.Catalog.Scaled(a.basePrice, ctx.StageIndex));
+            var offer = new AttachmentOffer(a, ctx.Catalog.Scaled(a.basePrice, ctx.StageIndex, ctx.PriceMultiplier));
             targets.Clear();
             offer.CollectTargets(ctx, targets);
             if (targets.Count > 0) into.Add(offer);

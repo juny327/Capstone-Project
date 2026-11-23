@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Audio;
 
 /// <summary>
 /// 모든 무기의 공통 구현. 쿨다운, 스탯 합성, 크리티컬 판정, 이펙트 스폰을 담당한다.
@@ -464,7 +465,7 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
 
         // 소리 층 (2026-11-19 효과음 재정비) — 순간음 · 저음 몸통 · 꼬리를 데이터로 겹친다. 비어 있으면 아무것도 안 한다
         if (data.HasFireStack && SoundManager.Instance != null)
-            SoundManager.Instance.PlayStack(data.fireStack, SoundKindOf, SoundScale, 1f - 0.04f * heavy);
+            SoundManager.Instance.PlayStack(data.fireStack, SoundKindOf, SoundScale, 1f - 0.04f * heavy, SoundGroup);
     }
 
     /// <summary>이 무기 소리의 종류 — 손에 든 무기는 Fire, 보조 칸은 SupportFire (2026-11-19 종류별 동시 발음 제한).</summary>
@@ -513,7 +514,7 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
 
         lastMeleeBodyAt = Time.unscaledTime;
         float scale = Mathf.Min(1.35f, 1f + (Mathf.Max(1, hits) - 1) * 0.08f);
-        SoundManager.Instance.PlayClip(clip, data.meleeBodyVolume * scale, Random.Range(0.96f, 1.04f), null, SoundKind.Hit);
+        SoundManager.Instance.PlayClip(clip, data.meleeBodyVolume * scale, Random.Range(0.96f, 1.04f), SoundGroup, SoundKind.Hit);
         MeleeBodyPlayed++;
     }
 
@@ -562,11 +563,15 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
     {
         if (clip == null || SoundManager.Instance == null) return;
 
-        SoundManager.Instance.PlayClip(clip, volume * SoundScale, pitch, null, kind == SoundKind.Auto ? SoundKindOf : kind);
+        SoundManager.Instance.PlayClip(clip, volume * SoundScale, pitch, SoundGroup, kind == SoundKind.Auto ? SoundKindOf : kind);
     }
 
-    /// <summary>보조 무기 소리 크기 — 주무기와 보조 셋이 한꺼번에 쏘면 시끄럽다. 주무기 소리가 앞에 선다.</summary>
-    public float SoundScale => IsSupport ? 0.5f : 1f;
+    /// <summary>이 무기 소리가 나갈 믹서 그룹 — 상위 무기는 'Evolved'(+5dB, 2026-11-23 — 배경음에 묻혔다), 그 밖은 효과음(null).</summary>
+    AudioMixerGroup SoundGroup => data != null && data.IsEvolved && SoundManager.Instance != null ? SoundManager.Instance.EvolvedGroup : null;
+
+    /// <summary>보조 무기 소리 크기 — 주무기와 보조 셋이 한꺼번에 쏘면 시끄럽다. 주무기 소리가 앞에 선다.
+    /// 상위 무기는 보조 칸이어도 ×0.7 (2026-11-23 — ×0.5 로는 끝 단계 상위 보조 셋의 소리가 배경음에 묻혔다).</summary>
+    public float SoundScale => IsSupport ? (data != null && data.IsEvolved ? 0.7f : 0.5f) : 1f;
 
     /// <summary>
     /// 손에 든 무기의 탄약 변화를 HUD 에 알린다.

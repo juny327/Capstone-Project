@@ -29,7 +29,7 @@ public class SubAbilitySource : ShopOfferSource
 
             int index = slot.IndexOf(data);
             int level = index >= 0 ? slot.Get(index).Level : 0;
-            int price = ctx.Catalog.Scaled(level > 0 ? data.LevelUpPrice(level) : data.basePrice, ctx.StageIndex);
+            int price = ctx.Catalog.Scaled(level > 0 ? data.LevelUpPrice(level) : data.basePrice, ctx.StageIndex, ctx.PriceMultiplier);
 
             if (level > 0 && data.HasVariants(level + 1))
             {

@@ -64,6 +64,12 @@ public class CharacterData : ScriptableObject
     [Tooltip("보조 무기 칸 수 — 사수 3 (고르지 않은 총 2 + 드론 무기들 중) · 검사 2 (고르지 않은 근접 2 — 드론은 사수 무기라 못 얻는다)")]
     [Range(0, 3)] public int supportSlots = 3;
 
+    // 2026-11-23 사용자: "검사 아이템 가격을 올려 코인이 딱 알맞게 떨어지도록" — 검사는 보조 2칸이라 살 것이 일찍 끝나
+    // 마지막 정비 창에서 코인이 88 ~ 110 남았다 (사수는 약 9)
+    [Header("정비 창")]
+    [Tooltip("이 캐릭터가 정비 창에서 사는 모든 상품 가격에 곱한다 (스테이지 배율 위에 — 새로고침 값은 그대로)")]
+    [Min(0.1f)] public float shopPriceMultiplier = 1f;
+
     [Header("Look")]
     [Tooltip("몸 머티리얼. 비우면 프리팹 기본값을 그대로 쓴다")]
     public Material bodyMaterial;

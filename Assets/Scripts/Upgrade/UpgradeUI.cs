@@ -87,6 +87,25 @@ public class UpgradeUI : MonoBehaviour
         UpdateRefreshCostLabel();
         DrawCards();
         ShowDetailToggle();
+        ShowExpBadge();
+    }
+
+    /// <summary>
+    /// 보유 경험치 — 맨 왼쪽 카드의 왼쪽 위 바로 위 (2026-11-23 사용자: "남은 경험치를 구석이 아니라 선택 창 왼쪽 위에").
+    /// 오른쪽의 '상세 설명' 스위치와 마주 본다. 창이 떠 있는 동안 HUD 왼쪽 아래 경험치는 숨는다 (ExpBadge).
+    /// </summary>
+    void ShowExpBadge()
+    {
+        if (panel == null || cards == null) return;
+
+        UpgradeCard left = null;
+        foreach (UpgradeCard card in cards)
+            if (card != null && card.gameObject.activeSelf && (left == null || card.transform.position.x < left.transform.position.x)) left = card;
+        if (left == null) return;
+
+        Canvas.ForceUpdateCanvases();
+        ExpBadge.EnsureAbove((RectTransform)panel.transform, (RectTransform)left.transform, new Vector2(0f, 8f),
+            left.title != null ? left.title.font : null, new Color(0.55f, 0.32f, 0.95f, 1f));
     }
 
     /// <summary>'상세 설명' 스위치 — 맨 오른쪽 카드의 오른쪽 위 바로 위 (2026-11-22). 카드는 토글이 바뀌면 스스로 설명을 다시 쓴다.</summary>
@@ -147,6 +166,7 @@ public class UpgradeUI : MonoBehaviour
                 StopCoroutine(insufficientCoinRoutine);
 
             insufficientCoinText.text = "코인이 부족합니다";
+            insufficientCoinText.raycastTarget = false;   // 문구가 떠 있는 동안에도 아래를 누를 수 있게 (2026-11-23)
             insufficientCoinText.gameObject.SetActive(true);
             insufficientCoinRoutine = StartCoroutine(HideInsufficientCoinsAfterDelay());
         }

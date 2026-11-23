@@ -59,7 +59,7 @@ MonoBehaviour:
   strikeSound:
     clips:
     - {fileID: 8300000, guid: 27389e6aed9fc974a91b170130d32cd5, type: 3}
-    volume: 0.75
+    volume: 0.556
     pitchRange: {x: 0.96, y: 1.04}
     minInterval: 0.2
   throwSound:

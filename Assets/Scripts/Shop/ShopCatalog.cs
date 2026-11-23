@@ -76,18 +76,18 @@ public class ShopCatalog : ScriptableObject
         return defaultWeaponPrice;
     }
 
-    /// <summary>스테이지 배율을 곱한 가격 (반올림).</summary>
-    public int Scaled(int basePrice, int stageIndex)
+    /// <summary>스테이지 배율 × 캐릭터 가격 배율(ShopContext.PriceMultiplier — 검사 2026-11-23)을 곱한 가격 (반올림).</summary>
+    public int Scaled(int basePrice, int stageIndex, float priceMultiplier = 1f)
     {
-        float multiplier = 1f + priceStepPerStage * Mathf.Max(0, stageIndex - 1);
+        float multiplier = (1f + priceStepPerStage * Mathf.Max(0, stageIndex - 1)) * Mathf.Max(0f, priceMultiplier);
         return Mathf.Max(0, Mathf.RoundToInt(basePrice * multiplier));
     }
 
     /// <summary>보유 무기를 currentLevel 에서 한 단계 올리는 가격.</summary>
-    public int UpgradePriceOf(WeaponData weapon, int currentLevel, int stageIndex)
+    public int UpgradePriceOf(WeaponData weapon, int currentLevel, int stageIndex, float priceMultiplier = 1f)
     {
         float rate = upgradeBaseRate + upgradeRatePerLevel * Mathf.Max(0, currentLevel - 1);
-        return Scaled(Mathf.RoundToInt(BasePriceOf(weapon) * rate), stageIndex);
+        return Scaled(Mathf.RoundToInt(BasePriceOf(weapon) * rate), stageIndex, priceMultiplier);
     }
 
     /// <summary>이번 정비에서 usedThisVisit 번 새로고침한 뒤의 다음 새로고침 값.</summary>

@@ -13,3 +13,7 @@ MonoBehaviour:
   m_Name: DrainEffect
   m_EditorClassIdentifier: Assembly-CSharp::DrainEffect
   healAmount: 3
+  chance: 0.1
+  chancePerLevel: 0.03
+  healMultiplier: 2
+  healCooldown: 0.3

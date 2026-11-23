@@ -11,6 +11,7 @@ public enum DifficultyMode
 /// <summary>
 /// 난이도별 값 (2026-11-17 사용자 결정) — 하드 = 그때까지의 밸런스 그대로(보스 체력만 ×2, 임시), 이지 = 몬스터 쪽을 낮춘 값.
 /// 2026-11-18 조정: 이지 처치 목표 ×0.5 · 등장 간격 ×1 · 보스 체력 이지 ×1.5 / 하드 ×2.
+/// 2026-11-23: 이지 코인 ×2 · 경험치 ×2 (처치 목표가 절반이라 수입 · 레벨도 절반이었다) · 보스 체력 이지 ×3 / 하드 ×3.5 (보스전 최소 2분).
 /// 모든 값은 스테이지 데이터(Scripts/Stage/Data) · 보스 체력(BossHealth) 위에 곱하는 배율이다. 무기 수치는 두 모드가 같다.
 ///
 /// 값을 바꿀 때는 이 에셋(Resources/Settings/DifficultySettings)만 고치면 된다.
@@ -46,6 +47,15 @@ public class DifficultySettings : ScriptableObject
         [Tooltip("스테이지 클리어에 필요한 처치 수 배율")]
         [Min(0.1f)] public float killTarget = 1f;
 
+        // 2026-11-23 사용자: "이지는 몬스터 수가 줄어든 만큼 골드를 많이" — 처치 목표 ×0.5 라 한 판 수입이 하드의 절반이었다 (봇 약 245 vs 435)
+        [Header("보상")]
+        [Tooltip("몬스터가 떨어뜨리는 코인 배율 — 스테이지별 코인 배율(EconomySettings) 위에 곱한다. 처치 목표가 줄어든 만큼 올린다 (이지 처치 ×0.5 → 코인 ×2)")]
+        [Min(0f)] public float coinMultiplier = 1f;
+
+        // 2026-11-23 사용자: "이지도 경험치 2배로" — 처치 목표 ×0.5 라 끝 레벨이 하드보다 2 낮았다 (봇 9 vs 11)
+        [Tooltip("몬스터가 떨어뜨리는 경험치 구슬의 값 배율 (반올림). 처치 목표가 줄어든 만큼 올린다 (이지 ×2)")]
+        [Min(0f)] public float expMultiplier = 1f;
+
         [Header("보스")]
         [Tooltip("보스 체력 배율 (BossHealth.maxHp 에 곱한다)")]
         [Min(0.1f)] public float bossHealth = 1f;
@@ -72,14 +82,17 @@ public class DifficultySettings : ScriptableObject
         enemyHealth = 0.7f,
         enemyDamage = 0.75f,
         killTarget = 0.5f,
-        bossHealth = 1.5f,
+        coinMultiplier = 2f,
+        expMultiplier = 2f,
+        bossHealth = 3f,
     };
 
+    // 11-23 — 보스전 최소 2분 (사용자): 사람이 친 하드 보스전 3판이 체력 2000 에 65 ~ 108초였다 → 하드 3500 · 이지 3000
     public static Mode DefaultHard() => new Mode
     {
         displayName = "하드",
         description = "몬스터가 강하고 많이 나온다",
-        bossHealth = 2f,
+        bossHealth = 3.5f,
     };
 }
 
