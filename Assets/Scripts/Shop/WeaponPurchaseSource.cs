@@ -20,7 +20,7 @@ public class WeaponPurchaseSource : ShopOfferSource
             bool support = ctx.Weapons.UsesSupportWeapons;
             int basePrice = support ? Mathf.Max(1, Mathf.RoundToInt(entry.price * ctx.Catalog.supportPriceMultiplier)) : entry.price;
 
-            into.Add(new WeaponPurchaseOffer(weapon, ctx.Catalog.Scaled(basePrice, ctx.StageIndex), support));
+            into.Add(new WeaponPurchaseOffer(weapon, ctx.Catalog.Scaled(basePrice, ctx.StageIndex, ctx.PriceMultiplier), support));
         }
     }
 }

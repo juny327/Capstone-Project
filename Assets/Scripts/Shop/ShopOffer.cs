@@ -12,6 +12,9 @@ public class ShopContext
     /// <summary>방금 클리어한 스테이지 번호 (1 · 2 · 3). 가격 배율에 쓴다.</summary>
     public int StageIndex = 1;
 
+    /// <summary>캐릭터 가격 배율 (CharacterData.shopPriceMultiplier — 검사 2026-11-23). 상품 가격 계산에 곱한다.</summary>
+    public float PriceMultiplier = 1f;
+
     /// <summary>
     /// 앞 공급원이 이미 진열한 상품 (부착물 · 서브 능력 · 스킬 카드) — 뒤 공급원이 같은 것을 또 올리지 않게.
     /// 진화 짝(EvolutionPairSource)이 먼저 자리를 잡는다. 진열을 새로 만들 때마다 비운다.

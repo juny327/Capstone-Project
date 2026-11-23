@@ -55,7 +55,7 @@ public class EvolutionPairSource : ShopOfferSource
         {
             AttachmentData a = e.requiredAttachment;
             if (!ctx.Reserved.Add(a)) return null;
-            return new EvolutionPairAttachmentOffer(a, ctx.Catalog.Scaled(a.basePrice, ctx.StageIndex), e);
+            return new EvolutionPairAttachmentOffer(a, ctx.Catalog.Scaled(a.basePrice, ctx.StageIndex, ctx.PriceMultiplier), e);
         }
 
         if (e.requiredSubAbility != null)
@@ -65,14 +65,14 @@ public class EvolutionPairSource : ShopOfferSource
 
             int index = slot.IndexOf(data);
             int level = index >= 0 ? slot.Get(index).Level : 0;
-            int price = ctx.Catalog.Scaled(level > 0 ? data.LevelUpPrice(level) : data.basePrice, ctx.StageIndex);
+            int price = ctx.Catalog.Scaled(level > 0 ? data.LevelUpPrice(level) : data.basePrice, ctx.StageIndex, ctx.PriceMultiplier);
             return new EvolutionPairSubAbilityOffer(data, level, price, e);
         }
 
         if (e.requiredSkill != null)
         {
             if (!ctx.Reserved.Add(e.requiredSkill)) return null;
-            return new SkillPairOffer(e.requiredSkill, ctx.Catalog.Scaled(ctx.Catalog.skillPairPrice, ctx.StageIndex), e);
+            return new SkillPairOffer(e.requiredSkill, ctx.Catalog.Scaled(ctx.Catalog.skillPairPrice, ctx.StageIndex, ctx.PriceMultiplier), e);
         }
 
         return null;
