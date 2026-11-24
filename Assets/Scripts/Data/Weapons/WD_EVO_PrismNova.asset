@@ -64,7 +64,7 @@ MonoBehaviour:
   fireLayerPitchRange: {x: 0.97, y: 1.03}
   fireLayerMinInterval: 0
   hitLayerSounds:
-  - {fileID: 8300000, guid: 9345ce759e018b1b887cc4b918ea7e24, type: 3}
+  - {fileID: 8300000, guid: 05a006cfaff9419ea6df091b880c6362, type: 3}
   hitLayerVolume: 0.18
   hitLayerMinInterval: 0.09
   meleeBodySounds: []
@@ -119,10 +119,10 @@ MonoBehaviour:
     moteMaterial: {fileID: 2100000, guid: ae39686096520d44bbce285605330eb4, type: 2}
     scatterSound:
       clips:
-      - {fileID: 8300000, guid: abd8a323e13ed904ea6dbf9f34fd61fa, type: 3}
-      - {fileID: 8300000, guid: 3f7bbf55382ccb94c8192ffb8b7f7415, type: 3}
+      - {fileID: 8300000, guid: 5d861def68982eb4296758ecddc38a80, type: 3}
+      - {fileID: 8300000, guid: 6eb96d1c17b29e84abb892fcaf6cd19f, type: 3}
       volume: 0.35
-      pitchRange: {x: 0.96, y: 1.04}
+      pitchRange: {x: 0.84, y: 0.92}
       minInterval: 0
     convergeSound:
       clips:
@@ -184,7 +184,7 @@ MonoBehaviour:
     beamLoop: {fileID: 0}
     beamLoopVolume: 0.5
     beamLoopPitch: {x: 0.75, y: 1}
-  chargeSound: {fileID: 8300000, guid: 7f6c1ae3232ac004aa3ef25eb1e887b3, type: 3}
+  chargeSound: {fileID: 8300000, guid: 4f3dea44923e4048a49835f12793aaa1, type: 3}
   chargeVolume: 0.484
   muzzleFlashPrefab: {fileID: 2916273817513264348, guid: 95044fb3908b36c46bc62060360f7ba6, type: 3}
   hitEffectPrefab: {fileID: 4324968127605537629, guid: c694cdd4158a7394bb9c62a42fc6bd6b, type: 3}
