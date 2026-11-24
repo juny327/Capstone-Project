@@ -81,6 +81,11 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
     /// </summary>
     public float FireRateBoost { get; set; } = 1f;
 
+    /// <summary>
+    /// 한 발 피해 배율 (2026-11-24) — 회전 기관포가 연사를 크게 올리는 동안 한 발을 줄여 화력이 과하게 오르지 않게 (SpinUpEffect). 1 = 그대로.
+    /// </summary>
+    public float ShotDamageScale { get; set; } = 1f;
+
     /// <summary>연사 열 0~1 (회전 기관포 — SpinUpEffect 가 넣는다). 쏘는 모습(ShotFx 의 hot 값)이 이 값으로 섞인다. 판정과는 무관.</summary>
     public float ShotHeat { get; set; }
 
@@ -976,7 +981,8 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
 
     protected float ApplyCritical(in WeaponRuntimeStats stats, bool isCritical)
     {
-        return isCritical ? stats.Damage * stats.CritMultiplier : stats.Damage;
+        float damage = stats.Damage * ShotDamageScale;
+        return isCritical ? damage * stats.CritMultiplier : damage;
     }
 
     protected void SpawnEffect(GameObject prefab, Transform at)

@@ -9,6 +9,8 @@ using UnityEngine;
 public class SpinUpEffect : AttachmentEffect
 {
     [Min(1f)] public float maxBoost = 3f;
+    [Tooltip("최고 연사일 때 한 발 피해 배율 (1 = 그대로) — 연사를 크게 올리고 한 발을 줄여 '정말 빠른데 화력은 조금만 더' (2026-11-24: 연사 ×1.5 → ×3, 한 발 ×0.6 → 최고 연사 화력 +20%)")]
+    [Range(0.2f, 1f)] public float maxShotDamage = 1f;
     [Min(0.1f)] public float spinUpTime = 2f;
     [Min(0.1f)] public float spinDownTime = 1f;
     [Tooltip("마지막 발 뒤 이만큼 지나면 '안 쏜다'로 본다")]
@@ -130,6 +132,7 @@ public class SpinUpEffect : AttachmentEffect
 
             float boost = 1f + (cfg.maxBoost - 1f) * spin;
             Weapon.FireRateBoost = boost;
+            Weapon.ShotDamageScale = Mathf.Lerp(1f, cfg.maxShotDamage, spin);
             if (Weapon.IsActive) LastBoost = boost;
 
             if (barrels != null) barrels.Rotate(Vector3.forward, (90f + cfg.barrelMaxSpeed * spin) * deltaTime, Space.Self);
@@ -291,6 +294,7 @@ public class SpinUpEffect : AttachmentEffect
             spin = 0f;
             hotShots = 0;
             Weapon.FireRateBoost = 1f;
+            Weapon.ShotDamageScale = 1f;
             Weapon.ShotHeat = 0f;
             if (heat != null) heat.enabled = false;
             if (smoke != null)
@@ -309,7 +313,7 @@ public class SpinUpEffect : AttachmentEffect
             heat = null;
             if (smoke != null) Object.Destroy(smoke.gameObject);
             smoke = null;
-            if (Weapon != null) Weapon.ShotHeat = 0f;
+            if (Weapon != null) { Weapon.ShotHeat = 0f; Weapon.ShotDamageScale = 1f; }
         }
 
         static Transform FindDeep(Transform parent, string name)
