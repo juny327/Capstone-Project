@@ -97,6 +97,7 @@ public class EnemyManager : MonoBehaviour
         if (player == null) return;
         if (spawners.Count == 0) return;
         if (waitForBossFight && !bossFighting) return;
+        if (StageEnded) return;   // 클리어 뒤에는 내보내지 않는다 (2026-11-25)
 
         spawnTimer += Time.deltaTime;
 
@@ -132,7 +133,7 @@ public class EnemyManager : MonoBehaviour
 
     void UpdateSpecialSpawn()
     {
-        if (specialSpawned || specialStageEnemy == null || player == null)
+        if (specialSpawned || specialStageEnemy == null || player == null || StageEnded)
             return;
 
         if (specialSpawnDelay < 0f || stageElapsed < specialSpawnDelay)
@@ -315,6 +316,35 @@ public class EnemyManager : MonoBehaviour
     }
 
     /// <summary>보스가 쓰러졌다 · 플레이어가 쓰러졌다 — 잡몹을 더 내보내지 않는다. defeatRemaining 이면 남은 몬스터도 쓰러뜨린다.</summary>
+    /// <summary>스테이지가 끝났다 (클리어) — 더 내보내지 않고, 이 뒤로 쓰러지는 몬스터는 보상이 없다.</summary>
+    public bool StageEnded { get; private set; }
+
+    /// <summary>시험용 — 클리어 때 치운 몬스터 수.</summary>
+    public int StageEndCleared { get; private set; }
+
+    /// <summary>
+    /// 스테이지 클리어 (2026-11-25 사용자: "클리어 문구가 나오는 동안 캐릭터가 계속 공격해 남은 몬스터를 잡고 골드 · 경험치를 먹는다") —
+    /// 맵에 남은 몬스터를 모두 쓰러뜨리고 더 내보내지 않는다. 이때 쓰러진 몬스터는 경험치 · 코인 · 보급을 떨어뜨리지 않고
+    /// 처치 수(스테이지 목표 · 판 기록)에도 들어가지 않는다. 이미 바닥에 떨어진 구슬 · 코인은 그대로 둔다.
+    /// </summary>
+    public void EndStage()
+    {
+        if (StageEnded) return;
+        StageEnded = true;
+        dropRewards = false;
+
+        foreach (Enemy enemy in enemies.ToArray())
+        {
+            if (enemy == null || !enemy.gameObject.activeInHierarchy || enemy.state == EnemyState.Dead) continue;
+            // 처치로 세지 않게 — 쓰러지는 동안(Die → OnDeath → OnEnemyDeath)만 끄고, 풀에서 다시 쓰이므로 바로 돌려놓는다
+            bool counted = enemy.countsTowardKillGoal;
+            enemy.countsTowardKillGoal = false;
+            enemy.DefeatSilently();
+            enemy.countsTowardKillGoal = counted;
+            StageEndCleared++;
+        }
+    }
+
     public void EndBossFight(bool defeatRemaining)
     {
         if (!waitForBossFight) return;

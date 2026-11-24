@@ -407,6 +407,17 @@ public class Enemy : MonoBehaviour, IDamageable, IPoolable
 
 
 
+    /// <summary>
+    /// 피해 숫자 없이 바로 쓰러뜨린다 — 스테이지 클리어 때 남은 몬스터를 치울 때 (EnemyManager.EndStage, 2026-11-25).
+    /// 경험치 · 코인 · 보급은 EnemyManager.dropRewards 가 꺼져 있어 나오지 않고, 처치 수는 부른 쪽이 막는다.
+    /// </summary>
+    public void DefeatSilently()
+    {
+        if (state == EnemyState.Dead || !gameObject.activeInHierarchy) return;
+        currentHp = 0f;
+        Die();
+    }
+
     void Die()
     {
         if (freezeRoutine != null)
