@@ -45,6 +45,15 @@ MonoBehaviour:
   slashTilt: 55
   slashDamageMul: 0.4
   slashCoreColor: {r: 1, g: 0.8, b: 0.78, a: 1}
+  madBlade: 1
+  madEvery: 3
+  madSeconds: 1.6
+  madFrenzyBlades: 2
+  madSeek: 7
+  madSpeed: 24
+  madDamageMul: 0.3
+  madRehit: 0.4
+  madScale: 1.4
   slashSound:
     clips:
     - {fileID: 8300000, guid: e3760d5047edad749ac1e25cd676ab46, type: 3}
