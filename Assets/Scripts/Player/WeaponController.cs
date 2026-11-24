@@ -132,7 +132,7 @@ public class WeaponController : MonoBehaviour
 
     static void PlaySupportSound(GameSoundSet.Entry entry)
     {
-        if (entry != null && SoundManager.Instance != null) SoundManager.Instance.Play(entry, SoundManager.Instance.SfxGroup, 1f, 1f, SoundKind.SupportFire);
+        if (entry != null && SoundManager.Instance != null) SoundManager.Instance.Play(entry, SoundManager.Instance.WeaponGroup, 1f, 1f, SoundKind.SupportFire);   // 무기 그룹 (2026-11-24)
     }
 
     [Header("Start")]

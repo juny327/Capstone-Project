@@ -286,7 +286,7 @@ public class ChargeBeamWeapon : WeaponBase
         chargeSource.spatialBlend = 0f;   // 플레이어 무기라 2D
 
         if (SoundManager.Instance != null)
-            chargeSource.outputAudioMixerGroup = SoundManager.Instance.SfxGroup;
+            chargeSource.outputAudioMixerGroup = SoundManager.Instance.GroupFor(Data != null && Data.IsEvolved);   // 무기 · 상위 무기 그룹 (2026-11-24)
     }
 
     void ApplyBeamDamage(ChargeBeamWeaponData cfg, in WeaponRuntimeStats stats,

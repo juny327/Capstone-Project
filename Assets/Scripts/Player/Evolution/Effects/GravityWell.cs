@@ -56,7 +56,7 @@ public class GravityWell : MonoBehaviour
             holeVolume = cfg.blackHoleVolume;
             if (SoundManager.Instance != null)
             {
-                a.outputAudioMixerGroup = SoundManager.Instance.SfxGroup;
+                a.outputAudioMixerGroup = SoundManager.Instance.EvolvedGroup;   // 상위 무기 그룹 (2026-11-24)
                 holeVolume *= SoundManager.Instance.SfxVolume;
             }
         }

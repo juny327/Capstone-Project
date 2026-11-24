@@ -566,8 +566,8 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
         SoundManager.Instance.PlayClip(clip, volume * SoundScale, pitch, SoundGroup, kind == SoundKind.Auto ? SoundKindOf : kind);
     }
 
-    /// <summary>이 무기 소리가 나갈 믹서 그룹 — 상위 무기는 'Evolved'(+5dB, 2026-11-23 — 배경음에 묻혔다), 그 밖은 효과음(null).</summary>
-    AudioMixerGroup SoundGroup => data != null && data.IsEvolved && SoundManager.Instance != null ? SoundManager.Instance.EvolvedGroup : null;
+    /// <summary>이 무기 소리가 나갈 믹서 그룹 — 무기는 'Weapon'(+3dB, 2026-11-24), 상위 무기는 그 아래 'Evolved'(+5dB 더, 2026-11-23 — 배경음에 묻혔다).</summary>
+    AudioMixerGroup SoundGroup => SoundManager.Instance == null ? null : SoundManager.Instance.GroupFor(data != null && data.IsEvolved);
 
     /// <summary>보조 무기 소리 크기 — 주무기와 보조 셋이 한꺼번에 쏘면 시끄럽다. 주무기 소리가 앞에 선다.
     /// 상위 무기는 보조 칸이어도 ×0.7 (2026-11-23 — ×0.5 로는 끝 단계 상위 보조 셋의 소리가 배경음에 묻혔다).</summary>
