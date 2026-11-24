@@ -934,6 +934,17 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
         CancelReload();
     }
 
+    /// <summary>
+    /// 반복음 · 이어지는 소리를 멈춘다 — 무기 조종(WeaponController)이 꺼질 때 부른다 (보스 등장 연출 · 엔딩, 2026-11-24 사용자 제보).
+    /// 조종이 꺼지면 무기 갱신(Tick)도 멈춰 회전 기관포 회전음 · 프리즘 · 태양창 빔 소리 · 충전음을 끄는 처리가 돌지 않아 연출 내내 울렸다.
+    /// 무기를 숨기거나 레벨 · 탄을 바꾸지는 않는다 (회전은 다시 켜지면 평소대로 내려간다).
+    /// </summary>
+    public virtual void Hush()
+    {
+        foreach (LoopVoice v in GetComponentsInChildren<LoopVoice>(true))
+            if (v != null) v.Stop(0.2f);
+    }
+
     // ───────── 파생 클래스가 구현/확장하는 부분 ─────────
 
     /// <summary>
