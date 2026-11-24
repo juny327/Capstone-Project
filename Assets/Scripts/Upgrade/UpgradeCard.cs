@@ -70,6 +70,38 @@ public class UpgradeCard : MonoBehaviour
         GameEvents.OnUpgradeSuccess -= OnSuccess;
         GameEvents.OnUpgradeFailed -= OnFailed;
         DescriptionMode.Changed -= OnDescriptionMode;
+        ResetFlash();
+    }
+
+    // ───────── 성공 · 실패 번쩍임이 남지 않게 (2026-11-24) ─────────
+    // 사용자 제보: "카드를 고를 때 이따금 나오는 초록 창이 사라지지 않고 계속 남는다".
+    // 원인: 성공(초록) · 실패(빨강) 애니메이션이 카드 안 'Image' 판의 색과 카드 크기를 0.33초 동안 바꾸는데, 그 도중에 창이 닫히면
+    // (사자마자 '닫기') 애니메이터가 다음에 켜질 때 그 순간의 색 · 크기를 '기본값'으로 다시 잡는다 (Write Defaults · 끌 때 상태 안 남김).
+    // 그 뒤로는 빈 상태가 초록 · 1.06배를 계속 써서 세 카드가 초록인 채 굳었다 (시험 kept_UpgradeFlashCheck — a 0.094).
+    // → 처음 색 · 크기를 기억해 두고, 꺼질 때 되돌린다. 다음에 켜질 때 깨끗한 값이 기본값이 된다.
+
+    Image flash;
+    Color flashColor;
+    Vector3 baseScale = Vector3.one;
+    bool flashCaptured;
+
+    void Awake() => CaptureFlash();
+
+    void CaptureFlash()
+    {
+        if (flashCaptured || animator == null) return;
+        flashCaptured = true;
+        Transform t = animator.transform.Find("Image");
+        if (t != null && t.TryGetComponent(out flash)) flashColor = flash.color;
+        baseScale = animator.transform.localScale;
+    }
+
+    void ResetFlash()
+    {
+        if (animator == null) return;
+        CaptureFlash();
+        if (flash != null) flash.color = flashColor;
+        animator.transform.localScale = baseScale;
     }
 
     // '상세 설명' 토글이 바뀌면 설명만 다시 (2026-11-22)
