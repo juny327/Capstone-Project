@@ -60,6 +60,31 @@ public class GhostfireBall : MonoBehaviour
         return ball;
     }
 
+    /// <summary>
+    /// 도깨비불 부채(GhostfireCone, 2026-11-24)가 덮친 바닥 코인 — 코인을 튕겨 올리고 그 자리에서 타구가 되어 가장 가까운 적에게 꺾여 들어간다.
+    /// 코인 하나를 튕긴 타구와 같다 (피해 ×1.25 · 적 하나를 더 꿰뚫는다).
+    /// </summary>
+    public static GhostfireBall LaunchFromCoin(BatEffect cfg, WeaponBase weapon, CoinPickup coin, float damage, float groundY)
+    {
+        if (coin == null) return null;
+        Vector3 start = coin.GroundPosition;
+        start.y = groundY + 1.1f;
+
+        var go = new GameObject("Ghostfire");
+        go.transform.position = start;
+        var ball = go.AddComponent<GhostfireBall>();
+        ball.cfg = cfg;
+        ball.weapon = weapon;
+        ball.baseDamage = damage;
+        ball.dir = Vector3.forward;
+        ball.groundY = groundY;
+        ball.maxDistance = cfg.coinBounceSeek;
+        ball.BuildTrail();
+        ball.BounceOff(coin, start);
+        Launched++;
+        return ball;
+    }
+
     void BuildTrail()
     {
         if (cfg.material == null) return;
