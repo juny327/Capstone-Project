@@ -22,7 +22,8 @@ public class UpgradeData : ScriptableObject
     [Tooltip("켜면 몇 번을 사도 기본 비용 그대로 (2026-11-08 회복 카드에 썼다 → 2026-11-23 사용자: \"회복도 살수록 비싸게\" — 지금 켠 카드 없음)")]
     public bool fixedCost;
 
-    /// <summary>Lv.level 로 올리는 비용 — 기본 비용 × 레벨 (2026-11-04, 키울수록 비싸진다: 스킬 10 → 20 → 30 …). fixedCost 면 늘 기본 비용.</summary>
+    /// <summary>Lv.level 로 올리는 비용 — 기본 비용 × 레벨 (2026-11-04, 키울수록 비싸진다). 2026-11-24 사용자: "후반에 경험치가 남아돈다 · 이동 속도 카드가 너무 쉽다" →
+    /// 스킬 10 → 15 (15 → 30 → 45 …) · 공격력 4 → 8 · 최대 체력 3 → 6 · 회복 3 → 5 · 이동 속도 2 → 6. fixedCost 면 늘 기본 비용.</summary>
     public int CostFor(int level) => fixedCost ? costExp : costExp * Mathf.Max(1, level);
 
     /// <summary>지금 레벨이 최대인가 (maxLevel 0 이면 늘 false).</summary>

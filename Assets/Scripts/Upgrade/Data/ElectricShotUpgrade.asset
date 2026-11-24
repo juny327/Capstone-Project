@@ -18,7 +18,7 @@ MonoBehaviour:
     \uC801 1\uBA85\uC744 2\uCD08\uAC04 \uACBD\uC9C1\uC2DC\uD0A8\uB2E4\n\uB808\uBCA8\uB9C8\uB2E4
     \uACBD\uC9C1 +1\uCD08"
   icon: {fileID: 21300000, guid: 2467fd7f0af6c4e42a5ff3cdcb943bef, type: 3}
-  costExp: 10
+  costExp: 15
   maxLevel: 5
   fixedCost: 0
   effect: {fileID: 11400000, guid: eca0e97fb95dd92418d794efbf6cf3ab, type: 2}
