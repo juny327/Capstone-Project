@@ -41,9 +41,10 @@ public class EconomySettings : ScriptableObject
     // 스테이지별 몬스터(1 = A · B, 2 = C · D 추가, 3 = 다섯 종)에 맞춰 한 판 약 407 (스테이지 65 · 130 · 214)이 되게 잡은 값.
     // 2026-11-24 — 흐름 (사용자: "초반은 잔잔하게, 아무리 빨라도 스테이지 2 중간 정비에서 상위 무기 하나, 그 뒤 화력"):
     // 0.6 · 0.65 · 0.8 → 0.45 · 0.6 · 0.9 — 뒤로 갈수록 더. 상위 무기는 스테이지 2 부터 열린다 (ShopCatalog.evolutionFromStage).
+    // 11-24 저녁: 스테이지 2 · 3 처치 목표 ×1.5 (85 · 110 → 128 · 165) 라 스테이지 2 · 3 을 ÷1.5 (0.6 · 0.9 → 0.4 · 0.6) — 한 판 수입은 그대로.
     // 캐릭터별 배율은 CharacterData.coinMultiplier.
     [Tooltip("스테이지별 몬스터 코인 배율 [스테이지 1, 2, 3 …]. 표보다 큰 스테이지는 마지막 값, 비우면 coinMultiplier 하나")]
-    public float[] stageCoinMultipliers = { 0.45f, 0.6f, 0.9f };
+    public float[] stageCoinMultipliers = { 0.45f, 0.4f, 0.6f };
 
     [Tooltip("한 번에 떨어뜨리는 코인 오브젝트 수의 상한. 넘으면 한 개가 여러 크레딧을 갖는다")]
     [Min(1)] public int maxCoinObjects = 4;
