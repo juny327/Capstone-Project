@@ -20,13 +20,13 @@ MonoBehaviour:
   weaponPrefab: {fileID: 7530073237280035592, guid: 3edac683bd4297a43bdc09226db67e8c, type: 3}
   socket: 0
   fireInterval: 0.5
-  damage: 4.5
+  damage: 4.95
   damageUpgradeFlatPerLevel: -1
   critChance: 0.08
   critMultiplier: 2
   maxLevel: 3
   perLevelBonus:
-    damageAdd: 0.55
+    damageAdd: 0.605
     damageMul: 1
     fireIntervalMul: 1
     critChanceAdd: 0
