@@ -64,7 +64,7 @@ MonoBehaviour:
   fireLayerPitchRange: {x: 0.97, y: 1.03}
   fireLayerMinInterval: 0
   hitLayerSounds:
-  - {fileID: 8300000, guid: 9345ce759e018b1b887cc4b918ea7e24, type: 3}
+  - {fileID: 8300000, guid: 05a006cfaff9419ea6df091b880c6362, type: 3}
   hitLayerVolume: 0.18
   hitLayerMinInterval: 0.09
   meleeBodySounds: []
@@ -181,7 +181,7 @@ MonoBehaviour:
     beamLoop: {fileID: 8300000, guid: 9ddc4190dede2a749a9c42a32eb9d1f5, type: 3}
     beamLoopVolume: 0.5
     beamLoopPitch: {x: 0.75, y: 1}
-  chargeSound: {fileID: 8300000, guid: 7f6c1ae3232ac004aa3ef25eb1e887b3, type: 3}
+  chargeSound: {fileID: 8300000, guid: 4f3dea44923e4048a49835f12793aaa1, type: 3}
   chargeVolume: 0.484
   muzzleFlashPrefab: {fileID: 2916273817513264348, guid: 95044fb3908b36c46bc62060360f7ba6, type: 3}
   hitEffectPrefab: {fileID: 4324968127605537629, guid: c694cdd4158a7394bb9c62a42fc6bd6b, type: 3}
