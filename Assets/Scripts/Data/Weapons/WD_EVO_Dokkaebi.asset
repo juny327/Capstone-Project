@@ -73,7 +73,7 @@ MonoBehaviour:
   meleeBodySounds: []
   meleeBodyVolume: 1
   fireStack: []
-  range: 3.2
+  range: 3.84
   arcAngle: 140
   maxTargets: 6
   extraTargetDamage: 0.7

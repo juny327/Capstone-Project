@@ -26,7 +26,7 @@ MonoBehaviour:
   lifestealPerSecond: 8
   material: {fileID: 2100000, guid: b6310812509a3ab46bf4e098541a27ab, type: 2}
   color: {r: 0.9, g: 0.08, b: 0.14, a: 1}
-  ringRadius: 0.95
+  ringRadius: 1.235
   frenzySound:
     clips:
     - {fileID: 8300000, guid: 6f0fd072993ca754e8ff678030d36181, type: 3}
@@ -40,7 +40,7 @@ MonoBehaviour:
   stormWaveTime: 0.4
   swingSlashEvery: 0
   swingSlashCount: 3
-  slashRadius: 4
+  slashRadius: 5.2
   slashArc: 110
   slashTilt: 55
   slashDamageMul: 0.4

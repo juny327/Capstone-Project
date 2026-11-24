@@ -68,7 +68,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 54cd2eaae0f23164d93863cda9f2548e, type: 3}
   meleeBodyVolume: 1
   fireStack: []
-  range: 5
+  range: 6.0
   arcAngle: 40
   maxTargets: 4
   extraTargetDamage: 0.7
