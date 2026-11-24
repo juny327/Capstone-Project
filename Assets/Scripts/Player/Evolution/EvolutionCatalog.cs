@@ -26,7 +26,7 @@ public class EvolutionCatalog : ScriptableObject
     /// <summary>지금 진화할 수 있는 조합을 모두 넣는다.</summary>
     public void CollectReady(WeaponController weapons, SubAbilitySlot abilities, List<WeaponEvolutionData> into)
     {
-        if (evolutions == null) return;
+        if (evolutions == null || !EvolutionService.Unlocked) return;   // 판 안에서는 스테이지 2 부터 (2026-11-24)
 
         foreach (WeaponEvolutionData e in evolutions)
             if (e != null && e.IsReady(weapons, abilities)) into.Add(e);
@@ -53,7 +53,7 @@ public class EvolutionCatalog : ScriptableObject
     /// <summary>그 무기로 지금 할 수 있는 진화. 없으면 null.</summary>
     public WeaponEvolutionData ReadyFor(IWeapon weapon, WeaponController weapons, SubAbilitySlot abilities)
     {
-        if (evolutions == null || weapon == null || weapon.Data == null) return null;
+        if (evolutions == null || weapon == null || weapon.Data == null || !EvolutionService.Unlocked) return null;   // '진화 가능' 표시도 열린 뒤에만
 
         foreach (WeaponEvolutionData e in evolutions)
             if (e != null && e.from == weapon.Data && e.IsReady(weapons, abilities)) return e;
