@@ -368,13 +368,28 @@ public class SoundManager : MonoBehaviour
                 if (voices[i].isPlaying && voiceFrame[i] < impactDuckFrame) voices[i].volume *= impactSfxLevel;
         }
 
+        // 잠깐 키우기 (엔딩 크레딧) — 0.8초에 걸쳐 바뀐다
+        bool boostChanged = !Mathf.Approximately(musicBoost, musicBoostTarget);
+        if (boostChanged) musicBoost = Mathf.MoveTowards(musicBoost, musicBoostTarget, Time.unscaledDeltaTime / 0.8f * Mathf.Max(1f, Mathf.Abs(musicBoostTarget - 1f)));
+
         // 배경음 — 0.06초에 내려가고 0.35초에 돌아온다
         float target = Time.unscaledTime < impactDuckUntil ? impactMusicLevel : 1f;
-        if (Mathf.Approximately(musicDuck, target)) return;
+        if (Mathf.Approximately(musicDuck, target) && !boostChanged) return;
         musicDuck = Mathf.MoveTowards(musicDuck, target, Time.unscaledDeltaTime / (target < musicDuck ? 0.06f : 0.35f));
         if (musicSource != null && currentTrack != null && musicRoutine == null)
-            musicSource.volume = currentTrack.volume * musicVolume * musicDuck;
+            musicSource.volume = currentTrack.volume * musicVolume * musicDuck * musicBoost;
     }
+
+    private float musicBoost = 1f, musicBoostTarget = 1f;
+
+    /// <summary>지금 배경음에 곱하는 '키우기' 배율 (시험용).</summary>
+    public float MusicBoost => musicBoost;
+
+    /// <summary>
+    /// 배경음을 잠깐 키운다 (2026-11-24 사용자: "엔딩 크레딧 사운드 증가") — 1 = 그대로. 0.8초에 걸쳐 바뀌고, 씬이 바뀌어도 되돌리기 전까지 남는다.
+    /// 곡마다의 크기(MusicSet)는 그대로 두고 그 장면에서만 키우려고 둔 칸 — 다 쓰면 1 로 되돌린다.
+    /// </summary>
+    public void SetMusicBoost(float target) => musicBoostTarget = Mathf.Max(0f, target);
 
     private AudioSource priorityVoice;
     private float duckUntil = -999f;
@@ -749,7 +764,7 @@ public class SoundManager : MonoBehaviour
         musicSource.Play();
 
         // 목표는 매 프레임 다시 읽는다 — 페이드 도중 설정창에서 배경음을 바꾸면 끝난 뒤에도 그 값이 남게 (2026-11-02 고침)
-        yield return FadeMusic(() => track.volume * musicVolume);
+        yield return FadeMusic(() => track.volume * musicVolume * musicBoost);
 
         musicRoutine = null;
     }
@@ -830,7 +845,7 @@ public class SoundManager : MonoBehaviour
         musicVolume = ok ? 1f : musicSetting;
 
         if (musicSource != null && currentTrack != null && musicRoutine == null)
-            musicSource.volume = currentTrack.volume * musicVolume * musicDuck;
+            musicSource.volume = currentTrack.volume * musicVolume * musicDuck * musicBoost;
         return ok;
     }
 

@@ -175,6 +175,7 @@ public class EndingFlow : MonoBehaviour
     void OnDestroy()
     {
         if (instance == this) instance = null;
+        if (SoundManager.Instance != null) SoundManager.Instance.SetMusicBoost(1f);   // 크레딧 도중 로비로 나가도 키운 배경음이 남지 않게
     }
 
     void SetFade(float alpha)
@@ -519,6 +520,7 @@ public class EndingFlow : MonoBehaviour
         // 화면 아래에서 올라와 위로 다 빠져나갈 때까지.
         // Space · Enter · 아래 화살표 · 마우스 왼쪽을 누르고 있으면 빨리 감는다 (2026-11-16) — 건너뛰기는 버튼으로
         if (creditsHint != null) creditsHint.text = settings.creditsHint;
+        if (SoundManager.Instance != null) SoundManager.Instance.SetMusicBoost(settings.creditsMusicBoost);   // 크레딧 동안 배경음을 키운다 (2026-11-24)
         float y = -view;
         while (y < height && !advance)
         {
@@ -531,6 +533,7 @@ public class EndingFlow : MonoBehaviour
         advance = false;
         FastForwarding = false;
         creditsPanel.SetActive(false);
+        if (SoundManager.Instance != null) SoundManager.Instance.SetMusicBoost(1f);
     }
 
     static bool FastHeld()
