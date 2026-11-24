@@ -76,14 +76,14 @@ MonoBehaviour:
   hitLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  cameraShake: 0.5
+  cameraShake: 0.8
   magazineSize: 3
   reloadTime: 2.5
   autoReload: 1
   beamMaterial: {fileID: 2100000, guid: 5d90de9dbfa086c47b0889319c447945, type: 2}
   beamColor: {r: 0.35, g: 0.95, b: 1, a: 1}
-  beamWidth: 0.35
-  chargeWidth: 0.3
+  beamWidth: 0.595
+  chargeWidth: 0.45
   extraBeams: 0
   beamsAllAround: 0
   primaryBeamDamageMul: 1
@@ -156,12 +156,12 @@ MonoBehaviour:
     damageMul: 1
     minChargeDamage: 0.6
     hitRadius: 1.1
-    beamWidth: 2.6
+    beamWidth: 3.64
     beamTime: 0.45
     burnRatio: 0.3
     burnDuration: 3
     scorchTime: 2.5
-    cameraShake: 0.7
+    cameraShake: 1.12
     lineMaterial: {fileID: 2100000, guid: b6310812509a3ab46bf4e098541a27ab, type: 2}
     color: {r: 1, g: 0.86, b: 0.45, a: 1}
     scorchColor: {r: 1, g: 0.35, b: 0.08, a: 0.8}

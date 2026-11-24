@@ -22,8 +22,8 @@ MonoBehaviour:
   material: {fileID: 2100000, guid: b6310812509a3ab46bf4e098541a27ab, type: 2}
   color: {r: 1, g: 0.16, b: 0.24, a: 1}
   explosionPrefab: {fileID: 5162910912013668194, guid: cf82839c411151342a7b2337bda9fb34, type: 3}
-  explosionScale: 1.3
-  cameraShake: 0.25
+  explosionScale: 1.82
+  cameraShake: 0.4
   sound:
     clips:
     - {fileID: 8300000, guid: 5d9bdccb6040af049bc0aaf163776336, type: 3}
@@ -33,10 +33,10 @@ MonoBehaviour:
     pitchRange: {x: 0.96, y: 1.04}
     minInterval: 0.06
   depthGrow: 1.2
-  flameLines: 6
+  flameLines: 9
   smokeAlpha: 0.45
   smokeLife: 0.6
   kitExplosion: 1
-  kitGrowBoost: 1.6
+  kitGrowBoost: 2.0
   finaleKills: 3
   finaleCooldown: 1.5

@@ -30,17 +30,17 @@ MonoBehaviour:
     volume: 0.42
     pitchRange: {x: 0.96, y: 1.04}
     minInterval: 0.3
-  strikeWidth: 0.3
+  strikeWidth: 0.45
   strikeHeight: 8
   strikeLean: 0.25
   strikeBranches: 4
-  strikeGlowRadius: 1.5
-  strikeShake: 0.05
+  strikeGlowRadius: 2.1
+  strikeShake: 0.1
   cloudFlash: 1
   kitStrike: 1
   skyBranches: 3
   stormFlash: 0.2
-  kitCloudScale: 2.4
+  kitCloudScale: 3.0
   kitCloudAlpha: 0.8
   kitShade: 0.45
   supportPeriod: 8

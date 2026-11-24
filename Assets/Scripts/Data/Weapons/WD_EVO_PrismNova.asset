@@ -76,14 +76,14 @@ MonoBehaviour:
   hitLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  cameraShake: 0.35
+  cameraShake: 0.56
   magazineSize: 3
   reloadTime: 2.5
   autoReload: 1
   beamMaterial: {fileID: 2100000, guid: 5d90de9dbfa086c47b0889319c447945, type: 2}
   beamColor: {r: 0.35, g: 0.95, b: 1, a: 1}
-  beamWidth: 0.525
-  chargeWidth: 0.3
+  beamWidth: 0.8925
+  chargeWidth: 0.45
   extraBeams: 0
   beamsAllAround: 0
   primaryBeamDamageMul: 1
@@ -110,9 +110,9 @@ MonoBehaviour:
     tickDamageMul: 0.06
     turnRate: 120
     hitRadius: 0.7
-    beamWidth: 2.4
-    cameraShake: 0.35
-    sustainShake: 0.09
+    beamWidth: 3.36
+    cameraShake: 0.56
+    sustainShake: 0.144
     sustainShakeInterval: 0.08
     lineMaterial: {fileID: 2100000, guid: b6310812509a3ab46bf4e098541a27ab, type: 2}
     kitFx: 1

@@ -28,6 +28,8 @@ public class SiegeShellEffect : AttachmentEffect
     public Color color = new Color(1f, 0.75f, 0.25f, 1f);
     public GameObject explosionPrefab;
     [Min(0f)] public float cameraShake = 0.45f;
+    [Tooltip("폭발 모습 크기 배율 — 판정 반경(blastRadius)은 그대로 두고 그림만 키운다 (2026-11-24 '폭발을 더 화려하게')")]
+    [Min(0.1f)] public float blastFxScale = 1f;
     public GameSoundSet.Entry blastSound = new GameSoundSet.Entry();
     [Tooltip("공통 재료(FxKit)로 그린다 — 총구 폭풍 · 불 덩어리 폭발 (2026-11-20). 끄면 예전 연출")]
     public bool kitBlast = true;
@@ -109,7 +111,7 @@ public class SiegeShellEffect : AttachmentEffect
             // 공통 재료 (2026-11-20) — 큰 포탄 한 발의 폭발: 판정 반경을 꽉 채우는 불 덩어리 · 가운데 불기둥 · 겹겹의 충격파 · 튀는 파편
             if (kit)
             {
-                float r = cfg.blastRadius * Weapon.EvoFxScale;
+                float r = cfg.blastRadius * cfg.blastFxScale * Weapon.EvoFxScale;
                 FxKit.Explosion(at, r, cfg.color, 1.15f);
                 FxKit.FlameRing(at, r * 0.3f, cfg.color, 5f, r * 1.3f, 0.5f);
                 FxKit.Shockwave(at, r * 4.4f, Color.white, 0.42f, 0.9f);

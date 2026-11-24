@@ -88,19 +88,19 @@ MonoBehaviour:
   shotFx:
     material: {fileID: 2100000, guid: b6310812509a3ab46bf4e098541a27ab, type: 2}
     tracerColor: {r: 1, g: 0.35, b: 0.35, a: 0.9}
-    tracerWidth: 0.15
-    tracerLength: 2.4
+    tracerWidth: 0.24
+    tracerLength: 3.12
     tracerInstant: 0
     tracerInstantFade: 0.15
     flashColor: {r: 1, g: 0.45, b: 0.4, a: 1}
-    flashSize: 0.9
+    flashSize: 1.35
     flashFan: 0
     flashRing: 0
     sparkColor: {r: 1, g: 0.35, b: 0.35, a: 1}
-    sparkSize: 0.7
+    sparkSize: 1.05
     sparkLines: 2
     sparkRing: 0
-    fireShake: 0
+    fireShake: 0.06
     flashSwing: 0
     hotFlashSize: 0
     hotTracerLength: 0
@@ -108,6 +108,6 @@ MonoBehaviour:
     hotColor: {r: 0, g: 0, b: 0, a: 0}
     smokeMaterial: {fileID: 0}
     smokeTime: 0
-    smokeWidth: 0.35
+    smokeWidth: 0.49
     smokeHeadColor: {r: 1, g: 0.6, b: 0.25, a: 0.9}
     smokeTailColor: {r: 0.55, g: 0.55, b: 0.58, a: 0.55}

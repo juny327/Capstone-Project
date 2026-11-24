@@ -26,8 +26,9 @@ MonoBehaviour:
     minInterval: 0.06
   vfxPrefab: {fileID: 0}
   vfxScale: 0.6
-  fireball: 1.1
+  fireball: 1.54
   innerRing: 1
-  shards: 6
-  cameraShake: 0.08
+  shards: 9
+  cameraShake: 0.14
   kitPop: 1
+  popScale: 1.4
