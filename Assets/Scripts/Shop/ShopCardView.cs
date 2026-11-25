@@ -104,12 +104,13 @@ public class ShopCardView : MonoBehaviour
     }
 
     /// <summary>
-    /// 가진 무기의 상위 무기 짝이면 금색 테두리 (2026-11-17). label 이 null 이면 끈다.
-    /// 2026-11-25 사용자: "'~ 짝' 같은 글보다 노란 테두리만 간단하게 — 이걸 먹으라는 걸 간접적으로만" → 꼬리표 글은 그대로 두고 테두리만.
+    /// 가진 무기의 상위 무기 짝이면 표시 (2026-11-17). label 이 null 이면 끈다.
+    /// 2026-11-25 사용자: "'~ 짝' 같은 글 없이 간접적으로" → "노란 테두리는 선택칸과 맞지 않는다 — 카드 모양 그대로 + 작은 별":
+    /// 카드 테두리 그림(frame)을 따라 뒤에서 금빛이 번지고, 아이콘 오른쪽 위에 작은 별. 꼬리표 글은 그대로.
     /// </summary>
     public void SetPairMark(string label)
     {
-        PairHighlight.Set((RectTransform)transform, label);
+        PairHighlight.Mark((RectTransform)transform, !string.IsNullOrEmpty(label), frame, icon != null ? icon.rectTransform : null);
     }
 
     /// <summary>대상 고르기 중인 카드 표시 — 테두리를 밝게.</summary>

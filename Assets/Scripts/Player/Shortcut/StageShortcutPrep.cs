@@ -1368,7 +1368,6 @@ public class StageShortcutPrep : MonoBehaviour
         var le = row.gameObject.AddComponent<LayoutElement>();
         le.preferredHeight = height > 0f ? height : compact ? 96f : RowH;
         le.minHeight = le.preferredHeight;
-        if (pair) PairBorder(row.rectTransform);
 
         Image strip = NewImage("Kind", row.transform, accent);
         strip.rectTransform.anchorMin = new Vector2(0f, 0f);
@@ -1377,6 +1376,7 @@ public class StageShortcutPrep : MonoBehaviour
         strip.rectTransform.sizeDelta = new Vector2(5f, 0f);
 
         float left = 16f;
+        RectTransform iconRect = null;
         if (icon != null)
         {
             Image i = NewImage("Icon", row.transform, bright ? Color.white : new Color(1f, 1f, 1f, 0.45f));
@@ -1384,6 +1384,7 @@ public class StageShortcutPrep : MonoBehaviour
             i.preserveAspect = true;
             Place(i.rectTransform, new Vector2(0f, 0.5f), new Vector2(14f, 0f), new Vector2(IconSize, IconSize), new Vector2(0f, 0.5f));
             left = 14f + IconSize + 12f;
+            iconRect = i.rectTransform;
         }
 
         float buyW = compact ? 104f : BuyW;
@@ -1405,23 +1406,9 @@ public class StageShortcutPrep : MonoBehaviour
         MakeButton(row.transform, "Buy", price, 21f, new Vector2(1f, 0.5f), new Vector2(-12f, 0f), new Vector2(buyW, BuyH),
                    interactable ? ButtonFrame : OffFrame, interactable ? ButtonFill : OffFill, onBuy, interactable, priceIcon,
                    interactable ? priceColor : new Color(priceColor.r, priceColor.g, priceColor.b, 0.5f));
-    }
 
-    /// <summary>상위 무기 짝 줄 — 노란 테두리 네 변 (글은 붙이지 않는다).</summary>
-    static void PairBorder(RectTransform row)
-    {
-        const float t = 3f;
-        for (int i = 0; i < 4; i++)
-        {
-            Image e = NewImage("PairEdge", row, PairHighlight.Gold);
-            e.raycastTarget = false;
-            RectTransform r = e.rectTransform;
-            r.anchorMin = i == 1 ? new Vector2(0f, 0f) : i == 3 ? new Vector2(1f, 0f) : new Vector2(0f, i == 0 ? 1f : 0f);
-            r.anchorMax = i == 2 ? new Vector2(1f, 0f) : i == 3 ? new Vector2(1f, 1f) : i == 0 ? new Vector2(1f, 1f) : new Vector2(0f, 1f);
-            r.pivot = new Vector2(0.5f, 0.5f);
-            r.offsetMin = i == 0 ? new Vector2(0f, -t) : i == 3 ? new Vector2(-t, 0f) : Vector2.zero;
-            r.offsetMax = i == 1 ? new Vector2(t, 0f) : i == 2 ? new Vector2(0f, t) : Vector2.zero;
-        }
+        // 상위 무기 짝 — 줄 모양 그대로 뒤에서 금빛 + 아이콘 오른쪽 위 작은 별 (정비 창 · 레벨업 카드와 같은 표시, 글 없음)
+        if (pair) PairHighlight.Mark(row.rectTransform, true, row, iconRect);
     }
 
     void Section(RectTransform parent, string title)
