@@ -28,6 +28,8 @@ public class EnemyManager : MonoBehaviour
     [System.NonSerialized] public bool waitForBossFight;
     /// <summary>꺼져 있으면 몬스터가 경험치 구슬 · 코인을 떨어뜨리지 않는다 (보스 스테이지).</summary>
     [System.NonSerialized] public bool dropRewards = true;
+    /// <summary>경험치 구슬 값 배율 — StageManager 가 StageData.expMultiplier 로 채운다 (2026-11-25, 처치 목표를 늘린 스테이지).</summary>
+    [System.NonSerialized] public float expMultiplier = 1f;
     bool bossFighting;
 
     // 2026-11-25 사용자: "예전엔 근접이 훨씬 많았는데 지금 원거리가 너무 많이 나온다" — 원거리(C · E)는 멀리서 쏘고 잘 안 잡혀서,
