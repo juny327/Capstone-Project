@@ -20,3 +20,4 @@ MonoBehaviour:
   enemyHealthMultiplier: 2.5
   spawnDuringBossFight: 1
   enemyRewards: 0
+  maxRangedEnemies: 0

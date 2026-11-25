@@ -30,3 +30,4 @@ MonoBehaviour:
     weight: 22
   - enemy: {fileID: 11400000, guid: 1c680aa537a04e62b484b5016fe797bc, type: 2}
     weight: 7
+  maxRangedEnemies: 10

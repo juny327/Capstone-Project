@@ -37,6 +37,7 @@ public class StageManager : MonoBehaviour
         EnemyManager.Instance.waitForBossFight = currentStage.spawnDuringBossFight;
         EnemyManager.Instance.dropRewards = currentStage.enemyRewards;
         EnemyManager.Instance.expMultiplier = currentStage.expMultiplier;   // 2026-11-25 처치 목표를 늘린 스테이지의 경험치 배율
+        EnemyManager.Instance.maxRangedAlive = currentStage.maxRangedEnemies;   // 2026-11-25 원거리 동시 최대 (0 = 제한 없음)
         GameEvents.OnStageProgress?.Invoke(killCount, killTarget);
     }
 
