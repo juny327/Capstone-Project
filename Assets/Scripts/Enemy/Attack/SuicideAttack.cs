@@ -133,6 +133,8 @@ public class SuicideAttack : EnemyAttack
         if (shader != null)
         {
             warningMaterial = new Material(shader);
+            // 2026-11-25 — 경고선은 일반 효과(투명 3000 — 불 장판 · 폭발 · 빛)보다 나중에 그려 그 밑으로 숨지 않게 (돌진 · 레이저 경고 재질도 3100)
+            warningMaterial.renderQueue = 3100;
             warningLine.material = warningMaterial;
         }
     }
