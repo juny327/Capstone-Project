@@ -88,6 +88,12 @@ public class WeaponUpgradeOffer : ShopOffer
     readonly WeaponData weapon;
     readonly int fromLevel;
 
+    /// <summary>이 카드로 강화한 무기. 같은 카드를 다시 눌러 취소할 때만 사용한다.</summary>
+    public IWeapon PurchasedWeapon { get; private set; }
+
+    internal void RecordPurchase(IWeapon purchasedWeapon) => PurchasedWeapon = purchasedWeapon;
+    internal void ClearPurchase() => PurchasedWeapon = null;
+
     public WeaponUpgradeOffer(WeaponData weapon, int fromLevel, int price)
     {
         this.weapon = weapon;
@@ -96,6 +102,7 @@ public class WeaponUpgradeOffer : ShopOffer
     }
 
     public WeaponData Weapon => weapon;
+    public int FromLevel => fromLevel;
 
     public override string Title => $"{weapon.weaponName} 강화";
 

@@ -298,6 +298,37 @@ public class WeaponController : MonoBehaviour
         return true;
     }
 
+    /// <summary>정비창에서 산 무기를 취소한다. 손에 든 무기라면 다른 보유 무기로 바꾼 뒤 뺀다.</summary>
+    public bool RemoveFromMaintenance(IWeapon weapon)
+    {
+        if (!(weapon is WeaponBase w)) return false;
+
+        int index = held.IndexOf(w);
+        if (index < 0) return RemoveSupport(weapon); // 서브유닛
+
+        if (index == activeHeldIndex)
+        {
+            if (held.Count <= 1) return false; // 마지막 주무기는 유지한다
+            SwapTo(index == 0 ? 1 : 0);
+        }
+
+        return RemoveSupport(weapon);
+    }
+
+    /// <summary>정비창에서 산 강화 한 단계를 취소하고 무기 관련 UI를 갱신한다.</summary>
+    public bool UndoMaintenanceUpgrade(IWeapon weapon, int previousLevel)
+    {
+        if (!(weapon is WeaponBase w)) return false;
+
+        bool isOwned = held.Contains(w) || subUnits.Contains(w);
+        if (!isOwned || w.Level != previousLevel + 1) return false;
+
+        w.SetLevel(previousLevel);
+        RaiseLegacyStats();
+        GameEvents.OnWeaponsChanged?.Invoke();
+        return true;
+    }
+
     /// <summary>보조 무기를 모두 뺀다 (테스트 룸). 뺀 수를 돌려준다.</summary>
     public int RemoveAllSupports()
     {

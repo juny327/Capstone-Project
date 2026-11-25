@@ -15,6 +15,9 @@ public class PlayerMove : MonoBehaviour
     private List<float> speedModifiers = new List<float>();
 
     bool isDead = false;
+    Vector3 externalKnockbackVelocity;
+    float externalKnockbackRemaining;
+    const float ExternalKnockbackDeceleration = 20f;
 
     public float CurrentSpeed
     {
@@ -37,6 +40,23 @@ public class PlayerMove : MonoBehaviour
     {
         speedModifiers.Remove(multiplier);
         GameEvents.OnMoveSpeedChanged?.Invoke(CurrentSpeed);
+    }
+
+    /// <summary>보스 꼬리 휩쓸기처럼 플레이어를 짧게 밀어내는 외부 힘.</summary>
+    public void ApplyKnockback(Vector3 direction, float speed, float duration)
+    {
+        if (rb == null || isDead || isRolling || isDashing || speed <= 0f || duration <= 0f) return;
+        direction.y = 0f;
+        if (direction.sqrMagnitude < 0.001f) return;
+
+        externalKnockbackVelocity = direction.normalized * speed;
+        externalKnockbackRemaining = Mathf.Max(externalKnockbackRemaining, duration);
+    }
+
+    void ClearExternalKnockback()
+    {
+        externalKnockbackVelocity = Vector3.zero;
+        externalKnockbackRemaining = 0f;
     }
 
     [SerializeField] private float jumpPower = 3f;
@@ -516,6 +536,7 @@ public class PlayerMove : MonoBehaviour
         // ── 서브 능력이 건 대시 중에는 일반 이동/회전을 건너뛴다 ──
         if (isDashing)
         {
+            ClearExternalKnockback();
             TickDash();
             return;
         }
@@ -523,6 +544,7 @@ public class PlayerMove : MonoBehaviour
         // ── 구르는 중에는 일반 이동/회전을 전부 건너뛴다 ──
         if (isRolling)
         {
+            ClearExternalKnockback();
             TickRoll();
             return;
         }
@@ -547,9 +569,22 @@ public class PlayerMove : MonoBehaviour
         if (IsSprinting)
             speed *= sprintMultiplier;
 
+        Vector3 push = Vector3.zero;
+        if (externalKnockbackRemaining > 0f)
+        {
+            push = externalKnockbackVelocity;
+            externalKnockbackRemaining -= Time.fixedDeltaTime;
+            externalKnockbackVelocity = Vector3.MoveTowards(
+                externalKnockbackVelocity,
+                Vector3.zero,
+                ExternalKnockbackDeceleration * Time.fixedDeltaTime);
+            if (externalKnockbackRemaining <= 0f)
+                ClearExternalKnockback();
+        }
+
         Vector3 velocity = rb.linearVelocity;
-        velocity.x = move.x * speed;
-        velocity.z = move.y * speed;
+        velocity.x = move.x * speed + push.x;
+        velocity.z = move.y * speed + push.z;
         rb.linearVelocity = velocity;
 
         currentGround = Physics.Raycast(transform.position, Vector3.down, GroundCheckDis, groundLayer);
@@ -1006,6 +1041,7 @@ public class PlayerMove : MonoBehaviour
         rollBufferedAt = -999f;
         isDashing = false;
         actionLocks.Clear();
+        ClearExternalKnockback();
 
         if (stats != null)
             stats.ClearInvulnerable();

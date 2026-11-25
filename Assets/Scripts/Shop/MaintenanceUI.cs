@@ -448,7 +448,18 @@ public class MaintenanceUI : MonoBehaviour
                 {
                     ShopOffer offer = list[k];
                     bool canBuy = shop.CanBuy(offer, out string reason);
-                    card.Show(offer, canBuy, reason, currency);
+                    bool canToggleSold = false;
+                    if (offer.Sold && offer is WeaponPurchaseOffer weaponPurchase)
+                    {
+                        canToggleSold = shop.CanUndoWeaponPurchase(weaponPurchase, out string undoReason);
+                        if (!canToggleSold) reason = undoReason;
+                    }
+                    else if (offer.Sold && offer is WeaponUpgradeOffer weaponUpgrade)
+                    {
+                        canToggleSold = shop.CanUndoWeaponUpgrade(weaponUpgrade, out string upgradeUndoReason);
+                        if (!canToggleSold) reason = upgradeUndoReason;
+                    }
+                    card.Show(offer, canBuy, reason, currency, canToggleSold);
                     card.SetPairMark(offer.Sold ? null : EvolutionPairs.LabelFor(player, offer.PairItem));   // 가진 무기의 짝이면 금색 테두리
                     card.SetSelected(offer == pending);
 
@@ -496,6 +507,40 @@ public class MaintenanceUI : MonoBehaviour
             bool same = pending == offer;
             CancelTargeting();
             if (same) return;
+        }
+
+        if (offer is WeaponPurchaseOffer purchasedWeapon && offer.Sold)
+        {
+            if (shop.TryUndoWeaponPurchase(purchasedWeapon, out string undoReason))
+            {
+                PlaySound(buySound);
+                ShowMessage($"{offer.Title} 해제 · {offer.Price} 크레딧 반환");
+            }
+            else
+            {
+                PlaySound(failSound);
+                ShowMessage(undoReason);
+            }
+
+            Refresh();
+            return;
+        }
+
+        if (offer is WeaponUpgradeOffer purchasedUpgrade && offer.Sold)
+        {
+            if (shop.TryUndoWeaponUpgrade(purchasedUpgrade, out string upgradeUndoReason))
+            {
+                PlaySound(buySound);
+                ShowMessage($"{offer.Title} 취소 · {offer.Price} 크레딧 반환");
+            }
+            else
+            {
+                PlaySound(failSound);
+                ShowMessage(upgradeUndoReason);
+            }
+
+            Refresh();
+            return;
         }
 
         if (!shop.CanBuy(offer, out string reason))

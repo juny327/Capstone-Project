@@ -47,16 +47,18 @@ public class ShopCardView : MonoBehaviour
         if (button != null) button.onClick.AddListener(() => Clicked?.Invoke(this));
     }
 
-    public void Show(ShopOffer offer, bool canBuy, string reason, Sprite currencyIcon)
+    public void Show(ShopOffer offer, bool canBuy, string reason, Sprite currencyIcon, bool canToggleSold = false)
     {
         Offer = offer;
         gameObject.SetActive(true);
+
+        bool togglingSoldOffer = offer.Sold && canToggleSold;
 
         Color kindColor = attachmentTierColor && offer is AttachmentOffer part
             ? AttachmentData.TierColor(part.Attachment.tier)
             : ColorOf(offer.Kind);
         bool unavailable = !canBuy && !offer.Sold;
-        if (frame != null) frame.color = unavailable ? Color.Lerp(kindColor, Color.black, 0.45f) : kindColor;
+        if (frame != null) frame.color = togglingSoldOffer ? Color.white : unavailable ? Color.Lerp(kindColor, Color.black, 0.45f) : kindColor;
 
         if (icon != null)
         {
@@ -82,19 +84,21 @@ public class ShopCardView : MonoBehaviour
             price.color = poor ? unaffordableColor : affordableColor;
         }
 
-        if (soldOverlay != null) soldOverlay.SetActive(offer.Sold);
+        if (soldOverlay != null) soldOverlay.SetActive(offer.Sold && !togglingSoldOffer);
         if (description != null && price != null) UiTextFit.KeepAbove(description, price.rectTransform);   // 설명이 가격 위에서 끝나게
 
         // 구매함은 덮개가 알려 주므로, 그 밖의 이유(슬롯 가득 등)만 글로
-        bool showReason = !canBuy && !offer.Sold && !poor && !string.IsNullOrEmpty(reason);
+        bool showReason = !canBuy && !poor && !string.IsNullOrEmpty(reason)
+            && (!offer.Sold || (offer is WeaponPurchaseOffer || offer is WeaponUpgradeOffer) && !togglingSoldOffer);
         if (stateText != null)
         {
-            stateText.gameObject.SetActive(showReason);
-            if (showReason) stateText.text = reason;
+            stateText.gameObject.SetActive(togglingSoldOffer || showReason);
+            if (togglingSoldOffer) stateText.text = offer is WeaponUpgradeOffer ? "강화됨 · 클릭 취소" : "담김 · 클릭 취소";
+            else if (showReason) stateText.text = reason;
         }
 
-        if (button != null) button.interactable = !offer.Sold;
-        if (group != null) group.alpha = offer.Sold ? 0.18f : unavailable ? 0.6f : 1f;
+        if (button != null) button.interactable = !offer.Sold || togglingSoldOffer;
+        if (group != null) group.alpha = offer.Sold && !togglingSoldOffer ? 0.18f : unavailable ? 0.6f : 1f;
     }
 
     public void Hide()
