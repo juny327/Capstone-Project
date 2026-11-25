@@ -132,7 +132,7 @@ public class WeaponController : MonoBehaviour
 
     static void PlaySupportSound(GameSoundSet.Entry entry)
     {
-        if (entry != null && SoundManager.Instance != null) SoundManager.Instance.Play(entry, SoundManager.Instance.SfxGroup, 1f, 1f, SoundKind.SupportFire);
+        if (entry != null && SoundManager.Instance != null) SoundManager.Instance.Play(entry, SoundManager.Instance.WeaponGroup, 1f, 1f, SoundKind.SupportFire);   // 무기 그룹 (2026-11-24)
     }
 
     [Header("Start")]
@@ -1069,6 +1069,11 @@ public class WeaponController : MonoBehaviour
     void OnDisable()
     {
         GameEvents.OnPlayerDeadStart -= OnPlayerDead;
+
+        // 조종이 꺼지면(보스 등장 연출 · 엔딩) 무기 갱신도 멈춘다 — 반복음 · 빔 소리를 여기서 끈다 (2026-11-24 사용자:
+        // "사수로 보스전에 들어갈 때 기관총 · 분광 레이저 소리가 난다" — 회전 기관포 회전음이 등장 연출 내내 울렸다)
+        for (int i = 0; i < held.Count; i++) if (held[i] != null) held[i].Hush();
+        for (int i = 0; i < subUnits.Count; i++) if (subUnits[i] != null) subUnits[i].Hush();
     }
 
     void Start()

@@ -14,19 +14,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ProjectileWeaponData
   weaponName: "\uCC98\uD615\uC790"
   brief: "\uCC98\uCE58\uD55C \uC801\uC774 \uC5F0\uC1C4 \uD3ED\uBC1C"
-  description: "\uCC98\uCE58\uD55C \uC801\uC774 \uD130\uC9C0\uACE0, \uADF8 \uD3ED\uBC1C\uC5D0
-    \uC8FD\uC740 \uC801\uB3C4 \uC5F0\uC1C4\uB85C \uD130\uC9C4\uB2E4"
+  description: "\uC801\uC744 \uCC98\uCE58\uD558\uBA74 \uD3ED\uBC1C\uD55C\uB2E4. \uD3ED\uBC1C\uC5D0
+    \uD729\uC4F8\uB824 \uC8FD\uC740 \uC801\uB3C4 \uC5F0\uC1C4\uC801\uC73C\uB85C \uD3ED\uBC1C\uD55C\uB2E4."
   icon: {fileID: 21300000, guid: bd2e1eb1a27ecde4bb6e002b703ee675, type: 3}
   weaponPrefab: {fileID: 1885557548371891229, guid: 8655bfadb6f4c2e41be552253e17c645, type: 3}
   socket: 0
   fireInterval: 0.3
-  damage: 6.1
+  damage: 6.71
   damageUpgradeFlatPerLevel: -1
   critChance: 0.1
   critMultiplier: 2
   maxLevel: 3
   perLevelBonus:
-    damageAdd: 0.45
+    damageAdd: 0.495
     damageMul: 1
     fireIntervalMul: 1
     critChanceAdd: 0
@@ -88,19 +88,19 @@ MonoBehaviour:
   shotFx:
     material: {fileID: 2100000, guid: b6310812509a3ab46bf4e098541a27ab, type: 2}
     tracerColor: {r: 1, g: 0.35, b: 0.35, a: 0.9}
-    tracerWidth: 0.15
-    tracerLength: 2.4
+    tracerWidth: 0.24
+    tracerLength: 3.12
     tracerInstant: 0
     tracerInstantFade: 0.15
     flashColor: {r: 1, g: 0.45, b: 0.4, a: 1}
-    flashSize: 0.9
+    flashSize: 1.35
     flashFan: 0
     flashRing: 0
     sparkColor: {r: 1, g: 0.35, b: 0.35, a: 1}
-    sparkSize: 0.7
+    sparkSize: 1.05
     sparkLines: 2
     sparkRing: 0
-    fireShake: 0
+    fireShake: 0.06
     flashSwing: 0
     hotFlashSize: 0
     hotTracerLength: 0
@@ -108,6 +108,6 @@ MonoBehaviour:
     hotColor: {r: 0, g: 0, b: 0, a: 0}
     smokeMaterial: {fileID: 0}
     smokeTime: 0
-    smokeWidth: 0.35
+    smokeWidth: 0.49
     smokeHeadColor: {r: 1, g: 0.6, b: 0.25, a: 0.9}
     smokeTailColor: {r: 0.55, g: 0.55, b: 0.58, a: 0.55}

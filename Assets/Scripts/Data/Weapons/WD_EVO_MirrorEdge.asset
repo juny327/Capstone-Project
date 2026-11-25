@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: WD_EVO_MirrorEdge
   m_EditorClassIdentifier: Assembly-CSharp::MeleeWeaponData
   weaponName: "\uAC70\uC6B8\uCE7C\uB0A0"
-  brief: "\uD0C4 \uB418\uBC1B\uAE30 \xB7 \uAC80\uAE30 \uBC1C\uC0AC"
-  description: "\uD718\uB450\uB97C \uB54C\uB9C8\uB2E4 \uC801 \uD0C4\uC744 \uB418\uB3CC\uB9AC\uACE0,
-    \uB124 \uBC88\uC9F8 \uD718\uB450\uB974\uAE30\uB9C8\uB2E4 \uCD08\uC2B9\uB2EC \uAC80\uAE30
-    3\uAC1C"
+  brief: "\uC801 \uD0C4\uD658 \uBC18\uC0AC \xB7 \uCD08\uC2B9\uB2EC \uAC80\uAE30"
+  description: "\uD718\uB450\uB97C \uB54C\uB9C8\uB2E4 \uC801 \uD0C4\uD658\uC744 \uB418\uB3CC\uB9B0\uB2E4.
+    \uB124 \uBC88\uC9F8 \uACF5\uACA9\uB9C8\uB2E4 \uCD08\uC2B9\uB2EC \uAC80\uAE30
+    3\uAC1C\uB97C \uBC1C\uC0AC\uD55C\uB2E4."
   icon: {fileID: 21300000, guid: 0bfc76417710fc8479e2f273e330d86a, type: 3}
   weaponPrefab: {fileID: 5825881266557484979, guid: 276e1eb0799988e469f02ac90f59f64b, type: 3}
   socket: 0
@@ -74,7 +74,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 3523106697c65c747afbe5b0b50584d4, type: 3}
   meleeBodyVolume: 1
   fireStack: []
-  range: 3
+  range: 3.6
   arcAngle: 120
   maxTargets: 5
   extraTargetDamage: 0.6

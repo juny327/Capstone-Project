@@ -139,6 +139,16 @@ public class GameAppManager : MonoBehaviour
         DontDestroyOnLoad(player);
     }
 
+    /// <summary>
+    /// 지금 플레이어를 버린다 (2026-11-25 스테이지 바로 가기 '처음부터') — 다음 Stage 씬이 열리면 SetupPlayer 가 새로 만든다.
+    /// </summary>
+    public void DropPlayer()
+    {
+        if (Player != null) Destroy(Player);
+        Player = null;
+        PlayerStats = null;
+    }
+
     void OnPlayerDead()
     {
         Destroy(Player);

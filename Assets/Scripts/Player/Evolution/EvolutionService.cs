@@ -12,7 +12,65 @@ public static class EvolutionService
 
     public static bool IsReady(GameObject player, WeaponEvolutionData evolution)
     {
-        return evolution != null && evolution.IsReady(WeaponsOf(player), AbilitiesOf(player));
+        return evolution != null && Unlocked && evolution.IsReady(WeaponsOf(player), AbilitiesOf(player));
+    }
+
+    // ───────── 상위 무기가 열리는 때 (2026-11-24) ─────────
+
+    /// <summary>
+    /// 상위 무기를 살 수 있는가 — 판 안에서는 ShopCatalog.evolutionFromStage(기본 2) 스테이지부터. 판 밖(테스트 룸 · 로비)은 늘 열림.
+    /// 사용자: "아무리 빨라도 스테이지 2 중간 정비에서 상위 무기 하나 — 초반은 잔잔하게, 스테이지 2 중반부터 화력".
+    /// 코인만으로는 못 막는다 — 혈검(검 Lv3 + 흡혈)은 흡혈을 레벨업 카드로 얻으면 검 강화 두 번(약 31코인)으로 스테이지 1 에서도 됐다.
+    /// 정비 창 '상위 무기' 칸 · 클리어 보상 카드 · '진화 가능' 표시가 모두 이것을 본다. 짝 부품 · 무기 강화는 그 전에도 산다.
+    /// </summary>
+    public static bool Unlocked
+    {
+        get
+        {
+            int from = UnlockStage;
+            if (from <= 1) return true;
+            int stage = StageOverride > 0 ? StageOverride : CurrentStage();
+            return stage <= 0 || stage >= from;
+        }
+    }
+
+    /// <summary>
+    /// 스테이지 바로 가기의 출전 준비 동안 (2026-11-25) — '지금 스테이지' 대신 방금 클리어한 스테이지(들어갈 스테이지 − 1)로 본다.
+    /// 스테이지 2 로 바로 가면 스테이지 1 클리어 정비와 같아 상위 무기가 아직 잠겨 있다. 0 = 쓰지 않음 (출발하면 0 으로 돌아간다).
+    /// </summary>
+    public static int StageOverride { get; set; }
+
+    /// <summary>상위 무기가 열리는 스테이지 (ShopCatalog.evolutionFromStage, 없으면 1).</summary>
+    public static int UnlockStage
+    {
+        get
+        {
+            ShopCatalog catalog = ShopCatalog.Load();
+            return catalog != null ? catalog.evolutionFromStage : 1;
+        }
+    }
+
+    static int cachedScene = int.MinValue;
+    static int cachedStage;
+
+    /// <summary>지금 스테이지 번호 (StageManager). 판 밖이면 0. 씬마다 한 번만 찾는다.</summary>
+    static int CurrentStage()
+    {
+        int scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().handle;
+        if (scene != cachedScene)
+        {
+            StageManager stage = Object.FindFirstObjectByType<StageManager>();
+            cachedStage = stage != null && stage.currentStage != null ? stage.currentStage.stageIndex : 0;
+            cachedScene = scene;
+        }
+        return cachedStage;
+    }
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetStageCache()
+    {
+        cachedScene = int.MinValue;
+        StageOverride = 0;
     }
 
     /// <summary>조건을 다시 보고 진화시킨다. 성공하면 연출을 건다.</summary>

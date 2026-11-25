@@ -81,6 +81,11 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
     /// </summary>
     public float FireRateBoost { get; set; } = 1f;
 
+    /// <summary>
+    /// 한 발 피해 배율 (2026-11-24) — 회전 기관포가 연사를 크게 올리는 동안 한 발을 줄여 화력이 과하게 오르지 않게 (SpinUpEffect). 1 = 그대로.
+    /// </summary>
+    public float ShotDamageScale { get; set; } = 1f;
+
     /// <summary>연사 열 0~1 (회전 기관포 — SpinUpEffect 가 넣는다). 쏘는 모습(ShotFx 의 hot 값)이 이 값으로 섞인다. 판정과는 무관.</summary>
     public float ShotHeat { get; set; }
 
@@ -566,8 +571,8 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
         SoundManager.Instance.PlayClip(clip, volume * SoundScale, pitch, SoundGroup, kind == SoundKind.Auto ? SoundKindOf : kind);
     }
 
-    /// <summary>이 무기 소리가 나갈 믹서 그룹 — 상위 무기는 'Evolved'(+5dB, 2026-11-23 — 배경음에 묻혔다), 그 밖은 효과음(null).</summary>
-    AudioMixerGroup SoundGroup => data != null && data.IsEvolved && SoundManager.Instance != null ? SoundManager.Instance.EvolvedGroup : null;
+    /// <summary>이 무기 소리가 나갈 믹서 그룹 — 무기는 'Weapon'(+3dB, 2026-11-24), 상위 무기는 그 아래 'Evolved'(+5dB 더, 2026-11-23 — 배경음에 묻혔다).</summary>
+    AudioMixerGroup SoundGroup => SoundManager.Instance == null ? null : SoundManager.Instance.GroupFor(data != null && data.IsEvolved);
 
     /// <summary>보조 무기 소리 크기 — 주무기와 보조 셋이 한꺼번에 쏘면 시끄럽다. 주무기 소리가 앞에 선다.
     /// 상위 무기는 보조 칸이어도 ×0.7 (2026-11-23 — ×0.5 로는 끝 단계 상위 보조 셋의 소리가 배경음에 묻혔다).</summary>
@@ -929,6 +934,17 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
         CancelReload();
     }
 
+    /// <summary>
+    /// 반복음 · 이어지는 소리를 멈춘다 — 무기 조종(WeaponController)이 꺼질 때 부른다 (보스 등장 연출 · 엔딩, 2026-11-24 사용자 제보).
+    /// 조종이 꺼지면 무기 갱신(Tick)도 멈춰 회전 기관포 회전음 · 프리즘 · 태양창 빔 소리 · 충전음을 끄는 처리가 돌지 않아 연출 내내 울렸다.
+    /// 무기를 숨기거나 레벨 · 탄을 바꾸지는 않는다 (회전은 다시 켜지면 평소대로 내려간다).
+    /// </summary>
+    public virtual void Hush()
+    {
+        foreach (LoopVoice v in GetComponentsInChildren<LoopVoice>(true))
+            if (v != null) v.Stop(0.2f);
+    }
+
     // ───────── 파생 클래스가 구현/확장하는 부분 ─────────
 
     /// <summary>
@@ -976,7 +992,8 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
 
     protected float ApplyCritical(in WeaponRuntimeStats stats, bool isCritical)
     {
-        return isCritical ? stats.Damage * stats.CritMultiplier : stats.Damage;
+        float damage = stats.Damage * ShotDamageScale;
+        return isCritical ? damage * stats.CritMultiplier : damage;
     }
 
     protected void SpawnEffect(GameObject prefab, Transform at)

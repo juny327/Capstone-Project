@@ -13,21 +13,21 @@ MonoBehaviour:
   m_Name: WD_EVO_SunLance
   m_EditorClassIdentifier: Assembly-CSharp::ChargeBeamWeaponData
   weaponName: "\uD0DC\uC591\uCC3D"
-  brief: "\uBAA8\uC744\uC218\uB85D \uAE38\uC5B4\uC9C0\uB294 \uBE5B \uAE30\uB465"
-  description: "\uBAA8\uC73C\uB294 \uB3D9\uC548 \uC0AC\uAC70\uB9AC\uAC00 10m \u2192
-    32m \uB85C \uB298\uC5B4\uB098\uB294 \uD55C \uBC29 \u2014 \uAD75\uC740 \uBE5B
-    \uAE30\uB465 + \uD654\uC0C1"
+  brief: "\uCDA9\uC804\uD560\uC218\uB85D \uAE38\uC5B4\uC9C0\uB294 \uBE5B\uC758 \uCC3D"
+  description: "\uCDA9\uC804 \uC2DC\uAC04\uC5D0 \uB530\uB77C \uC0AC\uAC70\uB9AC\uAC00
+    10m\uC5D0\uC11C 32m\uAE4C\uC9C0 \uC99D\uAC00\uD55C\uB2E4. \uAC15\uB825\uD55C
+    \uBE5B \uAE30\uB465\uC73C\uB85C \uC801\uC744 \uD0DC\uC6B4\uB2E4."
   icon: {fileID: 21300000, guid: 987f509586f38c2419ec7f1673d14816, type: 3}
   weaponPrefab: {fileID: 1597846053522236169, guid: 00b0b894f53fcc348a817c2998ac600d, type: 3}
   socket: 0
   fireInterval: 1.54
-  damage: 26.51
+  damage: 29.161
   damageUpgradeFlatPerLevel: -1
   critChance: 0.15
   critMultiplier: 2.5
   maxLevel: 3
   perLevelBonus:
-    damageAdd: 5.61
+    damageAdd: 6.171
     damageMul: 1
     fireIntervalMul: 1
     critChanceAdd: 0
@@ -64,7 +64,7 @@ MonoBehaviour:
   fireLayerPitchRange: {x: 0.97, y: 1.03}
   fireLayerMinInterval: 0
   hitLayerSounds:
-  - {fileID: 8300000, guid: 9345ce759e018b1b887cc4b918ea7e24, type: 3}
+  - {fileID: 8300000, guid: 05a006cfaff9419ea6df091b880c6362, type: 3}
   hitLayerVolume: 0.18
   hitLayerMinInterval: 0.09
   meleeBodySounds: []
@@ -76,14 +76,14 @@ MonoBehaviour:
   hitLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  cameraShake: 0.5
+  cameraShake: 0.8
   magazineSize: 3
   reloadTime: 2.5
   autoReload: 1
   beamMaterial: {fileID: 2100000, guid: 5d90de9dbfa086c47b0889319c447945, type: 2}
   beamColor: {r: 0.35, g: 0.95, b: 1, a: 1}
-  beamWidth: 0.35
-  chargeWidth: 0.3
+  beamWidth: 0.595
+  chargeWidth: 0.45
   extraBeams: 0
   beamsAllAround: 0
   primaryBeamDamageMul: 1
@@ -156,12 +156,12 @@ MonoBehaviour:
     damageMul: 1
     minChargeDamage: 0.6
     hitRadius: 1.1
-    beamWidth: 2.6
+    beamWidth: 3.64
     beamTime: 0.45
     burnRatio: 0.3
     burnDuration: 3
     scorchTime: 2.5
-    cameraShake: 0.7
+    cameraShake: 1.12
     lineMaterial: {fileID: 2100000, guid: b6310812509a3ab46bf4e098541a27ab, type: 2}
     color: {r: 1, g: 0.86, b: 0.45, a: 1}
     scorchColor: {r: 1, g: 0.35, b: 0.08, a: 0.8}
@@ -181,7 +181,7 @@ MonoBehaviour:
     beamLoop: {fileID: 8300000, guid: 9ddc4190dede2a749a9c42a32eb9d1f5, type: 3}
     beamLoopVolume: 0.5
     beamLoopPitch: {x: 0.75, y: 1}
-  chargeSound: {fileID: 8300000, guid: 7f6c1ae3232ac004aa3ef25eb1e887b3, type: 3}
+  chargeSound: {fileID: 8300000, guid: 4f3dea44923e4048a49835f12793aaa1, type: 3}
   chargeVolume: 0.484
   muzzleFlashPrefab: {fileID: 2916273817513264348, guid: 95044fb3908b36c46bc62060360f7ba6, type: 3}
   hitEffectPrefab: {fileID: 4324968127605537629, guid: c694cdd4158a7394bb9c62a42fc6bd6b, type: 3}

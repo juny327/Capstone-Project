@@ -407,6 +407,17 @@ public class Enemy : MonoBehaviour, IDamageable, IPoolable
 
 
 
+    /// <summary>
+    /// 피해 숫자 없이 바로 쓰러뜨린다 — 스테이지 클리어 때 남은 몬스터를 치울 때 (EnemyManager.EndStage, 2026-11-25).
+    /// 경험치 · 코인 · 보급은 EnemyManager.dropRewards 가 꺼져 있어 나오지 않고, 처치 수는 부른 쪽이 막는다.
+    /// </summary>
+    public void DefeatSilently()
+    {
+        if (state == EnemyState.Dead || !gameObject.activeInHierarchy) return;
+        currentHp = 0f;
+        Die();
+    }
+
     void Die()
     {
         if (freezeRoutine != null)
@@ -463,6 +474,17 @@ public class Enemy : MonoBehaviour, IDamageable, IPoolable
     {
         // 난이도 경험치 배율 (2026-11-23 — 이지 ×2, 처치 목표가 절반이라)
         int expAmount = Mathf.Max(0, Mathf.RoundToInt(data.expDrop * Difficulty.Values.expMultiplier));
+
+        // 스테이지 경험치 배율 (2026-11-25 — 처치 목표를 ×1.25 로 늘린 스테이지 2 · 3 은 ×0.8, 스테이지 전체 경험치는 그대로).
+        // 소수는 확률로 올린다 — 경험치 1 짜리가 ×0.8 이면 80% 로 1, 20% 로 구슬 없음
+        float stageMul = manager != null ? manager.expMultiplier : 1f;
+        if (!Mathf.Approximately(stageMul, 1f))
+        {
+            float scaled = expAmount * Mathf.Max(0f, stageMul);
+            expAmount = Mathf.FloorToInt(scaled);
+            if (UnityEngine.Random.value < scaled - expAmount) expAmount++;
+        }
+        if (expAmount <= 0) return;
 
 
         GameObject orbGO = PoolManager.Instance.Get(expOrb);

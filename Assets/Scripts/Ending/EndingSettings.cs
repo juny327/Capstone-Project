@@ -162,6 +162,8 @@ public class EndingSettings : ScriptableObject
     [Min(10f)] public float creditsSpeed = 90f;
     [Tooltip("빨리감기 배율 — Space · Enter · 아래 화살표 · 마우스 왼쪽을 누르고 있는 동안 (2026-11-16)")]
     [Range(1f, 20f)] public float creditsFastMultiplier = 6f;
+    [Tooltip("크레딧 동안 배경음 배율 (1 = 엔딩 곡 크기 그대로) — 2026-11-24 사용자: \"엔딩 크레딧 사운드 증가\" → 1.8 (약 +5dB). 크레딧이 끝나면 되돌린다")]
+    [Range(1f, 3f)] public float creditsMusicBoost = 1.8f;
     [Tooltip("크레딧 화면 아래의 안내 글")]
     public string creditsHint = "Space를 누르고 있으면 빨리감기";
 

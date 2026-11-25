@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: EnemyE
   m_EditorClassIdentifier: Assembly-CSharp::EnemyData
   maxHp: 18
-  attackPower: 9
+  attackPower: 7.5
   chaseRange: 17
   attackRange: 12
   moveSpeed: 1.7

@@ -45,7 +45,7 @@ public class LoopVoice : MonoBehaviour
         if (clip == null || clipVolume <= 0f) return;
 
         if (source.clip != clip) source.clip = clip;
-        if (SoundManager.Instance != null) source.outputAudioMixerGroup = SoundManager.Instance.SfxGroup;
+        if (SoundManager.Instance != null) source.outputAudioMixerGroup = SoundManager.Instance.EvolvedGroup;   // 상위 무기 반복음(회전 기관포 · 프리즘 · 태양창) — 상위 무기 그룹 (2026-11-24)
         volume = clipVolume;
         source.pitch = pitch;
         extra = 1f;

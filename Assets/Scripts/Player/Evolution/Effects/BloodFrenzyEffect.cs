@@ -15,6 +15,8 @@ using UnityEngine;
 ///    검의 직접 공격으로 센다 — 흡혈 · 폭주 회복 · 처치로 폭주 연장이 같이 된다.
 ///    2026-11-03 "딱딱하고 멋이 없다" → 검격 모양을 BloodSlash 로 (뾰족한 초승달이 휙 그어지고 꼬리부터 걷힌다) ·
 ///    폭주 동안 칼끝 궤적(BladeTrail)도 길고 붉고 뾰족하게.
+///  · <b>광란의 검</b> (2026-11-24 — "검이 스스로 미친 컨셉으로 여기저기 들쑤시고 다니게") — 혈검의 분신이 손을 떠나 둘레 적 사이를
+///    굽은 길로 꽂히고 · 꿰뚫고 · 프로펠러처럼 돌며 휘젓다 돌아온다 (MadBlade). 평소엔 닿은 공격 세 번째마다 하나, 폭주 동안엔 둘이 내내.
 /// 흡혈 스킬(Skill/Drain)은 그대로 돈다 — 여기서는 회복량을 읽기만 한다.
 /// </summary>
 [CreateAssetMenu(menuName = "Weapons/Evolution Effects/Blood Frenzy", fileName = "AE_EVO_BloodFrenzy")]
@@ -114,6 +116,26 @@ public class BloodFrenzyEffect : AttachmentEffect
     [Tooltip("다 그어진 뒤 꼬리부터 걷히며 사라지는 시간 (초)")]
     [Min(0.01f)] public float slashFadeTime = 0.24f;
 
+    [Header("광란의 검 (2026-11-24 — 검의 분신이 스스로 적 사이를 들쑤시고 다닌다)")]
+    [Tooltip("켜면 혈검의 분신이 손을 떠나 둘레 적 사이를 미친 듯 찌르고 휘젓다 돌아온다 — 평소엔 맞힌 공격 madEvery 번째마다 하나, 폭주 동안엔 madFrenzyBlades 개가 폭주 내내 (MadBlade)")]
+    public bool madBlade = true;
+    [Tooltip("폭주가 아닐 때 — 적에게 닿은 공격 이 번째마다 분신 하나")]
+    [Min(1)] public int madEvery = 3;
+    [Tooltip("폭주가 아닐 때 분신이 날뛰는 시간 (초)")]
+    [Min(0.2f)] public float madSeconds = 1.6f;
+    [Tooltip("폭주 동안 날뛰는 분신 수 (폭주가 끝나면 돌아온다)")]
+    [Min(0)] public int madFrenzyBlades = 2;
+    [Tooltip("분신이 찌를 적을 찾는 반경 (m, 플레이어 둘레)")]
+    [Min(1f)] public float madSeek = 7f;
+    [Tooltip("분신이 나는 빠르기 (m/s)")]
+    [Min(1f)] public float madSpeed = 24f;
+    [Tooltip("한 번 찌를 때 피해 = 무기 공격력 × 이 값")]
+    [Min(0f)] public float madDamageMul = 0.3f;
+    [Tooltip("같은 적을 다시 찌르기까지 (초) — 그동안은 그 둘레를 휙 돈다")]
+    [Min(0.05f)] public float madRehit = 0.4f;
+    [Tooltip("분신 크기 (손에 든 검의 배)")]
+    [Min(0.2f)] public float madScale = 1.4f;
+
     [Header("폭주 칼끝 궤적 (무기의 BladeTrail)")]
     [Tooltip("폭주 동안 궤적 길이(초) — 평소 0.14")]
     [Min(0.01f)] public float frenzyTrailTime = 0.22f;
@@ -204,6 +226,10 @@ public class BloodFrenzyEffect : AttachmentEffect
 
         public override void OnAttack(in WeaponAttack attack)
         {
+            // 광란의 검 — 폭주가 아닐 때 닿은 공격 madEvery 번째마다 분신 하나
+            if (cfg.madBlade && !Frenzy && attack.Hits > 0 && Weapon.IsActive && ++madHits % Mathf.Max(1, cfg.madEvery) == 0)
+                LaunchMad(cfg.madSeconds, null);
+
             if (!Frenzy || cfg.swingSlashEvery <= 0 || cfg.swingSlashCount <= 0) return;
             if (++frenzySwings % cfg.swingSlashEvery != 0) return;
 
@@ -279,6 +305,40 @@ public class BloodFrenzyEffect : AttachmentEffect
             }
         }
 
+        // ───────── 광란의 검 (2026-11-24) ─────────
+
+        int madHits;
+        readonly List<MadBlade> blades = new List<MadBlade>();
+
+        /// <summary>분신 하나를 날린다 — seconds > 0 이면 그 시간 뒤, 0 이면 폭주가 끝나면 돌아온다.</summary>
+        void LaunchMad(float seconds, System.Func<bool> keepAlive)
+        {
+            Transform owner = OwnerRoot;
+            if (owner == null) return;
+            blades.RemoveAll(b => b == null);
+            if (blades.Count >= cfg.madFrenzyBlades + 2) return;   // 너무 많이 겹치지 않게
+
+            Vector3 from;
+            if (Weapon.IsSupport && Weapon.SupportMount != null) from = Weapon.SupportMount.position;
+            else if (Weapon is MeleeWeapon melee && !Weapon.HeldAway) from = melee.HeadWorld;
+            else from = owner.position + Vector3.up * 1.2f;
+
+            blades.Add(MadBlade.Launch(cfg, Weapon, owner, from, seconds, keepAlive, OnMadStab));
+        }
+
+        /// <summary>분신이 찌른 적 — 검의 직접 공격으로 센다 (흡혈 처치 회복 · 폭주 회복 · 처치로 폭주 연장).</summary>
+        void OnMadStab(Transform target, float damage, Vector3 point, bool wasAlive)
+        {
+            if (Frenzy) Steal(damage, point);
+            if (WeaponBase.CheckDirectKill(target, wasAlive) && Frenzy) ExtendFrenzy();
+        }
+
+        void RecallMad()
+        {
+            foreach (MadBlade b in blades) if (b != null) b.Recall();
+            blades.Clear();
+        }
+
         public override void OnKill(in WeaponHit hit)
         {
             if (Frenzy)
@@ -347,6 +407,10 @@ public class BloodFrenzyEffect : AttachmentEffect
                 FxLine.Ring(cfg.material, owner.position, 0.2f, 2.2f, Color.white, 0.12f, 0.3f);
             }
             if (owner != null && cfg.UsesKit) KitFrenzyStart(owner.position);
+
+            // 광란의 검 — 폭주 내내 분신들이 날뛴다
+            if (cfg.madBlade)
+                for (int i = 0; i < cfg.madFrenzyBlades; i++) LaunchMad(0f, () => Frenzy && Weapon != null && Weapon.IsActive);
         }
 
         // ───────── 공통 재료 (2026-11-20) ─────────
@@ -524,11 +588,12 @@ public class BloodFrenzyEffect : AttachmentEffect
         {
             // 다른 무기로 바꾸면 폭주는 끝난다 (혈기는 남는다)
             if (!active && Frenzy) EndFrenzy();
-            if (!active) SetVisible(false);
+            if (!active) { SetVisible(false); RecallMad(); }
         }
 
         public override void Dispose()
         {
+            RecallMad();
             if (Frenzy) EndFrenzy();
             if (back != null) Object.Destroy(back.gameObject);
             if (fill != null) Object.Destroy(fill.gameObject);

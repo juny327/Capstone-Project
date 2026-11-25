@@ -46,7 +46,7 @@ NavMeshAgent:
   m_GameObject: {fileID: 3586289985083865050}
   m_Enabled: 1
   m_AgentTypeID: 0
-  m_Radius: 1.9066046
+  m_Radius: 2.383256
   m_Speed: 2.4
   m_Acceleration: 12
   avoidancePriority: 50
@@ -55,7 +55,7 @@ NavMeshAgent:
   m_AutoTraverseOffMeshLink: 1
   m_AutoBraking: 1
   m_AutoRepath: 1
-  m_Height: 6.595607
+  m_Height: 8.244509
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 2
@@ -105,10 +105,10 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 1.9066046
-  m_Height: 8.062345
+  m_Radius: 2.621581
+  m_Height: 10.077931
   m_Direction: 2
-  m_Center: {x: 0.08071017, y: 1.9566046, z: -1.1731627}
+  m_Center: {x: 0.100888, y: 2.671581, z: -1.466453}
 --- !u!114 &6631725690779810906
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -141,12 +141,12 @@ MonoBehaviour:
   fireMaterial: {fileID: 2100000, guid: 1ca4fd79f720fa44fa8ad1ba23d2f723, type: 2}
   smokeMaterial: {fileID: 2100000, guid: 34344ea80e234d84eb0e7a92d1b29673, type: 2}
   fireballPrefab: {fileID: 1507244431629263783, guid: 5320367a976c78640b20146a3aeab298, type: 3}
-  sizeFactor: 1.5
+  sizeFactor: 1.875
   spawnDistance: 14
   wakeDelay: 1.2
   moveSpeed: 2.4
   turnSpeed: 200
-  walkCycleSpeed: 0.9
+  walkCycleSpeed: 1.125
   nearRange: 5.5
   midRange: 11
   phase2At: 0.6666667
@@ -157,7 +157,7 @@ MonoBehaviour:
   winDelay: 1.2
   biteWidth: 3.2
   biteNear: 0.5
-  biteFar: 7.16
+  biteFar: 8.95
   biteDamage: 20
   delayedBiteDamage: 25
   delayedHold: {x: 0.4, y: 0.8}
@@ -180,7 +180,7 @@ MonoBehaviour:
   chargeWindup: 1
   chargeSpeed: 18
   chargeDamage: 25
-  chargeFront: 5.86
+  chargeFront: 7.325
   wallStagger: 1.6
   roarHold: 0.9
   summonDelay: 1

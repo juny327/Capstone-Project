@@ -12,23 +12,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b28815d6941648d4aab50aea47481f26, type: 3}
   m_Name: AE_EVO_SpinUp
   m_EditorClassIdentifier: Assembly-CSharp::SpinUpEffect
-  maxBoost: 1.5
+  maxBoost: 3
+  maxShotDamage: 0.6
   spinUpTime: 2
   spinDownTime: 1
   idleGrace: 0.35
   barrelName: SpinBarrels
-  barrelMaxSpeed: 1440
+  barrelMaxSpeed: 2880
   spinLoop: {fileID: 8300000, guid: 7219438f68ce4643a0cf6109370a4cbf, type: 3}
   spinLoopVolume: 0.45
-  spinLoopPitch: {x: 0.75, y: 1.25}
+  spinLoopPitch: {x: 0.75, y: 1.5}
   heatMaterial: {fileID: 2100000, guid: b6310812509a3ab46bf4e098541a27ab, type: 2}
   heatColor: {r: 1, g: 0.28, b: 0.08, a: 1}
-  heatWidth: 0.3
+  heatWidth: 0.45
   heatLength: 0.4
   heatFrom: 0.3
   heatLift: 0.13
   smokeMaterial: {fileID: 2100000, guid: 34344ea80e234d84eb0e7a92d1b29673, type: 2}
   smokeFrom: 0.75
   smokeRate: 14
-  maxSpinShake: 0.04
+  maxSpinShake: 0.06
   shakeEvery: 4

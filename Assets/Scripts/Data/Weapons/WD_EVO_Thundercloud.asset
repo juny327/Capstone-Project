@@ -13,20 +13,20 @@ MonoBehaviour:
   m_Name: WD_EVO_Thundercloud
   m_EditorClassIdentifier: Assembly-CSharp::ChainBeamWeaponData
   weaponName: "\uB1CC\uC6B4"
-  brief: "\uC7A5\uC804 \uC911 \uBA39\uAD6C\uB984 \uB099\uB8B0"
-  description: "\uC7A5\uC804\uD558\uB294 \uB3D9\uC548 \uBA38\uB9AC \uC704 \uBA39\uAD6C\uB984\uC774
-    \uC8FC\uBCC0 \uC801\uC5D0\uAC8C \uB099\uB8B0\uB97C \uC3DF\uB294\uB2E4"
+  brief: "\uC7A5\uC804 \uC911 \uC8FC\uBCC0 \uC801\uC5D0\uAC8C \uB099\uB8B0"
+  description: "\uC7A5\uC804\uD558\uB294 \uB3D9\uC548 \uBA38\uB9AC \uC704\uC5D0 \uBA39\uAD6C\uB984\uC774
+    \uC0DD\uC131\uB418\uC5B4 \uC8FC\uBCC0 \uC801\uC5D0\uAC8C \uB099\uB8B0\uB97C \uD37C\uBD93\uB294\uB2E4."
   icon: {fileID: 21300000, guid: afb0d17dbdb1dc040a857c3bf2d2f16a, type: 3}
   weaponPrefab: {fileID: 7530073237280035592, guid: 3edac683bd4297a43bdc09226db67e8c, type: 3}
   socket: 0
   fireInterval: 0.5
-  damage: 4.5
+  damage: 4.95
   damageUpgradeFlatPerLevel: -1
   critChance: 0.08
   critMultiplier: 2
   maxLevel: 3
   perLevelBonus:
-    damageAdd: 0.55
+    damageAdd: 0.605
     damageMul: 1
     fireIntervalMul: 1
     critChanceAdd: 0
@@ -76,7 +76,7 @@ MonoBehaviour:
   hitLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  cameraShake: 0.05
+  cameraShake: 0.1
   chainCount: 2
   chainRange: 4.5
   chainFalloff: 0.5
@@ -88,13 +88,13 @@ MonoBehaviour:
   beamMaterial: {fileID: 2100000, guid: 5d90de9dbfa086c47b0889319c447945, type: 2}
   beamColor: {r: 0.56, g: 0.4, b: 1, a: 0.9}
   arcColor: {r: 0.55, g: 0.45, b: 1, a: 0.8}
-  beamWidth: 0.24
-  arcWidth: 0.15
+  beamWidth: 0.384
+  arcWidth: 0.24
   jitter: 0.12
   segments: 8
   muzzleFlashPrefab: {fileID: 2916273817513264348, guid: 95044fb3908b36c46bc62060360f7ba6, type: 3}
   hitEffectPrefab: {fileID: 4324968127605537629, guid: c694cdd4158a7394bb9c62a42fc6bd6b, type: 3}
-  coreWidth: 0.07
+  coreWidth: 0.112
   coreColor: {r: 1, g: 1, b: 1, a: 1}
   rejitterInterval: 0.045
   hitBranches: 3

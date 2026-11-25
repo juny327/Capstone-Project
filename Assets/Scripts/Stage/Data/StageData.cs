@@ -16,6 +16,12 @@ public class StageData : ScriptableObject
 
     public int killTarget;
 
+    // 2026-11-25 사용자: "스테이지 2 · 3 에서 잡는 몬스터 수를 좀 더" — 처치 목표 ×1.25 (128 → 160 · 165 → 206).
+    // 골드(EconomySettings 스테이지 코인 배율 ÷1.25) · 경험치(이 값 ×0.8)는 스테이지 합계가 그대로이게 낮췄다 (사용자: 골드는 괜찮다 · 경험치는 남아돈다)
+    [Tooltip("이 스테이지 몬스터의 경험치 구슬 값 배율 (소수는 확률로 올림). 처치 목표를 늘리고 스테이지 경험치 합계는 그대로 두려면 낮춘다")]
+    [Min(0f)]
+    public float expMultiplier = 1f;
+
     public int maxEnemyCount;
 
     [Min(0.1f)]

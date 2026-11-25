@@ -15,7 +15,7 @@ MonoBehaviour:
   knockback: 2.5
   finisherKnockback: 5
   knockTime: 0.22
-  collideRadius: 0.9
+  collideRadius: 1.17
   collideDamageMul: 0.5
   wallDamageMul: 0.5
   wallStun: 0.5
@@ -31,11 +31,20 @@ MonoBehaviour:
   goldColor: {r: 1, g: 0.84, b: 0.32, a: 1}
   font: {fileID: 11400000, guid: b142b49dad0aa7747857b5917f44e1e7, type: 2}
   tukWord: "\uB69D\uB531!"
-  wispOrbit: {x: 1.15, y: 1.6}
+  wispOrbit: {x: 1.495, y: 2.08}
+  wispSize: 0.7
+  ghostCone: 1
+  coneLength: 8
+  coneHalfAngle: 35
+  coneSpreadTime: 0.3
+  coneDamage: 1
+  fieldSeconds: 3
+  fieldTick: 0.5
+  fieldDamage: 0.15
   ghostfire: 1
   ghostSpeed: 18
   ghostDistance: 14
-  ghostBlastRadius: 2.5
+  ghostBlastRadius: 3.25
   ghostDamage: {x: 1, y: 2}
   slowFactor: 0.5
   slowSeconds: 2

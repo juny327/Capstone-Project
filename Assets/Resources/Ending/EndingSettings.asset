@@ -88,6 +88,7 @@ MonoBehaviour:
     \uAC10\uC0AC\uD569\uB2C8\uB2E4"
   creditsSpeed: 90
   creditsFastMultiplier: 6
+  creditsMusicBoost: 1.8
   creditsHint: "Space\uB97C \uB204\uB974\uACE0 \uC788\uC73C\uBA74 \uBE68\uB9AC\uAC10\uAE30"
   thanks: "\uD50C\uB808\uC774\uD574 \uC8FC\uC154\uC11C \uAC10\uC0AC\uD569\uB2C8\uB2E4"
   lobbyLabel: "\uB85C\uBE44\uB85C"

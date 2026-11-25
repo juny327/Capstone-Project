@@ -160,7 +160,8 @@ public class EconomySystem : MonoBehaviour
         if (EnemyManager.Instance != null && !EnemyManager.Instance.dropRewards) return;
 
         // 스테이지별 배율 (0.6 · 0.65 · 0.8) × 난이도 배율 (이지 ×2 — 처치 목표가 절반이라) — 소수 부분은 확률로 (코인 1 × 0.6 = 60% 확률로 1)
-        float scaled = Settings.CoinsFor(enemy.data) * Settings.CoinMultiplierFor(CurrentStageIndex()) * Difficulty.Values.coinMultiplier;
+        float scaled = Settings.CoinsFor(enemy.data) * Settings.CoinMultiplierFor(CurrentStageIndex()) * Difficulty.Values.coinMultiplier
+                       * CharacterCoinMultiplier();   // 캐릭터별 (2026-11-24 — 사수 · 검사가 상위 무기를 갖추는 때를 따로 맞춘다)
         int total = Mathf.FloorToInt(scaled);
         if (Random.value < scaled - total) total++;
         if (total <= 0) return;
@@ -307,6 +308,14 @@ public class EconomySystem : MonoBehaviour
     }
 
     /// <summary>지금 씬의 스테이지 번호 — 씬마다 한 번만 찾는다.</summary>
+    /// <summary>플레이어 캐릭터의 코인 배율 (CharacterData.coinMultiplier). 캐릭터를 모르면 로비에서 고른 캐릭터, 그것도 없으면 1.</summary>
+    float CharacterCoinMultiplier()
+    {
+        CharacterLoadout loadout = player != null ? player.GetComponent<CharacterLoadout>() : null;
+        CharacterData data = loadout != null && loadout.Data != null ? loadout.Data : CharacterSelection.Current;
+        return data != null ? Mathf.Max(0f, data.coinMultiplier) : 1f;
+    }
+
     int CurrentStageIndex()
     {
         int scene = SceneManager.GetActiveScene().handle;

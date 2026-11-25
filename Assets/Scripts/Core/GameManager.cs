@@ -137,6 +137,12 @@ public class GameManager : MonoBehaviour
         // StartCoroutine 은 첫 yield 까지 바로 실행된다 — 클리어 신호와 같은 프레임에 무적이 걸린다
         LockPlayer();
 
+        // 남은 몬스터를 모두 치운다 — 보상 없이 · 처치로 세지 않고 · 더 내보내지 않게 (2026-11-25 사용자: 문구가 나오는 동안
+        // 캐릭터가 계속 공격해 남은 몬스터의 골드 · 경험치를 먹었다). 한 프레임 뒤에 — 클리어 신호는 마지막 처치가 쓰러지는 도중에 오므로,
+        // 바로 치우면 그 마지막 몬스터의 구슬 · 코인까지 막힌다
+        yield return null;
+        if (EnemyManager.Instance != null) EnemyManager.Instance.EndStage();
+
         // 클리어 전에 쌓인 레벨업 카드부터
         yield return DrainLevelUps();
 

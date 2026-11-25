@@ -13,21 +13,23 @@ MonoBehaviour:
   m_Name: WD_ChargeLaser
   m_EditorClassIdentifier: Assembly-CSharp::ChargeBeamWeaponData
   weaponName: "\uCDA9\uC804 \uB808\uC774\uC800"
-  brief: "\uBAA8\uC558\uB2E4\uAC00 \uC77C\uC9C1\uC120\uC73C\uB85C \uAFF0\uB6AB\uB294\uB2E4"
-  description: "\uB4DC\uB860\uC5D0 \uC2E4\uB824 \uD798\uC744 \uBAA8\uC558\uB2E4\uAC00,
-    \uC801\uC774 \uAC00\uC7A5 \uB9CE\uC774 \uACB9\uCE5C \uC904\uC744 \uC77C\uC9C1\uC120\uC73C\uB85C
-    \uAFF0\uB6AB\uB294\uB2E4. \uB290\uB9AC\uC9C0\uB9CC \uD55C \uBC29\uC774 \uD06C\uB2E4."
+  brief: "\uC5D0\uB108\uC9C0\uB97C \uBAA8\uC544 \uC801\uC744 \uAD00\uD1B5\uD558\uB294
+    \uB808\uC774\uC800\uB97C \uBC1C"
+  description: "\uC5D0\uB108\uC9C0\uB97C \uCDA9\uC804\uD55C \uB4A4, \uC801\uC774
+    \uAC00\uC7A5 \uB9CE\uC774 \uACB9\uCE5C \uBC29\uD5A5\uC73C\uB85C \uC77C\uC9C1\uC120
+    \uBC1C\uC0AC\uD55C\uB2E4. \uB290\uB9AC\uC9C0\uB9CC \uAC15\uB825\uD55C \uD55C
+    \uBC29\uC744 \uC790\uB791\uD55C\uB2E4."
   icon: {fileID: 21300000, guid: b99fc7fc0c734fb4cbdb85288b4617b4, type: 3}
   weaponPrefab: {fileID: 1597846053522236169, guid: f2e9bd52ecb8a42468a639ed1b81eb23, type: 3}
   socket: 0
   fireInterval: 2.2
-  damage: 9.9
+  damage: 10.89
   damageUpgradeFlatPerLevel: 0
   critChance: 0.15
   critMultiplier: 2.5
   maxLevel: 3
   perLevelBonus:
-    damageAdd: 3.3
+    damageAdd: 3.63
     damageMul: 1
     fireIntervalMul: 1
     critChanceAdd: 0
@@ -74,14 +76,14 @@ MonoBehaviour:
   hitLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  cameraShake: 0.25
+  cameraShake: 0.4
   magazineSize: 3
   reloadTime: 2.5
   autoReload: 1
   beamMaterial: {fileID: 2100000, guid: 5d90de9dbfa086c47b0889319c447945, type: 2}
   beamColor: {r: 0.35, g: 0.95, b: 1, a: 0.85}
-  beamWidth: 0.35
-  chargeWidth: 0.3
+  beamWidth: 0.595
+  chargeWidth: 0.45
   extraBeams: 0
   beamsAllAround: 0
   primaryBeamDamageMul: 1
@@ -181,8 +183,8 @@ MonoBehaviour:
   chargeVolume: 0.484
   muzzleFlashPrefab: {fileID: 2916273817513264348, guid: 95044fb3908b36c46bc62060360f7ba6, type: 3}
   hitEffectPrefab: {fileID: 4324968127605537629, guid: c694cdd4158a7394bb9c62a42fc6bd6b, type: 3}
-  coreWidth: 0.12
+  coreWidth: 0.204
   coreColor: {r: 1, g: 1, b: 1, a: 1}
   firePunch: 1.4
-  fireRing: 1.4
-  hitRing: 0.9
+  fireRing: 1.96
+  hitRing: 1.26

@@ -372,7 +372,10 @@ public class MaintenanceUI : MonoBehaviour
     {
         ShopContext ctx = shop.Context;
         EvolutionCatalog catalog = EvolutionCatalog.Instance;
-        const string head = "무기 레벨과 짝을 갖추면\n여기서 상위 무기를 삽니다";
+        // 상위 무기가 아직 안 열렸으면 (스테이지 1 — 2026-11-24) 언제 열리는지 먼저
+        string head = EvolutionService.Unlocked
+            ? "무기 레벨과 짝을 갖추면\n여기서 상위 무기를 삽니다"
+            : $"상위 무기는 <b>스테이지 {EvolutionService.UnlockStage} 중간 정비</b>부터\n지금은 무기 레벨과 짝을 준비하세요";
         if (ctx == null || ctx.Weapons == null || catalog == null) return head;
 
         SubAbilitySlot slot = EvolutionService.AbilitiesOf(ctx.Player);

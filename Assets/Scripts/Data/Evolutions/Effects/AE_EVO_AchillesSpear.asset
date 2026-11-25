@@ -16,7 +16,7 @@ MonoBehaviour:
   throwDistance: 6.5
   flySpeed: 32
   throwDamageMul: 1.5
-  hitRadius: 0.8
+  hitRadius: 1.04
   orbitLaps: 2
   orbitDuration: 1.4
   orbitDamageMul: 0.5
@@ -28,7 +28,7 @@ MonoBehaviour:
   flyHeight: 1
   goldColor: {r: 1, g: 0.86, b: 0.42, a: 1}
   throwStreak: 0.48
-  orbitTrailWidth: {x: 0.5, y: 0.8}
+  orbitTrailWidth: {x: 0.65, y: 1.04}
   orbitTrailLap: 0.33
   catchShake: 0.1
   throwSound:

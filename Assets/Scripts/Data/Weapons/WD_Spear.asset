@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: WD_Spear
   m_EditorClassIdentifier: Assembly-CSharp::MeleeWeaponData
   weaponName: "\uCC3D"
-  brief: "\uBA40\uB9AC \uCC0C\uB974\uACE0 \uB0B4\uB824\uCC0D\uB294\uB2E4"
-  description: "\uB450 \uC190\uC73C\uB85C \uBA40\uB9AC \uCC0C\uB974\uACE0 \uB0B4\uB824\uCC0D\uB294\uB2E4"
+  brief: "\uAE34 \uC0AC\uAC70\uB9AC \xB7 \uCC0C\uB974\uAE30\uC640 \uB0B4\uB824\uCC0D\uAE30"
+  description: "\uB450 \uC190\uC73C\uB85C \uCC3D\uC744 \uBA40\uB9AC \uCC0C\uB978
+    \uB4A4 \uAC15\uD558\uAC8C \uB0B4\uB824\uCC0D\uB294\uB2E4."
   icon: {fileID: 21300000, guid: 58d8c1fdf1f4ecf4f91741810cbcfa4f, type: 3}
   weaponPrefab: {fileID: 5825881266557484979, guid: 78fb8db727b07ee4da8d0682b614dc6c, type: 3}
   socket: 0
@@ -68,7 +69,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 54cd2eaae0f23164d93863cda9f2548e, type: 3}
   meleeBodyVolume: 1
   fireStack: []
-  range: 5
+  range: 6.0
   arcAngle: 40
   maxTargets: 4
   extraTargetDamage: 0.7

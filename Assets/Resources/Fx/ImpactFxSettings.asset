@@ -34,21 +34,21 @@ MonoBehaviour:
     zoom: 0
     flash: 0
     thud: 0
-    kick: 0.3
+    kick: 0.45
     duck: 0
   siegeBlast:
     hitStop: 0
     zoom: 0.02
-    flash: 0.06
-    thud: 0.6
+    flash: 0.072
+    thud: 0.9
     kick: 0
     duck: 0
   sunLanceFire:
     hitStop: 0
     zoom: 0.03
-    flash: 0.11
-    thud: 0.7
-    kick: 0.3
+    flash: 0.132
+    thud: 1.05
+    kick: 0.45
     duck: 1
   gravityCollapse:
     hitStop: 1
@@ -60,8 +60,8 @@ MonoBehaviour:
   killChainFinale:
     hitStop: 1
     zoom: 0.03
-    flash: 0.11
-    thud: 0.6
+    flash: 0.132
+    thud: 0.9
     kick: 0
     duck: 1
   bloodFrenzyStart:
@@ -74,8 +74,8 @@ MonoBehaviour:
   prismConverge:
     hitStop: 0
     zoom: 0.03
-    flash: 0.11
-    thud: 0.4
+    flash: 0.132
+    thud: 0.6
     kick: 0
     duck: 1
   spearCatch:

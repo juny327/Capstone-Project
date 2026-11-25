@@ -18,7 +18,8 @@ MonoBehaviour:
   material: {fileID: 2100000, guid: b6310812509a3ab46bf4e098541a27ab, type: 2}
   color: {r: 1, g: 0.75, b: 0.25, a: 1}
   explosionPrefab: {fileID: 5162910912013668194, guid: cf82839c411151342a7b2337bda9fb34, type: 3}
-  cameraShake: 0.45
+  cameraShake: 0.675
+  blastFxScale: 1.4
   blastSound:
     clips:
     - {fileID: 8300000, guid: 9f77b19527f3d5247a7e535fd573f78c, type: 3}

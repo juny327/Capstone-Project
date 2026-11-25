@@ -32,6 +32,15 @@ MonoBehaviour:
   font: {fileID: 0}
   tukWord: "\uB69D\uB531!"
   wispOrbit: {x: 1.15, y: 1.6}
+  wispSize: 0.42
+  ghostCone: 0
+  coneLength: 8
+  coneHalfAngle: 35
+  coneSpreadTime: 0.3
+  coneDamage: 1
+  fieldSeconds: 3
+  fieldTick: 0.5
+  fieldDamage: 0.15
   ghostfire: 0
   ghostSpeed: 18
   ghostDistance: 14

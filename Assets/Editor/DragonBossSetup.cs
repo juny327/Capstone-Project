@@ -29,7 +29,7 @@ public static class DragonBossSetup
     // 실제 몸(정점 기준)은 폭 0.4 × 높이 0.7 × 길이 1.1m — ×6 이면 길이 약 6.6m · 높이 4.2m
     /// <summary>보스 크기 (모델 배율). 2026-11-14 사용자 요청으로 6 → 9 — 몸길이 약 10m · 높이 약 6.6m.
     /// 패턴 거리 값은 BaseScale(6) 기준으로 적혀 있고, 프리팹에 넣는 sizeFactor(= Scale ÷ BaseScale)에 맞춰 스스로 늘어난다.</summary>
-    public const float Scale = 9f;
+    public const float Scale = 11.25f;   // 2026-11-24 ×1.25 (9 → 11.25) — 사용자 "보스를 더 크게". 프리팹은 boss_scale.py 로 같은 비율로 키웠다
     public const float BaseScale = 6f;
     public const float SizeFactor = Scale / BaseScale;
     const int BossHp = 1000;   // 옛 보스(골렘)와 같은 값 그대로 — 수치는 아직 안 맞췄다

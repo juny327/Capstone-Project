@@ -13,21 +13,21 @@ MonoBehaviour:
   m_Name: WD_EVO_SwarmCarbine
   m_EditorClassIdentifier: Assembly-CSharp::ProjectileWeaponData
   weaponName: "\uC2A4\uC6DC \uCE74\uBE48"
-  brief: "\uC810\uC0AC\uAC00 \uC720\uB3C4 \uBBF8\uC0AC\uC77C\uB85C"
-  description: "\uC810\uC0AC \uC138 \uBC1C\uC774 \uC720\uB3C4 \uBBF8\uC0AC\uC77C
-    \u2014 \uBC1C\uB9C8\uB2E4 \uB2E4\uB978 \uC801\uC744 \uCAD3\uC544\uAC00 \uC791\uC740
-    \uD3ED\uBC1C"
+  brief: "\uC138 \uBC1C\uC758 \uC720\uB3C4 \uBBF8\uC0AC\uC77C \uC5F0\uC0AC"
+  description: "\uC138 \uBC1C\uC758 \uC720\uB3C4 \uBBF8\uC0AC\uC77C\uC744 \uC5F0\uC18D
+    \uBC1C\uC0AC\uD55C\uB2E4. \uAC01 \uBBF8\uC0AC\uC77C\uC740 \uC11C\uB85C \uB2E4\uB978
+    \uC801\uC744 \uCD94\uC801\uD574 \uC791\uC740 \uD3ED\uBC1C\uC744 \uC77C\uC73C\uD0A8\uB2E4."
   icon: {fileID: 21300000, guid: c7ba8d6ce6f21d047a1d68c7df509037, type: 3}
   weaponPrefab: {fileID: 1885557548371891229, guid: fb8422ed8a00ecf44b865fe7a2ce5ed2, type: 3}
   socket: 0
   fireInterval: 0.2
-  damage: 3.88
+  damage: 4.268
   damageUpgradeFlatPerLevel: -1
   critChance: 0.05
   critMultiplier: 2
   maxLevel: 3
   perLevelBonus:
-    damageAdd: 0.26
+    damageAdd: 0.286
     damageMul: 1
     fireIntervalMul: 1
     critChanceAdd: 0
@@ -91,19 +91,19 @@ MonoBehaviour:
   shotFx:
     material: {fileID: 2100000, guid: b6310812509a3ab46bf4e098541a27ab, type: 2}
     tracerColor: {r: 1, g: 0.75, b: 0.35, a: 0.95}
-    tracerWidth: 0.2
-    tracerLength: 0.9
+    tracerWidth: 0.32
+    tracerLength: 1.17
     tracerInstant: 0
     tracerInstantFade: 0.15
     flashColor: {r: 1, g: 0.65, b: 0.3, a: 1}
-    flashSize: 0.8
+    flashSize: 1.2
     flashFan: 0
     flashRing: 0
     sparkColor: {r: 1, g: 0.6, b: 0.25, a: 1}
-    sparkSize: 0.65
+    sparkSize: 0.975
     sparkLines: 2
     sparkRing: 0
-    fireShake: 0
+    fireShake: 0.04
     flashSwing: 32
     hotFlashSize: 0
     hotTracerLength: 0
@@ -111,6 +111,6 @@ MonoBehaviour:
     hotColor: {r: 0, g: 0, b: 0, a: 0}
     smokeMaterial: {fileID: 2100000, guid: 34344ea80e234d84eb0e7a92d1b29673, type: 2}
     smokeTime: 0.4
-    smokeWidth: 0.7
+    smokeWidth: 0.98
     smokeHeadColor: {r: 1, g: 0.6, b: 0.25, a: 0.9}
     smokeTailColor: {r: 0.6, g: 0.6, b: 0.62, a: 0.7}

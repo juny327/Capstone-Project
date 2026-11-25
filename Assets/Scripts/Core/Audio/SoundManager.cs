@@ -108,11 +108,40 @@ public class SoundManager : MonoBehaviour
     /// <summary>효과음 그룹. 무기 소리가 여기로 나간다.</summary>
     public AudioMixerGroup SfxGroup => sfxGroup;
 
-    AudioMixerGroup evolvedGroup;
-    bool evolvedLooked;
+    AudioMixerGroup evolvedGroup, weaponGroup;
+    bool evolvedLooked, weaponLooked;
 
     /// <summary>
-    /// 상위 무기 소리 그룹 — 효과음(SFX) 아래 'Evolved' (2026-11-23 사용자: "상위 무기 효과음이 배경음에 묻힌다").
+    /// 무기 소리 그룹 — 효과음(SFX) 아래 'Weapon' (2026-11-24 사용자: "전체적인 무기 효과음을 더 올리고 배경음악을 낮춰").
+    /// 믹서 스냅숏에서 +3dB (노출 파라미터 WeaponSfxVolume — 믹서 창에서 바꾼다). 무기 발사 · 휘두름 · 장전 · 맞힘 확인음 ·
+    /// 부착물 효과가 여기로, 상위 무기('Evolved')는 이 그룹 아래라 같이 오른다. 효과음 크기 설정은 부모(SFX)라 그대로 따른다. 없으면 효과음 그룹.
+    /// </summary>
+    public AudioMixerGroup WeaponGroup
+    {
+        get
+        {
+            if (!weaponLooked) { weaponLooked = true; weaponGroup = FindGroup("Weapon", "Master/SFX/Weapon", "SFX/Weapon", "Weapon"); }
+            return weaponGroup != null ? weaponGroup : sfxGroup;
+        }
+    }
+
+    /// <summary>믹서에서 이름이 정확히 name 인 그룹 — 경로 후보를 차례로 찾는다.</summary>
+    AudioMixerGroup FindGroup(string name, params string[] paths)
+    {
+        AudioMixer mixer = sfxGroup != null ? sfxGroup.audioMixer : null;
+        if (mixer == null) return null;
+        foreach (string path in paths)
+        {
+            AudioMixerGroup[] found = mixer.FindMatchingGroups(path);
+            if (found == null) continue;
+            foreach (AudioMixerGroup g in found)
+                if (g != null && g.name == name) return g;
+        }
+        return null;
+    }
+
+    /// <summary>
+    /// 상위 무기 소리 그룹 — 'Evolved' (2026-11-23 사용자: "상위 무기 효과음이 배경음에 묻힌다") · 11-24 부터 무기 그룹(SFX/Weapon) 아래 — 무기 +3dB 위에 +5dB.
     /// 믹서 스냅숏에서 +5dB (노출 파라미터 EvolvedSfxVolume — 믹서 창에서 바꾼다). 소리 칸 음량은 1 을 넘을 수 없어 그룹으로 키운다.
     /// 효과음 크기 설정(SfxVolume)은 부모 그룹이라 그대로 따른다. 그룹이 없으면 효과음 그룹.
     /// </summary>
@@ -123,15 +152,15 @@ public class SoundManager : MonoBehaviour
             if (!evolvedLooked)
             {
                 evolvedLooked = true;
-                AudioMixerGroup[] found = sfxGroup != null && sfxGroup.audioMixer != null ? sfxGroup.audioMixer.FindMatchingGroups("SFX/Evolved") : null;
-                evolvedGroup = found != null && found.Length > 0 ? found[0] : null;
+                // 11-24 부터 SFX/Weapon/Evolved (무기 그룹 아래)
+                evolvedGroup = FindGroup("Evolved", "Master/SFX/Weapon/Evolved", "SFX/Weapon/Evolved", "Weapon/Evolved", "SFX/Evolved", "Evolved");
             }
-            return evolvedGroup != null ? evolvedGroup : sfxGroup;
+            return evolvedGroup != null ? evolvedGroup : WeaponGroup;
         }
     }
 
-    /// <summary>상위 무기 소리면 상위 무기 그룹, 아니면 효과음 그룹.</summary>
-    public AudioMixerGroup GroupFor(bool evolved) => evolved ? EvolvedGroup : sfxGroup;
+    /// <summary>무기 · 부착물 · 상위 무기 효과 소리의 그룹 — 상위 무기면 Evolved, 아니면 Weapon.</summary>
+    public AudioMixerGroup GroupFor(bool evolved) => evolved ? EvolvedGroup : WeaponGroup;
 
     /// <summary>UI 그룹 — 로비 · 설정창 버튼 소리(UISound)가 여기로 나간다.</summary>
     public AudioMixerGroup UiGroup => uiGroup;
@@ -339,13 +368,28 @@ public class SoundManager : MonoBehaviour
                 if (voices[i].isPlaying && voiceFrame[i] < impactDuckFrame) voices[i].volume *= impactSfxLevel;
         }
 
+        // 잠깐 키우기 (엔딩 크레딧) — 0.8초에 걸쳐 바뀐다
+        bool boostChanged = !Mathf.Approximately(musicBoost, musicBoostTarget);
+        if (boostChanged) musicBoost = Mathf.MoveTowards(musicBoost, musicBoostTarget, Time.unscaledDeltaTime / 0.8f * Mathf.Max(1f, Mathf.Abs(musicBoostTarget - 1f)));
+
         // 배경음 — 0.06초에 내려가고 0.35초에 돌아온다
         float target = Time.unscaledTime < impactDuckUntil ? impactMusicLevel : 1f;
-        if (Mathf.Approximately(musicDuck, target)) return;
+        if (Mathf.Approximately(musicDuck, target) && !boostChanged) return;
         musicDuck = Mathf.MoveTowards(musicDuck, target, Time.unscaledDeltaTime / (target < musicDuck ? 0.06f : 0.35f));
         if (musicSource != null && currentTrack != null && musicRoutine == null)
-            musicSource.volume = currentTrack.volume * musicVolume * musicDuck;
+            musicSource.volume = currentTrack.volume * musicVolume * musicDuck * musicBoost;
     }
+
+    private float musicBoost = 1f, musicBoostTarget = 1f;
+
+    /// <summary>지금 배경음에 곱하는 '키우기' 배율 (시험용).</summary>
+    public float MusicBoost => musicBoost;
+
+    /// <summary>
+    /// 배경음을 잠깐 키운다 (2026-11-24 사용자: "엔딩 크레딧 사운드 증가") — 1 = 그대로. 0.8초에 걸쳐 바뀌고, 씬이 바뀌어도 되돌리기 전까지 남는다.
+    /// 곡마다의 크기(MusicSet)는 그대로 두고 그 장면에서만 키우려고 둔 칸 — 다 쓰면 1 로 되돌린다.
+    /// </summary>
+    public void SetMusicBoost(float target) => musicBoostTarget = Mathf.Max(0f, target);
 
     private AudioSource priorityVoice;
     private float duckUntil = -999f;
@@ -519,7 +563,8 @@ public class SoundManager : MonoBehaviour
                 SoundKind hitKind = kind >= HitSound.FireBall ? SoundKind.Skill
                     : (entry == sounds.criticalHit ? SoundKind.Crit : SoundKind.Hit);
 
-                Play(entry, sfxGroup, scale * WeaponDuck, 1f, hitKind);   // 내가 맞은 직후에는 작게
+                // 무기 맞힘은 무기 그룹(+3dB, 2026-11-24) · 팀원 스킬 맞힘은 효과음 그룹 그대로
+                Play(entry, hitKind == SoundKind.Skill ? sfxGroup : WeaponGroup, scale * WeaponDuck, 1f, hitKind);   // 내가 맞은 직후에는 작게
             }
 
             pendingHit[k] = false;
@@ -719,7 +764,7 @@ public class SoundManager : MonoBehaviour
         musicSource.Play();
 
         // 목표는 매 프레임 다시 읽는다 — 페이드 도중 설정창에서 배경음을 바꾸면 끝난 뒤에도 그 값이 남게 (2026-11-02 고침)
-        yield return FadeMusic(() => track.volume * musicVolume);
+        yield return FadeMusic(() => track.volume * musicVolume * musicBoost);
 
         musicRoutine = null;
     }
@@ -800,7 +845,7 @@ public class SoundManager : MonoBehaviour
         musicVolume = ok ? 1f : musicSetting;
 
         if (musicSource != null && currentTrack != null && musicRoutine == null)
-            musicSource.volume = currentTrack.volume * musicVolume * musicDuck;
+            musicSource.volume = currentTrack.volume * musicVolume * musicDuck * musicBoost;
         return ok;
     }
 

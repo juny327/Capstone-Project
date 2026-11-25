@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: WD_Sword
   m_EditorClassIdentifier: Assembly-CSharp::MeleeWeaponData
   weaponName: "\uAC80"
-  brief: "\uC55E\uCABD\uC744 \uB113\uAC8C \uBCA4\uB2E4"
-  description: "\uC804\uBC29 \uBD80\uCC44\uAF34 \uAD11\uC5ED \uBCA0\uAE30"
+  brief: "\uC804\uBC29 \uBD80\uCC44\uAF34 \uAD11\uC5ED \uBCA0\uAE30"
+  description: "\uC804\uBC29 \uBD80\uCC44\uAF34 \uBC94\uC704\uB97C \uB113\uAC8C \uBCA0\uC5B4
+    \uC5EC\uB7EC \uC801\uC744 \uB3D9\uC2DC\uC5D0 \uACF5\uACA9\uD55C\uB2E4."
   icon: {fileID: 21300000, guid: e9edf3a17d810e44cbaa436df8f381f1, type: 3}
   weaponPrefab: {fileID: 5825881266557484979, guid: 9c5da29612edc2c4fbe7d00bb3457f60, type: 3}
   socket: 0
@@ -69,7 +70,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 3523106697c65c747afbe5b0b50584d4, type: 3}
   meleeBodyVolume: 1
   fireStack: []
-  range: 3
+  range: 3.6
   arcAngle: 120
   maxTargets: 5
   extraTargetDamage: 0.6
