@@ -26,10 +26,16 @@ MonoBehaviour:
   chainRange: 6.5
   chainDamageMul: 0.4
   strikeRadius: 3.9
-  strikeDamageMul: 1.5
+  strikeDamageMul: 1
   strikeStun: 1
   boltHeight: 14
   idleSparks: 14
+  aftershocks: 3
+  aftershockInterval: 0.14
+  aftershockRadius: 2.2
+  aftershockDamageMul: 0.3
+  aftershockRange: 6
+  aftershockStun: 0.4
   throwAfterFinisher: 1
   throwDelay: 0.14
   throwDistance: 9
@@ -41,6 +47,15 @@ MonoBehaviour:
   throwStun: 0.3
   spinSpeed: 1080
   flyHeight: 1.1
+  whirlTurns: 1
+  whirlTime: 0.3
+  whirlRadius: 1.8
+  whirlDamageMul: 0.3
+  bounces: 4
+  bounceRange: 7
+  curve: 0.35
+  tumbleTilt: 40
+  flyScale: 1.35
   slamSound:
     clips:
     - {fileID: 8300000, guid: 8804d0db2e0e158498903ca0e708ba6f, type: 3}
@@ -61,7 +76,7 @@ MonoBehaviour:
     - {fileID: 8300000, guid: 27389e6aed9fc974a91b170130d32cd5, type: 3}
     volume: 0.556
     pitchRange: {x: 0.96, y: 1.04}
-    minInterval: 0.2
+    minInterval: 0.12
   throwSound:
     clips:
     - {fileID: 8300000, guid: a2016a2cd3fccc94e9e75630f91ea9b6, type: 3}
