@@ -1,4 +1,3 @@
-
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
@@ -14,8 +13,8 @@ MonoBehaviour:
   m_Name: WD_EVO_BloodBlade
   m_EditorClassIdentifier: Assembly-CSharp::MeleeWeaponData
   weaponName: "\uD608\uAC80"
-  brief: "분신 공격 · 혈기 폭주"
-  description: "세 번째 공격마다 분신이 적을 공격한다. 혈기가 가득 차면 6초간 폭주해 공격 속도와 사거리가 증가하고 피해의 10%를 회복한다."
+  brief: "\uB0A0\uB6F0\uB294 \uBD84\uC2E0 \u00B7 \uD608\uAE30 \uD3ED\uC8FC"
+  description: "\uC801\uC5D0\uAC8C \uB2FF\uC740 \uACF5\uACA9 \uC138 \uBC88\uC9F8\uB9C8\uB2E4 \uAC80\uC758 \uBD84\uC2E0\uC774 \uC190\uC744 \uB5A0\uB098 \uB458\uB808 \uC801 \uC0AC\uC774\uB97C \uB0A0\uB6F0\uBA70 \uCC0C\uB978\uB2E4. \uACF5\uACA9\uC774 \uB2FF\uC744 \uB54C\uB9C8\uB2E4 \uD608\uAE30\uAC00 \uC313\uC774\uACE0 (\uCC98\uCE58\uD558\uBA74 \uB354) \uAC00\uB4DD \uCC28\uBA74 6\uCD08 \uD3ED\uC8FC \u2014 \uACF5\uACA9 \uC18D\uB3C4 \u00D71.5 \u00B7 \uC0AC\uAC70\uB9AC +1m \u00B7 \uBD84\uC2E0 \uB458\uC774 \uD3ED\uC8FC \uB0B4\uB0B4 \u00B7 \uB9DE\uD78C \uD53C\uD574\uC758 10% \uD68C\uBCF5"
   icon: {fileID: 21300000, guid: bd360907a21aaca4889db79141230616, type: 3}
   weaponPrefab: {fileID: 5825881266557484979, guid: fcd7bbd21a7889a43a5bbb4191f6bd2c, type: 3}
   socket: 0
@@ -73,7 +72,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 3523106697c65c747afbe5b0b50584d4, type: 3}
   meleeBodyVolume: 1
   fireStack: []
-  range: 3
+  range: 3.6
   arcAngle: 120
   maxTargets: 5
   extraTargetDamage: 0.6
