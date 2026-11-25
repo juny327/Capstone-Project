@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: dbf29e8ae125794418ff2905c8d23d96
+guid: 60ffc169b2e46424ab2dae7e73d467cd
 ShaderImporter:
   externalObjects: {}
   defaultTextures:
@@ -12,3 +12,10 @@ ShaderImporter:
   userData: 
   assetBundleName: 
   assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 306143
+  packageName: Easy Shockwaves VFX - URP
+  packageVersion: 1.0.2
+  assetPath: Assets/Vefects/Easy Shockwaves VFX URP/Shared/Shaders/SH_Vefects_VFX_Easy_Shockwave_URP.shader
+  uploadId: 780644
