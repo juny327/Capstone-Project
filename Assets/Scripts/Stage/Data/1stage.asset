@@ -19,6 +19,7 @@ MonoBehaviour:
   spawnInterval: 1.4
   rangedProjectileSpeed: 6
   enemyHealthMultiplier: 1
+  enemyDamageMultiplier: 1
   spawnWeights:
   - enemy: {fileID: 11400000, guid: 9f06c567617c12046bd90f15e64b6016, type: 2}
     weight: 50

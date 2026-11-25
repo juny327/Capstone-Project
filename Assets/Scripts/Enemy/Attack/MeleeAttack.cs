@@ -73,7 +73,7 @@ public class MeleeAttack : EnemyAttack
         {
             DamageInfo info = new DamageInfo
             {
-                damage = enemy.data.attackPower,
+                damage = enemy.AttackPower,
                 isCritical = false,
                 hitPoint = enemy.target.position,
                 hitDirection = enemy.transform.forward,

@@ -17,6 +17,8 @@ public class EnemyManager : MonoBehaviour
     [Min(0.1f)] public float rangedProjectileSpeed = 3.5f;
     [Tooltip("새로 나오는 몬스터의 체력 배율 — StageManager 가 스테이지 데이터 값으로 채운다 (2026-11-12)")]
     [Min(0.1f)] public float healthMultiplier = 1f;
+    /// <summary>새로 나오는 몬스터의 공격력 배율 — StageManager 가 StageData.enemyDamageMultiplier 로 채운다 (2026-11-25).</summary>
+    [System.NonSerialized] public float damageMultiplier = 1f;
 
     // 2026-11-17 — 스테이지별 등장 비율 (StageManager 가 StageData.spawnWeights 를 넣는다).
     // 비어 있으면 몬스터 데이터의 spawnWeight 그대로, 적혀 있으면 목록에 없는 몬스터는 나오지 않는다.

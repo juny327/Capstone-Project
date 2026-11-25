@@ -32,6 +32,7 @@ public class StageManager : MonoBehaviour
         EnemyManager.Instance.spawnInterval = currentStage.spawnInterval * mode.spawnInterval;
         EnemyManager.Instance.rangedProjectileSpeed = currentStage.rangedProjectileSpeed;
         EnemyManager.Instance.healthMultiplier = currentStage.enemyHealthMultiplier * mode.enemyHealth;
+        EnemyManager.Instance.damageMultiplier = currentStage.enemyDamageMultiplier;   // 2026-11-25 스테이지별 몬스터 피해 (난이도 배율은 PlayerStats 에서 따로)
         EnemyManager.Instance.stageSpawnWeights = currentStage.spawnWeights;   // 스테이지별 등장 몬스터 (2026-11-17)
         // 보스 스테이지 (2026-11-23) — 잡몹은 보스가 깨어난 뒤에만 · 몬스터는 경험치 · 코인을 떨어뜨리지 않는다
         EnemyManager.Instance.waitForBossFight = currentStage.spawnDuringBossFight;

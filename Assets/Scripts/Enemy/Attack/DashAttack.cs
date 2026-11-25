@@ -197,7 +197,7 @@ public class DashAttack : EnemyAttack
             var player = hit.GetComponentInParent<PlayerStats>();
             if (player == null || player.currentHp <= 0 || !victims.Add(player)) continue;
             player.TakeDamage(new DamageInfo {
-                damage = enemy.data.attackPower,
+                damage = enemy.AttackPower,
                 hitPoint = hit.ClosestPoint(center),
                 hitDirection = direction,
                 cameraShake = 0.35f

@@ -136,8 +136,16 @@ public class Enemy : MonoBehaviour, IDamageable, IPoolable
         currentHp = MaxHp;
     }
 
+    // 2026-11-25 — 스테이지별 몬스터 피해 배율 (나올 때의 스테이지 값). 공격 · 탄이 모두 AttackPower 를 쓴다
+    float damageMultiplier = 1f;
+
+    /// <summary>이 몬스터의 공격력 — 몬스터 데이터 × 스테이지 피해 배율 (StageData.enemyDamageMultiplier). 난이도 배율은 PlayerStats 가 따로 곱한다.</summary>
+    public float AttackPower => data != null ? data.attackPower * damageMultiplier : 0f;
+
     public void OnSpawn()
     {
+        damageMultiplier = EnemyManager.Instance != null ? EnemyManager.Instance.damageMultiplier : 1f;
+
         RestoreBodyColliders();   // 지난번에 쓰러지며 끈 충돌체를 다시 (2026-11-23)
 
         float multiplier = EnemyManager.Instance != null ? EnemyManager.Instance.healthMultiplier : 1f;

@@ -254,7 +254,7 @@ public class SuicideAttack : EnemyAttack
 
             DamageInfo info = new DamageInfo
             {
-                damage = enemy.data.attackPower,
+                damage = enemy.AttackPower,
                 isCritical = false,
                 hitPoint = hit.transform.position,
                 hitDirection = (hit.transform.position - enemy.transform.position).normalized,
