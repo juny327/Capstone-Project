@@ -69,6 +69,9 @@ public class SoundManager : MonoBehaviour
         public KindRule(SoundKind kind, int maxVoices, int priority) { this.kind = kind; this.maxVoices = maxVoices; this.priority = priority; }
     }
 
+    // ⚠ 2026-11-25 — 아래 기본값은 이미 모든 씬(로비 · 스테이지 1 ~ 3 · 보스 · 테스트 룸)의 SoundManager 에 저장돼 있다
+    // (씬을 편집기에서 저장하면 Unity 가 그때의 값을 적는다 — 11-25 팀원 로비 저장도 같은 값). 그래서 여기 기본값만 고치면 게임에 안 들어간다.
+    // 규칙 · 피격 줄이기 값을 바꿀 때는 씬 여섯 개의 SoundManager 값도 같이 고칠 것.
     [Header("종류별 규칙 (2026-11-19)")]
     [Tooltip("계획 문서의 규칙: 내 피격(전용 칸) > 처치 > 치명타 > 맞힘 > 발사 > 보조 무기 > 환경. 비어 있는 종류는 Ability 규칙을 따른다")]
     [SerializeField] private KindRule[] kindRules =
