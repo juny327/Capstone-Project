@@ -9,6 +9,7 @@ public class ElectricShotSkill : MonoBehaviour
     float shockDuration;
     float damage;
     float explosionRadius;
+    int maxTargets;
     GameObject impactEffectPrefab;
     float impactEffectLifetime;
     Vector3 spawnOffset;
@@ -16,7 +17,7 @@ public class ElectricShotSkill : MonoBehaviour
 
     public void Setup(GameObject prefab, float interval, float speed, float range,
         float duration, Vector3 offset, float hitDamage, float radius,
-        GameObject impactPrefab, float effectLifetime)
+        int hitLimit, GameObject impactPrefab, float effectLifetime)
     {
         projectilePrefab = prefab;
         fireInterval = interval;
@@ -26,6 +27,7 @@ public class ElectricShotSkill : MonoBehaviour
         spawnOffset = offset;
         damage = hitDamage;
         explosionRadius = radius;
+        maxTargets = Mathf.Max(1, hitLimit);
         impactEffectPrefab = impactPrefab;
         impactEffectLifetime = effectLifetime;
     }
@@ -54,7 +56,7 @@ public class ElectricShotSkill : MonoBehaviour
         }
 
         projectile.Initialize(target, projectileSpeed, shockDuration,
-            damage, explosionRadius, impactEffectPrefab, impactEffectLifetime);
+            damage, explosionRadius, maxTargets, impactEffectPrefab, impactEffectLifetime);
 
         SoundManager.Instance?.ReportSkillCast(SkillCastSound.ElectricShot);
         timer = fireInterval;

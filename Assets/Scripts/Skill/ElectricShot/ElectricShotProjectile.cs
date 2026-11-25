@@ -8,6 +8,7 @@ public class ElectricShotProjectile : MonoBehaviour
     float shockDuration;
     float damage;
     float explosionRadius;
+    int maxTargets;
     GameObject impactEffectPrefab;
     float impactEffectLifetime;
 
@@ -15,13 +16,14 @@ public class ElectricShotProjectile : MonoBehaviour
 
     // 풀링된 투사체는 발사할 때마다 설정을 다시 받는다.
     public void Initialize(Enemy enemy, float moveSpeed, float duration,
-        float hitDamage, float radius, GameObject impactPrefab, float effectLifetime)
+        float hitDamage, float radius, int hitLimit, GameObject impactPrefab, float effectLifetime)
     {
         target = enemy;
         speed = moveSpeed;
         shockDuration = duration;
         damage = hitDamage;
         explosionRadius = radius;
+        maxTargets = Mathf.Max(1, hitLimit);
         impactEffectPrefab = impactPrefab;
         impactEffectLifetime = effectLifetime;
     }
@@ -65,26 +67,45 @@ public class ElectricShotProjectile : MonoBehaviour
             Destroy(fx, Mathf.Max(0.05f, impactEffectLifetime));
         }
 
-        HashSet<Enemy> affected = new HashSet<Enemy>();
-        // 콜라이더가 자식에 여러 개 있어도 적 하나당 피해는 1회만 적용한다.
+        // 최초 적중 대상 1마리를 우선 포함하고, 나머지는 폭발 중심과 가까운 순으로 선정.
+        // 중복 콜라이더는 1마리로 취급하며 피해와 감전 모두 동일한 제한을 받는다.
+        HashSet<Enemy> unique = new HashSet<Enemy>();
+        List<Enemy> candidates = new List<Enemy>();
         Collider[] hits = Physics.OverlapSphere(center, Mathf.Max(0.1f, explosionRadius));
         foreach (Collider hit in hits)
         {
             Enemy enemy = hit.GetComponentInParent<Enemy>();
-            ApplyToEnemy(enemy, center, affected);
+            if (IsEligible(enemy) && unique.Add(enemy))
+                candidates.Add(enemy);
         }
 
-        // 주 타깃에 콜라이더가 없거나 비활성화된 경우에도 기존 적중 효과 보장.
-        ApplyToEnemy(target, center, affected);
+        candidates.Sort((a, b) =>
+            (a.transform.position - center).sqrMagnitude.CompareTo(
+                (b.transform.position - center).sqrMagnitude));
+
+        HashSet<Enemy> affected = new HashSet<Enemy>();
+        if (IsEligible(target))
+            ApplyToEnemy(target, center, affected);
+
+        foreach (Enemy enemy in candidates)
+        {
+            if (affected.Count >= maxTargets) break;
+            ApplyToEnemy(enemy, center, affected);
+        }
 
         if (affected.Count > 0)
             SoundManager.Instance?.ReportHit(false, HitSound.ElectricShot);
     }
 
+    bool IsEligible(Enemy enemy)
+    {
+        return enemy != null && enemy.gameObject.activeInHierarchy &&
+            enemy.state != EnemyState.Dead;
+    }
+
     void ApplyToEnemy(Enemy enemy, Vector3 center, HashSet<Enemy> affected)
     {
-        if (enemy == null || !enemy.gameObject.activeInHierarchy ||
-            enemy.state == EnemyState.Dead || !affected.Add(enemy))
+        if (!IsEligible(enemy) || !affected.Add(enemy))
             return;
 
         // 광역 감전. 피해와 별도로 기절(이동/공격 중단)이 적용된다.

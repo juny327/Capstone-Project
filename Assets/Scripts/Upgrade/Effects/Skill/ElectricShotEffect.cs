@@ -19,6 +19,10 @@ public class ElectricShotEffect : UpgradeEffect
     [Min(0f)] public float shockDuration = 1f;
     [Min(0f)] public float shockDurationPerLevel = 0.25f;
 
+    [Header("Target Limit")]
+    [Min(1)] public int maxTargets = 3;
+    [Min(0)] public int targetsPerLevel = 1;
+
     [Header("Impact VFX - optional")]
     [Tooltip("적중 지점에 생성할 광역 전기 폭발 프리팹. 없어도 광역 피해와 감전은 작동합니다.")]
     public GameObject impactEffectPrefab;
@@ -44,6 +48,7 @@ public class ElectricShotEffect : UpgradeEffect
         float scaledDamage = damage + (effectiveLevel - 1) * damagePerLevel;
         float scaledRadius = explosionRadius + (effectiveLevel - 1) * radiusPerLevel;
         float scaledShockDuration = shockDuration + (effectiveLevel - 1) * shockDurationPerLevel;
+        int scaledMaxTargets = Mathf.Max(1, maxTargets + (effectiveLevel - 1) * targetsPerLevel);
 
         skill.Setup(
             projectilePrefab,
@@ -54,6 +59,7 @@ public class ElectricShotEffect : UpgradeEffect
             spawnOffset,
             scaledDamage,
             scaledRadius,
+            scaledMaxTargets,
             impactEffectPrefab,
             impactEffectLifetime
         );
