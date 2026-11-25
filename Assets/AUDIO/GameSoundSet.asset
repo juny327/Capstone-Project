@@ -115,8 +115,8 @@ MonoBehaviour:
     minInterval: 0.09
   electricShotHit:
     clips:
-    - {fileID: 8300000, guid: 0881742b5752b6b4b9e4fc86197184ee, type: 3}
-    volume: 0.39
+    - {fileID: 8300000, guid: 7070bd9047b9d1d4fb87cf54fac9968f, type: 3}
+    volume: 0.6
     pitchRange: {x: 0.96, y: 1.04}
     minInterval: 0
   fireBallCast:
