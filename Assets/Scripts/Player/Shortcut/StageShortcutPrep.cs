@@ -80,8 +80,18 @@ public class StageShortcutPrep : MonoBehaviour
     TMP_FontAsset font;
     Material fontMaterial;
     Sprite coinIcon;
-    RectTransform shopContent, cardContent, rewardContent;
-    TMP_Text goldText, expText, levelText, rewardHeader, equipText, messageText;
+    RectTransform shopContent, cardContent, rewardContent, evoContent;
+    TMP_Text goldText, expText, levelText, rewardHeader, equipText, equipText2, messageText, stepHint, evoHint;
+
+    // 단계 (2026-11-25 사용자: "한 화면에 다 있으니 처음 하는 사람에게 장벽 — 골드 쓰는 화면 한 번, 경험치 쓰는 화면 한 번, 상위 무기는 위에 늘 떠 있게")
+    int step;
+    readonly GameObject[] pages = new GameObject[2];
+    readonly Image[] tabFrames = new Image[2], tabFills = new Image[2];
+    readonly TMP_Text[] tabLabels = new TMP_Text[2];
+    GameObject restartButton, backButton, nextButton, departButton;
+
+    /// <summary>지금 단계 — 0 = 골드(무기 · 장비 · 보상 카드), 1 = 경험치(레벨업 카드).</summary>
+    public int Step => step;
     UISoundBinder sounds;
     float messageLeft;
 
@@ -356,28 +366,36 @@ public class StageShortcutPrep : MonoBehaviour
 
         // 제목 · 설명
         string who = $"{Difficulty.Values.displayName} · {(CharacterSelection.Current != null ? CharacterSelection.Current.displayName : "기본")}";
-        Label(f, "Title", $"출전 준비 — {StageShortcut.NameOf(stage)}", 46f, TextMain, TextAlignmentOptions.TopLeft, new Vector2(0f, 1f), new Vector2(36f, -24f), new Vector2(900f, 60f));
-        string cleared = stage - 1 >= 3 ? "스테이지 3 클리어" : $"스테이지 {stage - 1} 클리어";
+        Label(f, "Title", $"출전 준비 — {StageShortcut.NameOf(stage)}", 42f, TextMain, TextAlignmentOptions.TopLeft, new Vector2(0f, 1f), new Vector2(36f, -18f), new Vector2(900f, 56f));
+        string cleared = $"스테이지 {Mathf.Min(3, stage - 1)} 클리어";
         Label(f, "Subtitle",
               $"{who} — 봇 판이 {cleared}까지 모은 <color=#FFD461>골드 {budget.gold}</color> · <color=#76E0FF>경험치 {budget.exp}</color> · 보상 카드 {StageShortcut.RewardsFor(stage)}장을 받았습니다. 남은 골드와 경험치는 그대로 들고 들어갑니다",
-              21f, Muted, TextAlignmentOptions.TopLeft, new Vector2(0f, 1f), new Vector2(38f, -88f), new Vector2(1300f, 32f));
+              20f, Muted, TextAlignmentOptions.TopLeft, new Vector2(0f, 1f), new Vector2(38f, -76f), new Vector2(1300f, 30f));
 
         // 남은 양 (오른쪽 위)
-        goldText = Chip(f, "Gold", new Vector2(-520f, -32f), GoldColor, coinIcon);
-        expText = Chip(f, "Exp", new Vector2(-300f, -32f), ExpColor, null);
-        levelText = Chip(f, "Level", new Vector2(-80f, -32f), TextMain, null);
+        goldText = Chip(f, "Gold", new Vector2(-520f, -24f), GoldColor, coinIcon);
+        expText = Chip(f, "Exp", new Vector2(-300f, -24f), ExpColor, null);
+        levelText = Chip(f, "Level", new Vector2(-80f, -24f), TextMain, null);
 
-        // 세 칸
-        const float top = -134f, height = 760f;
-        shopContent = Column(f, "ShopColumn", "무기 · 장비", "골드", new Vector2(30f, top), new Vector2(700f, height), GoldColor);
-        cardContent = Column(f, "CardColumn", "레벨업 카드", "경험치", new Vector2(750f, top), new Vector2(560f, height), ExpColor);
+        // 단계 탭
+        MakeTab(f, 0, "①  골드로 무기 갖추기", new Vector2(30f, -116f));
+        MakeTab(f, 1, "②  경험치로 능력 올리기", new Vector2(466f, -116f));
+        stepHint = Label(f, "StepHint", "", 19f, Muted, TextAlignmentOptions.MidlineLeft, new Vector2(0f, 1f), new Vector2(920f, -116f), new Vector2(880f, 52f));
+        stepHint.rectTransform.pivot = new Vector2(0f, 1f);
 
-        // 오른쪽 — 보상 카드 + 지금 장비
-        Image right = NewImage("RightColumn", f, ColumnFill);
-        Place(right.rectTransform, new Vector2(0f, 1f), new Vector2(1330f, top), new Vector2(474f, height), new Vector2(0f, 1f));
-        rewardHeader = Label(right.transform, "RewardHeader", "", 26f, TextMain, TextAlignmentOptions.TopLeft, new Vector2(0f, 1f), new Vector2(18f, -12f), new Vector2(440f, 36f));
+        // 상위 무기 — 두 단계 모두 위에 늘 떠 있다
+        BuildEvolutionStrip(f, new Vector2(30f, -180f), new Vector2(1774f, 200f));
+
+        // 단계별 화면
+        const float top = -394f, height = 500f;
+        pages[0] = NewRect("GoldPage", f).gameObject;
+        Stretch((RectTransform)pages[0].transform, 0f);
+        shopContent = Column(pages[0].transform, "ShopColumn", "무기 · 장비", "골드 — 새 무기 · 강화 · 부착물 · 서브 능력", new Vector2(30f, top), new Vector2(1180f, height), GoldColor);
+        Image right = NewImage("RightColumn", pages[0].transform, ColumnFill);
+        Place(right.rectTransform, new Vector2(0f, 1f), new Vector2(1226f, top), new Vector2(578f, height), new Vector2(0f, 1f));
+        rewardHeader = Label(right.transform, "RewardHeader", "", 24f, TextMain, TextAlignmentOptions.TopLeft, new Vector2(0f, 1f), new Vector2(18f, -10f), new Vector2(540f, 36f));
         var rewardRt = NewRect("Rewards", right.transform);
-        Place(rewardRt, new Vector2(0f, 1f), new Vector2(12f, -54f), new Vector2(450f, 330f), new Vector2(0f, 1f));
+        Place(rewardRt, new Vector2(0f, 1f), new Vector2(12f, -50f), new Vector2(554f, 288f), new Vector2(0f, 1f));
         var rewardLayout = rewardRt.gameObject.AddComponent<VerticalLayoutGroup>();
         rewardLayout.spacing = 8f;
         rewardLayout.childControlHeight = true;
@@ -385,21 +403,194 @@ public class StageShortcutPrep : MonoBehaviour
         rewardLayout.childForceExpandHeight = false;
         rewardLayout.childForceExpandWidth = true;
         rewardContent = rewardRt;
-        Label(right.transform, "EquipHeader", "지금 장비", 26f, TextMain, TextAlignmentOptions.TopLeft, new Vector2(0f, 1f), new Vector2(18f, -396f), new Vector2(440f, 36f));
-        equipText = Label(right.transform, "Equip", "", 19f, TextMain, TextAlignmentOptions.TopLeft, new Vector2(0f, 1f), new Vector2(18f, -438f), new Vector2(440f, 310f));
+        Label(right.transform, "EquipHeader", "지금 장비", 22f, TextMain, TextAlignmentOptions.TopLeft, new Vector2(0f, 1f), new Vector2(18f, -338f), new Vector2(540f, 32f));
+        equipText = Label(right.transform, "Equip", "", 16f, TextMain, TextAlignmentOptions.TopLeft, new Vector2(0f, 1f), new Vector2(18f, -368f), new Vector2(544f, 128f));
         equipText.textWrappingMode = TextWrappingModes.Normal;
         equipText.overflowMode = TextOverflowModes.Ellipsis;
 
+        pages[1] = NewRect("ExpPage", f).gameObject;
+        Stretch((RectTransform)pages[1].transform, 0f);
+        cardContent = Column(pages[1].transform, "CardColumn", "레벨업 카드", "경험치 — 스킬 · 능력치", new Vector2(30f, top), new Vector2(1180f, height), ExpColor);
+        Image right2 = NewImage("RightColumn", pages[1].transform, ColumnFill);
+        Place(right2.rectTransform, new Vector2(0f, 1f), new Vector2(1226f, top), new Vector2(578f, height), new Vector2(0f, 1f));
+        Label(right2.transform, "EquipHeader", "지금 장비", 24f, TextMain, TextAlignmentOptions.TopLeft, new Vector2(0f, 1f), new Vector2(18f, -10f), new Vector2(540f, 36f));
+        equipText2 = Label(right2.transform, "Equip", "", 19f, TextMain, TextAlignmentOptions.TopLeft, new Vector2(0f, 1f), new Vector2(18f, -54f), new Vector2(544f, 300f));
+        equipText2.textWrappingMode = TextWrappingModes.Normal;
+        equipText2.overflowMode = TextOverflowModes.Ellipsis;
+        TMP_Text tip = Label(right2.transform, "Tip", UiTextFit.KeepWords("스킬은 레벨이 오를수록 비싸집니다 (기본 × 다음 레벨). 남은 경험치는 들고 들어가 레벨업 카드 창에서 쓸 수 있습니다."),
+                             17f, Muted, TextAlignmentOptions.BottomLeft, new Vector2(0f, 0f), new Vector2(18f, 16f), new Vector2(544f, 80f));
+        tip.textWrappingMode = TextWrappingModes.Normal;
+
         // 아래 줄
-        messageText = Label(f, "Message", "", 24f, GoldColor, TextAlignmentOptions.Left, new Vector2(0f, 0f), new Vector2(36f, 40f), new Vector2(900f, 40f));
+        messageText = Label(f, "Message", "", 24f, GoldColor, TextAlignmentOptions.Left, new Vector2(0f, 0f), new Vector2(36f, 40f), new Vector2(980f, 40f));
         StageShortcutSettings settings = StageShortcutSettings.Load();
         if (settings != null && !string.IsNullOrEmpty(settings.source))
-            Label(f, "Source", "값: " + settings.source, 16f, new Color(Muted.r, Muted.g, Muted.b, 0.8f), TextAlignmentOptions.Left, new Vector2(0f, 0f), new Vector2(36f, 12f), new Vector2(900f, 24f));
+            Label(f, "Source", "값: " + settings.source, 16f, new Color(Muted.r, Muted.g, Muted.b, 0.8f), TextAlignmentOptions.Left, new Vector2(0f, 0f), new Vector2(36f, 12f), new Vector2(980f, 24f));
 
-        MakeButton(f, "Restart", "처음부터", 24f, new Vector2(1f, 0f), new Vector2(-300f, 26f), new Vector2(200f, 64f), ButtonFrame, ButtonFill, RestartPrep);
-        MakeButton(f, "Depart", "출발  ▶", 30f, new Vector2(1f, 0f), new Vector2(-30f, 26f), new Vector2(250f, 64f), GoFrame, GoFill, Depart);
+        restartButton = MakeButton(f, "Restart", "처음부터", 22f, new Vector2(1f, 0f), new Vector2(-560f, 26f), new Vector2(180f, 60f), ButtonFrame, ButtonFill, RestartPrep).gameObject;
+        backButton = MakeButton(f, "Back", "◀  이전", 24f, new Vector2(1f, 0f), new Vector2(-330f, 26f), new Vector2(210f, 60f), ButtonFrame, ButtonFill, () => GoStep(0)).gameObject;
+        nextButton = MakeButton(f, "Next", "다음 — 경험치  ▶", 26f, new Vector2(1f, 0f), new Vector2(-30f, 26f), new Vector2(290f, 60f), new Color(0.46f, 0.88f, 1f, 1f), new Color(0.06f, 0.20f, 0.30f, 1f), () => GoStep(1)).gameObject;
+        departButton = MakeButton(f, "Depart", "출발  ▶", 30f, new Vector2(1f, 0f), new Vector2(-30f, 26f), new Vector2(290f, 60f), GoFrame, GoFill, Depart).gameObject;
 
         sounds = root.AddComponent<UISoundBinder>();
+        ApplyStep();
+    }
+
+    void MakeTab(Transform parent, int index, string text, Vector2 topLeft)
+    {
+        Image frame = NewImage("Tab" + index, parent, OffFrame);
+        Place(frame.rectTransform, new Vector2(0f, 1f), topLeft, new Vector2(420f, 52f), new Vector2(0f, 1f));
+        Image fill = NewImage("Fill", frame.transform, OffFill);
+        Stretch(fill.rectTransform, 2f);
+        fill.raycastTarget = false;
+        var button = frame.gameObject.AddComponent<Button>();
+        button.targetGraphic = frame;
+        ColorBlock colors = button.colors;
+        colors.highlightedColor = new Color(1.2f, 1.2f, 1.2f, 1f);
+        colors.selectedColor = Color.white;
+        button.colors = colors;
+        button.onClick.AddListener(() => GoStep(index));
+        tabFrames[index] = frame;
+        tabFills[index] = fill;
+        tabLabels[index] = Label(frame.transform, "Label", text, 24f, Muted, TextAlignmentOptions.Center, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(410f, 50f));
+    }
+
+    /// <summary>단계를 바꾼다 (탭 · 다음 · 이전 · 시험).</summary>
+    public void GoStep(int index)
+    {
+        if (departed) return;
+        step = Mathf.Clamp(index, 0, 1);
+        ApplyStep();
+    }
+
+    void ApplyStep()
+    {
+        for (int i = 0; i < 2; i++)
+        {
+            if (pages[i] != null) pages[i].SetActive(i == step);
+            bool on = i == step;
+            Color accent = i == 0 ? GoldColor : ExpColor;
+            if (tabFrames[i] != null) tabFrames[i].color = on ? accent : OffFrame;
+            if (tabFills[i] != null) tabFills[i].color = on ? new Color(accent.r * 0.22f, accent.g * 0.22f, accent.b * 0.22f, 1f) : OffFill;
+            if (tabLabels[i] != null) tabLabels[i].color = on ? Color.white : Muted;
+        }
+        if (stepHint != null)
+            stepHint.text = step == 0
+                ? "골드로 새 무기 · 강화 · 부착물을 사고, 오른쪽에서 보상 카드를 고릅니다. 다 됐으면 <color=#76E0FF>다음</color>"
+                : "경험치로 레벨업 카드(스킬 · 능력치)를 삽니다. 다 됐으면 <color=#7CF29A>출발</color>";
+        if (backButton != null) backButton.SetActive(step == 1);
+        if (nextButton != null) nextButton.SetActive(step == 0);
+        if (departButton != null) departButton.SetActive(step == 1);
+        if (restartButton != null) ((RectTransform)restartButton.transform).anchoredPosition = new Vector2(step == 0 ? -340f : -560f, 26f);
+    }
+
+    /// <summary>상위 무기 띠 — 조건을 채운 상위 무기와 지금 골드로 바로 얻을 수 있는 것을 가로 카드로. 두 단계 모두 위에 늘 있다.</summary>
+    void BuildEvolutionStrip(Transform parent, Vector2 topLeft, Vector2 size)
+    {
+        Image panel = NewImage("EvolutionStrip", parent, new Color(0.13f, 0.11f, 0.06f, 1f));
+        Place(panel.rectTransform, new Vector2(0f, 1f), topLeft, size, new Vector2(0f, 1f));
+        Image line = NewImage("Line", panel.transform, new Color(GoldColor.r, GoldColor.g, GoldColor.b, 0.85f));
+        line.rectTransform.anchorMin = new Vector2(0f, 1f);
+        line.rectTransform.anchorMax = new Vector2(1f, 1f);
+        line.rectTransform.pivot = new Vector2(0.5f, 1f);
+        line.rectTransform.sizeDelta = new Vector2(0f, 3f);
+        Label(panel.transform, "Header", "상위 무기  <size=72%><color=#C9B88A>조건을 채웠거나 · 지금 골드로 바로 얻을 수 있는 것</color></size>", 24f, GoldColor,
+              TextAlignmentOptions.TopLeft, new Vector2(0f, 1f), new Vector2(18f, -10f), new Vector2(900f, 36f));
+        evoHint = Label(panel.transform, "Later", "", 17f, Muted, TextAlignmentOptions.TopRight, new Vector2(1f, 1f), new Vector2(-18f, -14f), new Vector2(840f, 30f));
+        evoHint.overflowMode = TextOverflowModes.Ellipsis;
+
+        var scrollGo = new GameObject("Scroll", typeof(RectTransform), typeof(Image), typeof(ScrollRect));
+        scrollGo.transform.SetParent(panel.transform, false);
+        var scrollRt = (RectTransform)scrollGo.transform;
+        scrollRt.anchorMin = Vector2.zero;
+        scrollRt.anchorMax = Vector2.one;
+        scrollRt.offsetMin = new Vector2(12f, 16f);
+        scrollRt.offsetMax = new Vector2(-12f, -50f);
+        scrollGo.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.001f);
+        var viewport = NewRect("Viewport", scrollGo.transform);
+        Stretch(viewport, 0f);
+        viewport.gameObject.AddComponent<RectMask2D>();
+        var content = NewRect("Content", viewport);
+        content.anchorMin = new Vector2(0f, 0f);
+        content.anchorMax = new Vector2(0f, 1f);
+        content.pivot = new Vector2(0f, 0.5f);
+        content.anchoredPosition = Vector2.zero;
+        content.sizeDelta = Vector2.zero;
+        var layout = content.gameObject.AddComponent<HorizontalLayoutGroup>();
+        layout.spacing = 10f;
+        layout.childControlHeight = true;
+        layout.childControlWidth = true;
+        layout.childForceExpandHeight = true;
+        layout.childForceExpandWidth = false;
+        var fitter = content.gameObject.AddComponent<ContentSizeFitter>();
+        fitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
+        var scroll = scrollGo.GetComponent<ScrollRect>();
+        scroll.viewport = viewport;
+        scroll.content = content;
+        scroll.vertical = false;
+        scroll.movementType = ScrollRect.MovementType.Clamped;
+        scroll.scrollSensitivity = 45f;
+        scroll.inertia = false;
+        evoContent = content;
+
+        // 가로 막대 — 카드가 넘치면 (옆으로 넘겨 보기)
+        var barGo = new GameObject("Scrollbar", typeof(RectTransform), typeof(Image), typeof(Scrollbar));
+        barGo.transform.SetParent(panel.transform, false);
+        var barRt = (RectTransform)barGo.transform;
+        barRt.anchorMin = new Vector2(0f, 0f);
+        barRt.anchorMax = new Vector2(1f, 0f);
+        barRt.pivot = new Vector2(0.5f, 0f);
+        barRt.offsetMin = new Vector2(12f, 4f);
+        barRt.offsetMax = new Vector2(-12f, 12f);
+        barGo.GetComponent<Image>().color = new Color(1f, 1f, 1f, 0.06f);
+        var handle = NewImage("Handle", barGo.transform, new Color(GoldColor.r, GoldColor.g, GoldColor.b, 0.6f));
+        Stretch(handle.rectTransform, 0f);
+        var bar = barGo.GetComponent<Scrollbar>();
+        bar.handleRect = handle.rectTransform;
+        bar.targetGraphic = handle;
+        bar.direction = Scrollbar.Direction.LeftToRight;
+        scroll.horizontalScrollbar = bar;
+        scroll.horizontalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHide;
+    }
+
+    /// <summary>상위 무기 띠의 카드 한 장 (340 × 140).</summary>
+    void EvoCard(Sprite icon, string title, string tag, string steps, string price, Sprite priceIcon, Action onBuy)
+    {
+        Image card = NewImage("EvoCard", evoContent, new Color(0.20f, 0.17f, 0.09f, 1f));
+        var le = card.gameObject.AddComponent<LayoutElement>();
+        le.preferredWidth = 360f;
+        le.minWidth = 360f;
+        Image edge = NewImage("Edge", card.transform, GoldColor);
+        edge.rectTransform.anchorMin = new Vector2(0f, 0f);
+        edge.rectTransform.anchorMax = new Vector2(0f, 1f);
+        edge.rectTransform.pivot = new Vector2(0f, 0.5f);
+        edge.rectTransform.sizeDelta = new Vector2(4f, 0f);
+        float left = 14f;
+        if (icon != null)
+        {
+            Image i = NewImage("Icon", card.transform, Color.white);
+            i.sprite = icon;
+            i.preserveAspect = true;
+            Place(i.rectTransform, new Vector2(0f, 1f), new Vector2(12f, -10f), new Vector2(52f, 52f), new Vector2(0f, 1f));
+            left = 74f;
+        }
+        TMP_Text t = Label(card.transform, "Title", $"{title}  <size=70%><color=#FFD461>{tag}</color></size>", 22f, TextMain, TextAlignmentOptions.TopLeft,
+                           new Vector2(0f, 1f), new Vector2(left, -6f), new Vector2(360f - left - 10f, 36f));
+        t.overflowMode = TextOverflowModes.Truncate;
+        TMP_Text d = Label(card.transform, "Steps", UiTextFit.KeepWords(steps ?? ""), 15f, Muted, TextAlignmentOptions.TopLeft,
+                           new Vector2(0f, 1f), new Vector2(left, -40f), new Vector2(360f - left - 10f, 46f));
+        d.textWrappingMode = TextWrappingModes.Normal;
+        d.overflowMode = TextOverflowModes.Ellipsis;
+        MakeButton(card.transform, "Buy", price, 20f, new Vector2(1f, 0f), new Vector2(-10f, 8f), new Vector2(150f, 40f), ButtonFrame, ButtonFill, onBuy, true, priceIcon, GoldColor);
+    }
+
+    void EvoNote(string text)
+    {
+        var rt = NewRect("Note", evoContent);
+        var le = rt.gameObject.AddComponent<LayoutElement>();
+        le.preferredWidth = 1740f;
+        TMP_Text t = Label(rt, "Label", UiTextFit.KeepWords(text), 18f, Muted, TextAlignmentOptions.MidlineLeft, new Vector2(0f, 0.5f), new Vector2(8f, 0f), new Vector2(1720f, 130f));
+        t.textWrappingMode = TextWrappingModes.Normal;
     }
 
     void PickFont()
@@ -511,53 +702,66 @@ public class StageShortcutPrep : MonoBehaviour
         expText.text = $"경험치 {(stats != null ? stats.currentExp : 0)}";
         levelText.text = $"레벨 {(stats != null ? stats.level : 1)}";
 
+        RefreshEvolutions();
         RefreshShop();
         RefreshCards();
         RefreshRewards();
-        equipText.text = EquipSummary();
+        string equip = EquipSummary();
+        equipText.text = equip;
+        if (equipText2 != null) equipText2.text = equip;
         if (sounds != null) sounds.BindAll();
+    }
+
+    /// <summary>상위 무기 띠 — 조건을 채운 진화 카드 → 지금 골드로 되는 바로 얻기. 골드가 모자란 것은 오른쪽 위 한 줄.</summary>
+    void RefreshEvolutions()
+    {
+        Clear(evoContent);
+        evoHint.text = "";
+
+        if (!EvolutionService.Unlocked)
+        {
+            string goals = NextGoals(out int goalLines);
+            EvoNote($"상위 무기는 스테이지 {EvolutionService.UnlockStage} 중간 정비부터 열립니다 — 이번 출전 전에는 살 수 없고, 무기 레벨 · 짝은 미리 갖출 수 있습니다." +
+                    (goalLines > 0 ? "\n" + goals.Replace("\n", "   ") : ""));
+            return;
+        }
+
+        int shown = 0;
+        foreach (ShopOffer o in offers.FindAll(x => x.Kind == ShopOfferKind.Evolution))
+        {
+            bool canBuy = CanBuy(o, null, out string reason);
+            if (!canBuy && reason != "골드 부족") continue;
+            ShopOffer offer = o;
+            EvoCard(o.Icon, o.Title.Replace("상위 무기 — ", ""), "조건 충족", "무기 레벨 · 짝을 다 갖췄다 — 바로 진화", o.Price > 0 ? $"{o.Price}" : "무료", o.Price > 0 ? coinIcon : null, () => Buy(offer, null));
+            shown++;
+        }
+
+        int gold = wallet != null ? wallet.Balance : 0;
+        var later = new List<string>();
+        foreach (EvolutionPlan p in plans)
+        {
+            if (p.Cost > gold) { later.Add($"{p.Evolution.Title} {p.Cost}"); continue; }
+            WeaponEvolutionData e = p.Evolution;
+            Sprite icon = e.result != null && e.result.icon != null ? e.result.icon : e.from != null ? e.from.icon : null;
+            EvoCard(icon, e.Title, "바로 얻기", p.Steps, p.Cost > 0 ? $"{p.Cost}" : "무료", p.Cost > 0 ? coinIcon : null, () => BuyPlan(e));
+            shown++;
+        }
+
+        // 띠에 4장 넘게 있으면 옆으로 넘겨 보라고 · 골드가 모자란 것은 오른쪽 위 한 줄
+        string more = shown > 4 ? $"<color=#FFD461>{shown}장 — 옆으로 넘겨 더 보기 ▶</color>" : "";
+        string lack = later.Count > 0 ? "<color=#C9B88A>골드가 더 있으면</color>  " + string.Join(" · ", later) : "";
+        evoHint.text = more.Length > 0 && lack.Length > 0 ? more + "    " + lack : more + lack;
+        if (shown == 0)
+        {
+            string goals = NextGoals(out int goalLines);
+            EvoNote((plans.Count == 0 ? "지금 무기 · 칸으로 얻을 수 있는 상위 무기가 없습니다 (보조 칸이 가득 찼으면 가진 무기의 것만)." : "지금 골드로 바로 얻을 수 있는 상위 무기가 없습니다 — 무기 레벨 · 짝을 하나씩 갖춰도 됩니다.") +
+                    (goalLines > 0 ? "\n" + goals.Replace("\n", "   ") : ""));
+        }
     }
 
     void RefreshShop()
     {
         Clear(shopContent);
-
-        // 상위 무기 — 열렸고 조건을 채운 것 · 아직이면 언제 열리는지
-        var evolutions = offers.FindAll(o => o.Kind == ShopOfferKind.Evolution);
-        Section(shopContent, "상위 무기");
-        if (evolutions.Count > 0)
-            foreach (ShopOffer o in evolutions) OfferRow(shopContent, o, null);
-        else
-        {
-            Note(shopContent, EvolutionService.Unlocked
-                ? "무기 Lv3 와 짝(부착물 · 서브 능력 · 스킬)을 갖추면 여기에 뜹니다"
-                : $"상위 무기는 스테이지 {EvolutionService.UnlockStage} 중간 정비부터 — 이번 출전 전에는 살 수 없습니다 (무기 레벨 · 짝은 미리 갖출 수 있다)");
-            string goals = NextGoals(out int goalLines);
-            if (goalLines > 0) Note(shopContent, goals, 14f + goalLines * 30f);
-        }
-
-        // 바로 얻기 (2026-11-25) — 골드가 되면 모자란 무기 · 레벨 · 짝을 한꺼번에 사고 그 자리에서 진화
-        if (EvolutionService.Unlocked)
-        {
-            Section(shopContent, "상위 무기 바로 얻기  <size=75%><color=#A9B4D0>모자란 것을 정비 창 값 그대로 한꺼번에</color></size>");
-            int gold = wallet != null ? wallet.Balance : 0;
-            var later = new List<string>();
-            int shown = 0;
-            foreach (EvolutionPlan p in plans)
-            {
-                if (p.Cost > gold) { later.Add($"{p.Evolution.Title} {p.Cost}"); continue; }
-                WeaponEvolutionData e = p.Evolution;
-                Sprite icon = e.result != null && e.result.icon != null ? e.result.icon : e.from != null ? e.from.icon : null;
-                Row(shopContent, icon, KindColor(ShopOfferKind.Evolution), e.Title, "바로 얻기", p.Steps, p.Cost > 0 ? $"{p.Cost}" : "무료", p.Cost > 0 ? coinIcon : null,
-                    GoldColor, true, true, () => BuyPlan(e));
-                shown++;
-            }
-            if (shown == 0)
-                Note(shopContent, plans.Count == 0 ? "지금 무기 · 칸으로 얻을 수 있는 상위 무기가 없습니다 (보조 칸이 가득 찼으면 가진 무기의 것만)" : "지금 골드로 바로 얻을 수 있는 상위 무기가 없습니다");
-            if (later.Count > 0)
-                Note(shopContent, "<color=#A9B4D0>골드가 더 있으면</color>  " + string.Join(" · ", later), later.Count > 4 ? 74f : 54f);
-        }
-
         AddGroup("무기 강화", o => o.Kind == ShopOfferKind.Upgrade);
         AddGroup("새 무기 (보조 칸)", o => o.Kind == ShopOfferKind.Weapon);
         SubAbilitySlot slot = player != null ? player.GetComponent<SubAbilitySlot>() : null;
@@ -635,7 +839,7 @@ public class StageShortcutPrep : MonoBehaviour
         foreach (StageReward r in rewardDraw)
         {
             StageReward pick = r;
-            Row(rewardContent, r.Icon, GoldColor, r.Title, "보상", r.Description, "고르기", null, GoldColor, true, true, () => PickReward(pick), compact: true);
+            Row(rewardContent, r.Icon, GoldColor, r.Title, "보상", r.Description, "고르기", null, GoldColor, true, true, () => PickReward(pick), compact: true, height: 88f);
         }
     }
 
@@ -821,7 +1025,7 @@ public class StageShortcutPrep : MonoBehaviour
             int skillPrice = Scaled(catalog.skillPairPrice);   // 정비 창 짝 스킬 값 — 레벨업 카드(경험치)로 먼저 사면 그만큼 싸진다
             plan.Cost += skillPrice;
             bool byCard = stats != null && stats.currentExp >= e.requiredSkill.CostFor(UpgradeManager.LevelOf(e.requiredSkill.effect) + 1);
-            steps.Add(byCard ? $"{SkillPairs.NameOf(e.requiredSkill)} (짝 스킬 — 레벨업 카드로 먼저 사면 골드 −{skillPrice})" : $"{SkillPairs.NameOf(e.requiredSkill)} (짝 스킬)");
+            steps.Add(byCard ? $"{SkillPairs.NameOf(e.requiredSkill)} (짝 스킬 · 카드로 사면 −{skillPrice})" : $"{SkillPairs.NameOf(e.requiredSkill)} (짝 스킬)");
         }
 
         if (e.shopPrice > 0) plan.Cost += Scaled(e.shopPrice);
@@ -959,11 +1163,11 @@ public class StageShortcutPrep : MonoBehaviour
     // ───────── 줄 ─────────
 
     void Row(RectTransform parent, Sprite icon, Color accent, string title, string tag, string description, string price, Sprite priceIcon, Color priceColor,
-             bool interactable, bool bright, Action onBuy, bool compact = false)
+             bool interactable, bool bright, Action onBuy, bool compact = false, float height = 0f)
     {
         Image row = NewImage("Row", parent, bright ? RowFill : RowFillOff);
         var le = row.gameObject.AddComponent<LayoutElement>();
-        le.preferredHeight = compact ? 96f : RowH;
+        le.preferredHeight = height > 0f ? height : compact ? 96f : RowH;
         le.minHeight = le.preferredHeight;
 
         Image strip = NewImage("Kind", row.transform, accent);
@@ -992,7 +1196,7 @@ public class StageShortcutPrep : MonoBehaviour
         t.overflowMode = TextOverflowModes.Truncate;
 
         TMP_Text d = Label(row.transform, "Description", UiTextFit.KeepWords(description ?? ""), 17f, bright ? Muted : new Color(Muted.r, Muted.g, Muted.b, 0.7f),
-                           TextAlignmentOptions.TopLeft, new Vector2(0f, 1f), new Vector2(left, -42f), new Vector2(10f, compact ? 52f : 40f));
+                           TextAlignmentOptions.TopLeft, new Vector2(0f, 1f), new Vector2(left, -42f), new Vector2(10f, compact ? 44f : 40f));
         d.rectTransform.anchorMax = new Vector2(1f, 1f);
         d.rectTransform.offsetMax = new Vector2(-(buyW + 24f), d.rectTransform.offsetMax.y);
         d.textWrappingMode = TextWrappingModes.Normal;
