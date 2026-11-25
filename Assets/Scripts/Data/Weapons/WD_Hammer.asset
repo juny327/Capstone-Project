@@ -14,8 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MeleeWeaponData
   weaponName: "\uC804\uD22C \uB9DD\uCE58"
   brief: "\uB9DE\uC740 \uC801 \uAE30\uC808 \xB7 3\uD0C0 \uB0B4\uB824\uCC0D\uAE30"
-  description: "\uB9DE\uD78C \uC801\uC744 \uAE30\uC808\uC2DC\uD0A4\uACE0, \uC138
-    \uBC88\uC9F8 \uACF5\uACA9\uC740 \uB0B4\uB824\uCC0D\uC5B4 \uB458\uB808\uB97C \uD754\uB4E0\uB2E4"
+  description: "\uC801\uC744 \uAE30\uC808\uC2DC\uD0A8\uB2E4. \uC138 \uBC88\uC9F8
+    \uACF5\uACA9\uC740 \uAC15\uD558\uAC8C \uB0B4\uB824\uCC0D\uC5B4 \uC8FC\uBCC0 \uC801\uC744
+    \uACF5\uACA9\uD55C\uB2E4."
   icon: {fileID: 21300000, guid: 1b3bb847240e7fa4b832993fe3a54d5d, type: 3}
   weaponPrefab: {fileID: 5825881266557484979, guid: 6bc624265fb74cd4190bfbbf4d7fc341, type: 3}
   socket: 0

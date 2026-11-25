@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: WD_EVO_Thundercloud
   m_EditorClassIdentifier: Assembly-CSharp::ChainBeamWeaponData
   weaponName: "\uB1CC\uC6B4"
-  brief: "\uC7A5\uC804 \uC911 \uBA39\uAD6C\uB984 \uB099\uB8B0"
-  description: "\uC7A5\uC804\uD558\uB294 \uB3D9\uC548 \uBA38\uB9AC \uC704 \uBA39\uAD6C\uB984\uC774
-    \uC8FC\uBCC0 \uC801\uC5D0\uAC8C \uB099\uB8B0\uB97C \uC3DF\uB294\uB2E4"
+  brief: "\uC7A5\uC804 \uC911 \uC8FC\uBCC0 \uC801\uC5D0\uAC8C \uB099\uB8B0"
+  description: "\uC7A5\uC804\uD558\uB294 \uB3D9\uC548 \uBA38\uB9AC \uC704\uC5D0 \uBA39\uAD6C\uB984\uC774
+    \uC0DD\uC131\uB418\uC5B4 \uC8FC\uBCC0 \uC801\uC5D0\uAC8C \uB099\uB8B0\uB97C \uD37C\uBD93\uB294\uB2E4."
   icon: {fileID: 21300000, guid: afb0d17dbdb1dc040a857c3bf2d2f16a, type: 3}
   weaponPrefab: {fileID: 7530073237280035592, guid: 3edac683bd4297a43bdc09226db67e8c, type: 3}
   socket: 0
