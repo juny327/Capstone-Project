@@ -104,18 +104,12 @@ public class ShopCardView : MonoBehaviour
     }
 
     /// <summary>
-    /// 가진 무기의 상위 무기 짝이면 금색 테두리 + 꼬리표 글을 "★ 처형자 짝" 으로 (2026-11-17). label 이 null 이면 끈다.
-    /// Show 다음에 부른다 — 꼬리표 글을 덮어쓴다.
+    /// 가진 무기의 상위 무기 짝이면 금색 테두리 (2026-11-17). label 이 null 이면 끈다.
+    /// 2026-11-25 사용자: "'~ 짝' 같은 글보다 노란 테두리만 간단하게 — 이걸 먹으라는 걸 간접적으로만" → 꼬리표 글은 그대로 두고 테두리만.
     /// </summary>
     public void SetPairMark(string label)
     {
         PairHighlight.Set((RectTransform)transform, label);
-
-        if (!string.IsNullOrEmpty(label) && tagText != null && Offer != null && !Offer.Sold)
-        {
-            tagText.text = label;
-            tagText.color = PairHighlight.Gold;
-        }
     }
 
     /// <summary>대상 고르기 중인 카드 표시 — 테두리를 밝게.</summary>

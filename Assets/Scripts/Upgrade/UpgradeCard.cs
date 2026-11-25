@@ -117,8 +117,8 @@ public class UpgradeCard : MonoBehaviour
     /// </summary>
     public void ShowPairMark(string label)
     {
-        // 꼬리표는 위쪽 '스킬 강화' 탭 자리 — 탭은 몸통 위 가장자리보다 조금 아래(몸통 높이의 2.6%)가 가운데, 너비 58%
-        PairHighlight.Set((RectTransform)transform, label, true, title, 0.58f, CardArtInsets, 0.026f);
+        // 2026-11-25 사용자: "'~ 짝' 같은 글보다 노란 테두리만 간단하게" — 위쪽 꼬리표("★ 혈검 짝")는 그리지 않고 테두리만
+        PairHighlight.Set((RectTransform)transform, label, false, title, 0.58f, CardArtInsets, 0.026f);
     }
 
     // 카드 그림(Space_Exploration_GUI_Kit/Containers/Small/UpgradeCard.png)의 투명한 여백 — 왼쪽 · 위(탭 아래 몸통) · 오른쪽 · 아래.
