@@ -81,7 +81,8 @@ public class StageShortcutPrep : MonoBehaviour
     Material fontMaterial;
     Sprite coinIcon;
     RectTransform shopContent, cardContent, rewardContent, evoContent;
-    TMP_Text goldText, expText, levelText, rewardHeader, equipText, equipText2, messageText, stepHint, evoHint;
+    TMP_Text goldText, expText, levelText, rewardHeader, messageText, stepHint, evoHint;
+    RectTransform loadoutBox, loadoutBox2;   // 지금 장비 — 그림 칸 (① 작게 · ② 크게)
 
     // 단계 (2026-11-25 사용자: "한 화면에 다 있으니 처음 하는 사람에게 장벽 — 골드 쓰는 화면 한 번, 경험치 쓰는 화면 한 번, 상위 무기는 위에 늘 떠 있게")
     int step;
@@ -395,7 +396,7 @@ public class StageShortcutPrep : MonoBehaviour
         Place(right.rectTransform, new Vector2(0f, 1f), new Vector2(1226f, top), new Vector2(578f, height), new Vector2(0f, 1f));
         rewardHeader = Label(right.transform, "RewardHeader", "", 24f, TextMain, TextAlignmentOptions.TopLeft, new Vector2(0f, 1f), new Vector2(18f, -10f), new Vector2(540f, 36f));
         var rewardRt = NewRect("Rewards", right.transform);
-        Place(rewardRt, new Vector2(0f, 1f), new Vector2(12f, -50f), new Vector2(554f, 288f), new Vector2(0f, 1f));
+        Place(rewardRt, new Vector2(0f, 1f), new Vector2(12f, -50f), new Vector2(554f, 256f), new Vector2(0f, 1f));
         var rewardLayout = rewardRt.gameObject.AddComponent<VerticalLayoutGroup>();
         rewardLayout.spacing = 8f;
         rewardLayout.childControlHeight = true;
@@ -403,10 +404,9 @@ public class StageShortcutPrep : MonoBehaviour
         rewardLayout.childForceExpandHeight = false;
         rewardLayout.childForceExpandWidth = true;
         rewardContent = rewardRt;
-        Label(right.transform, "EquipHeader", "지금 장비", 22f, TextMain, TextAlignmentOptions.TopLeft, new Vector2(0f, 1f), new Vector2(18f, -338f), new Vector2(540f, 32f));
-        equipText = Label(right.transform, "Equip", "", 16f, TextMain, TextAlignmentOptions.TopLeft, new Vector2(0f, 1f), new Vector2(18f, -368f), new Vector2(544f, 128f));
-        equipText.textWrappingMode = TextWrappingModes.Normal;
-        equipText.overflowMode = TextOverflowModes.Ellipsis;
+        Label(right.transform, "EquipHeader", "지금 장비", 22f, TextMain, TextAlignmentOptions.TopLeft, new Vector2(0f, 1f), new Vector2(18f, -312f), new Vector2(540f, 32f));
+        loadoutBox = NewRect("Loadout", right.transform);
+        Place(loadoutBox, new Vector2(0f, 1f), new Vector2(18f, -348f), new Vector2(544f, 144f), new Vector2(0f, 1f));
 
         pages[1] = NewRect("ExpPage", f).gameObject;
         Stretch((RectTransform)pages[1].transform, 0f);
@@ -414,11 +414,10 @@ public class StageShortcutPrep : MonoBehaviour
         Image right2 = NewImage("RightColumn", pages[1].transform, ColumnFill);
         Place(right2.rectTransform, new Vector2(0f, 1f), new Vector2(1226f, top), new Vector2(578f, height), new Vector2(0f, 1f));
         Label(right2.transform, "EquipHeader", "지금 장비", 24f, TextMain, TextAlignmentOptions.TopLeft, new Vector2(0f, 1f), new Vector2(18f, -10f), new Vector2(540f, 36f));
-        equipText2 = Label(right2.transform, "Equip", "", 19f, TextMain, TextAlignmentOptions.TopLeft, new Vector2(0f, 1f), new Vector2(18f, -54f), new Vector2(544f, 300f));
-        equipText2.textWrappingMode = TextWrappingModes.Normal;
-        equipText2.overflowMode = TextOverflowModes.Ellipsis;
+        loadoutBox2 = NewRect("Loadout", right2.transform);
+        Place(loadoutBox2, new Vector2(0f, 1f), new Vector2(18f, -52f), new Vector2(544f, 372f), new Vector2(0f, 1f));
         TMP_Text tip = Label(right2.transform, "Tip", UiTextFit.KeepWords("스킬은 레벨이 오를수록 비싸집니다 (기본 × 다음 레벨). 남은 경험치는 들고 들어가 레벨업 카드 창에서 쓸 수 있습니다."),
-                             17f, Muted, TextAlignmentOptions.BottomLeft, new Vector2(0f, 0f), new Vector2(18f, 16f), new Vector2(544f, 80f));
+                             16f, Muted, TextAlignmentOptions.BottomLeft, new Vector2(0f, 0f), new Vector2(18f, 12f), new Vector2(544f, 56f));
         tip.textWrappingMode = TextWrappingModes.Normal;
 
         // 아래 줄
@@ -706,9 +705,8 @@ public class StageShortcutPrep : MonoBehaviour
         RefreshShop();
         RefreshCards();
         RefreshRewards();
-        string equip = EquipSummary();
-        equipText.text = equip;
-        if (equipText2 != null) equipText2.text = equip;
+        DrawLoadout(loadoutBox, true);
+        DrawLoadout(loadoutBox2, false);
         if (sounds != null) sounds.BindAll();
     }
 
@@ -839,50 +837,245 @@ public class StageShortcutPrep : MonoBehaviour
         foreach (StageReward r in rewardDraw)
         {
             StageReward pick = r;
-            Row(rewardContent, r.Icon, GoldColor, r.Title, "보상", r.Description, "고르기", null, GoldColor, true, true, () => PickReward(pick), compact: true, height: 88f);
+            Row(rewardContent, r.Icon, GoldColor, r.Title, "보상", r.Description, "고르기", null, GoldColor, true, true, () => PickReward(pick), compact: true, height: 80f);
         }
     }
 
-    string EquipSummary()
+    // ───────── 지금 장비 — 그림 칸 (2026-11-25 사용자: "내가 가진 무기도 한 줄 글보다 이미지와 이름으로 직관적이게") ─────────
+
+    /// <summary>
+    /// 지금 장비를 그린다 — 무기 칸(주무기 + 보조 칸 수만큼, 빈 칸 포함) · 서브 능력 칸을 그림 + 이름 + 레벨로, 산 레벨업 카드는 아이콘 + 레벨로.
+    /// compact = ① 단계 오른쪽 아래 (보상 카드 밑, 좁다) · 아니면 ② 단계 오른쪽 (카드 이름까지).
+    /// </summary>
+    void DrawLoadout(RectTransform box, bool compact)
     {
-        var sb = new StringBuilder();
+        if (box == null) return;
+        Clear(box);
+        float width = box.sizeDelta.x;
         WeaponController wc = ctx != null ? ctx.Weapons : null;
+        SubAbilitySlot slot = player != null ? player.GetComponent<SubAbilitySlot>() : null;
+        bool abilities = slot != null && slot.SlotCount > 0;
+        // 칸 크기 — 칸 수(주무기 + 보조 칸 + 서브 능력 칸)에 맞춰 너비 안에서 되도록 크게 (사수 4칸 · 검사 5칸)
+        int tileCount = 1 + (wc != null ? Mathf.Max(wc.SupportSlots, wc.SupportCount) : 0) + (abilities ? slot.SlotCount : 0);
+        float gap = 8f, x = 0f, y = 0f;
+        float tile = Mathf.Min(compact ? 100f : 128f, (width - gap * (tileCount - 1) - (abilities ? 8f : 0f)) / Mathf.Max(1, tileCount));
+
+        if (!compact)
+        {
+            LoadoutLabel(box, abilities ? "무기 · 서브 능력" : "무기", new Vector2(0f, y), width);
+            y -= 28f;
+        }
+
         if (wc != null)
         {
             IWeapon main = wc.MainWeapon;
-            sb.Append("<color=#A9B4D0>주무기</color>  ").Append(WeaponLine(main)).Append('\n');
-            var support = new List<string>();
-            foreach (IWeapon w in wc.HeldWeapons) if (w != main) support.Add(WeaponLine(w));
-            foreach (IWeapon w in wc.SubUnits) support.Add(WeaponLine(w));
-            sb.Append($"<color=#A9B4D0>보조 {wc.SupportCount}/{wc.SupportSlots}</color>  ").Append(support.Count > 0 ? string.Join(" · ", support) : "없음").Append('\n');
-
-            var parts = new List<string>();
-            foreach (IWeapon w in wc.HeldWeapons)
-                for (int s = 0; s < AttachmentData.SlotCount; s++)
-                {
-                    AttachmentData a = w != null ? w.GetAttachment((AttachmentSlot)s) : null;
-                    if (a != null) parts.Add(a.displayName);
-                }
-            if (parts.Count > 0) sb.Append("<color=#A9B4D0>부착물</color>  ").Append(string.Join(" · ", parts)).Append('\n');
+            var supports = new List<IWeapon>();
+            foreach (IWeapon w in wc.HeldWeapons) if (w != main) supports.Add(w);
+            foreach (IWeapon w in wc.SubUnits) supports.Add(w);
+            WeaponTile(box, new Vector2(x, y), tile, main, "주무기", compact);
+            x += tile + gap;
+            int slots = Mathf.Max(wc.SupportSlots, supports.Count);
+            for (int i = 0; i < slots; i++)
+            {
+                WeaponTile(box, new Vector2(x, y), tile, i < supports.Count ? supports[i] : null, "보조", compact);
+                x += tile + gap;
+            }
         }
-
-        SubAbilitySlot slot = player != null ? player.GetComponent<SubAbilitySlot>() : null;
-        if (slot != null && slot.SlotCount > 0)
+        if (abilities)
         {
-            var names = new List<string>();
-            for (int i = 0; i < slot.SlotCount; i++) { SubAbility a = slot.Get(i); if (a != null) names.Add(a.DisplayName); }
-            sb.Append($"<color=#A9B4D0>서브 능력 {names.Count}/{slot.SlotCount}</color>  ").Append(names.Count > 0 ? string.Join(" · ", names) : "없음").Append('\n');
+            x += 8f;   // 무기 칸과 조금 띄운다
+            for (int i = 0; i < slot.SlotCount; i++)
+            {
+                AbilityTile(box, new Vector2(x, y), tile, slot.Get(i), compact);
+                x += tile + gap;
+            }
+        }
+        y -= tile + (compact ? 10f : 16f);
+
+        // 레벨업 카드 — 산 것만
+        var owned = cards.FindAll(d => UpgradeManager.LevelOf(d.effect) > 0);
+        string hp = stats != null ? $"체력 {stats.maxHp}" : "";
+        if (compact)
+        {
+            const float icon = 34f;
+            x = 0f;
+            foreach (UpgradeData d in owned)
+            {
+                if (x + icon > width - 96f) break;   // 오른쪽은 체력 글자 자리
+                CardIcon(box, new Vector2(x, y), icon, d, UpgradeManager.LevelOf(d.effect));
+                x += icon + 6f;
+            }
+            if (owned.Count == 0)
+            {
+                TMP_Text none = Label(box, "NoCards", "레벨업 카드 없음 — ② 단계에서 산다", 15f, Muted, TextAlignmentOptions.MidlineLeft, new Vector2(0f, 1f), new Vector2(0f, y), new Vector2(width - 100f, icon));
+                none.rectTransform.pivot = new Vector2(0f, 1f);
+            }
+            TMP_Text h = Label(box, "Hp", hp, 16f, TextMain, TextAlignmentOptions.MidlineRight, new Vector2(1f, 1f), new Vector2(0f, y), new Vector2(96f, icon));
+            h.rectTransform.pivot = new Vector2(1f, 1f);
+        }
+        else
+        {
+            LoadoutLabel(box, "레벨업 카드", new Vector2(0f, y), width, hp);
+            y -= 28f;
+            if (owned.Count == 0)
+            {
+                TMP_Text none = Label(box, "NoCards", "아직 산 카드가 없습니다", 16f, Muted, TextAlignmentOptions.TopLeft, new Vector2(0f, 1f), new Vector2(0f, y), new Vector2(width, 30f));
+                none.rectTransform.pivot = new Vector2(0f, 1f);
+            }
+            const float chipW = 176f, chipH = 40f;
+            x = 0f;
+            foreach (UpgradeData d in owned)
+            {
+                if (x + chipW > width + 1f) { x = 0f; y -= chipH + 6f; }
+                CardChip(box, new Vector2(x, y), new Vector2(chipW, chipH), d, UpgradeManager.LevelOf(d.effect));
+                x += chipW + 8f;
+            }
+        }
+    }
+
+    void LoadoutLabel(RectTransform box, string text, Vector2 pos, float width, string right = null)
+    {
+        TMP_Text t = Label(box, "Label", text, 17f, Muted, TextAlignmentOptions.TopLeft, new Vector2(0f, 1f), pos, new Vector2(width, 26f));
+        t.rectTransform.pivot = new Vector2(0f, 1f);
+        if (!string.IsNullOrEmpty(right))
+        {
+            TMP_Text r = Label(box, "Right", right, 17f, TextMain, TextAlignmentOptions.TopRight, new Vector2(0f, 1f), pos, new Vector2(width, 26f));
+            r.rectTransform.pivot = new Vector2(0f, 1f);
+        }
+    }
+
+    /// <summary>칸 틀 — 테두리 + 안쪽 + 왼쪽 위 역할 글자 (주무기 · 보조 · 서브 능력).</summary>
+    Image TileFrame(RectTransform box, Vector2 pos, float size, Color frameColor, Color fillColor, string role)
+    {
+        Image frame = NewImage("Tile", box, frameColor);
+        Place(frame.rectTransform, new Vector2(0f, 1f), pos, new Vector2(size, size), new Vector2(0f, 1f));
+        Image fill = NewImage("Fill", frame.transform, fillColor);
+        Stretch(fill.rectTransform, 2f);
+        TMP_Text r = Label(frame.transform, "Role", role, 12f, Muted, TextAlignmentOptions.TopLeft, new Vector2(0f, 1f), new Vector2(6f, -3f), new Vector2(size - 12f, 18f));
+        r.rectTransform.pivot = new Vector2(0f, 1f);
+        return frame;
+    }
+
+    /// <summary>칸 아래 이름 — 긴 이름(아킬레우스의 창)은 글자를 줄여 한 줄에.</summary>
+    void TileName(Transform frame, float size, string text, bool compact, Color color)
+    {
+        TMP_Text n = Label(frame, "Name", text, compact ? 14f : 15f, color, TextAlignmentOptions.Bottom, new Vector2(0.5f, 0f), new Vector2(0f, 4f), new Vector2(size - 8f, 22f));
+        n.rectTransform.pivot = new Vector2(0.5f, 0f);
+        n.enableAutoSizing = true;
+        n.fontSizeMin = 10f;
+        n.fontSizeMax = compact ? 14f : 15f;
+    }
+
+    void TileBadge(Transform frame, string text, Color color)
+    {
+        TMP_Text b = Label(frame, "Badge", text, 13f, color, TextAlignmentOptions.TopRight, new Vector2(1f, 1f), new Vector2(-6f, -3f), new Vector2(64f, 18f));
+        b.rectTransform.pivot = new Vector2(1f, 1f);
+    }
+
+    /// <summary>칸 가운데 그림. 근접 무기 아이콘은 세로로 길어 로비처럼 눕힌다 (칼끝이 오른쪽) — 눕히기 전 틀은 세로로.</summary>
+    void TileIcon(Transform frame, float size, Sprite sprite, bool lieDown)
+    {
+        if (sprite == null) return;
+        Image i = NewImage("Icon", frame, Color.white);
+        i.sprite = sprite;
+        i.preserveAspect = true;
+        i.raycastTarget = false;
+        float w = size - 10f, h = size * 0.5f;
+        Place(i.rectTransform, new Vector2(0.5f, 1f), new Vector2(0f, -20f - h * 0.5f), lieDown ? new Vector2(h, w) : new Vector2(w, h), new Vector2(0.5f, 0.5f));
+        if (lieDown) i.rectTransform.localEulerAngles = new Vector3(0f, 0f, -90f);
+    }
+
+    void WeaponTile(RectTransform box, Vector2 pos, float size, IWeapon w, string role, bool compact)
+    {
+        bool has = w != null && w.Data != null;
+        bool evolved = has && w.Data.IsEvolved;
+        bool main = role == "주무기";
+        Color frameColor = !has ? OffFrame : evolved ? GoldColor : main ? new Color(0.55f, 0.76f, 1f, 1f) : ButtonFrame;
+        Color fillColor = !has ? OffFill : evolved ? new Color(0.22f, 0.18f, 0.08f, 1f) : RowFill;
+        Image frame = TileFrame(box, pos, size, frameColor, fillColor, role);
+        if (!has)
+        {
+            Label(frame.transform, "Empty", "빈 칸", 15f, new Color(Muted.r, Muted.g, Muted.b, 0.6f), TextAlignmentOptions.Center, new Vector2(0.5f, 0.5f), new Vector2(0f, -4f), new Vector2(size, 30f));
+            return;
         }
 
-        var skills = new List<string>();
-        foreach (UpgradeData d in cards)
+        TileIcon(frame.transform, size, w.Data.icon, w.Data is MeleeWeaponData);
+        TileBadge(frame.transform, evolved ? "상위" : $"Lv{w.Level}", evolved ? GoldColor : new Color(0.48f, 0.95f, 0.62f, 1f));
+        TileName(frame.transform, size, w.Data.weaponName, compact, evolved ? GoldColor : TextMain);
+
+        // 단 부착물 — 이름 위 작은 아이콘 (최대 3개)
+        int n = 0;
+        for (int s = 0; s < AttachmentData.SlotCount && n < 3; s++)
         {
-            int lv = UpgradeManager.LevelOf(d.effect);
-            if (lv > 0) skills.Add($"{d.upgradeName} {lv}");
+            AttachmentData a = w.GetAttachment((AttachmentSlot)s);
+            if (a == null || a.icon == null) continue;
+            Image ai = NewImage("Part", frame.transform, Color.white);
+            ai.sprite = a.icon;
+            ai.preserveAspect = true;
+            ai.raycastTarget = false;
+            Place(ai.rectTransform, new Vector2(0f, 0f), new Vector2(6f + n * 20f, 26f), new Vector2(18f, 18f), new Vector2(0f, 0f));
+            n++;
         }
-        sb.Append("<color=#A9B4D0>카드</color>  ").Append(skills.Count > 0 ? string.Join(" · ", skills) : "없음").Append('\n');
-        if (stats != null) sb.Append($"<color=#A9B4D0>체력</color>  {stats.maxHp}");
-        return sb.ToString();
+    }
+
+    void AbilityTile(RectTransform box, Vector2 pos, float size, SubAbility a, bool compact)
+    {
+        bool has = a != null;
+        Color purple = KindColor(ShopOfferKind.SubAbility);
+        Image frame = TileFrame(box, pos, size, has ? purple : OffFrame, has ? new Color(0.17f, 0.12f, 0.26f, 1f) : OffFill, "서브 능력");
+        if (!has)
+        {
+            Label(frame.transform, "Empty", "빈 칸", 15f, new Color(Muted.r, Muted.g, Muted.b, 0.6f), TextAlignmentOptions.Center, new Vector2(0.5f, 0.5f), new Vector2(0f, -4f), new Vector2(size, 30f));
+            return;
+        }
+        TileIcon(frame.transform, size, a.Icon, false);
+        if (a.Level > 1) TileBadge(frame.transform, $"Lv{a.Level}", purple);
+        TileName(frame.transform, size, a.DisplayName, compact, TextMain);
+    }
+
+    /// <summary>① 단계 — 카드 아이콘 + 오른쪽 아래 레벨.</summary>
+    void CardIcon(RectTransform box, Vector2 pos, float size, UpgradeData d, int level)
+    {
+        Image frame = NewImage("Card", box, new Color(ExpColor.r, ExpColor.g, ExpColor.b, 0.55f));
+        Place(frame.rectTransform, new Vector2(0f, 1f), pos, new Vector2(size, size), new Vector2(0f, 1f));
+        if (d.icon != null)
+        {
+            Image i = NewImage("Icon", frame.transform, Color.white);
+            i.sprite = d.icon;
+            i.preserveAspect = true;
+            Stretch(i.rectTransform, 2f);
+        }
+        Image tag = NewImage("Lv", frame.transform, new Color(0f, 0f, 0f, 0.75f));
+        Place(tag.rectTransform, new Vector2(1f, 0f), new Vector2(0f, 0f), new Vector2(16f, 15f), new Vector2(1f, 0f));
+        Label(tag.transform, "Text", level.ToString(), 12f, Color.white, TextAlignmentOptions.Center, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(16f, 15f));
+    }
+
+    /// <summary>② 단계 — 카드 아이콘 + 이름 + 레벨.</summary>
+    void CardChip(RectTransform box, Vector2 pos, Vector2 size, UpgradeData d, int level)
+    {
+        Image chip = NewImage("CardChip", box, RowFill);
+        Place(chip.rectTransform, new Vector2(0f, 1f), pos, size, new Vector2(0f, 1f));
+        Image edge = NewImage("Edge", chip.transform, ExpColor);
+        edge.rectTransform.anchorMin = new Vector2(0f, 0f);
+        edge.rectTransform.anchorMax = new Vector2(0f, 1f);
+        edge.rectTransform.pivot = new Vector2(0f, 0.5f);
+        edge.rectTransform.sizeDelta = new Vector2(3f, 0f);
+        float left = 8f;
+        if (d.icon != null)
+        {
+            Image i = NewImage("Icon", chip.transform, Color.white);
+            i.sprite = d.icon;
+            i.preserveAspect = true;
+            Place(i.rectTransform, new Vector2(0f, 0.5f), new Vector2(7f, 0f), new Vector2(size.y - 8f, size.y - 8f), new Vector2(0f, 0.5f));
+            left = size.y + 2f;
+        }
+        string lv = d.maxLevel > 0 ? $"Lv{level}" : $"+{level}";
+        TMP_Text t = Label(chip.transform, "Name", $"{d.upgradeName}  <color=#76E0FF>{lv}</color>", 15f, TextMain, TextAlignmentOptions.MidlineLeft,
+                           new Vector2(0f, 0.5f), new Vector2(left, 0f), new Vector2(size.x - left - 4f, size.y));
+        t.rectTransform.pivot = new Vector2(0f, 0.5f);
+        t.enableAutoSizing = true;
+        t.fontSizeMin = 11f;
+        t.fontSizeMax = 15f;
     }
 
     readonly List<WeaponEvolutionData> recipes = new List<WeaponEvolutionData>();
@@ -1154,12 +1347,6 @@ public class StageShortcutPrep : MonoBehaviour
         return sb.ToString();
     }
 
-    static string WeaponLine(IWeapon w)
-    {
-        if (w == null || w.Data == null) return "없음";
-        return w.Data.IsEvolved ? $"<color=#FFD461>{w.Data.weaponName}</color>" : $"{w.Data.weaponName} Lv{w.Level}";
-    }
-
     // ───────── 줄 ─────────
 
     void Row(RectTransform parent, Sprite icon, Color accent, string title, string tag, string description, string price, Sprite priceIcon, Color priceColor,
@@ -1196,7 +1383,7 @@ public class StageShortcutPrep : MonoBehaviour
         t.overflowMode = TextOverflowModes.Truncate;
 
         TMP_Text d = Label(row.transform, "Description", UiTextFit.KeepWords(description ?? ""), 17f, bright ? Muted : new Color(Muted.r, Muted.g, Muted.b, 0.7f),
-                           TextAlignmentOptions.TopLeft, new Vector2(0f, 1f), new Vector2(left, -42f), new Vector2(10f, compact ? 44f : 40f));
+                           TextAlignmentOptions.TopLeft, new Vector2(0f, 1f), new Vector2(left, -42f), new Vector2(10f, compact ? 34f : 40f));
         d.rectTransform.anchorMax = new Vector2(1f, 1f);
         d.rectTransform.offsetMax = new Vector2(-(buyW + 24f), d.rectTransform.offsetMax.y);
         d.textWrappingMode = TextWrappingModes.Normal;
