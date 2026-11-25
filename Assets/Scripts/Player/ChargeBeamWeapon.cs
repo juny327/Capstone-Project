@@ -286,7 +286,7 @@ public class ChargeBeamWeapon : WeaponBase
         chargeSource.spatialBlend = 0f;   // 플레이어 무기라 2D
 
         if (SoundManager.Instance != null)
-            chargeSource.outputAudioMixerGroup = SoundManager.Instance.SfxGroup;
+            chargeSource.outputAudioMixerGroup = SoundManager.Instance.GroupFor(Data != null && Data.IsEvolved);   // 무기 · 상위 무기 그룹 (2026-11-24)
     }
 
     void ApplyBeamDamage(ChargeBeamWeaponData cfg, in WeaponRuntimeStats stats,
@@ -647,7 +647,19 @@ public class ChargeBeamWeapon : WeaponBase
         // 스왑으로 손에서 빠지면 연출도 같이 꺼야 한다.
         // SetActive 가 자식을 전부 끄지만, 다시 들었을 때 빔이 남아 있으면 안 된다.
         if (active) return;
+        StopBeamFx();
+    }
 
+    /// <summary>무기 조종이 꺼질 때 (보스 등장 연출) — 프리즘 · 태양창 빔과 충전음을 끝낸다 (2026-11-24).</summary>
+    public override void Hush()
+    {
+        base.Hush();
+        StopBeamFx();
+    }
+
+    /// <summary>빔 · 충전 모습과 소리를 끈다 — 손에서 빠질 때 · 조종이 꺼질 때.</summary>
+    void StopBeamFx()
+    {
         for (int i = 0; i < beams.Count; i++)
             if (beams[i] != null) beams[i].enabled = false;
 

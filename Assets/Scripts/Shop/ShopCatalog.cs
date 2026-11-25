@@ -52,6 +52,11 @@ public class ShopCatalog : ScriptableObject
     [Tooltip("상위 무기 짝인 스킬(레벨업 카드 — 흡혈 · 체인라이트닝 등)을 정비 창에서 살 때 Stage1 가격 (2026-11-04)")]
     [Min(0)] public int skillPairPrice = 30;
 
+    // 2026-11-24 사용자: "아무리 빨라도 스테이지 2 중간 정비에서 상위 무기 하나 — 초반은 잔잔하게, 스테이지 2 중반부터 화력"
+    [Tooltip("판 안에서 상위 무기(정비 창 칸 · 클리어 보상 카드)가 열리는 스테이지. 2 = 스테이지 2 중간 정비부터 (스테이지 1 정비 · 클리어 보상에서는 안 나온다). " +
+             "1 이면 언제나. 짝 부품 · 무기 강화는 그 전에도 판다. 판 밖(테스트 룸)은 늘 열림")]
+    [Min(1)] public int evolutionFromStage = 2;
+
     [Header("진열")]
     [Tooltip("진열 공급원. 위에서부터 칸을 채운다. 새 상품 종류(부품 등)는 공급원 에셋을 하나 더 만들어 넣는다")]
     public ShopOfferSource[] sources;

@@ -21,13 +21,13 @@ MonoBehaviour:
   weaponPrefab: {fileID: 7530073237280035592, guid: 960c5bfa0146625449615e130d50370b, type: 3}
   socket: 0
   fireInterval: 0.5
-  damage: 2.64
+  damage: 2.904
   damageUpgradeFlatPerLevel: 0
   critChance: 0.08
   critMultiplier: 2
   maxLevel: 3
   perLevelBonus:
-    damageAdd: 1
+    damageAdd: 1.1
     damageMul: 1
     fireIntervalMul: 1
     critChanceAdd: 0
@@ -74,7 +74,7 @@ MonoBehaviour:
   hitLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  cameraShake: 0.05
+  cameraShake: 0.1
   chainCount: 2
   chainRange: 4.5
   chainFalloff: 0.5
@@ -86,13 +86,13 @@ MonoBehaviour:
   beamMaterial: {fileID: 2100000, guid: 5d90de9dbfa086c47b0889319c447945, type: 2}
   beamColor: {r: 0.3, g: 0.68, b: 1, a: 0.85}
   arcColor: {r: 0.45, g: 0.7, b: 1, a: 0.75}
-  beamWidth: 0.18
-  arcWidth: 0.12
+  beamWidth: 0.288
+  arcWidth: 0.192
   jitter: 0.12
   segments: 8
   muzzleFlashPrefab: {fileID: 2916273817513264348, guid: 95044fb3908b36c46bc62060360f7ba6, type: 3}
   hitEffectPrefab: {fileID: 4324968127605537629, guid: c694cdd4158a7394bb9c62a42fc6bd6b, type: 3}
-  coreWidth: 0.05
+  coreWidth: 0.08
   coreColor: {r: 1, g: 1, b: 1, a: 1}
   rejitterInterval: 0.045
   hitBranches: 3

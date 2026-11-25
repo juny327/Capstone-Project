@@ -117,6 +117,7 @@ public class SupplySystem : MonoBehaviour
     void OnEnemyDefeated(Enemy enemy)
     {
         if (enemy == null || Settings == null || !InStage) return;
+        if (EnemyManager.Instance != null && EnemyManager.Instance.StageEnded) return;   // 클리어 때 치운 몬스터는 보급도 없다 (2026-11-25)
         ResolvePlayer();
         if (!HasLivePlayer) return;
 

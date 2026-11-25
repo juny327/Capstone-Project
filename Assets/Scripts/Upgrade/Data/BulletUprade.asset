@@ -19,7 +19,7 @@ MonoBehaviour:
     +1 / \uC2A4\uB098\uC774\uD37C +3 / \uD55C\uC190\uAC80\xB7\uCC3D +2 / \uB300\uAC80
     +4, \uC120\uD615 \uB204\uC801)"
   icon: {fileID: 2947914709021185861, guid: 44f8c69802068264599809705c4b512c, type: 3}
-  costExp: 4
+  costExp: 8
   maxLevel: 0
   fixedCost: 0
   effect: {fileID: 11400000, guid: 6d1fc9d9d5b5732458e2e746dabd74c5, type: 2}

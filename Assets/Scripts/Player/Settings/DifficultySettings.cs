@@ -11,7 +11,7 @@ public enum DifficultyMode
 /// <summary>
 /// 난이도별 값 (2026-11-17 사용자 결정) — 하드 = 그때까지의 밸런스 그대로(보스 체력만 ×2, 임시), 이지 = 몬스터 쪽을 낮춘 값.
 /// 2026-11-18 조정: 이지 처치 목표 ×0.5 · 등장 간격 ×1 · 보스 체력 이지 ×1.5 / 하드 ×2.
-/// 2026-11-23: 이지 코인 ×2 · 경험치 ×2 (처치 목표가 절반이라 수입 · 레벨도 절반이었다) · 보스 체력 이지 ×3 / 하드 ×3.5 (보스전 최소 2분).
+/// 2026-11-23: 이지 코인 ×2 · 경험치 ×2 (처치 목표가 절반이라 수입 · 레벨도 절반이었다) · 보스 체력 이지 ×3 / 하드 ×3.5 (보스전 최소 2분) → 11-24 ×4.5 / ×5.25.
 /// 모든 값은 스테이지 데이터(Scripts/Stage/Data) · 보스 체력(BossHealth) 위에 곱하는 배율이다. 무기 수치는 두 모드가 같다.
 ///
 /// 값을 바꿀 때는 이 에셋(Resources/Settings/DifficultySettings)만 고치면 된다.
@@ -84,15 +84,16 @@ public class DifficultySettings : ScriptableObject
         killTarget = 0.5f,
         coinMultiplier = 2f,
         expMultiplier = 2f,
-        bossHealth = 3f,
+        bossHealth = 4.5f,
     };
 
     // 11-23 — 보스전 최소 2분 (사용자): 사람이 친 하드 보스전 3판이 체력 2000 에 65 ~ 108초였다 → 하드 3500 · 이지 3000
+    // 11-24 — "보스 체력 더" (봇 45 ~ 94초): ×1.5 → 하드 5250 · 이지 4500
     public static Mode DefaultHard() => new Mode
     {
         displayName = "하드",
         description = "몬스터가 강하고 많이 나온다",
-        bossHealth = 3.5f,
+        bossHealth = 5.25f,
     };
 }
 

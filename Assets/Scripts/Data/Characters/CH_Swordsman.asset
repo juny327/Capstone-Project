@@ -30,5 +30,6 @@ MonoBehaviour:
   allowedHeldKinds: 01000000
   useSupportWeapons: 1
   supportSlots: 2
-  shopPriceMultiplier: 1.4
+  shopPriceMultiplier: 1.6
+  coinMultiplier: 1
   bodyMaterial: {fileID: 0}

@@ -22,7 +22,7 @@ MonoBehaviour:
     killTarget: 0.5
     coinMultiplier: 2
     expMultiplier: 2
-    bossHealth: 3
+    bossHealth: 4.5
   hard:
     displayName: "\uD558\uB4DC"
     description: "\uBAAC\uC2A4\uD130\uAC00 \uAC15\uD558\uACE0 \uB9CE\uC774 \uB098\uC628\uB2E4"
@@ -33,4 +33,4 @@ MonoBehaviour:
     killTarget: 1
     coinMultiplier: 1
     expMultiplier: 1
-    bossHealth: 3.5
+    bossHealth: 5.25

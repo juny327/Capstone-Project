@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::HammerEffect
   stun: 0.4
   finisherStun: 0.8
-  slamRadius: 2
+  slamRadius: 2.6
   slamDamageMul: 0.5
   material: {fileID: 2100000, guid: b6310812509a3ab46bf4e098541a27ab, type: 2}
   color: {r: 0.72, g: 0.9, b: 1, a: 1}
@@ -23,9 +23,9 @@ MonoBehaviour:
   lightning: 1
   chainChance: 0.4
   chainTargets: 2
-  chainRange: 5
+  chainRange: 6.5
   chainDamageMul: 0.4
-  strikeRadius: 3
+  strikeRadius: 3.9
   strikeDamageMul: 1.5
   strikeStun: 1
   boltHeight: 14
@@ -37,7 +37,7 @@ MonoBehaviour:
   returnSpeed: 30
   throwDamageMul: 1.2
   returnDamageMul: 1
-  hitRadius: 1.1
+  hitRadius: 1.43
   throwStun: 0.3
   spinSpeed: 1080
   flyHeight: 1.1

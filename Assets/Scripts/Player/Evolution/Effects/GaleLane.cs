@@ -101,7 +101,7 @@ public class GaleLane : MonoBehaviour
             windVolume = cfg.windVolume;
             if (SoundManager.Instance != null)
             {
-                wind.outputAudioMixerGroup = SoundManager.Instance.SfxGroup;
+                wind.outputAudioMixerGroup = SoundManager.Instance.EvolvedGroup;   // 상위 무기 그룹 (2026-11-24)
                 windVolume *= SoundManager.Instance.SfxVolume;
             }
             wind.Play();

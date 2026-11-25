@@ -20,7 +20,7 @@ MonoBehaviour:
   weaponPrefab: {fileID: 1993795525855743618, guid: 927753c13baf15f4ab57abe40958a474, type: 3}
   socket: 3
   fireInterval: 0.8
-  damage: 2.2
+  damage: 2.42
   damageUpgradeFlatPerLevel: 0
   critChance: 0.05
   critMultiplier: 2
@@ -82,16 +82,16 @@ MonoBehaviour:
   shotFx:
     material: {fileID: 2100000, guid: b6310812509a3ab46bf4e098541a27ab, type: 2}
     tracerColor: {r: 1, g: 0.95, b: 0.7, a: 0.85}
-    tracerWidth: 0.1
-    tracerLength: 1.6
+    tracerWidth: 0.16
+    tracerLength: 2.08
     tracerInstant: 0
     tracerInstantFade: 0.15
     flashColor: {r: 1, g: 0.9, b: 0.55, a: 1}
-    flashSize: 0.5
+    flashSize: 0.75
     flashFan: 0
     flashRing: 0
     sparkColor: {r: 1, g: 0.9, b: 0.45, a: 1}
-    sparkSize: 0.45
+    sparkSize: 0.675
     sparkLines: 1
     sparkRing: 0
     fireShake: 0
@@ -102,6 +102,6 @@ MonoBehaviour:
     hotColor: {r: 0, g: 0, b: 0, a: 0}
     smokeMaterial: {fileID: 0}
     smokeTime: 0
-    smokeWidth: 0.35
+    smokeWidth: 0.49
     smokeHeadColor: {r: 1, g: 0.6, b: 0.25, a: 0.9}
     smokeTailColor: {r: 0.55, g: 0.55, b: 0.58, a: 0.55}

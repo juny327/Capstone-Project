@@ -9,6 +9,8 @@ using UnityEngine.SceneManagement;
 ///    맴도는 도깨비불이 맞힐 때마다 하나씩 늘어 다섯이 되면 뚝딱 (카운터 겸용)
 ///  · 도깨비 방망이 (ghostfire) — 마무리 풀스윙이 도깨비불 타구를 날린다 (곧게 · 첫 적에서 폭발 2.5m · 멀리 갈수록 최대 2배 ·
 ///    맞은 적 2초 느려짐 → 확정 치명과 이어진다)
+///  · 도깨비 방망이 (ghostCone, 2026-11-24 — 타구가 작아 안 보였다) — 마무리 풀스윙이 타구 대신 앞쪽 부채꼴로 큰 도깨비불을 확 퍼뜨리고,
+///    탄 자리는 잠깐 도깨비불 장판(지속 피해 · 홀림)으로 남는다 — GhostfireCone. 불길이 덮친 코인은 타구가 되어 꽂힌다 (엽전 튕기기)
 ///  · 도깨비 방망이 (coinBounce, 2026-11-22) — 엽전 튕기기: 타구가 바닥 코인을 스치면 코인을 튕겨 올리고 가장 가까운 적에게 꺾여 들어가
 ///    적 사이를 지그재그로 꿰뚫는다 (코인마다 +25% · 최대 네 번, 코인은 잃지 않는다) — GhostfireBall
 ///  · 도깨비 방망이 (debt, 2026-11-22) — 도깨비 빚: 갖춘 동안 맞으면 피해 40% 를 지갑 코인이 대신 맞고(체력은 1 이상 깎인다),
@@ -57,6 +59,26 @@ public class BatEffect : AttachmentEffect
     public string tukWord = "뚝딱!";
     [Tooltip("맴도는 도깨비불 반경 · 높이 (m)")]
     public Vector2 wispOrbit = new Vector2(1.15f, 1.6f);
+    [Tooltip("맴도는 도깨비불 한 덩이 크기 (m) — 2026-11-24 0.42 → 0.7 (작아서 안 보였다)")]
+    [Min(0.05f)] public float wispSize = 0.42f;
+
+    [Header("도깨비 방망이 — 도깨비불 부채 (마무리 풀스윙, 2026-11-24)")]
+    [Tooltip("켜면 풀스윙이 타구 대신 앞쪽 부채꼴로 큰 도깨비불을 확 퍼뜨리고, 탄 자리에 잠깐 도깨비불 장판이 남는다 (끄면 예전 타구 — ghostfire 도 켜져 있어야 한다)")]
+    public bool ghostCone;
+    [Tooltip("부채꼴 길이 (m)")]
+    [Min(1f)] public float coneLength = 8f;
+    [Tooltip("부채꼴 반각 (도) — 35 면 앞쪽 70°")]
+    [Range(5f, 85f)] public float coneHalfAngle = 35f;
+    [Tooltip("불길이 끝까지 번지는 시간 (초)")]
+    [Min(0.05f)] public float coneSpreadTime = 0.3f;
+    [Tooltip("불길이 덮친 적 피해 = 무기 공격력 × 이 값 (한 번)")]
+    [Min(0f)] public float coneDamage = 1f;
+    [Tooltip("다 번진 뒤 장판이 남는 시간 (초)")]
+    [Min(0f)] public float fieldSeconds = 3f;
+    [Tooltip("장판 피해 간격 (초)")]
+    [Min(0.1f)] public float fieldTick = 0.5f;
+    [Tooltip("장판 한 번 피해 = 무기 공격력 × 이 값 (3초 · 0.5초면 여섯 번)")]
+    [Min(0f)] public float fieldDamage = 0.15f;
 
     [Header("도깨비 방망이 — 도깨비불 타구 (마무리 풀스윙)")]
     public bool ghostfire;
@@ -218,6 +240,13 @@ public class BatEffect : AttachmentEffect
             if (Weapon == null) return;
             Vector3 dir = EvoStrikes.Flat(attack.Direction, Vector3.forward);
             float ground = Weapon.Controller != null ? Weapon.Controller.transform.position.y : attack.Origin.y;
+            if (cfg.ghostCone)
+            {
+                Vector3 apex = attack.Origin + dir * 0.4f;
+                apex.y = ground;
+                GhostfireCone.Cast(cfg, Weapon, apex, dir, Weapon.Stats.Damage);
+                return;
+            }
             Vector3 start = attack.Origin + dir * 1.2f;
             start.y = ground + 1.1f;
             GhostfireBall.Launch(cfg, Weapon, start, dir, Weapon.Stats.Damage);
@@ -247,8 +276,8 @@ public class BatEffect : AttachmentEffect
                     float a = wispAngle + i * Mathf.PI * 2f / Mathf.Max(1, cfg.tukEvery - 1);
                     Vector3 p = center.position + new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a)) * radius;
                     p.y = height + Mathf.Sin(wispAngle * 2f + i) * 0.12f;
-                    FxKit.GhostPuff(p, Vector3.up * 0.5f, 0.42f * s, 0.24f, A(cfg.ghostColor, 0.9f));
-                    if (Random.value < 0.25f) FxKit.Spot(p, Color.Lerp(cfg.ghostColor, Color.white, 0.6f), 0.3f, 0.12f);
+                    FxKit.GhostPuff(p, Vector3.up * 0.5f, cfg.wispSize * s, 0.24f, A(cfg.ghostColor, 0.9f));
+                    if (Random.value < 0.25f) FxKit.Spot(p, Color.Lerp(cfg.ghostColor, Color.white, 0.6f), cfg.wispSize * 0.7f, 0.12f);
                 }
             }
 

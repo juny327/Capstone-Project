@@ -30,6 +30,8 @@ public class ExplodeOnHitEffect : AttachmentEffect
     [Min(0f)] public float cameraShake;
     [Tooltip("공통 재료(FxKit)로 그린다 — 작은 불 폭발 (2026-11-20). 끄면 예전 연출")]
     public bool kitPop = true;
+    [Tooltip("공통 재료 폭발 모습 크기 배율 — 판정 반경(radius)은 그대로 (2026-11-24 '폭발을 더 화려하게', 스웜 카빈 1.4)")]
+    [Min(0.1f)] public float popScale = 1f;
 
     // 산탄 8발이 한 프레임에 터지면 소리가 겹쳐 터진다 — 짧게 한 번만
     static float lastSound;
@@ -69,7 +71,7 @@ public class ExplodeOnHitEffect : AttachmentEffect
             if (kit)
             {
                 // 공통 재료 (2026-11-20) — '모습 더하기' 가 있는 것(스웜 카빈)은 크게, 기본 개조(폭발탄)는 조금 작게. 보조 칸은 SupportFx
-                float size = (cfg.fireball > 0f ? 1.5f : 1f) * SupportFx;
+                float size = (cfg.fireball > 0f ? 1.5f : 1f) * cfg.popScale * SupportFx;
                 if (EvoStrikes.Take(8)) FxKit.Pop(at, cfg.radius, cfg.color, size);
             }
             else if (cfg.vfxPrefab != null && EvoStrikes.Take(6)) EvoStrikes.Spawn(cfg.vfxPrefab, at, cfg.color, cfg.vfxScale);
