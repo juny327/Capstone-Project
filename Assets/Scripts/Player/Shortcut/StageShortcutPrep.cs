@@ -763,7 +763,7 @@ public class StageShortcutPrep : MonoBehaviour
         AddGroup("무기 강화", o => o.Kind == ShopOfferKind.Upgrade);
         AddGroup("새 무기 (보조 칸)", o => o.Kind == ShopOfferKind.Weapon);
         SubAbilitySlot slot = player != null ? player.GetComponent<SubAbilitySlot>() : null;
-        AddGroup(slot != null && slot.SlotCount > 0 ? "서브 능력 · 짝 스킬" : "부착물 · 짝 스킬",
+        AddGroup(slot != null && slot.SlotCount > 0 ? "서브 능력 · 스킬" : "부착물 · 스킬",
                  o => o.Kind == ShopOfferKind.Attachment || o.Kind == ShopOfferKind.SubAbility || o.Kind == ShopOfferKind.Skill || o.Kind == ShopOfferKind.Consumable);
     }
 
@@ -796,7 +796,7 @@ public class StageShortcutPrep : MonoBehaviour
         IWeapon t = target;
         bool free = offer.Price <= 0;   // 상위 무기는 조건(무기 레벨 · 짝)이 값이다 — 정비 창에서도 0
         Row(parent, offer.Icon, KindColor(offer.Kind), title, tag, desc, free ? "무료" : $"{offer.Price}", free ? null : coinIcon, GoldColor, canBuy, canBuy || poor,
-            () => Buy(offer, t));
+            () => Buy(offer, t), pair: IsPair(offer.PairItem, target));
     }
 
     void RefreshCards()
@@ -819,7 +819,19 @@ public class StageShortcutPrep : MonoBehaviour
         string lv = maxed ? "MAX" : d.maxLevel > 0 ? $"Lv{level}/{d.maxLevel}" : $"Lv{level}";   // 이름 옆이라 짧게 (지금 레벨 / 최대)
         string desc = !string.IsNullOrEmpty(d.brief) && !DescriptionMode.Detail ? d.brief : d.description;
         Row(cardContent, d.icon, ExpColor, d.upgradeName, lv, desc, maxed ? "MAX" : $"경험치 {cost}", null, ExpColor,
-            !maxed && affordable, !maxed, () => BuyCard(d));
+            !maxed && affordable, !maxed, () => BuyCard(d), pair: !maxed && IsPair(d, null));
+    }
+
+    /// <summary>
+    /// 지금 가진 무기의 상위 무기 짝인가 (부착물 · 서브 능력 · 스킬 카드) — 줄에 노란 테두리만 (2026-11-25 사용자: "숏컷에서도 내가 가진 무기에 따라
+    /// 짝이 되는 부품 · 스킬은 간단하게 노란 테두리"). 정비 창 · 레벨업 카드와 같은 기준(EvolutionPairs). 부품은 그 짝이 필요한 무기에 다는 줄에만.
+    /// </summary>
+    bool IsPair(UnityEngine.Object item, IWeapon target)
+    {
+        if (item == null || player == null) return false;
+        WeaponEvolutionData e = EvolutionPairs.For(player, item);
+        if (e == null) return false;
+        return target == null || target.Data == e.from || e.requiredAnyGunAttachment == item;
     }
 
     void RefreshRewards()
@@ -1218,7 +1230,7 @@ public class StageShortcutPrep : MonoBehaviour
             int skillPrice = Scaled(catalog.skillPairPrice);   // 정비 창 짝 스킬 값 — 레벨업 카드(경험치)로 먼저 사면 그만큼 싸진다
             plan.Cost += skillPrice;
             bool byCard = stats != null && stats.currentExp >= e.requiredSkill.CostFor(UpgradeManager.LevelOf(e.requiredSkill.effect) + 1);
-            steps.Add(byCard ? $"{SkillPairs.NameOf(e.requiredSkill)} (짝 스킬 · 카드로 사면 −{skillPrice})" : $"{SkillPairs.NameOf(e.requiredSkill)} (짝 스킬)");
+            steps.Add(byCard ? $"{SkillPairs.NameOf(e.requiredSkill)} (카드로 사면 −{skillPrice})" : SkillPairs.NameOf(e.requiredSkill));
         }
 
         if (e.shopPrice > 0) plan.Cost += Scaled(e.shopPrice);
@@ -1350,12 +1362,13 @@ public class StageShortcutPrep : MonoBehaviour
     // ───────── 줄 ─────────
 
     void Row(RectTransform parent, Sprite icon, Color accent, string title, string tag, string description, string price, Sprite priceIcon, Color priceColor,
-             bool interactable, bool bright, Action onBuy, bool compact = false, float height = 0f)
+             bool interactable, bool bright, Action onBuy, bool compact = false, float height = 0f, bool pair = false)
     {
         Image row = NewImage("Row", parent, bright ? RowFill : RowFillOff);
         var le = row.gameObject.AddComponent<LayoutElement>();
         le.preferredHeight = height > 0f ? height : compact ? 96f : RowH;
         le.minHeight = le.preferredHeight;
+        if (pair) PairBorder(row.rectTransform);
 
         Image strip = NewImage("Kind", row.transform, accent);
         strip.rectTransform.anchorMin = new Vector2(0f, 0f);
@@ -1392,6 +1405,23 @@ public class StageShortcutPrep : MonoBehaviour
         MakeButton(row.transform, "Buy", price, 21f, new Vector2(1f, 0.5f), new Vector2(-12f, 0f), new Vector2(buyW, BuyH),
                    interactable ? ButtonFrame : OffFrame, interactable ? ButtonFill : OffFill, onBuy, interactable, priceIcon,
                    interactable ? priceColor : new Color(priceColor.r, priceColor.g, priceColor.b, 0.5f));
+    }
+
+    /// <summary>상위 무기 짝 줄 — 노란 테두리 네 변 (글은 붙이지 않는다).</summary>
+    static void PairBorder(RectTransform row)
+    {
+        const float t = 3f;
+        for (int i = 0; i < 4; i++)
+        {
+            Image e = NewImage("PairEdge", row, PairHighlight.Gold);
+            e.raycastTarget = false;
+            RectTransform r = e.rectTransform;
+            r.anchorMin = i == 1 ? new Vector2(0f, 0f) : i == 3 ? new Vector2(1f, 0f) : new Vector2(0f, i == 0 ? 1f : 0f);
+            r.anchorMax = i == 2 ? new Vector2(1f, 0f) : i == 3 ? new Vector2(1f, 1f) : i == 0 ? new Vector2(1f, 1f) : new Vector2(0f, 1f);
+            r.pivot = new Vector2(0.5f, 0.5f);
+            r.offsetMin = i == 0 ? new Vector2(0f, -t) : i == 3 ? new Vector2(-t, 0f) : Vector2.zero;
+            r.offsetMax = i == 1 ? new Vector2(t, 0f) : i == 2 ? new Vector2(0f, t) : Vector2.zero;
+        }
     }
 
     void Section(RectTransform parent, string title)
