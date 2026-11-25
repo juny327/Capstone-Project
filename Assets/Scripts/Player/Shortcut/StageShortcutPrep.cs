@@ -505,6 +505,7 @@ public class StageShortcutPrep : MonoBehaviour
     {
         if (root == null) return;
         CollectOffers();
+        CollectPlans();
 
         goldText.text = $"{(wallet != null ? wallet.Balance : 0)}";
         expText.text = $"경험치 {(stats != null ? stats.currentExp : 0)}";
@@ -533,6 +534,28 @@ public class StageShortcutPrep : MonoBehaviour
                 : $"상위 무기는 스테이지 {EvolutionService.UnlockStage} 중간 정비부터 — 이번 출전 전에는 살 수 없습니다 (무기 레벨 · 짝은 미리 갖출 수 있다)");
             string goals = NextGoals(out int goalLines);
             if (goalLines > 0) Note(shopContent, goals, 14f + goalLines * 30f);
+        }
+
+        // 바로 얻기 (2026-11-25) — 골드가 되면 모자란 무기 · 레벨 · 짝을 한꺼번에 사고 그 자리에서 진화
+        if (EvolutionService.Unlocked)
+        {
+            Section(shopContent, "상위 무기 바로 얻기  <size=75%><color=#A9B4D0>모자란 것을 정비 창 값 그대로 한꺼번에</color></size>");
+            int gold = wallet != null ? wallet.Balance : 0;
+            var later = new List<string>();
+            int shown = 0;
+            foreach (EvolutionPlan p in plans)
+            {
+                if (p.Cost > gold) { later.Add($"{p.Evolution.Title} {p.Cost}"); continue; }
+                WeaponEvolutionData e = p.Evolution;
+                Sprite icon = e.result != null && e.result.icon != null ? e.result.icon : e.from != null ? e.from.icon : null;
+                Row(shopContent, icon, KindColor(ShopOfferKind.Evolution), e.Title, "바로 얻기", p.Steps, p.Cost > 0 ? $"{p.Cost}" : "무료", p.Cost > 0 ? coinIcon : null,
+                    GoldColor, true, true, () => BuyPlan(e));
+                shown++;
+            }
+            if (shown == 0)
+                Note(shopContent, plans.Count == 0 ? "지금 무기 · 칸으로 얻을 수 있는 상위 무기가 없습니다 (보조 칸이 가득 찼으면 가진 무기의 것만)" : "지금 골드로 바로 얻을 수 있는 상위 무기가 없습니다");
+            if (later.Count > 0)
+                Note(shopContent, "<color=#A9B4D0>골드가 더 있으면</color>  " + string.Join(" · ", later), later.Count > 4 ? 74f : 54f);
         }
 
         AddGroup("무기 강화", o => o.Kind == ShopOfferKind.Upgrade);
@@ -659,6 +682,233 @@ public class StageShortcutPrep : MonoBehaviour
     }
 
     readonly List<WeaponEvolutionData> recipes = new List<WeaponEvolutionData>();
+
+    // ───────── 상위 무기 바로 얻기 (2026-11-25 사용자: "골드가 된다면 바로 상위 무기를 얻을 수 있도록 제시") ─────────
+    // 원하는 상위 무기 하나를 고르면 모자란 것을 차례로 산다: 무기 사기(없으면) → 요구 레벨까지 강화 → 짝(개조 · 총 부착물 · 서브 능력 · 짝 스킬) → 진화.
+    // 값은 정비 창에서 하나씩 살 때와 똑같이 더한 것 (웃돈 없음 — 11-04 정비 창의 '바로 갖추기'는 ×1.5 였고 11-17 에 뺐다).
+    // 규칙도 정비 창 그대로 — 상위 무기가 열린 정비(스테이지 3 · 보스전 바로 가기)에서만, 보조 칸 · 서브 능력 칸이 남아야 한다.
+
+    /// <summary>상위 무기 하나를 얻는 데 모자란 것과 그 값.</summary>
+    public struct EvolutionPlan
+    {
+        public WeaponEvolutionData Evolution;
+        public int Cost;
+        public string Steps;
+    }
+
+    readonly List<EvolutionPlan> plans = new List<EvolutionPlan>();
+    readonly List<WeaponData> planFroms = new List<WeaponData>();
+
+    /// <summary>지금 얻을 수 있는 상위 무기 (값 순서, 골드가 모자란 것도 포함 — 시험용).</summary>
+    public IReadOnlyList<EvolutionPlan> Plans => plans;
+
+    void CollectPlans()
+    {
+        plans.Clear();
+        EvolutionCatalog evolutions = EvolutionCatalog.Instance;
+        WeaponController weapons = ctx != null ? ctx.Weapons : null;
+        if (evolutions == null || weapons == null || catalog == null || !EvolutionService.Unlocked) return;
+
+        SubAbilitySlot slot = EvolutionService.AbilitiesOf(player);
+        bool swordsman = slot != null && slot.SlotCount > 0;
+
+        // 가진 무기(아직 진화 전) + 지금 살 수 있는 새 무기
+        planFroms.Clear();
+        foreach (IWeapon w in weapons.HeldWeapons) if (w != null && w.Data != null && !w.Data.IsEvolved && !planFroms.Contains(w.Data)) planFroms.Add(w.Data);
+        foreach (IWeapon w in weapons.SubUnits) if (w != null && w.Data != null && !w.Data.IsEvolved && !planFroms.Contains(w.Data)) planFroms.Add(w.Data);
+        if (catalog.weaponPrices != null)
+            foreach (ShopCatalog.WeaponPrice entry in catalog.weaponPrices)
+                if (entry.weapon != null && !weapons.Has(entry.weapon) && weapons.CanAcquire(entry.weapon) && !planFroms.Contains(entry.weapon)) planFroms.Add(entry.weapon);
+
+        foreach (WeaponData from in planFroms)
+        {
+            recipes.Clear();
+            evolutions.CollectFor(from, swordsman, recipes);
+            foreach (WeaponEvolutionData e in recipes)
+            {
+                if (e == null || e.result == null) continue;
+                if (e.IsReady(weapons, slot)) continue;   // 이미 갖췄다 — 위 '상위 무기' 카드로 산다
+                if (TryPlan(e, weapons, slot, out EvolutionPlan plan)) plans.Add(plan);
+            }
+        }
+        plans.Sort((a, b) => a.Cost.CompareTo(b.Cost));
+    }
+
+    int BuyPrice(WeaponData weapon)
+    {
+        if (catalog.weaponPrices == null) return -1;
+        foreach (ShopCatalog.WeaponPrice entry in catalog.weaponPrices)
+        {
+            if (entry.weapon != weapon) continue;
+            // 정비 창 새 무기와 같은 값 (WeaponPurchaseSource — 보조 무기 방식이면 ×supportPriceMultiplier)
+            int basePrice = ctx.Weapons.UsesSupportWeapons ? Mathf.Max(1, Mathf.RoundToInt(entry.price * catalog.supportPriceMultiplier)) : entry.price;
+            return catalog.Scaled(basePrice, ctx.StageIndex, ctx.PriceMultiplier);
+        }
+        return -1;
+    }
+
+    int Scaled(int basePrice) => catalog.Scaled(basePrice, ctx.StageIndex, ctx.PriceMultiplier);
+
+    /// <summary>총 부착물(어느 총에나)을 달 총 — 주무기부터.</summary>
+    static WeaponBase AnyGunFor(WeaponController weapons, AttachmentData a)
+    {
+        if (weapons.MainWeapon is WeaponBase main && main.CanAttach(a)) return main;
+        foreach (IWeapon w in weapons.HeldWeapons) if (w is WeaponBase b && b.CanAttach(a)) return b;
+        return null;
+    }
+
+    /// <summary>모자란 것 · 값을 잰다. 칸이 없거나 팔지 않아 못 얻으면 false.</summary>
+    bool TryPlan(WeaponEvolutionData e, WeaponController weapons, SubAbilitySlot slot, out EvolutionPlan plan)
+    {
+        plan = new EvolutionPlan { Evolution = e };
+        var steps = new List<string>();
+        WeaponData from = e.from;
+        IWeapon owned = e.FindOwned(weapons);
+        int level = owned != null ? owned.Level : 0;
+        bool support = owned is WeaponBase ob ? ob.IsSupport : weapons.UsesSupportWeapons;
+
+        if (owned == null)
+        {
+            int price = BuyPrice(from);
+            if (price < 0 || !weapons.CanAcquire(from)) return false;   // 팔지 않는 무기 · 칸이 가득
+            plan.Cost += price;
+            steps.Add($"{from.weaponName} 사기");
+            level = 1;
+        }
+
+        int need = Mathf.Min(e.RequiredLevel, Mathf.Max(1, from.maxLevel));
+        if (level < need)
+        {
+            for (int lv = level; lv < need; lv++) plan.Cost += catalog.UpgradePriceOf(from, lv, ctx.StageIndex, ctx.PriceMultiplier);
+            steps.Add($"{(owned == null ? "" : from.weaponName + " ")}Lv{level}→{need}");
+        }
+
+        // 짝
+        if (e.requiredAttachment != null && (owned == null || owned.GetAttachment(e.requiredAttachment.slot) != e.requiredAttachment))
+        {
+            AttachmentData a = e.requiredAttachment;
+            if (!a.Fits(from) || a.minWeaponLevel > need || (support && a.slot != AttachmentSlot.Mod)) return false;
+            plan.Cost += Scaled(a.basePrice);
+            bool replace = owned != null && owned.GetAttachment(a.slot) != null;
+            steps.Add(a.displayName + (replace ? " (교체)" : ""));
+        }
+        if (e.requiredAnyGunAttachment != null && !WeaponEvolutionData.AnyGunHas(weapons, e.requiredAnyGunAttachment))
+        {
+            if (AnyGunFor(weapons, e.requiredAnyGunAttachment) == null) return false;
+            plan.Cost += Scaled(e.requiredAnyGunAttachment.basePrice);
+            steps.Add("총에 " + e.requiredAnyGunAttachment.displayName);
+        }
+        if (e.requiredSubAbility != null)
+        {
+            if (slot == null) return false;
+            SubAbilityData data = e.requiredSubAbility;
+            int index = slot.IndexOf(data);
+            int abilityLevel = index >= 0 ? slot.Get(index).Level : 0;
+            if (abilityLevel < e.requiredAbilityLevel)
+            {
+                if (abilityLevel == 0)
+                {
+                    if (!slot.CanAcquire(data)) return false;   // 서브 능력 칸이 가득
+                    plan.Cost += Scaled(data.basePrice);
+                    abilityLevel = 1;
+                }
+                for (int lv = abilityLevel; lv < e.requiredAbilityLevel; lv++) plan.Cost += Scaled(data.LevelUpPrice(lv));
+                steps.Add(e.requiredAbilityLevel > 1 ? $"{data.displayName} Lv{e.requiredAbilityLevel}" : data.displayName);
+            }
+        }
+        if (e.requiredSkill != null && !SkillPairs.Has(player, e.requiredSkill))
+        {
+            int skillPrice = Scaled(catalog.skillPairPrice);   // 정비 창 짝 스킬 값 — 레벨업 카드(경험치)로 먼저 사면 그만큼 싸진다
+            plan.Cost += skillPrice;
+            bool byCard = stats != null && stats.currentExp >= e.requiredSkill.CostFor(UpgradeManager.LevelOf(e.requiredSkill.effect) + 1);
+            steps.Add(byCard ? $"{SkillPairs.NameOf(e.requiredSkill)} (짝 스킬 — 레벨업 카드로 먼저 사면 골드 −{skillPrice})" : $"{SkillPairs.NameOf(e.requiredSkill)} (짝 스킬)");
+        }
+
+        if (e.shopPrice > 0) plan.Cost += Scaled(e.shopPrice);
+        plan.Steps = (steps.Count > 0 ? string.Join(" · ", steps) : "조건 충족") + $" → {e.Title}";
+        return true;
+    }
+
+    /// <summary>상위 무기 바로 얻기 (시험도 부른다). 중간에 실패하면 그때까지 산 것만 값을 낸다.</summary>
+    public bool BuyPlan(WeaponEvolutionData e)
+    {
+        if (e == null || departed) return false;
+        CollectPlans();
+        int at = plans.FindIndex(p => p.Evolution == e);
+        if (at < 0) { Message("지금은 얻을 수 없는 상위 무기", Warn); Refresh(); return false; }
+        EvolutionPlan plan = plans[at];
+        if (wallet == null || !wallet.CanSpend(plan.Cost)) { Message($"골드 부족 — {plan.Cost} 필요", Warn); return false; }
+
+        WeaponController weapons = ctx.Weapons;
+        SubAbilitySlot slot = EvolutionService.AbilitiesOf(player);
+        WeaponData from = e.from;
+        int spent = 0;
+        bool ok = false;
+
+        do
+        {
+            // 1) 무기 — 정비 창 새 무기 · 강화와 같은 길 (Acquire)
+            if (e.FindOwned(weapons) == null)
+            {
+                int price = BuyPrice(from);
+                if (weapons.Acquire(from) != WeaponAcquireResult.Equipped) break;
+                spent += price;
+            }
+            IWeapon w = e.FindOwned(weapons);
+            if (w == null) break;
+            int need = Mathf.Min(e.RequiredLevel, Mathf.Max(1, from.maxLevel));
+            bool leveled = true;
+            for (int guard = 0; guard < 10 && w.Level < need; guard++)
+            {
+                int price = catalog.UpgradePriceOf(from, w.Level, ctx.StageIndex, ctx.PriceMultiplier);
+                if (weapons.Acquire(from) != WeaponAcquireResult.LeveledUp) { leveled = false; break; }
+                spent += price;
+            }
+            if (!leveled || w.Level < need) break;
+
+            // 2) 짝
+            if (e.requiredAttachment != null && w.GetAttachment(e.requiredAttachment.slot) != e.requiredAttachment)
+            {
+                if (!weapons.TryAttach(from, e.requiredAttachment, out _)) break;
+                spent += Scaled(e.requiredAttachment.basePrice);
+            }
+            if (e.requiredAnyGunAttachment != null && !WeaponEvolutionData.AnyGunHas(weapons, e.requiredAnyGunAttachment))
+            {
+                WeaponBase gun = AnyGunFor(weapons, e.requiredAnyGunAttachment);
+                if (gun == null || !weapons.TryAttach(gun.Data, e.requiredAnyGunAttachment, out _)) break;
+                spent += Scaled(e.requiredAnyGunAttachment.basePrice);
+            }
+            if (e.requiredSubAbility != null)
+            {
+                bool abilityOk = true;
+                for (int guard = 0; guard < 6; guard++)
+                {
+                    int index = slot != null ? slot.IndexOf(e.requiredSubAbility) : -1;
+                    int lv = index >= 0 ? slot.Get(index).Level : 0;
+                    if (lv >= e.requiredAbilityLevel) break;
+                    int price = Scaled(lv > 0 ? e.requiredSubAbility.LevelUpPrice(lv) : e.requiredSubAbility.basePrice);
+                    if (slot == null || !slot.Acquire(e.requiredSubAbility, 0)) { abilityOk = false; break; }
+                    spent += price;
+                }
+                if (!abilityOk) break;
+            }
+            if (e.requiredSkill != null && !SkillPairs.Has(player, e.requiredSkill))
+            {
+                if (UpgradeManager.GrantFree(player, e.requiredSkill) <= 0) break;
+                spent += Scaled(catalog.skillPairPrice);
+            }
+
+            // 3) 진화 — 정비 창 '상위 무기' 카드와 같은 길 (연출 포함)
+            if (!EvolutionService.TryEvolve(player, e)) break;
+            if (e.shopPrice > 0) spent += Scaled(e.shopPrice);
+            ok = true;
+        } while (false);
+
+        if (spent > 0) wallet.TrySpend(Mathf.Min(spent, wallet.Balance));
+        Message(ok ? $"{e.Title} 획득 — {plan.Steps}" : $"{e.Title} — 중간에 막혔습니다 (산 것까지만 골드 {spent})", ok ? GoldColor : Warn);
+        Refresh();
+        return ok;
+    }
 
     /// <summary>
     /// 다음 목표 — 가진 무기(주무기 먼저)마다 상위 무기 조합 하나의 조건과 지금 채운 정도 (최대 3줄, 정비 창 '상위 무기' 칸과 같은 규칙).
