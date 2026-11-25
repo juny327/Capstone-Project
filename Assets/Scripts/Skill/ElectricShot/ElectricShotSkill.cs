@@ -7,11 +7,16 @@ public class ElectricShotSkill : MonoBehaviour
     float projectileSpeed;
     float targetRange;
     float shockDuration;
+    float damage;
+    float explosionRadius;
+    GameObject impactEffectPrefab;
+    float impactEffectLifetime;
     Vector3 spawnOffset;
-
     float timer;
 
-    public void Setup(GameObject prefab, float interval, float speed, float range, float duration, Vector3 offset)
+    public void Setup(GameObject prefab, float interval, float speed, float range,
+        float duration, Vector3 offset, float hitDamage, float radius,
+        GameObject impactPrefab, float effectLifetime)
     {
         projectilePrefab = prefab;
         fireInterval = interval;
@@ -19,22 +24,37 @@ public class ElectricShotSkill : MonoBehaviour
         targetRange = range;
         shockDuration = duration;
         spawnOffset = offset;
+        damage = hitDamage;
+        explosionRadius = radius;
+        impactEffectPrefab = impactPrefab;
+        impactEffectLifetime = effectLifetime;
     }
 
     void Update()
     {
         timer -= Time.deltaTime;
-        if (timer > 0 || projectilePrefab == null)
+        if (timer > 0f || projectilePrefab == null) return;
+        if (EnemyManager.Instance == null) return;
+
+        Vector3 origin = transform.position + spawnOffset;
+        // 기존 방식 유지: 벽에 가려진 적은 타깃으로 지정하지 않는다.
+        Enemy target = EnemyManager.Instance.GetClosestVisibleEnemy(
+            transform.position, targetRange, origin);
+        if (target == null) return;
+
+        GameObject obj = PoolManager.Spawn(projectilePrefab, origin, Quaternion.identity);
+        if (obj == null) return;
+
+        ElectricShotProjectile projectile = obj.GetComponent<ElectricShotProjectile>();
+        if (projectile == null)
+        {
+            Debug.LogError("[ElectricShot] 투사체 프리팹에 ElectricShotProjectile이 없습니다.");
+            PoolManager.Despawn(obj);
             return;
+        }
 
-        // 벽에 가린 적은 노리지 않는다 (2026-11-17 — 벽을 뚫고 날아갔다)
-        Enemy target = EnemyManager.Instance.GetClosestVisibleEnemy(transform.position, targetRange, transform.position + spawnOffset);
-
-        if (target == null)
-            return;
-
-        GameObject obj = PoolManager.Spawn(projectilePrefab, transform.position + spawnOffset, Quaternion.identity);   // 2026-11-18 성능 — 풀에서 돌려 쓴다
-        obj.GetComponent<ElectricShotProjectile>().Initialize(target, projectileSpeed, shockDuration);
+        projectile.Initialize(target, projectileSpeed, shockDuration,
+            damage, explosionRadius, impactEffectPrefab, impactEffectLifetime);
 
         SoundManager.Instance?.ReportSkillCast(SkillCastSound.ElectricShot);
         timer = fireInterval;
