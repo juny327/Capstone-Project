@@ -11,12 +11,12 @@ using UnityEngine.UI;
 /// <summary>
 /// 스테이지 바로 가기 — 출전 준비 창 (2026-11-25).
 ///
-/// 바로 가기로 연 스테이지 씬에서 시간을 멈춘 채 먼저 뜬다. 봇 판이 그 스테이지 직전까지 모은 골드 · 경험치를 받고,
+/// 바로 가기로 연 스테이지 씬에서 시간을 멈춘 채 먼저 뜬다. 봇 판이 그 스테이지 직전까지 모은 크레딧 · 경험치를 받고,
 ///  · 왼쪽 = 정비 창에서 파는 상품 전부 (무작위 진열 대신 지금 살 수 있는 것을 모두 — 새 무기 · 강화 · 부착물 · 서브 능력 · 짝 스킬 · 상위 무기)
 ///  · 가운데 = 레벨업 카드 전부 (경험치)
 ///  · 오른쪽 = 보상 카드 (지나온 스테이지 클리어 수만큼, 3장 중 1장) + 지금 장비
 /// 가격 · 보조 칸 · 최대 레벨 · 상위 무기가 열리는 스테이지는 본 게임 규칙 그대로다 — 방금 클리어한 스테이지(들어갈 스테이지 − 1)의 정비로 본다.
-/// '출발' 을 누르면 체력을 채우고 시간이 흐른다. 남은 골드 · 경험치는 들고 들어간다.
+/// '출발' 을 누르면 체력을 채우고 시간이 흐른다. 남은 크레딧 · 경험치는 들고 들어간다.
 ///
 /// 씬 · 프리팹을 고치지 않는다 — 창은 코드로 만든다 (로비 난이도 칸 · 설정 버튼과 같은 방식).
 /// </summary>
@@ -91,7 +91,7 @@ public class StageShortcutPrep : MonoBehaviour
     readonly TMP_Text[] tabLabels = new TMP_Text[2];
     GameObject restartButton, backButton, nextButton, departButton;
 
-    /// <summary>지금 단계 — 0 = 골드(무기 · 장비 · 보상 카드), 1 = 경험치(레벨업 카드).</summary>
+    /// <summary>지금 단계 — 0 = 크레딧(무기 · 장비 · 보상 카드), 1 = 경험치(레벨업 카드).</summary>
     public int Step => step;
     UISoundBinder sounds;
     float messageLeft;
@@ -252,7 +252,7 @@ public class StageShortcutPrep : MonoBehaviour
     {
         offer.Target = offer.NeedsTarget ? target : null;
         if (!offer.IsAvailable(ctx, out reason)) return false;
-        if (wallet == null || !wallet.CanSpend(offer.Price)) { reason = "골드 부족"; return false; }
+        if (wallet == null || !wallet.CanSpend(offer.Price)) { reason = "크레딧 부족"; return false; }
         reason = null;
         return true;
     }
@@ -370,7 +370,7 @@ public class StageShortcutPrep : MonoBehaviour
         Label(f, "Title", $"출전 준비 — {StageShortcut.NameOf(stage)}", 42f, TextMain, TextAlignmentOptions.TopLeft, new Vector2(0f, 1f), new Vector2(36f, -18f), new Vector2(900f, 56f));
         string cleared = $"스테이지 {Mathf.Min(3, stage - 1)} 클리어";
         Label(f, "Subtitle",
-              $"{who} — 봇 판이 {cleared}까지 모은 <color=#FFD461>골드 {budget.gold}</color> · <color=#76E0FF>경험치 {budget.exp}</color> · 보상 카드 {StageShortcut.RewardsFor(stage)}장을 받았습니다. 남은 골드와 경험치는 그대로 들고 들어갑니다",
+              $"{who} — 봇 판이 {cleared}까지 모은 <color=#FFD461>크레딧 {budget.gold}</color> · <color=#76E0FF>경험치 {budget.exp}</color> · 보상 카드 {StageShortcut.RewardsFor(stage)}장을 받았습니다. 남은 크레딧과 경험치는 그대로 들고 들어갑니다",
               20f, Muted, TextAlignmentOptions.TopLeft, new Vector2(0f, 1f), new Vector2(38f, -76f), new Vector2(1300f, 30f));
 
         // 남은 양 (오른쪽 위)
@@ -379,7 +379,7 @@ public class StageShortcutPrep : MonoBehaviour
         levelText = Chip(f, "Level", new Vector2(-80f, -24f), TextMain, null);
 
         // 단계 탭
-        MakeTab(f, 0, "①  골드로 무기 갖추기", new Vector2(30f, -116f));
+        MakeTab(f, 0, "①  크레딧으로 무기 갖추기", new Vector2(30f, -116f));
         MakeTab(f, 1, "②  경험치로 능력 올리기", new Vector2(466f, -116f));
         stepHint = Label(f, "StepHint", "", 19f, Muted, TextAlignmentOptions.MidlineLeft, new Vector2(0f, 1f), new Vector2(920f, -116f), new Vector2(880f, 52f));
         stepHint.rectTransform.pivot = new Vector2(0f, 1f);
@@ -391,7 +391,7 @@ public class StageShortcutPrep : MonoBehaviour
         const float top = -394f, height = 500f;
         pages[0] = NewRect("GoldPage", f).gameObject;
         Stretch((RectTransform)pages[0].transform, 0f);
-        shopContent = Column(pages[0].transform, "ShopColumn", "무기 · 장비", "골드 — 새 무기 · 강화 · 부착물 · 서브 능력", new Vector2(30f, top), new Vector2(1180f, height), GoldColor);
+        shopContent = Column(pages[0].transform, "ShopColumn", "무기 · 장비", "크레딧 — 새 무기 · 강화 · 부착물 · 서브 능력", new Vector2(30f, top), new Vector2(1180f, height), GoldColor);
         Image right = NewImage("RightColumn", pages[0].transform, ColumnFill);
         Place(right.rectTransform, new Vector2(0f, 1f), new Vector2(1226f, top), new Vector2(578f, height), new Vector2(0f, 1f));
         rewardHeader = Label(right.transform, "RewardHeader", "", 24f, TextMain, TextAlignmentOptions.TopLeft, new Vector2(0f, 1f), new Vector2(18f, -10f), new Vector2(540f, 36f));
@@ -475,7 +475,7 @@ public class StageShortcutPrep : MonoBehaviour
         }
         if (stepHint != null)
             stepHint.text = step == 0
-                ? "골드로 새 무기 · 강화 · 부착물을 사고, 오른쪽에서 보상 카드를 고릅니다. 다 됐으면 <color=#76E0FF>다음</color>"
+                ? "크레딧으로 새 무기 · 강화 · 부착물을 사고, 오른쪽에서 보상 카드를 고릅니다. 다 됐으면 <color=#76E0FF>다음</color>"
                 : "경험치로 레벨업 카드(스킬 · 능력치)를 삽니다. 다 됐으면 <color=#7CF29A>출발</color>";
         if (backButton != null) backButton.SetActive(step == 1);
         if (nextButton != null) nextButton.SetActive(step == 0);
@@ -483,7 +483,7 @@ public class StageShortcutPrep : MonoBehaviour
         if (restartButton != null) ((RectTransform)restartButton.transform).anchoredPosition = new Vector2(step == 0 ? -340f : -560f, 26f);
     }
 
-    /// <summary>상위 무기 띠 — 조건을 채운 상위 무기와 지금 골드로 바로 얻을 수 있는 것을 가로 카드로. 두 단계 모두 위에 늘 있다.</summary>
+    /// <summary>상위 무기 띠 — 조건을 채운 상위 무기와 지금 크레딧으로 바로 얻을 수 있는 것을 가로 카드로. 두 단계 모두 위에 늘 있다.</summary>
     void BuildEvolutionStrip(Transform parent, Vector2 topLeft, Vector2 size)
     {
         Image panel = NewImage("EvolutionStrip", parent, new Color(0.13f, 0.11f, 0.06f, 1f));
@@ -493,7 +493,7 @@ public class StageShortcutPrep : MonoBehaviour
         line.rectTransform.anchorMax = new Vector2(1f, 1f);
         line.rectTransform.pivot = new Vector2(0.5f, 1f);
         line.rectTransform.sizeDelta = new Vector2(0f, 3f);
-        Label(panel.transform, "Header", "상위 무기  <size=72%><color=#C9B88A>조건을 채웠거나 · 지금 골드 (짝 스킬은 경험치 먼저) 로 바로 얻을 수 있는 것</color></size>", 24f, GoldColor,
+        Label(panel.transform, "Header", "상위 무기  <size=72%><color=#C9B88A>조건을 채웠거나 · 지금 크레딧 (짝 스킬은 경험치 먼저) 으로 바로 얻을 수 있는 것</color></size>", 24f, GoldColor,
               TextAlignmentOptions.TopLeft, new Vector2(0f, 1f), new Vector2(18f, -10f), new Vector2(900f, 36f));
         evoHint = Label(panel.transform, "Later", "", 17f, Muted, TextAlignmentOptions.TopRight, new Vector2(1f, 1f), new Vector2(-18f, -14f), new Vector2(840f, 30f));
         evoHint.overflowMode = TextOverflowModes.Ellipsis;
@@ -710,7 +710,7 @@ public class StageShortcutPrep : MonoBehaviour
         if (sounds != null) sounds.BindAll();
     }
 
-    /// <summary>상위 무기 띠 — 조건을 채운 진화 카드 → 지금 골드로 되는 바로 얻기. 골드가 모자란 것은 오른쪽 위 한 줄.</summary>
+    /// <summary>상위 무기 띠 — 조건을 채운 진화 카드 → 지금 크레딧으로 되는 바로 얻기. 크레딧이 모자란 것은 오른쪽 위 한 줄.</summary>
     void RefreshEvolutions()
     {
         Clear(evoContent);
@@ -728,7 +728,7 @@ public class StageShortcutPrep : MonoBehaviour
         foreach (ShopOffer o in offers.FindAll(x => x.Kind == ShopOfferKind.Evolution))
         {
             bool canBuy = CanBuy(o, null, out string reason);
-            if (!canBuy && reason != "골드 부족") continue;
+            if (!canBuy && reason != "크레딧 부족") continue;
             ShopOffer offer = o;
             EvoCard(o.Icon, o.Title.Replace("상위 무기 — ", ""), "조건 충족", "무기 레벨 · 짝을 다 갖췄다 — 바로 진화", o.Price > 0 ? $"{o.Price}" : "무료", o.Price > 0 ? coinIcon : null, () => Buy(offer, null));
             shown++;
@@ -741,7 +741,7 @@ public class StageShortcutPrep : MonoBehaviour
             if (p.Cost > gold) { later.Add($"{p.Evolution.Title} {p.Cost}"); continue; }
             WeaponEvolutionData e = p.Evolution;
             Sprite icon = e.result != null && e.result.icon != null ? e.result.icon : e.from != null ? e.from.icon : null;
-            // 짝 스킬을 경험치로 사면 단추에 경험치도 (골드 0 이면 경험치만 · 코인 그림 없이)
+            // 짝 스킬을 경험치로 사면 단추에 경험치도 (크레딧 0 이면 경험치만 · 코인 그림 없이)
             string price = p.Cost > 0 ? $"{p.Cost}" : p.ExpCost > 0 ? "" : "무료";
             if (p.ExpCost > 0) price += (price.Length > 0 ? " + " : "") + $"<color=#76E0FF>경험치 {p.ExpCost}</color>";
             bool both = p.Cost > 0 && p.ExpCost > 0;
@@ -749,14 +749,14 @@ public class StageShortcutPrep : MonoBehaviour
             shown++;
         }
 
-        // 띠에 4장 넘게 있으면 옆으로 넘겨 보라고 · 골드가 모자란 것은 오른쪽 위 한 줄
+        // 띠에 4장 넘게 있으면 옆으로 넘겨 보라고 · 크레딧이 모자란 것은 오른쪽 위 한 줄
         string more = shown > 4 ? $"<color=#FFD461>{shown}장 — 옆으로 넘겨 더 보기 ▶</color>" : "";
-        string lack = later.Count > 0 ? "<color=#C9B88A>골드가 더 있으면</color>  " + string.Join(" · ", later) : "";
+        string lack = later.Count > 0 ? "<color=#C9B88A>크레딧이 더 있으면</color>  " + string.Join(" · ", later) : "";
         evoHint.text = more.Length > 0 && lack.Length > 0 ? more + "    " + lack : more + lack;
         if (shown == 0)
         {
             string goals = NextGoals(out int goalLines);
-            EvoNote((plans.Count == 0 ? "지금 무기 · 칸으로 얻을 수 있는 상위 무기가 없습니다 (보조 칸이 가득 찼으면 가진 무기의 것만)." : "지금 골드로 바로 얻을 수 있는 상위 무기가 없습니다 — 무기 레벨 · 짝을 하나씩 갖춰도 됩니다.") +
+            EvoNote((plans.Count == 0 ? "지금 무기 · 칸으로 얻을 수 있는 상위 무기가 없습니다 (보조 칸이 가득 찼으면 가진 무기의 것만)." : "지금 크레딧으로 바로 얻을 수 있는 상위 무기가 없습니다 — 무기 레벨 · 짝을 하나씩 갖춰도 됩니다.") +
                     (goalLines > 0 ? "\n" + goals.Replace("\n", "   ") : ""));
         }
     }
@@ -791,7 +791,7 @@ public class StageShortcutPrep : MonoBehaviour
     void OfferRow(RectTransform parent, ShopOffer offer, IWeapon target)
     {
         bool canBuy = CanBuy(offer, target, out string reason);
-        bool poor = reason == "골드 부족";
+        bool poor = reason == "크레딧 부족";
         string title = target != null ? $"{offer.Title}  <size=80%><color=#A9B4D0>→ {target.Data.weaponName}</color></size>" : offer.Title;
         string tag = target != null && offer.WouldReplace(target) ? "교체" : offer.Tag;
         string desc = !canBuy && !poor && !string.IsNullOrEmpty(reason)
@@ -1105,7 +1105,7 @@ public class StageShortcutPrep : MonoBehaviour
     public struct EvolutionPlan
     {
         public WeaponEvolutionData Evolution;
-        public int Cost;      // 골드
+        public int Cost;      // 크레딧
         public int ExpCost;   // 경험치 — 짝 스킬을 레벨업 카드 값으로 살 때 (2026-11-25)
         public string Steps;
     }
@@ -1113,7 +1113,7 @@ public class StageShortcutPrep : MonoBehaviour
     readonly List<EvolutionPlan> plans = new List<EvolutionPlan>();
     readonly List<WeaponData> planFroms = new List<WeaponData>();
 
-    /// <summary>지금 얻을 수 있는 상위 무기 (값 순서, 골드가 모자란 것도 포함 — 시험용).</summary>
+    /// <summary>지금 얻을 수 있는 상위 무기 (값 순서, 크레딧이 모자란 것도 포함 — 시험용).</summary>
     public IReadOnlyList<EvolutionPlan> Plans => plans;
 
     void CollectPlans()
@@ -1233,7 +1233,7 @@ public class StageShortcutPrep : MonoBehaviour
         if (e.requiredSkill != null && !SkillPairs.Has(player, e.requiredSkill))
         {
             // 2026-11-25 사용자: "경험치로 살 수 있는 부분을 억지로 골드로 사지 말고 경험치로 먼저 (경험치가 없으면 골드로)" —
-            // 짝 스킬은 레벨업 카드 값(경험치)으로 먼저, 경험치가 모자라면 정비 창 짝 스킬 값(골드)으로
+            // 짝 스킬은 레벨업 카드 값(경험치)으로 먼저, 경험치가 모자라면 정비 창 짝 스킬 값(크레딧)으로
             int cardCost = SkillCardCost(e.requiredSkill);
             if (cardCost > 0 && stats != null && stats.currentExp >= cardCost)
             {
@@ -1243,7 +1243,7 @@ public class StageShortcutPrep : MonoBehaviour
             else
             {
                 plan.Cost += Scaled(catalog.skillPairPrice);
-                steps.Add($"{SkillPairs.NameOf(e.requiredSkill)} (골드 — 경험치 {cardCost} 모자람)");
+                steps.Add($"{SkillPairs.NameOf(e.requiredSkill)} (크레딧 — 경험치 {cardCost} 모자람)");
             }
         }
 
@@ -1268,7 +1268,7 @@ public class StageShortcutPrep : MonoBehaviour
         int at = plans.FindIndex(p => p.Evolution == e);
         if (at < 0) { Message("지금은 얻을 수 없는 상위 무기", Warn); Refresh(); return false; }
         EvolutionPlan plan = plans[at];
-        if (wallet == null || !wallet.CanSpend(plan.Cost)) { Message($"골드 부족 — {plan.Cost} 필요", Warn); return false; }
+        if (wallet == null || !wallet.CanSpend(plan.Cost)) { Message($"크레딧 부족 — {plan.Cost} 필요", Warn); return false; }
         if (plan.ExpCost > 0 && (stats == null || stats.currentExp < plan.ExpCost)) { Message($"경험치 부족 — {plan.ExpCost} 필요", Warn); return false; }
 
         WeaponController weapons = ctx.Weapons;
@@ -1341,7 +1341,7 @@ public class StageShortcutPrep : MonoBehaviour
         } while (false);
 
         if (spent > 0) wallet.TrySpend(Mathf.Min(spent, wallet.Balance));
-        string paid = $"골드 {spent}" + (expSpent > 0 ? $" · 경험치 {expSpent}" : "");
+        string paid = $"크레딧 {spent}" + (expSpent > 0 ? $" · 경험치 {expSpent}" : "");
         Message(ok ? $"{e.Title} 획득 ({paid}) — {plan.Steps}" : $"{e.Title} — 중간에 막혔습니다 (산 것까지만 {paid})", ok ? GoldColor : Warn);
         Refresh();
         return ok;
