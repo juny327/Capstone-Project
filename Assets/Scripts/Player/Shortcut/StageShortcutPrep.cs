@@ -493,7 +493,7 @@ public class StageShortcutPrep : MonoBehaviour
         line.rectTransform.anchorMax = new Vector2(1f, 1f);
         line.rectTransform.pivot = new Vector2(0.5f, 1f);
         line.rectTransform.sizeDelta = new Vector2(0f, 3f);
-        Label(panel.transform, "Header", "상위 무기  <size=72%><color=#C9B88A>조건을 채웠거나 · 지금 골드로 바로 얻을 수 있는 것</color></size>", 24f, GoldColor,
+        Label(panel.transform, "Header", "상위 무기  <size=72%><color=#C9B88A>조건을 채웠거나 · 지금 골드 (짝 스킬은 경험치 먼저) 로 바로 얻을 수 있는 것</color></size>", 24f, GoldColor,
               TextAlignmentOptions.TopLeft, new Vector2(0f, 1f), new Vector2(18f, -10f), new Vector2(900f, 36f));
         evoHint = Label(panel.transform, "Later", "", 17f, Muted, TextAlignmentOptions.TopRight, new Vector2(1f, 1f), new Vector2(-18f, -14f), new Vector2(840f, 30f));
         evoHint.overflowMode = TextOverflowModes.Ellipsis;
@@ -553,7 +553,7 @@ public class StageShortcutPrep : MonoBehaviour
     }
 
     /// <summary>상위 무기 띠의 카드 한 장 (340 × 140).</summary>
-    void EvoCard(Sprite icon, string title, string tag, string steps, string price, Sprite priceIcon, Action onBuy)
+    void EvoCard(Sprite icon, string title, string tag, string steps, string price, Sprite priceIcon, Action onBuy, float priceWidth = 150f, float priceSize = 20f)
     {
         Image card = NewImage("EvoCard", evoContent, new Color(0.20f, 0.17f, 0.09f, 1f));
         var le = card.gameObject.AddComponent<LayoutElement>();
@@ -580,7 +580,7 @@ public class StageShortcutPrep : MonoBehaviour
                            new Vector2(0f, 1f), new Vector2(left, -40f), new Vector2(360f - left - 10f, 46f));
         d.textWrappingMode = TextWrappingModes.Normal;
         d.overflowMode = TextOverflowModes.Ellipsis;
-        MakeButton(card.transform, "Buy", price, 20f, new Vector2(1f, 0f), new Vector2(-10f, 8f), new Vector2(150f, 40f), ButtonFrame, ButtonFill, onBuy, true, priceIcon, GoldColor);
+        MakeButton(card.transform, "Buy", price, priceSize, new Vector2(1f, 0f), new Vector2(-10f, 8f), new Vector2(priceWidth, 40f), ButtonFrame, ButtonFill, onBuy, true, priceIcon, GoldColor);
     }
 
     void EvoNote(string text)
@@ -741,7 +741,11 @@ public class StageShortcutPrep : MonoBehaviour
             if (p.Cost > gold) { later.Add($"{p.Evolution.Title} {p.Cost}"); continue; }
             WeaponEvolutionData e = p.Evolution;
             Sprite icon = e.result != null && e.result.icon != null ? e.result.icon : e.from != null ? e.from.icon : null;
-            EvoCard(icon, e.Title, "바로 얻기", p.Steps, p.Cost > 0 ? $"{p.Cost}" : "무료", p.Cost > 0 ? coinIcon : null, () => BuyPlan(e));
+            // 짝 스킬을 경험치로 사면 단추에 경험치도 (골드 0 이면 경험치만 · 코인 그림 없이)
+            string price = p.Cost > 0 ? $"{p.Cost}" : p.ExpCost > 0 ? "" : "무료";
+            if (p.ExpCost > 0) price += (price.Length > 0 ? " + " : "") + $"<color=#76E0FF>경험치 {p.ExpCost}</color>";
+            bool both = p.Cost > 0 && p.ExpCost > 0;
+            EvoCard(icon, e.Title, "바로 얻기", p.Steps, price, p.Cost > 0 ? coinIcon : null, () => BuyPlan(e), both ? 210f : 150f, both ? 17f : 20f);
             shown++;
         }
 
@@ -1101,7 +1105,8 @@ public class StageShortcutPrep : MonoBehaviour
     public struct EvolutionPlan
     {
         public WeaponEvolutionData Evolution;
-        public int Cost;
+        public int Cost;      // 골드
+        public int ExpCost;   // 경험치 — 짝 스킬을 레벨업 카드 값으로 살 때 (2026-11-25)
         public string Steps;
     }
 
@@ -1227,15 +1232,32 @@ public class StageShortcutPrep : MonoBehaviour
         }
         if (e.requiredSkill != null && !SkillPairs.Has(player, e.requiredSkill))
         {
-            int skillPrice = Scaled(catalog.skillPairPrice);   // 정비 창 짝 스킬 값 — 레벨업 카드(경험치)로 먼저 사면 그만큼 싸진다
-            plan.Cost += skillPrice;
-            bool byCard = stats != null && stats.currentExp >= e.requiredSkill.CostFor(UpgradeManager.LevelOf(e.requiredSkill.effect) + 1);
-            steps.Add(byCard ? $"{SkillPairs.NameOf(e.requiredSkill)} (카드로 사면 −{skillPrice})" : SkillPairs.NameOf(e.requiredSkill));
+            // 2026-11-25 사용자: "경험치로 살 수 있는 부분을 억지로 골드로 사지 말고 경험치로 먼저 (경험치가 없으면 골드로)" —
+            // 짝 스킬은 레벨업 카드 값(경험치)으로 먼저, 경험치가 모자라면 정비 창 짝 스킬 값(골드)으로
+            int cardCost = SkillCardCost(e.requiredSkill);
+            if (cardCost > 0 && stats != null && stats.currentExp >= cardCost)
+            {
+                plan.ExpCost += cardCost;
+                steps.Add($"{SkillPairs.NameOf(e.requiredSkill)} (경험치 {cardCost})");
+            }
+            else
+            {
+                plan.Cost += Scaled(catalog.skillPairPrice);
+                steps.Add($"{SkillPairs.NameOf(e.requiredSkill)} (골드 — 경험치 {cardCost} 모자람)");
+            }
         }
 
         if (e.shopPrice > 0) plan.Cost += Scaled(e.shopPrice);
         plan.Steps = (steps.Count > 0 ? string.Join(" · ", steps) : "조건 충족") + $" → {e.Title}";
         return true;
+    }
+
+    /// <summary>짝 스킬 레벨업 카드 한 단계의 경험치 (레벨업 창 · 이 창 카드와 같은 값). 최대 레벨이면 0.</summary>
+    static int SkillCardCost(UpgradeData card)
+    {
+        if (card == null || card.effect == null) return 0;
+        int level = UpgradeManager.LevelOf(card.effect);
+        return card.IsMaxed(level) ? 0 : card.CostFor(level + 1);
     }
 
     /// <summary>상위 무기 바로 얻기 (시험도 부른다). 중간에 실패하면 그때까지 산 것만 값을 낸다.</summary>
@@ -1247,11 +1269,12 @@ public class StageShortcutPrep : MonoBehaviour
         if (at < 0) { Message("지금은 얻을 수 없는 상위 무기", Warn); Refresh(); return false; }
         EvolutionPlan plan = plans[at];
         if (wallet == null || !wallet.CanSpend(plan.Cost)) { Message($"골드 부족 — {plan.Cost} 필요", Warn); return false; }
+        if (plan.ExpCost > 0 && (stats == null || stats.currentExp < plan.ExpCost)) { Message($"경험치 부족 — {plan.ExpCost} 필요", Warn); return false; }
 
         WeaponController weapons = ctx.Weapons;
         SubAbilitySlot slot = EvolutionService.AbilitiesOf(player);
         WeaponData from = e.from;
-        int spent = 0;
+        int spent = 0, expSpent = 0;
         bool ok = false;
 
         do
@@ -1303,8 +1326,12 @@ public class StageShortcutPrep : MonoBehaviour
             }
             if (e.requiredSkill != null && !SkillPairs.Has(player, e.requiredSkill))
             {
+                // 경험치로 먼저 (계획과 같게) — 카드 한 단계 = 레벨업 창에서 산 것과 같다 (BuyCard)
+                int cardCost = SkillCardCost(e.requiredSkill);
+                bool byExp = plan.ExpCost > 0 && cardCost > 0 && stats.currentExp >= cardCost;
                 if (UpgradeManager.GrantFree(player, e.requiredSkill) <= 0) break;
-                spent += Scaled(catalog.skillPairPrice);
+                if (byExp) { stats.SpendExp(cardCost); expSpent += cardCost; }
+                else spent += Scaled(catalog.skillPairPrice);
             }
 
             // 3) 진화 — 정비 창 '상위 무기' 카드와 같은 길 (연출 포함)
@@ -1314,7 +1341,8 @@ public class StageShortcutPrep : MonoBehaviour
         } while (false);
 
         if (spent > 0) wallet.TrySpend(Mathf.Min(spent, wallet.Balance));
-        Message(ok ? $"{e.Title} 획득 — {plan.Steps}" : $"{e.Title} — 중간에 막혔습니다 (산 것까지만 골드 {spent})", ok ? GoldColor : Warn);
+        string paid = $"골드 {spent}" + (expSpent > 0 ? $" · 경험치 {expSpent}" : "");
+        Message(ok ? $"{e.Title} 획득 ({paid}) — {plan.Steps}" : $"{e.Title} — 중간에 막혔습니다 (산 것까지만 {paid})", ok ? GoldColor : Warn);
         Refresh();
         return ok;
     }
