@@ -419,13 +419,16 @@ public class LobbyScreen : MonoBehaviour
     {
         if (previewCaption == null) return;
 
+        // 2026-11-25 — 상세 모드에서 상위 무기 설명이 칸(두 줄)을 넘쳐 아래 능력치 막대를 덮었다 (혈검 · 도깨비 방망이 · 묠니르).
+        // 다른 카드 글처럼 칸에 맞춰 줄이고(원래 크기의 62% 까지, 그래도 넘치면 말줄임) 낱말 가운데에서 줄이 꺾이지 않게
+        UiTextFit.Box(previewCaption);
         previewCaption.text = e != null
             ? string.Format(
                 evolvedCaption,
                 $"<color=#{ColorUtility.ToHtmlStringRGB(e.color)}>{e.Title}</color>",
-                e.result != null
+                UiTextFit.KeepWords(e.result != null
                     ? DescriptionMode.Pick(e.result.brief, e.result.description)
-                    : DescriptionMode.Pick(e.brief, (e.flavor ?? "").Split('\n')[0])
+                    : DescriptionMode.Pick(e.brief, (e.flavor ?? "").Split('\n')[0]))
               )
             : dragCaption;
     }
