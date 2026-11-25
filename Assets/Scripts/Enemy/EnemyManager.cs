@@ -28,7 +28,21 @@ public class EnemyManager : MonoBehaviour
     [System.NonSerialized] public bool waitForBossFight;
     /// <summary>꺼져 있으면 몬스터가 경험치 구슬 · 코인을 떨어뜨리지 않는다 (보스 스테이지).</summary>
     [System.NonSerialized] public bool dropRewards = true;
+    /// <summary>경험치 구슬 값 배율 — StageManager 가 StageData.expMultiplier 로 채운다 (2026-11-25, 처치 목표를 늘린 스테이지).</summary>
+    [System.NonSerialized] public float expMultiplier = 1f;
     bool bossFighting;
+
+    // 2026-11-25 사용자: "예전엔 근접이 훨씬 많았는데 지금 원거리가 너무 많이 나온다" — 원거리(C · E)는 멀리서 쏘고 잘 안 잡혀서,
+    // 동시 최대 수에 닿으면 근접만 잡히고 그 빈자리를 등장 비율대로 채우는 동안 원거리가 계속 쌓였다
+    // (측정 kept_RangedMixCheck, 하드 · 회전 기관포: 스테이지 2 설정 10% → 2분 뒤 살아 있는 몬스터의 24% · 스테이지 3 15% → 29%).
+    // 켜져 있으면 살아 있는 원거리가 그 종류의 등장 비율만큼 차 있을 때 이번에는 그 종류를 빼고 고른다 — 근접끼리는 비율 그대로.
+    /// <summary>살아 있는 원거리 몬스터가 등장 비율을 넘지 않게 한다 (시험에서 끄고 비교한다).</summary>
+    [System.NonSerialized] public bool capRangedShare = true;
+    /// <summary>원거리가 비율만큼 차서 다른 몬스터로 바꿔 내보낸 횟수 (시험).</summary>
+    public int RangedCapSkips { get; private set; }
+    readonly Dictionary<Enemy, bool> rangedPrefab = new Dictionary<Enemy, bool>();
+    readonly Dictionary<EnemyData, int> aliveByData = new Dictionary<EnemyData, int>();
+    int[] pickWeights;
 
     [Header("Stage Event")]
     [Tooltip("Stage2에서 자동으로 로드되는 특수 몬스터. 다른 스테이지에서는 비워 둔다.")]
@@ -230,17 +244,82 @@ public class EnemyManager : MonoBehaviour
         if (totalWeight <= 0)
             return enemyPrefabs[0];
 
-        int random = Random.Range(0, totalWeight);
-
-        foreach (var prefab in enemyPrefabs)
+        // 살아 있는 원거리가 비율만큼 차 있는 종류는 이번에 빼고 고른다 (2026-11-25) — 모두 빠지면 원래 비율 그대로
+        if (pickWeights == null || pickWeights.Length != enemyPrefabs.Length) pickWeights = new int[enemyPrefabs.Length];
+        CountAlive();
+        int pickTotal = 0;
+        bool skipped = false;
+        for (int i = 0; i < enemyPrefabs.Length; i++)
         {
-            random -= WeightOf(prefab);
+            int weight = WeightOf(enemyPrefabs[i]);
+            if (weight > 0 && RangedFull(enemyPrefabs[i], weight, totalWeight)) { weight = 0; skipped = true; }
+            pickWeights[i] = weight;
+            pickTotal += weight;
+        }
+        if (pickTotal <= 0)
+        {
+            for (int i = 0; i < enemyPrefabs.Length; i++) pickWeights[i] = WeightOf(enemyPrefabs[i]);
+            pickTotal = totalWeight;
+            skipped = false;
+        }
+
+        int random = Random.Range(0, pickTotal);
+
+        for (int i = 0; i < enemyPrefabs.Length; i++)
+        {
+            random -= pickWeights[i];
 
             if (random < 0)
-                return prefab;
+            {
+                // 원거리를 빼서 다른 종류가 나왔을 때만 센다 (어차피 근접이 뽑혔을 차례는 세지 않는다 — 근사)
+                if (skipped) RangedCapSkips++;
+                return enemyPrefabs[i];
+            }
         }
 
         return enemyPrefabs[0];
+    }
+
+    /// <summary>살아 있는 몬스터 수를 종류별로 센다 (뽑을 때마다 — 최대 140마리라 가볍다).</summary>
+    int CountAlive()
+    {
+        aliveByData.Clear();
+        int alive = 0;
+        for (int i = 0; i < enemies.Count; i++)
+        {
+            Enemy e = enemies[i];
+            if (e == null || e.state == EnemyState.Dead || e.data == null) continue;
+            alive++;
+            aliveByData[e.data] = aliveByData.TryGetValue(e.data, out int n) ? n + 1 : 1;
+        }
+        aliveTotal = alive;
+        return alive;
+    }
+
+    int aliveTotal;
+
+    /// <summary>원거리 몬스터(원거리 · 레이저 공격)인가 — 프리팹마다 한 번만 본다.</summary>
+    public bool IsRanged(Enemy prefab)
+    {
+        if (prefab == null) return false;
+        if (!rangedPrefab.TryGetValue(prefab, out bool ranged))
+        {
+            ranged = prefab.GetComponentInChildren<RangedAttack>(true) != null || prefab.GetComponentInChildren<LaserAttack>(true) != null;
+            rangedPrefab[prefab] = ranged;
+        }
+        return ranged;
+    }
+
+    /// <summary>
+    /// 원거리이고, 살아 있는 그 종류가 등장 비율만큼 차 있는가 — (살아 있는 수 + 1) × 비율을 올림한 수 (적어도 1마리).
+    /// 예: 스테이지 3 의 C(8%)는 140마리 중 12마리까지.
+    /// </summary>
+    bool RangedFull(Enemy prefab, int weight, int totalWeight)
+    {
+        if (!capRangedShare || prefab == null || prefab.data == null || !IsRanged(prefab)) return false;
+        int same = aliveByData.TryGetValue(prefab.data, out int n) ? n : 0;
+        int allowed = Mathf.Max(1, (weight * (aliveTotal + 1) + totalWeight - 1) / totalWeight);   // 올림 (정수로 — 소수 오차 없이)
+        return same >= allowed;
     }
 
     /// <summary>이 몬스터의 등장 비율 — 스테이지 목록이 있으면 그 값(없는 몬스터는 0), 없으면 몬스터 데이터의 값.</summary>

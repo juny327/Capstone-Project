@@ -36,6 +36,7 @@ public class StageManager : MonoBehaviour
         // 보스 스테이지 (2026-11-23) — 잡몹은 보스가 깨어난 뒤에만 · 몬스터는 경험치 · 코인을 떨어뜨리지 않는다
         EnemyManager.Instance.waitForBossFight = currentStage.spawnDuringBossFight;
         EnemyManager.Instance.dropRewards = currentStage.enemyRewards;
+        EnemyManager.Instance.expMultiplier = currentStage.expMultiplier;   // 2026-11-25 처치 목표를 늘린 스테이지의 경험치 배율
         GameEvents.OnStageProgress?.Invoke(killCount, killTarget);
     }
 

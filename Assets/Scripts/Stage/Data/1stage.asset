@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StageData
   stageIndex: 1
   killTarget: 60
+  expMultiplier: 1
   maxEnemyCount: 50
   spawnInterval: 1.4
   rangedProjectileSpeed: 6
