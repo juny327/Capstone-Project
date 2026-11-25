@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: WD_EVO_AchillesSpear
   m_EditorClassIdentifier: Assembly-CSharp::MeleeWeaponData
   weaponName: "\uC544\uD0AC\uB808\uC6B0\uC2A4\uC758 \uCC3D"
-  brief: "4\uBC88\uC9F8 \uCC0C\uB974\uAE30\uC5D0 \uCC3D \uD22C\uCC99"
-  description: "\uB124 \uBC88\uC9F8 \uCC0C\uB974\uAE30\uB9C8\uB2E4 \uCC3D\uC744 \uB358\uC9C4\uB2E4
-    \u2014 \uAFF0\uB6AB\uACE0, \uB358\uC9C4 \uAC70\uB9AC \uB05D\uC5D0\uC11C \uCE90\uB9AD\uD130
-    \uB458\uB808\uB97C \uB450 \uBC14\uD034 \uB3CC\uBA70 \uBCA4 \uB4A4 \uC190\uC73C\uB85C
-    \uB3CC\uC544\uC628\uB2E4"
+  brief: "\uB124 \uBC88\uC9F8 \uACF5\uACA9\uB9C8\uB2E4 \uCC3D\uC744 \uD22C\uCC99"
+  description: "\uB124 \uBC88\uC9F8 \uCC0C\uB974\uAE30\uB9C8\uB2E4 \uCC3D\uC744 \uB358\uC9C4\uB2E4.
+    \uCC3D\uC740 \uC801\uC744 \uAFF0\uB6AB\uACE0 \uC0AC\uAC70\uB9AC \uB05D\uC5D0\uC11C
+    \uCE90\uB9AD\uD130 \uC8FC\uC704\uB97C \uB450 \uBC14\uD034 \uB3C8 \uB4A4 \uC190\uC73C\uB85C
+    \uB3CC\uC544\uC628\uB2E4."
   icon: {fileID: 21300000, guid: 839b31b3be0a11d4696e22e263703ff3, type: 3}
   weaponPrefab: {fileID: 5825881266557484979, guid: 8ad3475308e11584d9baf539eef8da7e, type: 3}
   socket: 0

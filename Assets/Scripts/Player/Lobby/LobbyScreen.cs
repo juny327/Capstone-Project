@@ -105,19 +105,19 @@ public class LobbyScreen : MonoBehaviour
     [Header("글")]
     [SerializeField] private string rangedRole = "원거리 캐릭터";
     [SerializeField] private string meleeRole = "근거리 캐릭터";
-    [SerializeField] private string rollText = "<color=#9AA3BD>회피</color>  구르기 — 무적으로 재빨리 굴러 빠진다";
-    [SerializeField] private string parryText = "<color=#9AA3BD>회피</color>  패링 — 밀쳐 내고 탄을 쳐 낸다 · 성공하면 떠 있는 무기가 반격";
-    [SerializeField] private string gunnerSpecial = "<color=#9AA3BD>특기</color>  보조 무기 3칸 — 얻은 총이 떠서 스스로 쏜다";
+    [SerializeField] private string rollText = "<color=#9AA3BD>회피</color>  구르기 — 짧은 시간 무적 상태로 굴러 적의 공격을 피한다";
+    [SerializeField] private string parryText = "<color=#9AA3BD>회피</color>  패링 — 적을 밀쳐내고 탄환을 튕겨낸다. 성공하면 공중의 무기가 반격한다";
+    [SerializeField] private string gunnerSpecial = "<color=#9AA3BD>특기</color>  보조 무기 3칸 — 획득한 무기가 주변 적을 자동으로 공격한다";
     [Tooltip("{0} = 서브 능력 칸 수")]
     [SerializeField] private string swordsmanSpecial = "<color=#9AA3BD>특기</color>  서브 능력 {0}칸 — 정비 창에서 얻는다";
     [SerializeField] private string dragCaption = "◀  끌어서 돌려 보기  ▶";
     [Tooltip("{0} = 상위 무기 이름 (색 포함), {1} = 설명 첫 줄")]
     [SerializeField] private string evolvedCaption = "{0}  <color=#C9CEDB>{1}</color>";
-    [SerializeField] private string noRecipeText = "이 무기의 상위 무기는 준비 중이다";
+    [SerializeField] private string noRecipeText = "상위 무기 준비중";
     [Tooltip("{0} = 캐릭터 이름, {1} = 요약 (' · ' 마다 줄을 바꾼다), {2} = 조사 붙은 이름")]
     [SerializeField] private string blurbFormat = "<size=120%>{0}</size>\n<color=#9AA3BD>{1}</color>\n\n무기를 누르면 {2} 바뀐다";
     [Tooltip("조합식 줄 설명 글자 수 (넘으면 … 로 줄인다)")]
-    [Min(8)] [SerializeField] private int recipeLineMax = 14;
+    [Min(8)][SerializeField] private int recipeLineMax = 14;
 
     [Header("색")]
     [SerializeField] private Color selectedFrame = new Color(1f, 0.82f, 0.3f, 1f);
@@ -129,7 +129,7 @@ public class LobbyScreen : MonoBehaviour
     [SerializeField] private Color rowNormal = new Color(0.09f, 0.1f, 0.19f, 0.95f);
     [SerializeField] private Color rowHover = new Color(0.16f, 0.17f, 0.3f, 1f);
     [Tooltip("능력치 막대 — 두 캐릭터 중 가장 큰 값이 이만큼 찬다")]
-    [Range(0.3f, 1f)] [SerializeField] private float statBarBest = 0.9f;
+    [Range(0.3f, 1f)][SerializeField] private float statBarBest = 0.9f;
 
     private readonly List<WeaponEvolutionData> recipes = new List<WeaponEvolutionData>();
     private WeaponEvolutionData hovered;
@@ -420,7 +420,13 @@ public class LobbyScreen : MonoBehaviour
         if (previewCaption == null) return;
 
         previewCaption.text = e != null
-            ? string.Format(evolvedCaption, $"<color=#{ColorUtility.ToHtmlStringRGB(e.color)}>{e.Title}</color>", DescriptionMode.Pick(e.brief, (e.flavor ?? "").Split('\n')[0]))
+            ? string.Format(
+                evolvedCaption,
+                $"<color=#{ColorUtility.ToHtmlStringRGB(e.color)}>{e.Title}</color>",
+                e.result != null
+                    ? DescriptionMode.Pick(e.result.brief, e.result.description)
+                    : DescriptionMode.Pick(e.brief, (e.flavor ?? "").Split('\n')[0])
+              )
             : dragCaption;
     }
 

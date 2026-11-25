@@ -13,9 +13,11 @@ MonoBehaviour:
   m_Name: WD_Drone
   m_EditorClassIdentifier: Assembly-CSharp::DroneWeaponData
   weaponName: "\uB4DC\uB860"
-  brief: "\uC8FC\uC704\uB97C \uB3CC\uBA70 \uC790\uB3D9 \uC0AC\uACA9"
-  description: "\uC8FC\uC704\uB97C \uB3CC\uBA70 \uC790\uB3D9 \uC0AC\uACA9. \uB808\uBCA8
-    = \uB4DC\uB860 \uC218"
+  brief: "\uB4DC\uB860\uC774 \uC8FC\uC704\uB97C \uB3CC\uBA70 \uC790\uB3D9\uC73C\uB85C
+    \uC801\uC744 \uACF5\uACA9"
+  description: "\uD50C\uB808\uC774\uC5B4 \uC8FC\uC704\uB97C \uB3CC\uBA70 \uC790\uB3D9
+    \uC0AC\uACA9\uD55C\uB2E4. \uB808\uBCA8\uC774 \uC624\uB97C\uC218\uB85D \uB4DC\uB860
+    \uC218\uAC00 \uC99D\uAC00\uD55C\uB2E4."
   icon: {fileID: 21300000, guid: 254d946975cd54c4d8c0cfe57a88e3b9, type: 3}
   weaponPrefab: {fileID: 1993795525855743618, guid: 927753c13baf15f4ab57abe40958a474, type: 3}
   socket: 3

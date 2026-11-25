@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: WD_EVO_SunLance
   m_EditorClassIdentifier: Assembly-CSharp::ChargeBeamWeaponData
   weaponName: "\uD0DC\uC591\uCC3D"
-  brief: "\uBAA8\uC744\uC218\uB85D \uAE38\uC5B4\uC9C0\uB294 \uBE5B \uAE30\uB465"
-  description: "\uBAA8\uC73C\uB294 \uB3D9\uC548 \uC0AC\uAC70\uB9AC\uAC00 10m \u2192
-    32m \uB85C \uB298\uC5B4\uB098\uB294 \uD55C \uBC29 \u2014 \uAD75\uC740 \uBE5B
-    \uAE30\uB465 + \uD654\uC0C1"
+  brief: "\uCDA9\uC804\uD560\uC218\uB85D \uAE38\uC5B4\uC9C0\uB294 \uBE5B\uC758 \uCC3D"
+  description: "\uCDA9\uC804 \uC2DC\uAC04\uC5D0 \uB530\uB77C \uC0AC\uAC70\uB9AC\uAC00
+    10m\uC5D0\uC11C 32m\uAE4C\uC9C0 \uC99D\uAC00\uD55C\uB2E4. \uAC15\uB825\uD55C
+    \uBE5B \uAE30\uB465\uC73C\uB85C \uC801\uC744 \uD0DC\uC6B4\uB2E4."
   icon: {fileID: 21300000, guid: 987f509586f38c2419ec7f1673d14816, type: 3}
   weaponPrefab: {fileID: 1597846053522236169, guid: 00b0b894f53fcc348a817c2998ac600d, type: 3}
   socket: 0
