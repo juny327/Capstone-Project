@@ -128,6 +128,8 @@ public class DragonEntrance : MonoBehaviour
     IEnumerator Start()
     {
         yield return null;   // GameAppManager 가 플레이어를 시작 자리에 세운 뒤
+        // 스테이지 바로 가기로 들어왔으면 출전 준비가 끝날 때까지 (2026-11-25) — 준비 창도 캔버스라 Setup 이 HUD 와 함께 숨기면 안 된다
+        while (StageShortcut.Preparing) yield return null;
         Setup();
         // 2026-11-18 성능 — 준비(장면 훑기 · 캔버스 · 조명 찾기 · 연출 오브젝트 만들기, 80 ~ 100ms)는 입장 가림막이
         // 덮인 동안 끝내고, 연출은 가림막이 걷히기 시작할 때 시작한다 (가림막 없이 들어오면 바로)

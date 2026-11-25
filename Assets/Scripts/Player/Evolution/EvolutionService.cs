@@ -29,10 +29,16 @@ public static class EvolutionService
         {
             int from = UnlockStage;
             if (from <= 1) return true;
-            int stage = CurrentStage();
+            int stage = StageOverride > 0 ? StageOverride : CurrentStage();
             return stage <= 0 || stage >= from;
         }
     }
+
+    /// <summary>
+    /// 스테이지 바로 가기의 출전 준비 동안 (2026-11-25) — '지금 스테이지' 대신 방금 클리어한 스테이지(들어갈 스테이지 − 1)로 본다.
+    /// 스테이지 2 로 바로 가면 스테이지 1 클리어 정비와 같아 상위 무기가 아직 잠겨 있다. 0 = 쓰지 않음 (출발하면 0 으로 돌아간다).
+    /// </summary>
+    public static int StageOverride { get; set; }
 
     /// <summary>상위 무기가 열리는 스테이지 (ShopCatalog.evolutionFromStage, 없으면 1).</summary>
     public static int UnlockStage
@@ -61,7 +67,11 @@ public static class EvolutionService
     }
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-    static void ResetStageCache() => cachedScene = int.MinValue;
+    static void ResetStageCache()
+    {
+        cachedScene = int.MinValue;
+        StageOverride = 0;
+    }
 
     /// <summary>조건을 다시 보고 진화시킨다. 성공하면 연출을 건다.</summary>
     public static bool TryEvolve(GameObject player, WeaponEvolutionData evolution)
