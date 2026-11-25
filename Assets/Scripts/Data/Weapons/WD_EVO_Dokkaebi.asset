@@ -1,3 +1,4 @@
+
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
@@ -13,11 +14,8 @@ MonoBehaviour:
   m_Name: WD_EVO_Dokkaebi
   m_EditorClassIdentifier: Assembly-CSharp::MeleeWeaponData
   weaponName: "\uB3C4\uAE68\uBE44 \uBC29\uB9DD\uC774"
-  brief: "'\uB69D\uB531' \uCF54\uC778 \xB7 \uB3C4\uAE68\uBE44\uBD88"
-  description: "\uB2E4\uC12F \uBC88\uC9F8 \uD718\uB450\uB974\uAE30\uB9C8\uB2E4 '\uB69D\uB531!'
-    \uCF54\uC778 (\uC2A4\uD14C\uC774\uC9C0\uB9C8\uB2E4 12\uAC1C), \uD480\uC2A4\uC719\uC740
-    \uB3C4\uAE68\uBE44\uBD88\uC744 \uB0A0\uB824 \uBA40\uB9AC\uC11C \uB9DE\uD790\uC218\uB85D
-    \uAC15\uD55C \uD53C\uD574\uB97C \uC900\uB2E4."
+  brief: "뚝딱 코인 · 도깨비불"
+  description: "다섯 번째 적중마다 코인을 얻는다(스테이지당 최대 12개). 풀스윙 시 도깨비불을 퍼뜨려 적을 느리게 하고 지속 피해를 준다."
   icon: {fileID: 21300000, guid: 21cfe8675bd9ef24a9f10f898583223e, type: 3}
   weaponPrefab: {fileID: 5825881266557484979, guid: 5958bb94c80ac2045b0978133d3a889d, type: 3}
   socket: 0
