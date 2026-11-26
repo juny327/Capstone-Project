@@ -217,6 +217,7 @@ public class WeaponController : MonoBehaviour
 
     // 패링 모션 동안 손 무기 발사를 멈춘다
     private float suppressFireUntil;
+    PlayerMove mover;   // 구르기 · 추스르기 동안 손 무기를 쉬게 (2026-11-26)
 
     // 서브 능력 칸 (검사). 있으면 E 는 그쪽이 쓴다
     private SubAbilitySlot abilitySlot;
@@ -1222,6 +1223,10 @@ public class WeaponController : MonoBehaviour
 
             // 패링 모션 중에는 휘두르지 않는다 (쿨다운 Tick 은 위에서 이미 돌았다)
             if (Time.time < suppressFireUntil) continue;
+
+            // 구르는 중 · 구른 뒤 추스르는 중 · 아직 조준 쪽으로 돌아서지 못했으면 쏘지 않는다 (2026-11-26 — 구른 방향으로 쏘던 것)
+            if (mover == null) mover = GetComponent<PlayerMove>();
+            if (mover != null && mover.HoldsAttack) continue;
 
             if (!w.CanFire)
             {
