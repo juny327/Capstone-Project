@@ -31,6 +31,12 @@ public class WeaponPurchaseOffer : ShopOffer
     readonly WeaponData weapon;
     readonly bool support;
 
+    /// <summary>이번 정비에서 이 카드로 담은 무기 인스턴스. 다시 눌러 취소할 때만 사용한다.</summary>
+    public IWeapon PurchasedWeapon { get; private set; }
+
+    internal void RecordPurchase(IWeapon purchasedWeapon) => PurchasedWeapon = purchasedWeapon;
+    internal void ClearPurchase() => PurchasedWeapon = null;
+
     public WeaponPurchaseOffer(WeaponData weapon, int price, bool support = false)
     {
         this.weapon = weapon;

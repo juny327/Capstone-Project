@@ -54,6 +54,28 @@ public partial class DragonBoss
     /// <summary>바닥 높이로 내린 자리.</summary>
     Vector3 Ground(Vector3 at) => new Vector3(at.x, transform.position.y, at.z);
 
+    /// <summary>기존 효과 프리팹을 씬 단위 FxPool에서 재사용한다. 색은 새로 만들 때만 입혀 반복 재생 시 퇴색하지 않게 한다.</summary>
+    void PrewarmBossVfx(GameObject prefab, Color tint, int count)
+    {
+        if (prefab == null) return;
+        FxPool.Prewarm(prefab, FxPool.ColorKey(tint), count,
+            fx => ConfigureBossVfx(fx, tint), transform.position);
+    }
+
+    bool PlayBossVfx(GameObject prefab, Vector3 at, Color tint, float scale, float lifetime)
+    {
+        if (!Staged || !stage.attackFx || prefab == null) return false;
+        FxPool.Spawn(prefab, FxPool.ColorKey(tint), at + Vector3.up * 0.3f, Quaternion.identity,
+            scale * FxScale, lifetime, fx => ConfigureBossVfx(fx, tint));
+        return true;
+    }
+
+    static void ConfigureBossVfx(GameObject fx, Color tint)
+    {
+        EvoStrikes.Tint(fx, tint);
+        EvoStrikes.ThinSmoke(fx, 0.4f, 0.55f);
+    }
+
     void LoadStaging()
     {
         var settings = Resources.Load<DragonBossSettings>(DragonBossSettings.ResourcePath);
@@ -135,7 +157,10 @@ public partial class DragonBoss
         Vector3 f = Flat(forward).normalized;
         Vector3 at = origin + f * Mathf.Lerp(biteNear, biteFar, 0.8f) + Vector3.up * 1.1f;
         float s = FxScale * (chain ? 0.85f : 1f);
-        FxKit.EnergyBurst(Ground(at), 2.6f * bodyScale, HotColor, 1.2f * s);
+        bool prefabImpact = !chain && current != Pattern.GroundBite &&
+            PlayBossVfx(impactVfxPrefab, at, HotColor, 2.8f * bodyScale, 1.6f);
+        // 프리팹 타격 섬광 위에 짧은 중심 플래시를 겹쳐 턱이 닫히는 순간을 강조한다.
+        FxKit.EnergyBurst(Ground(at), (prefabImpact ? 1.8f : 2.6f) * bodyScale, HotColor, (prefabImpact ? 0.9f : 1.2f) * s);
         FxKit.ClawMark(at, 6.5f * bodyScale * s, FireColor, 0.3f);
         FxKit.ClawMark(at + Vector3.up * 0.4f, 4.5f * bodyScale * s, Color.white, 0.18f);
         FxKit.Spray(at, f, EmberColor, 34f * s, 13f, 0.85f);
@@ -153,7 +178,9 @@ public partial class DragonBoss
         float s = FxScale;
         FxKit.Explosion(slam, radius * 0.5f, FireColor, 1.15f * s);
         FxKit.BigShockwave(slam, radius * 0.75f, HotColor);
-        FxKit.Shockwave(slam, radius * 2.3f, Color.white, 0.4f, 0.9f);
+        // 기존 충격파의 지름과 같은 크기로 펼쳐져 공격 범위가 화면에서 읽히게 한다.
+        if (!PlayBossVfx(shockwaveVfxPrefab, Ground(slam), HotColor, radius * 2.3f, 1.8f))
+            FxKit.Shockwave(slam, radius * 2.3f, Color.white, 0.4f, 0.9f);
         FxKit.Wave(slam, radius * 3f, FireColor, 0.65f, 0.6f);
         FxKit.Debris(slam, radius * 0.7f, 14f * s);
         FxKit.Mist(slam + Vector3.up * 0.8f, radius * 0.8f, DustColor, 0.5f, 10f * s, 1.4f);
@@ -252,7 +279,9 @@ public partial class DragonBoss
         if (!FxOn) return;
         float s = FxScale;
         Vector3 at = transform.position + forward * (chargeFront * 0.8f);
-        FxKit.Explosion(at, 3.2f * bodyScale, FireColor, 1.25f * s);
+        if (!PlayBossVfx(explosionVfxPrefab, at, FireColor, 4f * bodyScale, 3.2f))
+            FxKit.Explosion(at, 3.2f * bodyScale, FireColor, 1.25f * s);
+        FxKit.EnergyBurst(at, 2.6f * bodyScale, HotColor, 1.25f * s, true);
         FxKit.BigShockwave(at, 4.2f * bodyScale, HotColor);
         FxKit.Debris(at, 2.6f * bodyScale, 18f * s);
         FxKit.Spray(at + Vector3.up, -forward + Vector3.up * 0.6f, HotColor, 26f * s, 12f, 1f);
@@ -264,8 +293,8 @@ public partial class DragonBoss
     void FxRainFall(Vector3 point)
     {
         if (!FxOn) return;
-        FxKit.Pillar(point, rainRadius * 0.55f, 13f, FireColor, 0.42f, 6);
-        FxKit.Disc(point, rainRadius * 2f, HotColor, 0.4f, 0.7f);
+        FxKit.Pillar(point, rainRadius * 0.8f, 18f, FireColor, 0.5f, 9);
+        FxKit.Disc(point, rainRadius * 3f, HotColor, 0.5f, 0.85f);
     }
 
     /// <summary>불비 착탄 — 폭발 · 그을음.</summary>
@@ -273,10 +302,10 @@ public partial class DragonBoss
     {
         if (!FxOn) return;
         float s = FxScale;
-        FxKit.Explosion(point, rainRadius * 0.9f, FireColor, 1.1f * s);
-        FxKit.FlameRing(point, rainRadius * 0.8f, FireColor, 7f * s, 2.4f, 0.45f);
-        FxKit.Shockwave(point, rainRadius * 3.6f, Color.white, 0.36f, 0.85f);
-        FxKit.Debris(point, rainRadius * 0.7f, 6f * s);
+        FxKit.Explosion(point, rainRadius * 1.35f, FireColor, 1.2f * s);
+        FxKit.FlameRing(point, rainRadius * 1.15f, FireColor, 10f * s, 2.8f, 0.5f);
+        FxKit.Shockwave(point, rainRadius * 5.2f, HotColor, 0.42f, 0.95f);
+        FxKit.Debris(point, rainRadius, 10f * s);
     }
 
     /// <summary>꼬리가 돌기 시작한다 — 꼬리를 따라 도는 소용돌이 · 큰 베기 호 · 밀려 나가는 먼지.</summary>
@@ -403,7 +432,8 @@ public partial class DragonBoss
         float s = FxScale, r = leapRadius;
         FxKit.Explosion(spot, r * 0.8f, FireColor, 1.3f * s);
         FxKit.BigShockwave(spot, r * 1.2f, HotColor);
-        FxKit.Shockwave(spot, r * 3.4f, Color.white, 0.42f, 0.9f);
+        if (!PlayBossVfx(shockwaveVfxPrefab, Ground(spot), HotColor, r * 3.4f, 1.8f))
+            FxKit.Shockwave(spot, r * 3.4f, Color.white, 0.42f, 0.9f);
         FxKit.Wave(spot, r * 4.2f, FireColor, 0.7f, 0.6f);
         FxKit.Debris(spot, r * 0.9f, 20f * s);
         FxKit.FlameRing(spot, r * 0.95f, FireColor, 16f * s, 3.4f, 0.55f);

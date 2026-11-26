@@ -85,9 +85,138 @@ public class ShopService
 
         Context.Wallet.TrySpend(offer.Price);
         offer.Sold = true;
+        if (offer is WeaponPurchaseOffer weaponPurchase)
+            weaponPurchase.RecordPurchase(Context.Weapons.Find(weaponPurchase.Weapon));
+        else if (offer is WeaponUpgradeOffer weaponUpgrade)
+            weaponUpgrade.RecordPurchase(Context.Weapons.Find(weaponUpgrade.Weapon));
 
         RefreshEvolutions();   // 마지막 강화 · 짝을 샀으면 상위 무기 칸이 켜진다
         OnChanged?.Invoke();
+        return true;
+    }
+
+    /// <summary>새 무기 카드가 다시 눌러 해제 가능한 상태인가.</summary>
+    public bool CanUndoWeaponPurchase(WeaponPurchaseOffer offer, out string reason)
+    {
+        reason = null;
+        if (offer == null || !offer.Sold || Context?.Weapons == null || Context.Wallet == null)
+        {
+            reason = "취소할 구매를 찾지 못했습니다";
+            return false;
+        }
+
+        IWeapon purchased = offer.PurchasedWeapon;
+        if (purchased == null || !ReferenceEquals(Context.Weapons.Find(offer.Weapon), purchased))
+        {
+            reason = "무기 상태가 바뀌어 취소할 수 없습니다";
+            return false;
+        }
+
+        if (purchased.Data == null || purchased.Data.IsEvolved || purchased.Level > 1)
+        {
+            reason = "강화한 무기는 취소할 수 없습니다";
+            return false;
+        }
+
+        for (int slot = 0; slot < AttachmentData.SlotCount; slot++)
+        {
+            if (purchased.GetAttachment((AttachmentSlot)slot) == null) continue;
+            reason = "개조한 무기는 취소할 수 없습니다";
+            return false;
+        }
+
+        bool isHeld = false;
+        foreach (IWeapon held in Context.Weapons.HeldWeapons)
+            if (ReferenceEquals(held, purchased)) { isHeld = true; break; }
+        if (isHeld && Context.Weapons.HeldWeapons.Count <= 1)
+        {
+            reason = "마지막 무기는 취소할 수 없습니다";
+            return false;
+        }
+
+        return true;
+    }
+
+    /// <summary>방금 담은 무기를 빼고 구입 크레딧을 돌려준다.</summary>
+    public bool TryUndoWeaponPurchase(WeaponPurchaseOffer offer, out string reason)
+    {
+        if (!CanUndoWeaponPurchase(offer, out reason)) return false;
+
+        IWeapon purchased = offer.PurchasedWeapon;
+        if (!Context.Weapons.RemoveFromMaintenance(purchased))
+        {
+            reason = "이 무기는 지금 해제할 수 없습니다";
+            return false;
+        }
+
+        Context.Wallet.Add(offer.Price);
+        offer.Sold = false;
+        offer.ClearPurchase();
+        RefreshEvolutions();
+        OnChanged?.Invoke();
+        reason = null;
+        return true;
+    }
+
+    /// <summary>강화 카드의 구매를 되돌릴 수 있는가.</summary>
+    public bool CanUndoWeaponUpgrade(WeaponUpgradeOffer offer, out string reason)
+    {
+        reason = null;
+        if (offer == null || !offer.Sold || Context?.Weapons == null || Context.Wallet == null)
+        {
+            reason = "취소할 강화를 찾지 못했습니다";
+            return false;
+        }
+
+        IWeapon purchased = offer.PurchasedWeapon;
+        if (purchased == null || !ReferenceEquals(Context.Weapons.Find(offer.Weapon), purchased)
+            || !ReferenceEquals(purchased.Data, offer.Weapon))
+        {
+            reason = "무기 상태가 바뀌어 강화를 취소할 수 없습니다";
+            return false;
+        }
+
+        if (purchased.Level != offer.FromLevel + 1)
+        {
+            reason = "무기 레벨이 바뀌어 이 강화를 취소할 수 없습니다";
+            return false;
+        }
+
+        if (purchased.Data.IsEvolved)
+        {
+            reason = "상위 무기로 진화한 강화는 취소할 수 없습니다";
+            return false;
+        }
+
+        for (int slot = 0; slot < AttachmentData.SlotCount; slot++)
+        {
+            AttachmentData attachment = purchased.GetAttachment((AttachmentSlot)slot);
+            if (attachment == null || attachment.minWeaponLevel <= offer.FromLevel) continue;
+            reason = "장착한 개조가 필요한 레벨이라 강화를 취소할 수 없습니다";
+            return false;
+        }
+
+        return true;
+    }
+
+    /// <summary>강화 한 단계를 되돌리고 구매 크레딧을 돌려준다.</summary>
+    public bool TryUndoWeaponUpgrade(WeaponUpgradeOffer offer, out string reason)
+    {
+        if (!CanUndoWeaponUpgrade(offer, out reason)) return false;
+
+        IWeapon purchased = offer.PurchasedWeapon;
+        if (!Context.Weapons.UndoMaintenanceUpgrade(purchased, offer.FromLevel))
+        {
+            reason = "이 강화는 지금 취소할 수 없습니다";
+            return false;
+        }
+
+        Context.Wallet.Add(offer.Price);
+        offer.Sold = false;
+        offer.ClearPurchase();
+        RefreshEvolutions();
+        OnChanged?.Invoke();
+        reason = null;
         return true;
     }
 

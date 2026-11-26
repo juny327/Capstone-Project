@@ -63,6 +63,14 @@ public partial class DragonBoss : MonoBehaviour
     [Tooltip("불덩이 — 몬스터 투사체(RangedProjectile)라 검사 패링으로 되받아칠 수 있다")]
     [SerializeField] GameObject fireballPrefab;
 
+    [Header("공격 VFX 프리팹")]
+    [Tooltip("물기 적중 지점에 재생하는 짧은 타격 효과")]
+    [SerializeField] GameObject impactVfxPrefab;
+    [Tooltip("땅 물기·도약 착지에 사용하는 큰 충격파")]
+    [SerializeField] GameObject shockwaveVfxPrefab;
+    [Tooltip("돌진이 벽에 부딪힐 때 사용하는 폭발")]
+    [SerializeField] GameObject explosionVfxPrefab;
+
     /// <summary>
     /// 불덩이 풀을 미리 채운다 (2026-11-18 성능 2단계) — 입장 가림막 아래에서 StageWarmup 이 부른다.
     /// 풀 설정에 불덩이가 없어, 처음 쏘는 순간 풀을 만들며 5개를 한꺼번에 생성해 끊겼다.
@@ -71,6 +79,11 @@ public partial class DragonBoss : MonoBehaviour
     {
         if (fireballPrefab != null && PoolManager.Instance != null)
             PoolManager.Instance.Prewarm(fireballPrefab, fireballs);
+
+        // 처음 맞거나 착지하는 순간의 파티클 초기화를 입장 연출 동안 끝내 둔다.
+        PrewarmBossVfx(impactVfxPrefab, HotColor, 2);
+        PrewarmBossVfx(shockwaveVfxPrefab, HotColor, 1);
+        PrewarmBossVfx(explosionVfxPrefab, FireColor, 1);
     }
 
     [Header("크기")]
@@ -366,7 +379,7 @@ public partial class DragonBoss : MonoBehaviour
         else if (distance <= midRange)
         {
             Add(Pattern.Breath, 3f); Add(Pattern.Fireball, 2f); Add(Pattern.Charge, 2f);
-            Add(Pattern.FireRain, 2f);
+            Add(Pattern.FireRain, tune.fireRainWeight.x);   // 불비를 전보다 자주 선택 (난이도 값 — 하드 5 · 이지 3.5, 예전 2)
             Add(Pattern.SweepBreath, 2.5f);
             if (distance <= groundBiteReach) Add(Pattern.GroundBite, 1.5f);
             Add(Pattern.FireWall, 2f); Add(Pattern.RingWave, 1.5f);
@@ -375,7 +388,7 @@ public partial class DragonBoss : MonoBehaviour
         else
         {
             Add(Pattern.Charge, 3f); Add(Pattern.Fireball, 3f);
-            Add(Pattern.FireRain, 3f);
+            Add(Pattern.FireRain, tune.fireRainWeight.y);   // 원거리에서도 불비 빈도를 높인다 (하드 6 · 이지 4.5, 예전 3)
             Add(Pattern.Leap, 3.5f); Add(Pattern.FireWall, 2f);   // 멀리서 걷기만 하면 뛰어든다
         }
         if (CanSummon()) Add(Pattern.Summon, 2f);
@@ -419,13 +432,13 @@ public partial class DragonBoss : MonoBehaviour
         _ => 1,
     };
 
-    static float Cooldown(Pattern p) => p switch
+    float Cooldown(Pattern p) => p switch
     {
         Pattern.DelayedBite => 4f,
         Pattern.Breath => 7f,
         Pattern.Fireball => 6f,
         Pattern.Charge => 6f,
-        Pattern.FireRain => 10f,
+        Pattern.FireRain => tune.fireRainCooldown,   // 하드 7.5 · 이지 8.75 (예전 10)
         Pattern.TailSweep => 5f,
         Pattern.Retreat => 9f,
         Pattern.Summon => 22f,
@@ -457,7 +470,7 @@ public partial class DragonBoss : MonoBehaviour
         IEnumerator body = Body(p);
         if (body != null) yield return body;
 
-        // 연계 (3페이즈) — 빈틈 없이 한 번 더. 가만히(시험) 중이거나 시험 키로 고른 패턴이 기다리면 하지 않는다
+        // 연계 — 꼬리 휩쓸기 뒤 돌진은 고정. 그 밖의 연계는 난이도별 확률을 따른다.
         Pattern follow = ComboAfter(p);
         if (follow != Pattern.None)
         {
@@ -468,7 +481,7 @@ public partial class DragonBoss : MonoBehaviour
             readyAt[follow] = Time.time + Cooldown(follow) * tune.cooldownScale;
             nextRecover = 0.8f;
             OnPatternStart?.Invoke(follow);
-            body = Body(follow);
+            body = p == Pattern.TailSweep && follow == Pattern.Charge ? Charge(tune.tailChargeWindup) : Body(follow);   // 예고 하드 0.5 · 이지 0.75초
             if (body != null) yield return body;
         }
         running = null;

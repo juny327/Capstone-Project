@@ -189,7 +189,12 @@ public partial class DragonBoss
         float hold = delayed ? Random.Range(delayedHold.x, delayedHold.y) : ground ? groundBiteHold : 0f;
         float hitAt = Motion.BiteClose + hold;
         float end = attackLength + hold;
-        DragonTelegraph warning = Track(DragonTelegraph.Rect(telegraphMaterial, origin, forward, biteWidth, biteNear, biteFar));
+        // 일반 물기는 2배, 지연 물기는 4/3배로 예고 게이지·애니메이션·판정을 함께 진행한다.
+        // 지연 물기의 전방 공격 범위도 1/3 늘리며, 땅 물기는 기존 설정을 유지한다.
+        // 2026-11-26 — 빠르기 · 범위는 난이도 값 (하드 = 팀원 값 2 · 4/3 · 4/3, 이지 = 중간 1.5 · 1.17 · 1.17)
+        float timeScale = delayed ? tune.delayedBiteSpeed : !ground ? tune.biteSpeed : 1f;
+        float attackFar = delayed ? biteFar * tune.delayedBiteReach : biteFar;
+        DragonTelegraph warning = Track(DragonTelegraph.Rect(telegraphMaterial, origin, forward, biteWidth, biteNear, attackFar));
         Vector3 slam = origin + Flat(forward).normalized * groundBiteCenter;
         DragonTelegraph ring = ground ? Track(DragonTelegraph.Circle(telegraphMaterial, slam, groundBiteRadius)) : null;
 
@@ -202,7 +207,7 @@ public partial class DragonBoss
         bool aimLocked = !tune.lateLock || ground;
 
         bool hit = false;
-        for (float t = 0f; t < end; t += Dt)
+        for (float t = 0f; t < end; t += Dt * timeScale)
         {
             float clip = t < Motion.WindupEnd ? t : t < Motion.WindupEnd + hold ? Motion.WindupEnd : t - hold;
             Scrub(AttackState, clip);
@@ -232,12 +237,12 @@ public partial class DragonBoss
                     hit = true;
                     warning.Flash();
                     if (ground) Quake(0.95f, slam, 0.7f);
-                    else Shove(0.45f, origin + Flat(forward).normalized * (biteFar * 0.7f), origin, 0.25f);
+                    else Shove(0.45f, origin + Flat(forward).normalized * (attackFar * 0.7f), origin, 0.25f);
                     FxBite(origin, forward, false);
                     if (ground) FxGroundSlam(slam, groundBiteRadius);
                     Sfx(DragonSfx.Bite);
                     if (ground) Sfx(DragonSfx.Slam);
-                    bool bitten = PlayerInRect(origin, forward, biteWidth, biteNear, biteFar);
+                    bool bitten = PlayerInRect(origin, forward, biteWidth, biteNear, attackFar);
                     if (bitten) HitPlayer(ground ? groundBiteDamage : delayed ? delayedBiteDamage : biteDamage, origin, 0.5f);
                     if (ring != null)
                     {
@@ -452,7 +457,7 @@ public partial class DragonBoss
         return chargeMaxLength;
     }
 
-    IEnumerator Charge()
+    IEnumerator Charge(float windupOverride = -1f)
     {
         yield return TurnToTarget(0.4f);
         Vector3 forward = Flat(transform.forward).normalized, start = transform.position;
@@ -467,6 +472,7 @@ public partial class DragonBoss
 
         DragonTelegraph warning = Track(DragonTelegraph.Rect(telegraphMaterial, start, forward, chargeWidth, -1f * bodyScale, travel + chargeFront));
         Sfx(DragonSfx.Windup);
+        float windup = windupOverride > 0f ? windupOverride : chargeWindup;
         // 늦게 굳히기 (하드 — 2026-11-20) — 웅크린 동안 플레이어를 따라 돌다가, 플레이어 자리에 닿기 chargeLock 초 전에 방향을 굳힌다.
         // 멀리 있으면 달려오는 시간이 기니 그만큼 늦게 굳힌다 — 어느 거리에서나 피할 시간이 같다 (굳히고 나서 출발까지는 적어도 0.2초).
         // 굳힌 뒤에는 걸어서 못 벗어난다 (폭 5m) — 달리기 · 구르기, 또는 벽 앞에 서서 박게 한다
@@ -476,12 +482,12 @@ public partial class DragonBoss
             return Mathf.Clamp(tune.chargeLock - Mathf.Max(0f, gap) / chargeSpeed, Mathf.Min(0.2f, tune.chargeLock), tune.chargeLock);
         }
         bool aimLocked = !tune.lateLock;
-        for (float t = 0f; t < chargeWindup; t += Dt)
+        for (float t = 0f; t < windup; t += Dt)
         {
             Scrub(AttackState, Mathf.Min(t, Motion.WindupEnd));
             if (!aimLocked)
             {
-                if (t >= chargeWindup - LockLead() * tune.tempo)
+                if (t >= windup - LockLead() * tune.tempo)
                 {
                     aimLocked = true;
                     // 굳힌 방향으로 길 끝을 다시 잰다 — 예고 길이가 달라지면 새로 깐다
@@ -502,8 +508,8 @@ public partial class DragonBoss
                     Follow(warning, start, forward);
                 }
             }
-            warning.SetProgress(t / chargeWindup);
-            FxChargeWindup(t / chargeWindup);
+            warning.SetProgress(t / windup);
+            FxChargeWindup(t / windup);
             yield return null;
         }
         warning.Hold();

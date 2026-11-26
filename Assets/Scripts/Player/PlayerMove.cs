@@ -15,6 +15,9 @@ public class PlayerMove : MonoBehaviour
     private List<float> speedModifiers = new List<float>();
 
     bool isDead = false;
+    Vector3 externalKnockbackVelocity;
+    float externalKnockbackRemaining;
+    const float ExternalKnockbackDeceleration = 20f;
 
     public float CurrentSpeed
     {
@@ -37,6 +40,23 @@ public class PlayerMove : MonoBehaviour
     {
         speedModifiers.Remove(multiplier);
         GameEvents.OnMoveSpeedChanged?.Invoke(CurrentSpeed);
+    }
+
+    /// <summary>보스 꼬리 휩쓸기처럼 플레이어를 짧게 밀어내는 외부 힘.</summary>
+    public void ApplyKnockback(Vector3 direction, float speed, float duration)
+    {
+        if (rb == null || isDead || isRolling || isDashing || speed <= 0f || duration <= 0f) return;
+        direction.y = 0f;
+        if (direction.sqrMagnitude < 0.001f) return;
+
+        externalKnockbackVelocity = direction.normalized * speed;
+        externalKnockbackRemaining = Mathf.Max(externalKnockbackRemaining, duration);
+    }
+
+    void ClearExternalKnockback()
+    {
+        externalKnockbackVelocity = Vector3.zero;
+        externalKnockbackRemaining = 0f;
     }
 
     [SerializeField] private float jumpPower = 3f;
@@ -169,6 +189,20 @@ public class PlayerMove : MonoBehaviour
 
     [Tooltip("구르기 입력 선행 입력 허용 시간(초). 쿨다운이 곧 끝날 때 누른 입력을 살려준다")]
     [SerializeField] private float rollBufferTime = 0.15f;
+
+    // 2026-11-26 사용자: "구르는 동안은 공격을 막고, 구르고 다시 일어나는 동안 약간의 텀 — 구르자마자 구른 방향으로 쏘지 않게".
+    // 총은 몸 앞(WeaponFireContext.AimDirection = 몸의 forward)으로 나간다. 구르는 동안 · 끝난 직후엔 몸이 구른 쪽을 봐서 그쪽으로 쐈다.
+    [Header("구르기 뒤 추스르기 (2026-11-26)")]
+    [Tooltip("구르기가 끝난 뒤 다시 공격하기까지 (초) — 이 동안 손 무기는 쏘지 · 휘두르지 않고, 상체 자세(총 겨누기)는 끝날 때 돌아온다")]
+    [SerializeField] private float rollRecovery = 0.25f;
+    [Tooltip("추스르는 동안 이동 빠르기 배율")]
+    [Range(0.1f, 1f)] [SerializeField] private float rollRecoverMoveScale = 0.6f;
+    [Tooltip("구른 뒤 조준 쪽으로 돌아서는 빠르기 배율 (평소 rotationSpeed 에 곱한다)")]
+    [Min(1f)] [SerializeField] private float rollRecoverTurnScale = 4f;
+    [Tooltip("추스른 뒤에도 몸이 조준 방향에서 이 각도(도)보다 틀어져 있으면 돌아설 때까지 쏘지 않는다")]
+    [Range(5f, 90f)] [SerializeField] private float rollRecoverAimAngle = 30f;
+    [Tooltip("위 '돌아설 때까지' 의 최대 시간 (초, 추스르기 뒤부터)")]
+    [Min(0f)] [SerializeField] private float rollRecoverMaxHold = 0.6f;
 
     [Tooltip("구르기 1회가 끝날 때 실제 이동 거리를 Console에 찍는다 (원인 파악용)")]
     [SerializeField] private bool logRollDebug = true;
@@ -311,6 +345,40 @@ public class PlayerMove : MonoBehaviour
     private static readonly int HashIsAttack = Animator.StringToHash("isAttack");
     private static readonly int HashRoll = Animator.StringToHash("Roll");
     private static readonly int HashMoveSpeed = Animator.StringToHash("moveSpeed");
+    // 2026-11-26 — 조준(몸) 기준 이동 방향 (애니메이터 Locomotion 블렌드 트리: 앞 뛰기 · 뒤 · 왼 · 오른 걷기)
+    private static readonly int HashMoveX = Animator.StringToHash("MoveX");
+    private static readonly int HashMoveZ = Animator.StringToHash("MoveZ");
+    private bool hasDirectionParams;
+
+    // 구르기 뒤 추스르기 (2026-11-26)
+    float recoverUntil = -1f;      // 이때까지 추스른다 (공격 X · 느리게 · 빨리 돌아선다)
+    float aimHoldUntil = -1f;      // 이때까지는 몸이 조준에서 틀어져 있으면 쏘지 않는다
+    bool upperBodyPending;         // 추스르기가 끝나면 상체 자세를 되돌린다
+
+    /// <summary>구른 뒤 추스르는 중인가.</summary>
+    public bool IsRecovering => Time.time < recoverUntil;
+
+    /// <summary>
+    /// 손 무기가 쏘거나 휘두르면 안 되는가 — 구르는 중 · 추스르는 중 · 그 뒤 몸이 아직 조준 쪽으로 돌아서지 못했을 때 (WeaponController 가 묻는다).
+    /// </summary>
+    public bool HoldsAttack => isRolling || Time.time < recoverUntil || (Time.time < aimHoldUntil && AimOffAngle() > rollRecoverAimAngle);
+
+    float AimOffAngle()
+    {
+        Vector3 aim = targetLookPos - transform.position;
+        aim.y = 0f;
+        Vector3 fwd = transform.forward;
+        fwd.y = 0f;
+        if (aim.sqrMagnitude < 0.0001f || fwd.sqrMagnitude < 0.0001f) return 0f;
+        return Vector3.Angle(fwd, aim);
+    }
+
+    void ClearRecovery()
+    {
+        recoverUntil = -1f;
+        aimHoldUntil = -1f;
+        upperBodyPending = false;
+    }
 
     private bool hasRollParam;
     private bool hasMoveSpeedParam;
@@ -369,6 +437,7 @@ public class PlayerMove : MonoBehaviour
         {
             if (p.nameHash == HashRoll) hasRollParam = true;
             else if (p.nameHash == HashMoveSpeed) hasMoveSpeedParam = true;
+            else if (p.nameHash == HashMoveX || p.nameHash == HashMoveZ) hasDirectionParams = true;
         }
     }
 
@@ -451,6 +520,13 @@ public class PlayerMove : MonoBehaviour
     {
         if (isDead) return;
 
+        // 추스르기가 끝나면 상체 자세(총 겨누기 · 검 자세)를 되돌린다
+        if (upperBodyPending && !isRolling && Time.time >= recoverUntil)
+        {
+            upperBodyPending = false;
+            SetUpperBodyLayers(true);
+        }
+
         if (cam == null || Mouse.current == null) return;
 
         Ray ray = cam.ScreenPointToRay(Mouse.current.position.ReadValue());
@@ -516,6 +592,7 @@ public class PlayerMove : MonoBehaviour
         // ── 서브 능력이 건 대시 중에는 일반 이동/회전을 건너뛴다 ──
         if (isDashing)
         {
+            ClearExternalKnockback();
             TickDash();
             return;
         }
@@ -523,6 +600,7 @@ public class PlayerMove : MonoBehaviour
         // ── 구르는 중에는 일반 이동/회전을 전부 건너뛴다 ──
         if (isRolling)
         {
+            ClearExternalKnockback();
             TickRoll();
             return;
         }
@@ -547,9 +625,26 @@ public class PlayerMove : MonoBehaviour
         if (IsSprinting)
             speed *= sprintMultiplier;
 
+        // 구른 뒤 추스르는 동안은 조금 느리게 (2026-11-26)
+        if (Time.time < recoverUntil)
+            speed *= rollRecoverMoveScale;
+
+        Vector3 push = Vector3.zero;
+        if (externalKnockbackRemaining > 0f)
+        {
+            push = externalKnockbackVelocity;
+            externalKnockbackRemaining -= Time.fixedDeltaTime;
+            externalKnockbackVelocity = Vector3.MoveTowards(
+                externalKnockbackVelocity,
+                Vector3.zero,
+                ExternalKnockbackDeceleration * Time.fixedDeltaTime);
+            if (externalKnockbackRemaining <= 0f)
+                ClearExternalKnockback();
+        }
+
         Vector3 velocity = rb.linearVelocity;
-        velocity.x = move.x * speed;
-        velocity.z = move.y * speed;
+        velocity.x = move.x * speed + push.x;
+        velocity.z = move.y * speed + push.z;
         rb.linearVelocity = velocity;
 
         currentGround = Physics.Raycast(transform.position, Vector3.down, GroundCheckDis, groundLayer);
@@ -563,7 +658,7 @@ public class PlayerMove : MonoBehaviour
             Quaternion newRot = Quaternion.RotateTowards(
                 rb.rotation,
                 targetRot,
-                rotationSpeed * Time.fixedDeltaTime
+                rotationSpeed * (Time.time < aimHoldUntil ? rollRecoverTurnScale : 1f) * Time.fixedDeltaTime   // 구른 뒤엔 조준 쪽으로 빨리 돌아선다
             );
             rb.MoveRotation(newRot);
         }
@@ -587,6 +682,18 @@ public class PlayerMove : MonoBehaviour
     // 0 = 정지, 1 = 걷기, sprintMultiplier = 달리기
     void UpdateMoveAnimation()
     {
+        // 2026-11-26 사용자: "상하좌우로 움직일 때 발걸음 모션" — 캐릭터는 늘 마우스 쪽을 보므로 이동 방향을 몸 기준으로 바꿔 넘긴다.
+        // 애니메이터는 앞 = 뛰기 · 뒤 / 왼 / 오른 = 걷기(캐릭터 팩의 WalkBack · Left · Right_Shoot_AR)를 섞는다. 다리만 (상체 층은 Upper 마스크)
+        if (hasDirectionParams)
+        {
+            Vector3 world = new Vector3(move.x, 0f, move.y);
+            Vector3 local = world.sqrMagnitude > 0.0001f
+                ? Quaternion.Inverse(rb != null ? rb.rotation : transform.rotation) * world.normalized
+                : Vector3.forward;
+            anim.SetFloat(HashMoveX, local.x, 0.08f, Time.fixedDeltaTime);
+            anim.SetFloat(HashMoveZ, local.z, 0.08f, Time.fixedDeltaTime);
+        }
+
         if (!hasMoveSpeedParam) return;
 
         float target = move == Vector2.zero ? 0f : (IsSprinting ? sprintMultiplier : 1f);
@@ -840,6 +947,7 @@ public class PlayerMove : MonoBehaviour
         rollStartPos = transform.position;
         rollCodeDistance = 0f;
         rollCdTimer = rollDuration + PracticeRules.Cooldown(rollCooldown); // 구르기가 끝난 뒤부터 쿨다운 시작 (테스트 룸은 짧게)
+        ClearRecovery();   // 추스르다 다시 구르면 그 추스르기는 버린다 (상체는 구르기가 끄고, 끝나면 다시 추스른다)
 
         // 구르는 방향을 바라보도록 고정 (구르기 클립이 정면 구르기 하나이므로)
         if (rollDir.sqrMagnitude > 0.001f)
@@ -932,7 +1040,11 @@ public class PlayerMove : MonoBehaviour
 
         if (isDead) return;   // 구르는 도중 사망했다면 사망 연출을 되돌리지 않는다
 
-        SetUpperBodyLayers(true);
+        // 2026-11-26 — 바로 상체를 켜고 쏘지 않고 잠깐 추스른다 (공격 X · 느리게 · 조준 쪽으로 빨리 돌아선다)
+        recoverUntil = Time.time + rollRecovery;
+        aimHoldUntil = recoverUntil + rollRecoverMaxHold;
+        if (rollRecovery > 0f) upperBodyPending = true;
+        else SetUpperBodyLayers(true);
         anim.SetBool(HashIsMove, move != Vector2.zero);
     }
 
@@ -951,6 +1063,7 @@ public class PlayerMove : MonoBehaviour
         rollDir = Vector3.zero;
         if (hasRollParam && anim != null) anim.ResetTrigger(HashRoll);
         if (anim != null) anim.speed = 1f;
+        ClearRecovery();
         SetUpperBodyLayers(true);
         rb.position = position;
         rb.linearVelocity = Vector3.zero;
@@ -1006,6 +1119,8 @@ public class PlayerMove : MonoBehaviour
         rollBufferedAt = -999f;
         isDashing = false;
         actionLocks.Clear();
+        ClearExternalKnockback();
+        ClearRecovery();
 
         if (stats != null)
             stats.ClearInvulnerable();
