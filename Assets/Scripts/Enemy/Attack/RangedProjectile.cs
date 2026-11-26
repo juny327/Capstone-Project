@@ -21,13 +21,42 @@ public class RangedProjectile : MonoBehaviour, IPoolable
         trail.startWidth = visualRadius * 1.4f;
         trail.endWidth = 0f;
         trail.startColor = new Color(1f, 1f, 0.65f, 1f);
-        trail.endColor = new Color(1f, 0.35f, 0.05f, 0f);
+        trail.endColor = new Color(1f, 0.12f, 0.06f, 0f);   // 2026-11-27 (7-4) 꼬리 끝 주황 → 빨강
         trail.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
         trail.receiveShadows = false;
         var properties = new MaterialPropertyBlock();
         properties.SetFloat("_UseVertexColor", 1f);
         trail.SetPropertyBlock(properties);
         trail.emitting = false;
+        AddRim();
+    }
+
+    // 2026-11-27 (남은 작업 7-4 — 사용자: "적 탄에 테두리도 추가") — 탄 뒤에 조금 큰 빨강 공을 먼저 그려 테두리로 보이게 한다.
+    // 아군 불길 · 폭발(주황 · 노랑)과 같은 색이던 적 탄이 그 위에서도 보이게. 재질은 하나를 모두가 나눠 쓴다 (탄보다 한 칸 먼저 그림).
+    const float RimScale = 1.5f;
+    static Material rimMaterial;
+
+    void AddRim()
+    {
+        if (projectileMaterial == null) return;
+        var self = GetComponent<MeshFilter>();
+        if (self == null || self.sharedMesh == null) return;
+        if (rimMaterial == null)
+        {
+            rimMaterial = new Material(projectileMaterial) { name = "EnemyProjectile Rim (runtime)" };
+            rimMaterial.SetColor("_BaseColor", DangerTelegraph.ShotRim);
+            rimMaterial.SetFloat("_UseVertexColor", 0f);
+            rimMaterial.renderQueue = projectileMaterial.renderQueue - 1;
+        }
+        var rim = new GameObject("Rim", typeof(MeshFilter), typeof(MeshRenderer));
+        rim.layer = 2;
+        rim.transform.SetParent(transform, false);
+        rim.transform.localScale = Vector3.one * RimScale;
+        rim.GetComponent<MeshFilter>().sharedMesh = self.sharedMesh;
+        var r = rim.GetComponent<MeshRenderer>();
+        r.sharedMaterial = rimMaterial;
+        r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        r.receiveShadows = false;
     }
 
     void OnEnable() { GameEvents.OnPlayerDeadStart += ReturnToPool; }

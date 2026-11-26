@@ -381,7 +381,7 @@ public class FxKit : MonoBehaviour
             position = pos,
             velocity = vel,
             startLifetime = life,
-            startColor = color,
+            startColor = new Color(color.r, color.g, color.b, color.a * FxCrowd.Alpha),   // 적이 많으면 살짝 옅게 (2026-11-27, 남은 작업 7-4 — FxCrowd)
             rotation = float.IsNaN(rot) ? Random.Range(0f, 360f) : rot,
         };
         if (height > 0f) p.startSize3D = new Vector3(size, height, 1f);

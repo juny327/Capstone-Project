@@ -157,7 +157,7 @@ public class FxLine : MonoBehaviour
     void Begin(Mode m, Color c, float w, float d)
     {
         mode = m;
-        color = c;
+        color = new Color(c.r, c.g, c.b, c.a * FxCrowd.Alpha);   // 적이 많으면 살짝 옅게 (2026-11-27, 남은 작업 7-4 — FxCrowd)
         width = w;
         duration = Mathf.Max(0.02f, d);
         age = 0f;

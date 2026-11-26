@@ -228,7 +228,19 @@ public class SuicideAttack : EnemyAttack
         PlayVisualAnimation("Roar");
 
         // Brief, readable warning before the lunge.
-        yield return new WaitForSeconds(explosionDelay);
+        // 2026-11-27 (남은 작업 7-4) — 기다리는 동안 경고 줄이 깜빡인다 (터질 때가 가까울수록 빠르게, DangerTelegraph)
+        float waited = 0f;
+        while (waited < explosionDelay)
+        {
+            if (warningLine != null)
+            {
+                float k = DangerTelegraph.Blink(waited, explosionDelay);
+                warningLine.startColor = DangerTelegraph.Dim(new Color(1f, 0.12f, 0.08f, 0.9f), k);
+                warningLine.endColor = DangerTelegraph.Dim(new Color(1f, 0.12f, 0.08f, 0.15f), k);
+            }
+            waited += Time.deltaTime;
+            yield return null;
+        }
 
         if (warningLine != null)
             warningLine.enabled = false;

@@ -126,6 +126,7 @@ public class GroundGlow : MonoBehaviour
     public static void Flash(Vector3 ground, float radius, Color color, float duration, float strength = 1f)
     {
         strength *= GameSettings.FlashScale;   // 설정 '번쩍임 줄이기' (2026-11-26)
+        strength *= FxCrowd.Alpha;   // 적이 많으면 살짝 옅게 (2026-11-27, 남은 작업 7-4 — FxCrowd)
         FxGlowSettings s = FxGlow.Settings;
         if (s == null || s.groundMaterial == null || s.groundStrength <= 0f || radius <= 0.01f || strength <= 0f) return;
 
@@ -277,6 +278,7 @@ public class FlashLight : MonoBehaviour
     public static void Flash(Vector3 at, Color color, float range, float duration = 0.15f, float strength = 1f)
     {
         strength *= GameSettings.FlashScale;   // 설정 '번쩍임 줄이기' (2026-11-26) — 폭발 · 낙뢰의 순간 조명
+        strength *= FxCrowd.Alpha;   // 적이 많으면 살짝 옅게 (2026-11-27, 남은 작업 7-4 — FxCrowd)
         FxGlowSettings s = FxGlow.Settings;
         if (s == null || s.maxLights <= 0 || s.lightIntensity <= 0f || range <= 0.1f || strength <= 0f) return;
 
