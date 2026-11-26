@@ -331,6 +331,10 @@ public class PlayerMove : MonoBehaviour
     private static readonly int HashIsAttack = Animator.StringToHash("isAttack");
     private static readonly int HashRoll = Animator.StringToHash("Roll");
     private static readonly int HashMoveSpeed = Animator.StringToHash("moveSpeed");
+    // 2026-11-26 — 조준(몸) 기준 이동 방향 (애니메이터 Locomotion 블렌드 트리: 앞 뛰기 · 뒤 · 왼 · 오른 걷기)
+    private static readonly int HashMoveX = Animator.StringToHash("MoveX");
+    private static readonly int HashMoveZ = Animator.StringToHash("MoveZ");
+    private bool hasDirectionParams;
 
     private bool hasRollParam;
     private bool hasMoveSpeedParam;
@@ -389,6 +393,7 @@ public class PlayerMove : MonoBehaviour
         {
             if (p.nameHash == HashRoll) hasRollParam = true;
             else if (p.nameHash == HashMoveSpeed) hasMoveSpeedParam = true;
+            else if (p.nameHash == HashMoveX || p.nameHash == HashMoveZ) hasDirectionParams = true;
         }
     }
 
@@ -622,6 +627,18 @@ public class PlayerMove : MonoBehaviour
     // 0 = 정지, 1 = 걷기, sprintMultiplier = 달리기
     void UpdateMoveAnimation()
     {
+        // 2026-11-26 사용자: "상하좌우로 움직일 때 발걸음 모션" — 캐릭터는 늘 마우스 쪽을 보므로 이동 방향을 몸 기준으로 바꿔 넘긴다.
+        // 애니메이터는 앞 = 뛰기 · 뒤 / 왼 / 오른 = 걷기(캐릭터 팩의 WalkBack · Left · Right_Shoot_AR)를 섞는다. 다리만 (상체 층은 Upper 마스크)
+        if (hasDirectionParams)
+        {
+            Vector3 world = new Vector3(move.x, 0f, move.y);
+            Vector3 local = world.sqrMagnitude > 0.0001f
+                ? Quaternion.Inverse(rb != null ? rb.rotation : transform.rotation) * world.normalized
+                : Vector3.forward;
+            anim.SetFloat(HashMoveX, local.x, 0.08f, Time.fixedDeltaTime);
+            anim.SetFloat(HashMoveZ, local.z, 0.08f, Time.fixedDeltaTime);
+        }
+
         if (!hasMoveSpeedParam) return;
 
         float target = move == Vector2.zero ? 0f : (IsSprinting ? sprintMultiplier : 1f);
