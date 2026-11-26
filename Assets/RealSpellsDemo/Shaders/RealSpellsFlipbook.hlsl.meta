@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 35e9451b1bc434f2e49e98fc1c04a37c
+ShaderIncludeImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 429574
+  packageName: Real Spells Demo - 10 Free Spell VFX with Light and Sound
+  packageVersion: 1.0.0
+  assetPath: Assets/RealSpellsDemo/Shaders/RealSpellsFlipbook.hlsl
+  uploadId: 1049474

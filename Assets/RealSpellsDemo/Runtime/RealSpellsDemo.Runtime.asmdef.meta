@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: f5fa5146eb2adfba91ab93c79a2e59ad
+AssemblyDefinitionImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 429574
+  packageName: Real Spells Demo - 10 Free Spell VFX with Light and Sound
+  packageVersion: 1.0.0
+  assetPath: Assets/RealSpellsDemo/Runtime/RealSpellsDemo.Runtime.asmdef
+  uploadId: 1049474
