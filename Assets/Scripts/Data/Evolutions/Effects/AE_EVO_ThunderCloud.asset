@@ -41,7 +41,7 @@ MonoBehaviour:
   skyBranches: 3
   stormFlash: 0.2
   kitCloudScale: 3.0
-  kitCloudAlpha: 0.8
+  kitCloudAlpha: 0.5
   kitShade: 0.45
   supportPeriod: 8
   supportStormTime: 2
