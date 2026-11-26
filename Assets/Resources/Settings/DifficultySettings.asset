@@ -19,8 +19,8 @@ MonoBehaviour:
     maxEnemies: 0.85
     enemyHealth: 0.7
     enemyDamage: 0.75
-    killTarget: 0.5
-    coinMultiplier: 2
+    killTarget: 0.7
+    coinMultiplier: 1.43
     expMultiplier: 2
     bossHealth: 4.5
   hard:
