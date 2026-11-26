@@ -134,7 +134,7 @@ public class StageShortcutBar : MonoBehaviour
 
         (TMP_FontAsset font, Material material) = PickFont();
 
-        Text("Header", "바로 가기 — 크레딧 · 경험치를 받고 준비한 뒤 들어간다", font, material, 19f, Muted, TextAlignmentOptions.BottomLeft,
+        Text("Header", "스테이지 바로 가기", font, material, 19f, Muted, TextAlignmentOptions.BottomLeft,
              new Vector2(0f, 1f), new Vector2(0f, 0f), new Vector2(width, HeaderH), transform, new Vector2(0f, 1f));
 
         budgetLines = new TMP_Text[Stages.Length];

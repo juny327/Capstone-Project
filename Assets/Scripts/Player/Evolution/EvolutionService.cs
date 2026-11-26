@@ -208,7 +208,7 @@ public static class EvolutionService
         }
 
         EvolutionPresenter.Ensure(player).Play(evolution);
-        message = $"{evolution.from.weaponName} → {evolution.Title} 진화 (시험 — {missing ?? "짝 장비"} 없이)";
+        message = $"{evolution.from.weaponName} → {evolution.Title} 진화";
         return true;
     }
 }

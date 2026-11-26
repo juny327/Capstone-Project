@@ -372,7 +372,7 @@ public class StageShortcutPrep : MonoBehaviour
         Label(f, "Title", $"출전 준비 — {StageShortcut.NameOf(stage)}", 42f, TextMain, TextAlignmentOptions.TopLeft, new Vector2(0f, 1f), new Vector2(36f, -18f), new Vector2(900f, 56f));
         string cleared = $"스테이지 {Mathf.Min(3, stage - 1)} 클리어";
         Label(f, "Subtitle",
-              $"{who} — 봇 판이 {cleared}까지 모은 <color=#FFD461>크레딧 {budget.gold}</color> · <color=#76E0FF>경험치 {budget.exp}</color> · 보상 카드 {StageShortcut.RewardsFor(stage)}장을 받았습니다. 남은 크레딧과 경험치는 그대로 들고 들어갑니다",
+              $"{who} — {cleared}까지 모았을 만큼의 <color=#FFD461>크레딧 {budget.gold}</color> · <color=#76E0FF>경험치 {budget.exp}</color> · 보상 카드 {StageShortcut.RewardsFor(stage)}장을 받았습니다. 남은 크레딧과 경험치는 그대로 들고 들어갑니다",
               20f, Muted, TextAlignmentOptions.TopLeft, new Vector2(0f, 1f), new Vector2(38f, -76f), new Vector2(1300f, 30f));
 
         // 남은 양 (오른쪽 위)
@@ -418,15 +418,13 @@ public class StageShortcutPrep : MonoBehaviour
         Label(right2.transform, "EquipHeader", "지금 장비", 24f, TextMain, TextAlignmentOptions.TopLeft, new Vector2(0f, 1f), new Vector2(18f, -10f), new Vector2(540f, 36f));
         loadoutBox2 = NewRect("Loadout", right2.transform);
         Place(loadoutBox2, new Vector2(0f, 1f), new Vector2(18f, -52f), new Vector2(544f, 372f), new Vector2(0f, 1f));
-        TMP_Text tip = Label(right2.transform, "Tip", UiTextFit.KeepWords("스킬은 레벨이 오를수록 비싸집니다 (기본 × 다음 레벨). 남은 경험치는 들고 들어가 레벨업 카드 창에서 쓸 수 있습니다."),
+        TMP_Text tip = Label(right2.transform, "Tip", UiTextFit.KeepWords("스킬은 레벨이 오를수록 비싸집니다. 남은 경험치는 들고 들어가 레벨업 카드 창에서 쓸 수 있습니다."),
                              16f, Muted, TextAlignmentOptions.BottomLeft, new Vector2(0f, 0f), new Vector2(18f, 12f), new Vector2(544f, 56f));
         tip.textWrappingMode = TextWrappingModes.Normal;
 
         // 아래 줄
         messageText = Label(f, "Message", "", 24f, GoldColor, TextAlignmentOptions.Left, new Vector2(0f, 0f), new Vector2(36f, 40f), new Vector2(980f, 40f));
-        StageShortcutSettings settings = StageShortcutSettings.Load();
-        if (settings != null && !string.IsNullOrEmpty(settings.source))
-            Label(f, "Source", "값: " + settings.source, 16f, new Color(Muted.r, Muted.g, Muted.b, 0.8f), TextAlignmentOptions.Left, new Vector2(0f, 0f), new Vector2(36f, 12f), new Vector2(980f, 24f));
+        // 값의 출처(settings.source — 봇 판 중앙값)는 화면에 내지 않는다 — 개발용 메모 (2026-11-27 사용자: 개발 설명 글 정리)
 
         restartButton = MakeButton(f, "Restart", "처음부터", 22f, new Vector2(1f, 0f), new Vector2(-560f, 26f), new Vector2(180f, 60f), ButtonFrame, ButtonFill, RestartPrep).gameObject;
         backButton = MakeButton(f, "Back", "◀  이전", 24f, new Vector2(1f, 0f), new Vector2(-330f, 26f), new Vector2(210f, 60f), ButtonFrame, ButtonFill, () => GoStep(0)).gameObject;
@@ -495,7 +493,7 @@ public class StageShortcutPrep : MonoBehaviour
         line.rectTransform.anchorMax = new Vector2(1f, 1f);
         line.rectTransform.pivot = new Vector2(0.5f, 1f);
         line.rectTransform.sizeDelta = new Vector2(0f, 3f);
-        Label(panel.transform, "Header", "상위 무기  <size=72%><color=#C9B88A>조건을 채웠거나 · 지금 크레딧 (짝 스킬은 경험치 먼저) 으로 바로 얻을 수 있는 것</color></size>", 24f, GoldColor,
+        Label(panel.transform, "Header", "상위 무기  <size=72%><color=#C9B88A>지금 바로 얻을 수 있는 것</color></size>", 24f, GoldColor,
               TextAlignmentOptions.TopLeft, new Vector2(0f, 1f), new Vector2(18f, -10f), new Vector2(900f, 36f));
         evoHint = Label(panel.transform, "Later", "", 17f, Muted, TextAlignmentOptions.TopRight, new Vector2(1f, 1f), new Vector2(-18f, -14f), new Vector2(840f, 30f));
         evoHint.overflowMode = TextOverflowModes.Ellipsis;

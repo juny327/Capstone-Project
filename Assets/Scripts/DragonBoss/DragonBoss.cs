@@ -570,13 +570,6 @@ public partial class DragonBoss : MonoBehaviour
         }
     }
 
-    void OnGUI()
-    {
-        // 시험 경로(테스트 룸 → 보스)에서만 — 지금 어느 난이도 값으로 움직이는지
-        if (!testKeys || state == State.Dead) return;
-        GUI.Label(new Rect(12f, Screen.height - 28f, 900f, 24f), $"보스 패턴 값: {(tuneMode == DifficultyMode.Hard ? "하드" : "이지")}   (H 키로 바꿈 — 시험용)   새 패턴: B 불의 벽 · G 퍼지는 고리 · J 도약");
-    }
-
     // ───────── 등장 ─────────
 
     void ResolveTarget()
