@@ -90,6 +90,7 @@ public class ChainLightningSkill : MonoBehaviour
                 cameraShake = 0f
             };
 
+            info.source = "ChainLightningUpgrade";   // 판 결과 화면 — 스킬별 피해 몫 (레벨업 카드 이름, 2026-11-26)
             current.TakeDamage(info);
             SoundManager.Instance?.ReportHit(false, HitSound.ChainLightning);
 

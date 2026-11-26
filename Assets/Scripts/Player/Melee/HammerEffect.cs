@@ -176,7 +176,7 @@ public class HammerEffect : AttachmentEffect
 
                 Vector3 to = CombatFx.Body(next);
                 Vector3 dir = EvoStrikes.Flat(to - fromPos, Vector3.forward);
-                CombatFx.Damage(next, damage, to, dir, false, 0f, HitSound.Electric);
+                CombatFx.Damage(next, damage, to, dir, false, 0f, HitSound.Electric, source: DamageSource.Of(Weapon));
                 direct.Add(next);   // 한 번 튄 적은 다시 튀지 않는다
 
                 if (cfg.material != null)
@@ -220,7 +220,7 @@ public class HammerEffect : AttachmentEffect
             foreach (Transform t in found)
             {
                 if (!direct.Contains(t) && cfg.slamDamageMul > 0f)
-                    CombatFx.Damage(t, damage * cfg.slamDamageMul, CombatFx.Body(t), EvoStrikes.Flat(t.position - at, dir));
+                    CombatFx.Damage(t, damage * cfg.slamDamageMul, CombatFx.Body(t), EvoStrikes.Flat(t.position - at, dir), source: DamageSource.Of(Weapon));
                 cfg.StunTarget(t, cfg.finisherStun);
             }
 

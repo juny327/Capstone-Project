@@ -19,6 +19,9 @@ public class BurnTicker : MonoBehaviour
 
         // 약한 무기는 한 틱이 1 보다 작다 — 피해 숫자가 "0" 으로 뜨고 보스는 정수로 잘라 버린다. 1 이 될 때까지 모은다
         public float Pending;
+
+        // 판 결과 화면 — 불을 붙인 무기 (붙일 때의 DamageSource.Current, 2026-11-26)
+        public string Source;
     }
 
     static BurnTicker instance;
@@ -48,12 +51,13 @@ public class BurnTicker : MonoBehaviour
         foreach (Burn b in instance.burns)
         {
             if (b.Target != target) continue;
+            if (dps >= b.Dps && DamageSource.Current != null) b.Source = DamageSource.Current;   // 더 센 불이 덮으면 그 무기 몫
             b.Dps = Mathf.Max(b.Dps, dps);
             b.Remaining = Mathf.Max(b.Remaining, duration);
             return false;
         }
 
-        instance.burns.Add(new Burn { Target = target, Dps = dps, Remaining = duration, NextTick = TickInterval });
+        instance.burns.Add(new Burn { Target = target, Dps = dps, Remaining = duration, NextTick = TickInterval, Source = DamageSource.Current });
         return true;
     }
 
@@ -81,7 +85,7 @@ public class BurnTicker : MonoBehaviour
             {
                 float amount = b.Pending;
                 b.Pending = 0f;
-                CombatFx.Damage(b.Target, amount, CombatFx.Body(b.Target), Vector3.up);
+                CombatFx.Damage(b.Target, amount, CombatFx.Body(b.Target), Vector3.up, source: b.Source);
             }
 
             if (ending) burns.RemoveAt(i);

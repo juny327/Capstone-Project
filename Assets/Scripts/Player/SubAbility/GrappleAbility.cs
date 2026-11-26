@@ -386,7 +386,7 @@ public class GrappleAbility : SubAbility
         float damage = WeaponDamage(fallbackDamage) * chaseDamageRatio;
         foreach (Transform t in strikeTargets)
         {
-            CombatFx.Damage(t, damage, CombatFx.Body(t), Forward, false, 0.12f);
+            CombatFx.Damage(t, damage, CombatFx.Body(t), Forward, false, 0.12f, source: DamageSource.Grapple);
             CombatFx.Stun(t, chaseStun);
         }
 

@@ -14,6 +14,8 @@ using UnityEngine;
 /// </summary>
 public class GhostfireBall : MonoBehaviour
 {
+    // 판 결과 화면 — 이 오브젝트를 만든 무기 (만들 때의 DamageSource.Current, 2026-11-26)
+    readonly string damageSource = DamageSource.Current;
     BatEffect cfg;
     WeaponBase weapon;
     float baseDamage;
@@ -226,7 +228,7 @@ public class GhostfireBall : MonoBehaviour
 
         float damage = baseDamage * DamageMul();
         Vector3 d = EvoStrikes.Flat(enemy.position - transform.position, dir);
-        CombatFx.Damage(enemy, damage, CombatFx.Body(enemy), d, false, 0f, HitSound.FireBall);
+        CombatFx.Damage(enemy, damage, CombatFx.Body(enemy), d, false, 0f, HitSound.FireBall, source: damageSource);
         EnemySlow.Apply(enemy, cfg.slowFactor, cfg.slowSeconds);
         StunMarks.Show(enemy, cfg.slowSeconds, cfg.ghostColor, StunMarks.Kind.Haunt);
 
@@ -323,7 +325,7 @@ public class GhostfireBall : MonoBehaviour
         foreach (Transform t in found)
         {
             Vector3 d = EvoStrikes.Flat(t.position - at, dir);
-            CombatFx.Damage(t, damage, CombatFx.Body(t), d, false, 0f, HitSound.FireBall);
+            CombatFx.Damage(t, damage, CombatFx.Body(t), d, false, 0f, HitSound.FireBall, source: damageSource);
             EnemySlow.Apply(t, cfg.slowFactor, cfg.slowSeconds);   // 적만 (보스 · 테스트 룸 표적은 넘어간다)
             StunMarks.Show(t, cfg.slowSeconds, cfg.ghostColor, StunMarks.Kind.Haunt);
             BlastHits++;

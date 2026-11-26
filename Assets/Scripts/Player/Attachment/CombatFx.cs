@@ -207,8 +207,9 @@ public static class CombatFx
     }
 
     /// <summary>피해를 준다. 맞은 소리는 프레임 끝에 한 번 (탄 · 빔과 같다).</summary>
+    /// <param name="source">누가 준 피해인가 (DamageSource) — 비우면 지금 효과를 돌리는 무기 (2026-11-26 판 결과 화면)</param>
     public static void Damage(Transform root, float amount, Vector3 point, Vector3 direction, bool critical = false, float cameraShake = 0f,
-        HitSound sound = HitSound.Normal)
+        HitSound sound = HitSound.Normal, string source = null)
     {
         if (root == null || amount <= 0f || !IsAlive(root)) return;
 
@@ -222,6 +223,7 @@ public static class CombatFx
             hitPoint = point,
             hitDirection = direction,
             cameraShake = cameraShake,
+            source = source ?? DamageSource.Current,
         });
 
         if (SoundManager.Instance != null)

@@ -7,6 +7,8 @@ using UnityEngine;
 /// </summary>
 public class ThrownSpear : MonoBehaviour
 {
+    // 판 결과 화면 — 이 오브젝트를 만든 무기 (만들 때의 DamageSource.Current, 2026-11-26)
+    readonly string damageSource = DamageSource.Current;
     enum Phase { Fly, Orbit, Return }
 
     AchillesSpearEffect cfg;
@@ -374,7 +376,7 @@ public class ThrownSpear : MonoBehaviour
         {
             if (!hit.Add(enemy)) continue;
 
-            CombatFx.Damage(enemy, baseDamage * damageMul, CombatFx.Body(enemy), dir);
+            CombatFx.Damage(enemy, baseDamage * damageMul, CombatFx.Body(enemy), dir, source: damageSource);
             HitFx(enemy, dir, stage);
             if (stage == 0) AchillesSpearEffect.ThrowHits++;
             else if (stage == 1) AchillesSpearEffect.OrbitHits++;

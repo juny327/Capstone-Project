@@ -456,7 +456,7 @@ public class EnemyManager : MonoBehaviour
 
         foreach (Enemy enemy in enemies.ToArray())
             if (enemy != null && enemy.gameObject.activeInHierarchy && enemy.state != EnemyState.Dead)
-                enemy.TakeDamage(new DamageInfo { damage = 999999f, hitPoint = enemy.transform.position + Vector3.up });
+                enemy.TakeDamage(new DamageInfo { damage = 999999f, hitPoint = enemy.transform.position + Vector3.up, source = DamageSource.Sweep });   // 판 결과 화면은 세지 않는다 (2026-11-26)
     }
 
     public void RegisterSpawner(EnemySpawner spawner)

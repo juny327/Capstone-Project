@@ -161,6 +161,7 @@ public class DeflectedProjectile : MonoBehaviour
                     damage = damage,
                     hitPoint = hit.point == Vector3.zero ? transform.position : hit.point,
                     hitDirection = direction,
+                    source = DamageSource.Parry,   // 판 결과 화면 — 패링으로 되돌린 탄 (2026-11-26)
                 });
 
                 if (SoundManager.Instance != null)

@@ -117,7 +117,7 @@ public class SiegeShellEffect : AttachmentEffect
             {
                 Vector3 away = struck.position - at;
                 away.y = 0f;
-                CombatFx.Damage(struck, blast, CombatFx.Body(struck), away.sqrMagnitude > 0.0001f ? away.normalized : Vector3.forward);
+                CombatFx.Damage(struck, blast, CombatFx.Body(struck), away.sqrMagnitude > 0.0001f ? away.normalized : Vector3.forward, source: DamageSource.Of(Weapon));
             }
             // 공통 재료 (2026-11-20) — 큰 포탄 한 발의 폭발: 판정 반경을 꽉 채우는 불 덩어리 · 가운데 불기둥 · 겹겹의 충격파 · 튀는 파편
             if (kit)

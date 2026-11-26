@@ -39,6 +39,9 @@ public class BossHealth : MonoBehaviour, IDamageable
         if (currentHp < 0)
             currentHp = 0;
 
+        // 판 결과 화면 — 무기 · 스킬별 피해 몫 · 마지막 한 방 (2026-11-26)
+        RunStats.RecordHit(info.source, Mathf.Max(0f, info.damage), info.damage, currentHp <= 0, true);
+
         OnBossDamaged?.Invoke();
         OnHpChanged?.Invoke(currentHp, maxHp);
 

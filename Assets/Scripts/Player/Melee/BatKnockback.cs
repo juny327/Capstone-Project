@@ -119,8 +119,8 @@ public static class BatKnockback
                     if (!bumped.Add(other)) continue;
                     Vector3 at = (CombatFx.Body(other) + CombatFx.Body(t)) * 0.5f;
                     float hurt = damage * cfg.collideDamageMul;
-                    CombatFx.Damage(other, hurt, at, dir);
-                    CombatFx.Damage(t, hurt, at, -dir);
+                    CombatFx.Damage(other, hurt, at, dir, source: DamageSource.Of(weapon));
+                    CombatFx.Damage(t, hurt, at, -dir, source: DamageSource.Of(weapon));
                     Nudge(weapon, other, dir, finisher ? 2f : 1.2f);
                     CollideFx(cfg, at, dir, scale);
                     CombatFx.PlaySound(cfg.collideSound);
@@ -135,7 +135,7 @@ public static class BatKnockback
         // 벽에 박힘 — 피해 + 잠깐 기절 (테스트 룸 표적은 표시만)
         if (wall && Valid(t, enemy, agent))
         {
-            CombatFx.Damage(t, damage * cfg.wallDamageMul, CombatFx.Body(t), dir);
+            CombatFx.Damage(t, damage * cfg.wallDamageMul, CombatFx.Body(t), dir, source: DamageSource.Of(weapon));
             if (cfg.wallStun > 0f)
             {
                 if (enemy != null) CombatFx.Stun(t, cfg.wallStun);

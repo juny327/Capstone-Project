@@ -13,6 +13,8 @@ using UnityEngine;
 /// </summary>
 public class ThrownHammer : MonoBehaviour
 {
+    // 판 결과 화면 — 이 오브젝트를 만든 무기 (만들 때의 DamageSource.Current, 2026-11-26)
+    readonly string damageSource = DamageSource.Current;
     enum Phase { Wait, Whirl, Fly, Return }
 
     HammerEffect cfg;
@@ -559,7 +561,7 @@ public class ThrownHammer : MonoBehaviour
     {
         Vector3 p = CombatFx.Body(enemy);
         Vector3 d = EvoStrikes.Flat(travel.sqrMagnitude > 0.0001f ? travel : enemy.position - transform.position, dir);
-        CombatFx.Damage(enemy, baseDamage * damageMul, p, d, false, 0f, HitSound.Electric);
+        CombatFx.Damage(enemy, baseDamage * damageMul, p, d, false, 0f, HitSound.Electric, source: damageSource);
         cfg.StunTarget(enemy, cfg.throwStun);
         HitFx(p, d, kind != HitKind.Back);
         switch (kind)

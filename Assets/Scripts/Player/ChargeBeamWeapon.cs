@@ -201,7 +201,7 @@ public class ChargeBeamWeapon : WeaponBase
         if (target == null || damage <= 0f) return;
 
         bool wasAlive = CombatFx.IsAlive(target);
-        CombatFx.Damage(target, damage, point, direction, critical, 0f, HitSound.Laser);
+        CombatFx.Damage(target, damage, point, direction, critical, 0f, HitSound.Laser, source: DamageSource.Of(this));
         bool killed = CheckDirectKill(target, wasAlive);   // 레이저를 대신하는 공격 — Drain
 
         if (HasHitEffects)
@@ -334,6 +334,7 @@ public class ChargeBeamWeapon : WeaponBase
                 hitPoint = point,
                 hitDirection = dir,
                 cameraShake = cfg.cameraShake,
+                source = DamageSource.Of(this),   // 판 결과 화면 (2026-11-26)
             });
 
             bool killed = CheckDirectKill(root, wasAlive);   // Drain

@@ -408,10 +408,12 @@ public class Enemy : MonoBehaviour, IDamageable, IPoolable
         if (state == EnemyState.Dead)
             return;
 
+        float hpBefore = currentHp;   // 판 결과 화면 — 실제로 깎은 양 (2026-11-26)
 
         currentHp -= info.damage;
 
         currentHp = Mathf.Max(currentHp, 0f);
+        RunStats.RecordHit(info.source, hpBefore - currentHp, info.damage, currentHp <= 0, false);
 
 
         hitFlash.HitFlash();

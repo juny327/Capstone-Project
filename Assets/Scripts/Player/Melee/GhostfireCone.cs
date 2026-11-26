@@ -12,6 +12,8 @@ using UnityEngine;
 /// </summary>
 public class GhostfireCone : MonoBehaviour
 {
+    // 판 결과 화면 — 이 오브젝트를 만든 무기 (만들 때의 DamageSource.Current, 2026-11-26)
+    readonly string damageSource = DamageSource.Current;
     BatEffect cfg;
     WeaponBase weapon;
     float baseDamage;
@@ -140,7 +142,7 @@ public class GhostfireCone : MonoBehaviour
             swept.Add(t);
             SweepHits++;
             Vector3 push = EvoStrikes.Flat(at - apex, dir);
-            if (damage > 0f) CombatFx.Damage(t, damage, CombatFx.Body(t), push, false, 0f, HitSound.FireBall);
+            if (damage > 0f) CombatFx.Damage(t, damage, CombatFx.Body(t), push, false, 0f, HitSound.FireBall, source: damageSource);
             Haunt(t, cfg.slowSeconds);
             if (Kit && EvoStrikes.Take(8)) FxKit.GhostBlast(new Vector3(at.x, apex.y, at.z), 0.8f, cfg.ghostColor, 0.6f * Scale);
         }
@@ -162,7 +164,7 @@ public class GhostfireCone : MonoBehaviour
         {
             if (!Inside(t, length + 0.3f, out Vector3 at)) continue;
             FieldHits++;
-            if (damage > 0f) CombatFx.Damage(t, damage, CombatFx.Body(t), Vector3.up, false, 0f, HitSound.FireBall);
+            if (damage > 0f) CombatFx.Damage(t, damage, CombatFx.Body(t), Vector3.up, false, 0f, HitSound.FireBall, source: damageSource);
             Haunt(t, cfg.fieldTick + 0.3f);
             if (Kit) FxKit.GhostLick(new Vector3(at.x, apex.y, at.z), 0.7f * Scale, 1.6f * Scale, 0.4f, A(cfg.ghostColor, 0.9f));
         }

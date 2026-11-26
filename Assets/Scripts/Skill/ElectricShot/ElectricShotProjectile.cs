@@ -126,6 +126,7 @@ public class ElectricShotProjectile : MonoBehaviour
             hitDirection = direction.normalized,
             cameraShake = 0f
         };
+        info.source = "ElectricShotUpgrade";   // 판 결과 화면 — 스킬별 피해 몫 (레벨업 카드 이름, 2026-11-26)
         enemy.TakeDamage(info);
     }
 }

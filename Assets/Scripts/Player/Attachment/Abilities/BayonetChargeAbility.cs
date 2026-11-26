@@ -122,7 +122,7 @@ public class BayonetChargeAbility : SubAbility
             if (!struck.Add(target)) continue;
 
             Vector3 at = CombatFx.Body(target);
-            CombatFx.Damage(target, damage, at, Forward, false, 0.12f);
+            CombatFx.Damage(target, damage, at, Forward, false, 0.12f, source: "sub:Bayonet");
             CombatFx.Stun(target, stun);
             CombatFx.Push(this, target, Forward, push, pushDuration);
             if (fxMaterial != null) FxLine.Ring(fxMaterial, target.position, 0.2f, 1.2f, trailColor, 0.18f, 0.22f);

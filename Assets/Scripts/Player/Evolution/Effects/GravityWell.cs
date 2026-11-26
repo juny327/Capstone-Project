@@ -5,6 +5,8 @@ using UnityEngine;
 /// <summary>실행 중에 생기는 중력장 하나. 끝나면 스스로 지운다.</summary>
 public class GravityWell : MonoBehaviour
 {
+    // 판 결과 화면 — 이 오브젝트를 만든 무기 (만들 때의 DamageSource.Current, 2026-11-26)
+    readonly string damageSource = DamageSource.Current;
     GravityWellEffect cfg;
     float damage;
     MeshRenderer disc;
@@ -211,7 +213,7 @@ public class GravityWell : MonoBehaviour
         {
             Vector3 dir = enemy.position - at;
             dir.y = 0f;
-            CombatFx.Damage(enemy, damage, CombatFx.Body(enemy), dir.sqrMagnitude > 0.0001f ? dir.normalized : Vector3.forward);
+            CombatFx.Damage(enemy, damage, CombatFx.Body(enemy), dir.sqrMagnitude > 0.0001f ? dir.normalized : Vector3.forward, source: damageSource);
             CombatFx.Stun(enemy, cfg.collapseStun);
         }
 
