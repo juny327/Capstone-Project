@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: d6475adc97784992361d9edbf0956ab7
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 429574
+  packageName: Real Spells Demo - 10 Free Spell VFX with Light and Sound
+  packageVersion: 1.0.0
+  assetPath: Assets/RealSpellsDemo/Spells/frost_ray/Materials/frost_ray_Loop_core.mat
+  uploadId: 1049474

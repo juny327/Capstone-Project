@@ -13,6 +13,7 @@ public class ShurikenEffect : UpgradeEffect
 
     [Header("Damage")]
     public float damage = 10f;
+    [Min(1f)] public float damageMultiplierPerLevel = 1.5f;
     public float hitInterval = 0.5f;
 
     [Header("Duration / Cooldown")]
@@ -48,15 +49,15 @@ public class ShurikenEffect : UpgradeEffect
         // Lv.3 = 5개
         int scaledCount = count + (level - 1);
 
-        // 데미지는 모든 레벨에서 10으로 고정
-        float fixedDamage = damage;
+        // Inspector에서 지정한 기본 데미지와 레벨별 배율 적용
+        float scaledDamage = damage * Mathf.Pow(Mathf.Max(1f, damageMultiplierPerLevel), level - 1);
 
         skill.Setup(
             projectilePrefab,
             scaledCount,
             orbitRadius,
             rotationSpeed,
-            fixedDamage,
+            scaledDamage,
             hitInterval,
             duration,
             cooldown,

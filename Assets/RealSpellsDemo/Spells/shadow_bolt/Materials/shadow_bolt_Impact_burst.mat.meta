@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: ac6238bc63f27255f99db65dee45425b
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 429574
+  packageName: Real Spells Demo - 10 Free Spell VFX with Light and Sound
+  packageVersion: 1.0.0
+  assetPath: Assets/RealSpellsDemo/Spells/shadow_bolt/Materials/shadow_bolt_Impact_burst.mat
+  uploadId: 1049474

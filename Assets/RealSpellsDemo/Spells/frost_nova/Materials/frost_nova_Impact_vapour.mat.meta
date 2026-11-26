@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 3601317bebeee2f63b686b591021630d
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 429574
+  packageName: Real Spells Demo - 10 Free Spell VFX with Light and Sound
+  packageVersion: 1.0.0
+  assetPath: Assets/RealSpellsDemo/Spells/frost_nova/Materials/frost_nova_Impact_vapour.mat
+  uploadId: 1049474

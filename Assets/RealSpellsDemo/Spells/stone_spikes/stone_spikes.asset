@@ -1,0 +1,4326 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8038981dfc5337752c8ed9051ef60068, type: 3}
+  m_Name: stone_spikes
+  m_EditorClassIdentifier: RealSpellsDemo.Runtime::RealSpellsDemo.SpellDefinition
+  id: stone_spikes
+  displayName: Stone Spikes
+  style: realistic
+  seed: 611
+  sourceFolder: 
+  projectile:
+    present: 0
+    speed: 14
+    arc: 0
+    curve: 0
+    curveRandomSign: 0
+    radius: 0.25
+    maxRange: 40
+    spin: 0
+  cast:
+    present: 1
+    duration: 0.3
+    startAtRelease: 0
+    layers:
+    - name: gather
+      mesh: {fileID: 0}
+      sheetIndex: 0
+      blend: 1
+      occlusion: 1
+      playback: 0
+      speed: 1
+      hasLife: 1
+      life:
+        min: 0.4
+        max: 0.4
+      fadeIn: 0
+      fadeOut: 0.2
+      randomStart: 1
+      anchor: 1
+      offset: {x: 0, y: 0, z: 0}
+      space: 0
+      orient: 0
+      stretch: 0.1
+      aspect: 1
+      spawn:
+        mode: 0
+        count:
+          min: 1
+          max: 1
+        rate: 10
+        spacing: 0.25
+        duration: -1
+        delay: 0
+        radius: 0
+        jitter: 0
+        lateral: 0
+        sizeJitter: 0
+        flip: 0
+        startOffset: 0
+        drift: 0
+        inherit: -1
+        falloff: 0.5
+        density: 4
+        band: 0.15
+        ride: 1
+        speed: 20
+      size:
+        min: 0.9
+        max: 0.9
+      sizeCurve:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      rotation:
+        min: 0
+        max: 0
+      spin:
+        min: 0
+        max: 0
+      velocity:
+        enabled: 0
+        speed:
+          min: 0
+          max: 0
+        directionMode: 0
+        direction: {x: 0, y: 1, z: 0}
+        spread: 30
+        inherit: 0
+        gravity: 0
+        drag: 0
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      intensity:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      alpha:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      softness: 0.3
+      depthOffset: 0
+      ageEase: 1.6
+      onFloor: 0
+      lingering: 0
+      lit: 0.9
+      align: 0
+      alignMode: 0
+      when: 0
+      tile: 0
+      scroll: 0
+      flicker: 0
+      ringHeight: 0.6
+      reach: 0
+      hasWidthCurve: 0
+      widthCurve:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      mirror: 0
+      behind: 0
+      filter: 0
+      order: 0
+      material: {fileID: 2100000, guid: 32f6dde2d0479629e9686330f33bb830, type: 2}
+    - name: gather_dust
+      mesh: {fileID: 0}
+      sheetIndex: 1
+      blend: 1
+      occlusion: 1
+      playback: 0
+      speed: 1
+      hasLife: 1
+      life:
+        min: 0.4
+        max: 0.5
+      fadeIn: 0
+      fadeOut: 0.2
+      randomStart: 1
+      anchor: 1
+      offset: {x: 0, y: 0, z: 0}
+      space: 0
+      orient: 0
+      stretch: 0.1
+      aspect: 1
+      spawn:
+        mode: 1
+        count:
+          min: 2
+          max: 3
+        rate: 10
+        spacing: 0.25
+        duration: -1
+        delay: 0
+        radius: 0.25
+        jitter: 0
+        lateral: 0
+        sizeJitter: 0
+        flip: 0.5
+        startOffset: 0
+        drift: 0
+        inherit: -1
+        falloff: 0.5
+        density: 4
+        band: 0.15
+        ride: 1
+        speed: 20
+      size:
+        min: 0.45
+        max: 0.63
+      sizeCurve:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 1.3
+          inSlope: 0
+          outSlope: -0.6999999
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 0.6
+          inSlope: -0.6999999
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      rotation:
+        min: 0
+        max: 360
+      spin:
+        min: 0
+        max: 0
+      velocity:
+        enabled: 0
+        speed:
+          min: 0
+          max: 0
+        directionMode: 0
+        direction: {x: 0, y: 1, z: 0}
+        spread: 30
+        inherit: 0
+        gravity: 0
+        drag: 0
+      tint: {r: 0.52, g: 0.44, b: 0.34, a: 1}
+      intensity:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      alpha:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 0
+          inSlope: 0
+          outSlope: 1
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 0.3
+          value: 0.3
+          inSlope: 1
+          outSlope: -0.42857146
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 0
+          inSlope: -0.42857146
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      softness: 0.3
+      depthOffset: 0
+      ageEase: 1.6
+      onFloor: 0
+      lingering: 0
+      lit: 1
+      align: 0
+      alignMode: 0
+      when: 0
+      tile: 0
+      scroll: 0
+      flicker: 0
+      ringHeight: 0.6
+      reach: 0
+      hasWidthCurve: 0
+      widthCurve:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      mirror: 0
+      behind: 0
+      filter: 0
+      order: 1
+      material: {fileID: 2100000, guid: 870d998ec658433ed1eed8e93e5b8590, type: 2}
+    lights:
+    - anchor: 1
+      offset: {x: 0, y: 0, z: 0}
+      color: {r: 1, g: 0.82, b: 0.6, a: 1}
+      range: 3
+      intensity:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 0
+          inSlope: 0
+          outSlope: 1.111111
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 0.18
+          value: 0.2
+          inSlope: 1.111111
+          outSlope: 2.4999998
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 0.3
+          value: 0.5
+          inSlope: 2.4999998
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      delay: 0
+      duration: -1
+      fadeOut: 0.15
+      flicker: 0.05
+      shadows: 0
+    sounds:
+    - clipPaths:
+      - Assets/RealSpellsDemo/Audio/stone_spikes_cast.wav
+      clips:
+      - {fileID: 8300000, guid: a7654b48d181fb587ad75916df1fbdd7, type: 3}
+      delay: 0
+      volume: 0.9
+      volumeJitter: 0
+      pitch: 1
+      pitchJitter: 0.03
+      loop: 0
+      fadeOut: 0.15
+      anchor: 1
+      spatial: 0.7
+      at: 0
+      clickAt:
+      - 0.29
+    shake:
+      enabled: 0
+      delay: 0
+      amplitude: 0.5
+      frequency: 20
+      duration: 0.4
+      radius: 25
+  travel:
+    present: 0
+    duration: -1
+    startAtRelease: 0
+    layers: []
+    lights: []
+    sounds: []
+    shake:
+      enabled: 0
+      delay: 0
+      amplitude: 0.5
+      frequency: 20
+      duration: 0.4
+      radius: 25
+  impact:
+    present: 1
+    duration: -1
+    startAtRelease: 0
+    layers:
+    - name: spikes
+      mesh: {fileID: 0}
+      sheetIndex: 2
+      blend: 1
+      occlusion: 1
+      playback: 0
+      speed: 1
+      hasLife: 1
+      life:
+        min: 1.4
+        max: 1.4
+      fadeIn: 0
+      fadeOut: 0.2
+      randomStart: 1
+      anchor: 3
+      offset: {x: 0, y: 0, z: 0}
+      space: 0
+      orient: 0
+      stretch: 0.1
+      aspect: 1
+      spawn:
+        mode: 0
+        count:
+          min: 1
+          max: 1
+        rate: 10
+        spacing: 0.25
+        duration: -1
+        delay: 0
+        radius: 0
+        jitter: 0
+        lateral: 0
+        sizeJitter: 0
+        flip: 0
+        startOffset: 0
+        drift: 0
+        inherit: -1
+        falloff: 0.5
+        density: 4
+        band: 0.15
+        ride: 1
+        speed: 20
+      size:
+        min: 3.2
+        max: 3.2
+      sizeCurve:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      rotation:
+        min: 0
+        max: 0
+      spin:
+        min: 0
+        max: 0
+      velocity:
+        enabled: 0
+        speed:
+          min: 0
+          max: 0
+        directionMode: 0
+        direction: {x: 0, y: 1, z: 0}
+        spread: 30
+        inherit: 0
+        gravity: 0
+        drag: 0
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      intensity:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      alpha:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      softness: 0.384
+      depthOffset: 0.2
+      ageEase: 1
+      onFloor: 1
+      lingering: 1
+      lit: 0.9
+      align: 0
+      alignMode: 0
+      when: 0
+      tile: 0
+      scroll: 0
+      flicker: 0
+      ringHeight: 0.6
+      reach: 0
+      hasWidthCurve: 0
+      widthCurve:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      mirror: 0
+      behind: 0
+      filter: 0
+      order: 3
+      material: {fileID: 2100000, guid: f046f596e6eafac2dd0fc2a848ef3cc1, type: 2}
+    - name: spike_ring
+      mesh: {fileID: 0}
+      sheetIndex: 2
+      blend: 1
+      occlusion: 1
+      playback: 0
+      speed: 1
+      hasLife: 1
+      life:
+        min: 1.2
+        max: 1.4
+      fadeIn: 0
+      fadeOut: 0.2
+      randomStart: 1
+      anchor: 3
+      offset: {x: 0, y: 0, z: 0}
+      space: 0
+      orient: 0
+      stretch: 0.1
+      aspect: 1
+      spawn:
+        mode: 5
+        count:
+          min: 1
+          max: 1
+        rate: 70
+        spacing: 0.25
+        duration: 0.08
+        delay: 0.03
+        radius: 1.6
+        jitter: 0
+        lateral: 0
+        sizeJitter: 0
+        flip: 0.5
+        startOffset: 0
+        drift: 0
+        inherit: -1
+        falloff: 0.6
+        density: 4
+        band: 0.15
+        ride: 1
+        speed: 20
+      size:
+        min: 1.1
+        max: 1.6
+      sizeCurve:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      rotation:
+        min: 0
+        max: 0
+      spin:
+        min: 0
+        max: 0
+      velocity:
+        enabled: 0
+        speed:
+          min: 0
+          max: 0
+        directionMode: 0
+        direction: {x: 0, y: 1, z: 0}
+        spread: 30
+        inherit: 0
+        gravity: 0
+        drag: 0
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      intensity:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      alpha:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      softness: 0.3
+      depthOffset: 0.2
+      ageEase: 1
+      onFloor: 1
+      lingering: 1
+      lit: 0.9
+      align: 0
+      alignMode: 0
+      when: 0
+      tile: 0
+      scroll: 0
+      flicker: 0
+      ringHeight: 0.6
+      reach: 0
+      hasWidthCurve: 0
+      widthCurve:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      mirror: 0
+      behind: 0
+      filter: 0
+      order: 3
+      material: {fileID: 2100000, guid: 4a23ac26b36cdb313f4368a760776840, type: 2}
+    - name: crack
+      mesh: {fileID: 0}
+      sheetIndex: 3
+      blend: 1
+      occlusion: 1
+      playback: 0
+      speed: 1
+      hasLife: 1
+      life:
+        min: 6
+        max: 6
+      fadeIn: 0
+      fadeOut: 0.2
+      randomStart: 1
+      anchor: 3
+      offset: {x: 0, y: 0.02, z: 0}
+      space: 0
+      orient: 1
+      stretch: 0.1
+      aspect: 1
+      spawn:
+        mode: 0
+        count:
+          min: 1
+          max: 1
+        rate: 10
+        spacing: 0.25
+        duration: -1
+        delay: 0
+        radius: 0
+        jitter: 0
+        lateral: 0
+        sizeJitter: 0
+        flip: 0
+        startOffset: 0
+        drift: 0
+        inherit: -1
+        falloff: 0.5
+        density: 4
+        band: 0.15
+        ride: 1
+        speed: 20
+      size:
+        min: 4.4
+        max: 4.4
+      sizeCurve:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      rotation:
+        min: 0
+        max: 360
+      spin:
+        min: 0
+        max: 0
+      velocity:
+        enabled: 0
+        speed:
+          min: 0
+          max: 0
+        directionMode: 0
+        direction: {x: 0, y: 1, z: 0}
+        spread: 30
+        inherit: 0
+        gravity: 0
+        drag: 0
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      intensity:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      alpha:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 0.8
+          value: 1
+          inSlope: 0
+          outSlope: -5.0000005
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 0
+          inSlope: -5.0000005
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      softness: 0
+      depthOffset: 0
+      ageEase: 1
+      onFloor: 1
+      lingering: 0
+      lit: 1
+      align: 0
+      alignMode: 0
+      when: 0
+      tile: 0
+      scroll: 0
+      flicker: 0
+      ringHeight: 0.6
+      reach: 0
+      hasWidthCurve: 0
+      widthCurve:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      mirror: 0
+      behind: 0
+      filter: 0
+      order: 0
+      material: {fileID: 2100000, guid: b0b5fa328d041f1ba7f75ee62b6cef8c, type: 2}
+    - name: dust_ring
+      mesh: {fileID: 0}
+      sheetIndex: 4
+      blend: 1
+      occlusion: 1
+      playback: 0
+      speed: 1
+      hasLife: 1
+      life:
+        min: 0.8
+        max: 0.8
+      fadeIn: 0
+      fadeOut: 0.2
+      randomStart: 1
+      anchor: 3
+      offset: {x: 0, y: 0.04, z: 0}
+      space: 0
+      orient: 1
+      stretch: 0.1
+      aspect: 1
+      spawn:
+        mode: 0
+        count:
+          min: 1
+          max: 1
+        rate: 10
+        spacing: 0.25
+        duration: -1
+        delay: 0
+        radius: 0
+        jitter: 0
+        lateral: 0
+        sizeJitter: 0
+        flip: 0
+        startOffset: 0
+        drift: 0
+        inherit: -1
+        falloff: 0.5
+        density: 4
+        band: 0.15
+        ride: 1
+        speed: 20
+      size:
+        min: 8
+        max: 8
+      sizeCurve:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      rotation:
+        min: 0
+        max: 360
+      spin:
+        min: 0
+        max: 0
+      velocity:
+        enabled: 0
+        speed:
+          min: 0
+          max: 0
+        directionMode: 0
+        direction: {x: 0, y: 1, z: 0}
+        spread: 30
+        inherit: 0
+        gravity: 0
+        drag: 0
+      tint: {r: 0.5, g: 0.42, b: 0.32, a: 1}
+      intensity:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      alpha:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 0.8
+          inSlope: 0
+          outSlope: -0.64000005
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 0.5
+          value: 0.48
+          inSlope: -0.64000005
+          outSlope: -0.96
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 0
+          inSlope: -0.96
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      softness: 0
+      depthOffset: 0
+      ageEase: 1
+      onFloor: 1
+      lingering: 0
+      lit: 1
+      align: 0
+      alignMode: 0
+      when: 0
+      tile: 0
+      scroll: 0
+      flicker: 0
+      ringHeight: 0.6
+      reach: 0
+      hasWidthCurve: 0
+      widthCurve:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      mirror: 0
+      behind: 0
+      filter: 0
+      order: 0
+      material: {fileID: 2100000, guid: 52aebc10cbc708a22da27365726d47e5, type: 2}
+    - name: burst
+      mesh: {fileID: 0}
+      sheetIndex: 5
+      blend: 1
+      occlusion: 1
+      playback: 0
+      speed: 1
+      hasLife: 1
+      life:
+        min: 1.2
+        max: 1.5
+      fadeIn: 0
+      fadeOut: 0.2
+      randomStart: 1
+      anchor: 3
+      offset: {x: 0, y: 0.35, z: 0}
+      space: 0
+      orient: 0
+      stretch: 0.1
+      aspect: 1
+      spawn:
+        mode: 1
+        count:
+          min: 3
+          max: 3
+        rate: 10
+        spacing: 0.25
+        duration: -1
+        delay: 0.03
+        radius: 0.4
+        jitter: 0
+        lateral: 0
+        sizeJitter: 0
+        flip: 0.5
+        startOffset: 0
+        drift: 0
+        inherit: -1
+        falloff: 0.5
+        density: 4
+        band: 0.15
+        ride: 1
+        speed: 20
+      size:
+        min: 2.2
+        max: 2.8
+      sizeCurve:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 0.6
+          inSlope: 0
+          outSlope: 0.79999995
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 0.5
+          value: 1
+          inSlope: 0.79999995
+          outSlope: 0.5
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1.25
+          inSlope: 0.5
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      rotation:
+        min: -25
+        max: 25
+      spin:
+        min: 0
+        max: 0
+      velocity:
+        enabled: 1
+        speed:
+          min: 0.8
+          max: 1.6
+        directionMode: 0
+        direction: {x: 0, y: 1, z: 0}
+        spread: 30
+        inherit: 0
+        gravity: 0.1
+        drag: 1.5
+      tint: {r: 0.52, g: 0.44, b: 0.34, a: 1}
+      intensity:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      alpha:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 0
+          inSlope: 0
+          outSlope: 5
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 0.1
+          value: 0.5
+          inSlope: 5
+          outSlope: -0.3333333
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 0.7
+          value: 0.3
+          inSlope: -0.3333333
+          outSlope: -1
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 0
+          inSlope: -1
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      softness: 0.336
+      depthOffset: 0.56
+      ageEase: 1
+      onFloor: 1
+      lingering: 0
+      lit: 1
+      align: 0
+      alignMode: 0
+      when: 0
+      tile: 0
+      scroll: 0
+      flicker: 0
+      ringHeight: 0.6
+      reach: 0
+      hasWidthCurve: 0
+      widthCurve:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      mirror: 0
+      behind: 0
+      filter: 0
+      order: 1
+      material: {fileID: 2100000, guid: 7787f3ea123ce7cf324d5b58764ee7c5, type: 2}
+    - name: chunks
+      mesh: {fileID: 0}
+      sheetIndex: 6
+      blend: 1
+      occlusion: 1
+      playback: 1
+      speed: 1
+      hasLife: 1
+      life:
+        min: 0.8
+        max: 1.2
+      fadeIn: 0
+      fadeOut: 0.2
+      randomStart: 1
+      anchor: 3
+      offset: {x: 0, y: 0.4, z: 0}
+      space: 1
+      orient: 0
+      stretch: 0.1
+      aspect: 1
+      spawn:
+        mode: 1
+        count:
+          min: 14
+          max: 18
+        rate: 10
+        spacing: 0.25
+        duration: -1
+        delay: 0
+        radius: 0.25
+        jitter: 0
+        lateral: 0
+        sizeJitter: 0
+        flip: 0.5
+        startOffset: 0
+        drift: 0
+        inherit: -1
+        falloff: 0.5
+        density: 4
+        band: 0.15
+        ride: 1
+        speed: 20
+      size:
+        min: 0.14
+        max: 0.32
+      sizeCurve:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      rotation:
+        min: 0
+        max: 360
+      spin:
+        min: -540
+        max: 540
+      velocity:
+        enabled: 1
+        speed:
+          min: 5
+          max: 10
+        directionMode: 1
+        direction: {x: 0, y: 1, z: 0}
+        spread: 120
+        inherit: 0
+        gravity: 1.2
+        drag: 0.3
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      intensity:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      alpha:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 0.85
+          value: 1
+          inSlope: 0
+          outSlope: -6.666668
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 0
+          inSlope: -6.666668
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      softness: 0.3
+      depthOffset: 0
+      ageEase: 1
+      onFloor: 1
+      lingering: 0
+      lit: 0.9
+      align: 0
+      alignMode: 0
+      when: 0
+      tile: 0
+      scroll: 0
+      flicker: 0
+      ringHeight: 0.6
+      reach: 0
+      hasWidthCurve: 0
+      widthCurve:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      mirror: 0
+      behind: 0
+      filter: 0
+      order: 4
+      material: {fileID: 2100000, guid: ad868e98f8fc5e5428f78ec8c1c89888, type: 2}
+    - name: grit
+      mesh: {fileID: 0}
+      sheetIndex: 6
+      blend: 1
+      occlusion: 1
+      playback: 1
+      speed: 1
+      hasLife: 1
+      life:
+        min: 0.5
+        max: 0.9
+      fadeIn: 0
+      fadeOut: 0.2
+      randomStart: 1
+      anchor: 3
+      offset: {x: 0, y: 0.3, z: 0}
+      space: 1
+      orient: 0
+      stretch: 0.1
+      aspect: 1
+      spawn:
+        mode: 1
+        count:
+          min: 24
+          max: 30
+        rate: 10
+        spacing: 0.25
+        duration: -1
+        delay: 0
+        radius: 0.25
+        jitter: 0
+        lateral: 0
+        sizeJitter: 0
+        flip: 0.5
+        startOffset: 0
+        drift: 0
+        inherit: -1
+        falloff: 0.5
+        density: 4
+        band: 0.15
+        ride: 1
+        speed: 20
+      size:
+        min: 0.04
+        max: 0.08
+      sizeCurve:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      rotation:
+        min: 0
+        max: 360
+      spin:
+        min: -540
+        max: 540
+      velocity:
+        enabled: 1
+        speed:
+          min: 4
+          max: 9
+        directionMode: 1
+        direction: {x: 0, y: 1, z: 0}
+        spread: 140
+        inherit: 0
+        gravity: 1.2
+        drag: 0.3
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      intensity:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      alpha:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 0.85
+          value: 1
+          inSlope: 0
+          outSlope: -6.666668
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 0
+          inSlope: -6.666668
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      softness: 0.3
+      depthOffset: 0
+      ageEase: 1
+      onFloor: 1
+      lingering: 0
+      lit: 0.9
+      align: 0
+      alignMode: 0
+      when: 0
+      tile: 0
+      scroll: 0
+      flicker: 0
+      ringHeight: 0.6
+      reach: 0
+      hasWidthCurve: 0
+      widthCurve:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      mirror: 0
+      behind: 0
+      filter: 0
+      order: 5
+      material: {fileID: 2100000, guid: 58c7a977cee4cee7eb46ff2c5f7382e8, type: 2}
+    - name: crumble
+      mesh: {fileID: 0}
+      sheetIndex: 6
+      blend: 1
+      occlusion: 1
+      playback: 1
+      speed: 1
+      hasLife: 1
+      life:
+        min: 0.4
+        max: 0.6
+      fadeIn: 0
+      fadeOut: 0.2
+      randomStart: 1
+      anchor: 3
+      offset: {x: 0, y: 0.8, z: 0}
+      space: 1
+      orient: 0
+      stretch: 0.1
+      aspect: 1
+      spawn:
+        mode: 1
+        count:
+          min: 12
+          max: 16
+        rate: 10
+        spacing: 0.25
+        duration: -1
+        delay: 1
+        radius: 1
+        jitter: 0
+        lateral: 0
+        sizeJitter: 0
+        flip: 0.5
+        startOffset: 0
+        drift: 0
+        inherit: -1
+        falloff: 0.5
+        density: 4
+        band: 0.15
+        ride: 1
+        speed: 20
+      size:
+        min: 0.06
+        max: 0.14
+      sizeCurve:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      rotation:
+        min: 0
+        max: 360
+      spin:
+        min: -540
+        max: 540
+      velocity:
+        enabled: 1
+        speed:
+          min: 0.4
+          max: 1.4
+        directionMode: 0
+        direction: {x: 0, y: 1, z: 0}
+        spread: 30
+        inherit: 0
+        gravity: 1.6
+        drag: 0.3
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      intensity:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      alpha:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 0.85
+          value: 1
+          inSlope: 0
+          outSlope: -6.666668
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 0
+          inSlope: -6.666668
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      softness: 0.3
+      depthOffset: 0
+      ageEase: 1
+      onFloor: 1
+      lingering: 0
+      lit: 0.9
+      align: 0
+      alignMode: 0
+      when: 0
+      tile: 0
+      scroll: 0
+      flicker: 0
+      ringHeight: 0.6
+      reach: 0
+      hasWidthCurve: 0
+      widthCurve:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      mirror: 0
+      behind: 0
+      filter: 0
+      order: 4
+      material: {fileID: 2100000, guid: fd6a8d3dc6f9ecd8cd5bb82d2d591b53, type: 2}
+    - name: crumble_dust
+      mesh: {fileID: 0}
+      sheetIndex: 5
+      blend: 1
+      occlusion: 1
+      playback: 0
+      speed: 1
+      hasLife: 1
+      life:
+        min: 0.9
+        max: 1.1
+      fadeIn: 0
+      fadeOut: 0.2
+      randomStart: 1
+      anchor: 3
+      offset: {x: 0, y: 0.3, z: 0}
+      space: 0
+      orient: 0
+      stretch: 0.1
+      aspect: 1
+      spawn:
+        mode: 1
+        count:
+          min: 2
+          max: 2
+        rate: 10
+        spacing: 0.25
+        duration: -1
+        delay: 1
+        radius: 0.4
+        jitter: 0
+        lateral: 0
+        sizeJitter: 0
+        flip: 0.5
+        startOffset: 0
+        drift: 0
+        inherit: -1
+        falloff: 0.5
+        density: 4
+        band: 0.15
+        ride: 1
+        speed: 20
+      size:
+        min: 2
+        max: 2.4
+      sizeCurve:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 0.6
+          inSlope: 0
+          outSlope: 0.79999995
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 0.5
+          value: 1
+          inSlope: 0.79999995
+          outSlope: 0.5
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1.25
+          inSlope: 0.5
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      rotation:
+        min: -25
+        max: 25
+      spin:
+        min: 0
+        max: 0
+      velocity:
+        enabled: 1
+        speed:
+          min: 0.4
+          max: 0.9
+        directionMode: 0
+        direction: {x: 0, y: 1, z: 0}
+        spread: 30
+        inherit: 0
+        gravity: 0.1
+        drag: 1.5
+      tint: {r: 0.52, g: 0.44, b: 0.34, a: 1}
+      intensity:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      alpha:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 0
+          inSlope: 0
+          outSlope: 3.5
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 0.1
+          value: 0.35
+          inSlope: 3.5
+          outSlope: -0.23333333
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 0.7
+          value: 0.21
+          inSlope: -0.23333333
+          outSlope: -0.6999999
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 0
+          inSlope: -0.6999999
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      softness: 0.3
+      depthOffset: 0.48000002
+      ageEase: 1
+      onFloor: 1
+      lingering: 0
+      lit: 1
+      align: 0
+      alignMode: 0
+      when: 0
+      tile: 0
+      scroll: 0
+      flicker: 0
+      ringHeight: 0.6
+      reach: 0
+      hasWidthCurve: 0
+      widthCurve:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      mirror: 0
+      behind: 0
+      filter: 0
+      order: 1
+      material: {fileID: 2100000, guid: 1320f000c5bf71b3fd719a950cfaaafd, type: 2}
+    lights:
+    - anchor: 3
+      offset: {x: 0, y: 1, z: 0}
+      color: {r: 1, g: 0.82, b: 0.6, a: 1}
+      range: 8
+      intensity:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 0
+          inSlope: 0
+          outSlope: 125
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 0.02
+          value: 2.5
+          inSlope: 125
+          outSlope: -11.538461
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 0.15
+          value: 1
+          inSlope: -11.538461
+          outSlope: -2.222222
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 0.6
+          value: 0
+          inSlope: -2.222222
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      delay: 0
+      duration: -1
+      fadeOut: 0.15
+      flicker: 0.04
+      shadows: 0
+    sounds:
+    - clipPaths:
+      - Assets/RealSpellsDemo/Audio/stone_spikes_impact.wav
+      clips:
+      - {fileID: 8300000, guid: 02e4b9ca7240643c9d165e4e798b471f, type: 3}
+      delay: 0
+      volume: 1
+      volumeJitter: 0.04
+      pitch: 1
+      pitchJitter: 0.03
+      loop: 0
+      fadeOut: 0.15
+      anchor: 3
+      spatial: 0.45
+      at: 0
+      clickAt: []
+    - clipPaths:
+      - Assets/RealSpellsDemo/Audio/stone_spikes_end.wav
+      clips:
+      - {fileID: 8300000, guid: d71651d182b663a6f9ac38be75223669, type: 3}
+      delay: 1
+      volume: 0.9
+      volumeJitter: 0
+      pitch: 1
+      pitchJitter: 0
+      loop: 0
+      fadeOut: 0.15
+      anchor: 3
+      spatial: 0.6
+      at: 0
+      clickAt: []
+    shake:
+      enabled: 1
+      delay: 0
+      amplitude: 1.2
+      frequency: 18
+      duration: 0.45
+      radius: 35
+  loop:
+    present: 0
+    duration: -1
+    startAtRelease: 0
+    layers: []
+    lights: []
+    sounds: []
+    shake:
+      enabled: 0
+      delay: 0
+      amplitude: 0.5
+      frequency: 20
+      duration: 0.4
+      radius: 25
+  telegraph:
+    present: 1
+    duration: 0.45
+    startAtRelease: 0
+    layers:
+    - name: mark
+      mesh: {fileID: 0}
+      sheetIndex: 3
+      blend: 1
+      occlusion: 1
+      playback: 0
+      speed: 0.35
+      hasLife: 1
+      life:
+        min: 0.55
+        max: 0.55
+      fadeIn: 0
+      fadeOut: 0.2
+      randomStart: 1
+      anchor: 3
+      offset: {x: 0, y: 0.02, z: 0}
+      space: 0
+      orient: 1
+      stretch: 0.1
+      aspect: 1
+      spawn:
+        mode: 0
+        count:
+          min: 1
+          max: 1
+        rate: 10
+        spacing: 0.25
+        duration: -1
+        delay: 0
+        radius: 0
+        jitter: 0
+        lateral: 0
+        sizeJitter: 0
+        flip: 0
+        startOffset: 0
+        drift: 0
+        inherit: -1
+        falloff: 0.5
+        density: 4
+        band: 0.15
+        ride: 1
+        speed: 20
+      size:
+        min: 5
+        max: 5
+      sizeCurve:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      rotation:
+        min: 0
+        max: 360
+      spin:
+        min: 0
+        max: 0
+      velocity:
+        enabled: 0
+        speed:
+          min: 0
+          max: 0
+        directionMode: 0
+        direction: {x: 0, y: 1, z: 0}
+        spread: 30
+        inherit: 0
+        gravity: 0
+        drag: 0
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      intensity:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      alpha:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 0.8
+          value: 1
+          inSlope: 0
+          outSlope: -5.0000005
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 0
+          inSlope: -5.0000005
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      softness: 0
+      depthOffset: 0
+      ageEase: 1
+      onFloor: 1
+      lingering: 0
+      lit: 1
+      align: 0
+      alignMode: 0
+      when: 0
+      tile: 0
+      scroll: 0
+      flicker: 0
+      ringHeight: 0.6
+      reach: 0
+      hasWidthCurve: 0
+      widthCurve:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      mirror: 0
+      behind: 0
+      filter: 0
+      order: 1
+      material: {fileID: 2100000, guid: 19ed3e8f9fd39eb6659b8b2e52f0d53f, type: 2}
+    - name: hop
+      mesh: {fileID: 0}
+      sheetIndex: 6
+      blend: 1
+      occlusion: 1
+      playback: 1
+      speed: 1
+      hasLife: 1
+      life:
+        min: 0.25
+        max: 0.4
+      fadeIn: 0
+      fadeOut: 0.2
+      randomStart: 1
+      anchor: 3
+      offset: {x: 0, y: 0, z: 0}
+      space: 1
+      orient: 0
+      stretch: 0.1
+      aspect: 1
+      spawn:
+        mode: 3
+        count:
+          min: 1
+          max: 1
+        rate: 90
+        spacing: 0.25
+        duration: 0.45
+        delay: 0
+        radius: 1.5
+        jitter: 0
+        lateral: 0
+        sizeJitter: 0
+        flip: 0.5
+        startOffset: 0
+        drift: 0
+        inherit: -1
+        falloff: 0.5
+        density: 4
+        band: 0.15
+        ride: 1
+        speed: 20
+      size:
+        min: 0.16
+        max: 0.34
+      sizeCurve:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      rotation:
+        min: 0
+        max: 360
+      spin:
+        min: -540
+        max: 540
+      velocity:
+        enabled: 1
+        speed:
+          min: 2
+          max: 3.6
+        directionMode: 1
+        direction: {x: 0, y: 1, z: 0}
+        spread: 30
+        inherit: 0
+        gravity: 2
+        drag: 0.2
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      intensity:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      alpha:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 0.8
+          value: 1
+          inSlope: 0
+          outSlope: -5.0000005
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 0
+          inSlope: -5.0000005
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      softness: 0.3
+      depthOffset: 0
+      ageEase: 1
+      onFloor: 1
+      lingering: 0
+      lit: 0.6
+      align: 0
+      alignMode: 0
+      when: 0
+      tile: 0
+      scroll: 0
+      flicker: 0
+      ringHeight: 0.6
+      reach: 0
+      hasWidthCurve: 0
+      widthCurve:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      mirror: 0
+      behind: 0
+      filter: 0
+      order: 4
+      material: {fileID: 2100000, guid: 5c2bfad11c2d541341bba37f1529a5c9, type: 2}
+    - name: seep
+      mesh: {fileID: 0}
+      sheetIndex: 1
+      blend: 1
+      occlusion: 1
+      playback: 0
+      speed: 1
+      hasLife: 1
+      life:
+        min: 0.45
+        max: 0.6
+      fadeIn: 0
+      fadeOut: 0.2
+      randomStart: 1
+      anchor: 3
+      offset: {x: 0, y: 0.1, z: 0}
+      space: 0
+      orient: 0
+      stretch: 0.1
+      aspect: 1
+      spawn:
+        mode: 3
+        count:
+          min: 1
+          max: 1
+        rate: 20
+        spacing: 0.25
+        duration: 0.45
+        delay: 0
+        radius: 1.3
+        jitter: 0
+        lateral: 0
+        sizeJitter: 0
+        flip: 0.5
+        startOffset: 0
+        drift: 0
+        inherit: -1
+        falloff: 0.5
+        density: 4
+        band: 0.15
+        ride: 1
+        speed: 20
+      size:
+        min: 1.3
+        max: 1.9
+      sizeCurve:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 0.6
+          inSlope: 0
+          outSlope: 0.79999995
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 0.5
+          value: 1
+          inSlope: 0.79999995
+          outSlope: 0.5
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1.25
+          inSlope: 0.5
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      rotation:
+        min: -25
+        max: 25
+      spin:
+        min: 0
+        max: 0
+      velocity:
+        enabled: 1
+        speed:
+          min: 0.8
+          max: 1.6
+        directionMode: 1
+        direction: {x: 0, y: 1, z: 0}
+        spread: 30
+        inherit: 0
+        gravity: 0.1
+        drag: 1.5
+      tint: {r: 0.56, g: 0.4, b: 0.25, a: 1}
+      intensity:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      alpha:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 0
+          inSlope: 0
+          outSlope: 7
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 0.1
+          value: 0.7
+          inSlope: 7
+          outSlope: -0.49999997
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 0.7
+          value: 0.4
+          inSlope: -0.49999997
+          outSlope: -1.3333333
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 0
+          inSlope: -1.3333333
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      softness: 0.3
+      depthOffset: 0.38
+      ageEase: 1
+      onFloor: 1
+      lingering: 0
+      lit: 0.6
+      align: 0
+      alignMode: 0
+      when: 0
+      tile: 0
+      scroll: 0
+      flicker: 0
+      ringHeight: 0.6
+      reach: 0
+      hasWidthCurve: 0
+      widthCurve:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      mirror: 0
+      behind: 0
+      filter: 0
+      order: 1
+      material: {fileID: 2100000, guid: 684135a2365504cd0d2ac65872b469ec, type: 2}
+    - name: mark_dark
+      mesh: {fileID: 0}
+      sheetIndex: 7
+      blend: 1
+      occlusion: 1
+      playback: 0
+      speed: 1
+      hasLife: 1
+      life:
+        min: 0.55
+        max: 0.55
+      fadeIn: 0
+      fadeOut: 0.2
+      randomStart: 1
+      anchor: 3
+      offset: {x: 0, y: 0.015, z: 0}
+      space: 0
+      orient: 1
+      stretch: 0.1
+      aspect: 1
+      spawn:
+        mode: 0
+        count:
+          min: 1
+          max: 1
+        rate: 10
+        spacing: 0.25
+        duration: -1
+        delay: 0
+        radius: 0
+        jitter: 0
+        lateral: 0
+        sizeJitter: 0
+        flip: 0
+        startOffset: 0
+        drift: 0
+        inherit: -1
+        falloff: 0.5
+        density: 4
+        band: 0.15
+        ride: 1
+        speed: 20
+      size:
+        min: 5.6
+        max: 5.6
+      sizeCurve:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 0.5
+          inSlope: 0
+          outSlope: 0.5
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 0.5
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      rotation:
+        min: 0
+        max: 360
+      spin:
+        min: 0
+        max: 0
+      velocity:
+        enabled: 0
+        speed:
+          min: 0
+          max: 0
+        directionMode: 0
+        direction: {x: 0, y: 1, z: 0}
+        spread: 30
+        inherit: 0
+        gravity: 0
+        drag: 0
+      tint: {r: 0.09, g: 0.07, b: 0.05, a: 1}
+      intensity:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      alpha:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 0
+          inSlope: 0
+          outSlope: 2.2857144
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 0.35
+          value: 0.8
+          inSlope: 2.2857144
+          outSlope: 0.19999991
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 0.85
+          value: 0.9
+          inSlope: 0.19999991
+          outSlope: -2.666667
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 0.5
+          inSlope: -2.666667
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      softness: 0
+      depthOffset: 0
+      ageEase: 1
+      onFloor: 1
+      lingering: 0
+      lit: 1
+      align: 0
+      alignMode: 0
+      when: 0
+      tile: 0
+      scroll: 0
+      flicker: 0
+      ringHeight: 0.6
+      reach: 0
+      hasWidthCurve: 0
+      widthCurve:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      mirror: 0
+      behind: 0
+      filter: 0
+      order: 0
+      material: {fileID: 2100000, guid: 89074c3b16c9f266fd19030663950e69, type: 2}
+    - name: mark_b
+      mesh: {fileID: 0}
+      sheetIndex: 3
+      blend: 1
+      occlusion: 1
+      playback: 0
+      speed: 0.5
+      hasLife: 1
+      life:
+        min: 0.55
+        max: 0.55
+      fadeIn: 0
+      fadeOut: 0.2
+      randomStart: 1
+      anchor: 3
+      offset: {x: 0, y: 0.025, z: 0}
+      space: 0
+      orient: 1
+      stretch: 0.1
+      aspect: 1
+      spawn:
+        mode: 0
+        count:
+          min: 1
+          max: 1
+        rate: 10
+        spacing: 0.25
+        duration: -1
+        delay: 0
+        radius: 0
+        jitter: 0
+        lateral: 0
+        sizeJitter: 0
+        flip: 0
+        startOffset: 0
+        drift: 0
+        inherit: -1
+        falloff: 0.5
+        density: 4
+        band: 0.15
+        ride: 1
+        speed: 20
+      size:
+        min: 2.4
+        max: 2.4
+      sizeCurve:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      rotation:
+        min: 0
+        max: 360
+      spin:
+        min: 0
+        max: 0
+      velocity:
+        enabled: 0
+        speed:
+          min: 0
+          max: 0
+        directionMode: 0
+        direction: {x: 0, y: 1, z: 0}
+        spread: 30
+        inherit: 0
+        gravity: 0
+        drag: 0
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      intensity:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      alpha:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 0.8
+          value: 1
+          inSlope: 0
+          outSlope: -5.0000005
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 0
+          inSlope: -5.0000005
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      softness: 0
+      depthOffset: 0
+      ageEase: 1
+      onFloor: 1
+      lingering: 0
+      lit: 1
+      align: 0
+      alignMode: 0
+      when: 0
+      tile: 0
+      scroll: 0
+      flicker: 0
+      ringHeight: 0.6
+      reach: 0
+      hasWidthCurve: 0
+      widthCurve:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      mirror: 0
+      behind: 0
+      filter: 0
+      order: 1
+      material: {fileID: 2100000, guid: 49a0d8375ce31e3a6537389545f575a0, type: 2}
+    lights:
+    - anchor: 3
+      offset: {x: 0, y: 0.5, z: 0}
+      color: {r: 1, g: 0.8, b: 0.58, a: 1}
+      range: 4
+      intensity:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 0
+          inSlope: 0
+          outSlope: 4.166667
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 0.12
+          value: 0.5
+          inSlope: 4.166667
+          outSlope: 1.0714285
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 0.4
+          value: 0.8
+          inSlope: 1.0714285
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      delay: 0
+      duration: -1
+      fadeOut: 0.15
+      flicker: 0.2
+      shadows: 0
+    sounds:
+    - clipPaths:
+      - Assets/RealSpellsDemo/Audio/stone_spikes_telegraph.wav
+      clips:
+      - {fileID: 8300000, guid: d05449f8c7f8b72e588def70bfab1467, type: 3}
+      delay: 0
+      volume: 0.9
+      volumeJitter: 0
+      pitch: 1
+      pitchJitter: 0
+      loop: 0
+      fadeOut: 0.15
+      anchor: 3
+      spatial: 0.7
+      at: 0
+      clickAt: []
+    shake:
+      enabled: 0
+      delay: 0
+      amplitude: 0.5
+      frequency: 20
+      duration: 0.4
+      radius: 25
+  archetype: strike
+  archetypeDeclared: 1
+  sheets:
+  - name: earth_cast
+    folder: 
+    tier: high
+    frameCount: 13
+    cols: 5
+    rows: 3
+    cell: 512
+    gutter: 8
+    mipMax: 3
+    duration: 0.35
+    loop: 0
+    endHold: 0
+    step: 0
+    times:
+    - 0
+    - 0.03
+    - 0.06
+    - 0.09
+    - 0.12
+    - 0.15
+    - 0.18
+    - 0.21
+    - 0.24
+    - 0.27
+    - 0.3
+    - 0.32
+    - 0.35
+    content: lit
+    blend: 1
+    intensity: 1
+    occlusion: 1
+    hasSegments: 0
+    segAppear: {x: 0, y: 0}
+    segLoop: {x: 0, y: 0}
+    segEnd: {x: 0, y: 0}
+    hasMotion: 0
+    motionScale: 0
+    motionStrength: 1
+    pivot: {x: 0.5, y: 0.5}
+    hasExtent: 1
+    extent: {x: 0.5, y: 0.5, z: 0.5, w: 0.5}
+    hasForward: 0
+    forward: {x: 1, y: 0}
+    projection: billboard
+    tilePeriod: 0
+    tileAxis: x
+    filter: 0
+    texture: {fileID: 2800000, guid: 2584e10e267890405969a134606b9a23, type: 3}
+    motion: {fileID: 0}
+    lut: {fileID: 93917686861258628}
+    tierData:
+    - name: high
+      textureGuid: 2584e10e267890405969a134606b9a23
+      motionGuid: 
+      cell: 512
+      gutter: 8
+      mipMax: 3
+    - name: standard
+      textureGuid: 1dc159cc1451cce0f24b4342af9d13cf
+      motionGuid: 
+      cell: 256
+      gutter: 4
+      mipMax: 2
+    - name: mobile
+      textureGuid: 63c6a98f916c46202fd6802345aa5d84
+      motionGuid: 
+      cell: 128
+      gutter: 2
+      mipMax: 2
+  - name: fireball_smoke
+    folder: 
+    tier: high
+    frameCount: 32
+    cols: 8
+    rows: 4
+    cell: 512
+    gutter: 8
+    mipMax: 3
+    duration: 1.5
+    loop: 0
+    endHold: 0
+    step: 0
+    times:
+    - 0
+    - 0.0126
+    - 0.0252
+    - 0.0504
+    - 0.063
+    - 0.0756
+    - 0.0882
+    - 0.1134
+    - 0.1387
+    - 0.1639
+    - 0.2017
+    - 0.2395
+    - 0.3025
+    - 0.3782
+    - 0.4664
+    - 0.5798
+    - 0.6807
+    - 0.7689
+    - 0.8697
+    - 0.958
+    - 1.0462
+    - 1.1345
+    - 1.1975
+    - 1.2479
+    - 1.3109
+    - 1.3487
+    - 1.3866
+    - 1.4244
+    - 1.4496
+    - 1.4622
+    - 1.4874
+    - 1.5
+    content: lit
+    blend: 1
+    intensity: 1
+    occlusion: 1
+    hasSegments: 0
+    segAppear: {x: 0, y: 0}
+    segLoop: {x: 0, y: 0}
+    segEnd: {x: 0, y: 0}
+    hasMotion: 1
+    motionScale: 0.07
+    motionStrength: 1
+    pivot: {x: 0.5002, y: 0.4571}
+    hasExtent: 1
+    extent: {x: 0.395, y: 0.394, z: 0.254, w: 0.341}
+    hasForward: 0
+    forward: {x: 1, y: 0}
+    projection: billboard
+    tilePeriod: 0
+    tileAxis: x
+    filter: 0
+    texture: {fileID: 2800000, guid: 7efa9f259b8cb88b794f5b3f0507b30c, type: 3}
+    motion: {fileID: 2800000, guid: ac928210a9643bded5cdb0975e97b237, type: 3}
+    lut: {fileID: 5500027306957789}
+    tierData:
+    - name: high
+      textureGuid: 7efa9f259b8cb88b794f5b3f0507b30c
+      motionGuid: ac928210a9643bded5cdb0975e97b237
+      cell: 512
+      gutter: 8
+      mipMax: 3
+    - name: standard
+      textureGuid: 2d25dbaab9b20a64726f1fd942f76f3a
+      motionGuid: 44b82f4ab786ece4cb310607b23f63e3
+      cell: 256
+      gutter: 4
+      mipMax: 2
+    - name: mobile
+      textureGuid: 7af055aaddc2f2c0d8bc01935505d9b8
+      motionGuid: 7ffba8e8dc68bb4fdd50d9f344c923d8
+      cell: 128
+      gutter: 2
+      mipMax: 1
+  - name: earth_spike
+    folder: 
+    tier: high
+    frameCount: 16
+    cols: 4
+    rows: 4
+    cell: 512
+    gutter: 8
+    mipMax: 3
+    duration: 1.4
+    loop: 0
+    endHold: 0
+    step: 0
+    times:
+    - 0
+    - 0.025
+    - 0.05
+    - 0.075
+    - 0.1
+    - 0.16
+    - 0.3
+    - 0.5
+    - 0.7
+    - 0.85
+    - 0.95
+    - 1.05
+    - 1.15
+    - 1.25
+    - 1.35
+    - 1.4
+    content: lit
+    blend: 1
+    intensity: 1
+    occlusion: 1
+    hasSegments: 0
+    segAppear: {x: 0, y: 0}
+    segLoop: {x: 0, y: 0}
+    segEnd: {x: 0, y: 0}
+    hasMotion: 0
+    motionScale: 0
+    motionStrength: 1
+    pivot: {x: 0.5, y: 0.04}
+    hasExtent: 1
+    extent: {x: 0.5, y: 0.5, z: 0.04, w: 0.96}
+    hasForward: 0
+    forward: {x: 1, y: 0}
+    projection: billboard
+    tilePeriod: 0
+    tileAxis: x
+    filter: 0
+    texture: {fileID: 2800000, guid: 1b8eb4c9a660e78979d09aee9a0f6bc1, type: 3}
+    motion: {fileID: 0}
+    lut: {fileID: 659863337189204391}
+    tierData:
+    - name: high
+      textureGuid: 1b8eb4c9a660e78979d09aee9a0f6bc1
+      motionGuid: 
+      cell: 512
+      gutter: 8
+      mipMax: 3
+    - name: standard
+      textureGuid: 08d79b4ad1de37fca6f05dbc06f5b078
+      motionGuid: 
+      cell: 256
+      gutter: 4
+      mipMax: 2
+    - name: mobile
+      textureGuid: 0669286e5e036a4caea8d8c35a070632
+      motionGuid: 
+      cell: 128
+      gutter: 2
+      mipMax: 2
+  - name: earth_crack
+    folder: 
+    tier: high
+    frameCount: 7
+    cols: 4
+    rows: 2
+    cell: 512
+    gutter: 8
+    mipMax: 3
+    duration: 0.3
+    loop: 0
+    endHold: 1
+    step: 0
+    times:
+    - 0
+    - 0.03
+    - 0.06
+    - 0.09
+    - 0.12
+    - 0.15
+    - 0.3
+    content: lit
+    blend: 1
+    intensity: 1
+    occlusion: 1
+    hasSegments: 0
+    segAppear: {x: 0, y: 0}
+    segLoop: {x: 0, y: 0}
+    segEnd: {x: 0, y: 0}
+    hasMotion: 0
+    motionScale: 0
+    motionStrength: 1
+    pivot: {x: 0.5, y: 0.5}
+    hasExtent: 1
+    extent: {x: 0.5, y: 0.5, z: 0.5, w: 0.5}
+    hasForward: 0
+    forward: {x: 1, y: 0}
+    projection: ground
+    tilePeriod: 0
+    tileAxis: x
+    filter: 0
+    texture: {fileID: 2800000, guid: b19989ebd9e660d8991e30a8e5a484f4, type: 3}
+    motion: {fileID: 0}
+    lut: {fileID: 406524109711150759}
+    tierData:
+    - name: high
+      textureGuid: b19989ebd9e660d8991e30a8e5a484f4
+      motionGuid: 
+      cell: 512
+      gutter: 8
+      mipMax: 3
+    - name: standard
+      textureGuid: 865b98b7cd8c572ec756b592690d5caf
+      motionGuid: 
+      cell: 256
+      gutter: 4
+      mipMax: 2
+    - name: mobile
+      textureGuid: 27582bc65d9c6bedc16fbfb52d08582e
+      motionGuid: 
+      cell: 128
+      gutter: 2
+      mipMax: 2
+  - name: fireball_shockwave
+    folder: 
+    tier: high
+    frameCount: 10
+    cols: 4
+    rows: 3
+    cell: 512
+    gutter: 8
+    mipMax: 3
+    duration: 0.35
+    loop: 0
+    endHold: 0
+    step: 0
+    times:
+    - 0
+    - 0.0389
+    - 0.0778
+    - 0.1167
+    - 0.1556
+    - 0.1944
+    - 0.2333
+    - 0.2722
+    - 0.3111
+    - 0.35
+    content: lit
+    blend: 1
+    intensity: 1
+    occlusion: 1
+    hasSegments: 0
+    segAppear: {x: 0, y: 0}
+    segLoop: {x: 0, y: 0}
+    segEnd: {x: 0, y: 0}
+    hasMotion: 0
+    motionScale: 0
+    motionStrength: 1
+    pivot: {x: 0.5, y: 0.5}
+    hasExtent: 1
+    extent: {x: 0.5, y: 0.5, z: 0.5, w: 0.5}
+    hasForward: 0
+    forward: {x: 1, y: 0}
+    projection: ground
+    tilePeriod: 0
+    tileAxis: x
+    filter: 0
+    texture: {fileID: 2800000, guid: 9213a298aad5261117b04741146f2842, type: 3}
+    motion: {fileID: 0}
+    lut: {fileID: 1152862982504408053}
+    tierData:
+    - name: high
+      textureGuid: 9213a298aad5261117b04741146f2842
+      motionGuid: 
+      cell: 512
+      gutter: 8
+      mipMax: 3
+    - name: standard
+      textureGuid: a3b53456b8a1711920ed2edcac2bab7b
+      motionGuid: 
+      cell: 256
+      gutter: 4
+      mipMax: 2
+    - name: mobile
+      textureGuid: 2fb4a861852107f50d268e54073f6639
+      motionGuid: 
+      cell: 128
+      gutter: 2
+      mipMax: 2
+  - name: ice_burst
+    folder: 
+    tier: high
+    frameCount: 16
+    cols: 4
+    rows: 4
+    cell: 512
+    gutter: 8
+    mipMax: 3
+    duration: 0.6
+    loop: 0
+    endHold: 0
+    step: 0
+    times:
+    - 0
+    - 0.02
+    - 0.04
+    - 0.06
+    - 0.08
+    - 0.1
+    - 0.12
+    - 0.14
+    - 0.16
+    - 0.18
+    - 0.2
+    - 0.26
+    - 0.34
+    - 0.44
+    - 0.52
+    - 0.6
+    content: lit
+    blend: 1
+    intensity: 1
+    occlusion: 1
+    hasSegments: 0
+    segAppear: {x: 0, y: 0}
+    segLoop: {x: 0, y: 0}
+    segEnd: {x: 0, y: 0}
+    hasMotion: 1
+    motionScale: 0.1
+    motionStrength: 1
+    pivot: {x: 0.4986, y: 0.4973}
+    hasExtent: 1
+    extent: {x: 0.393, y: 0.395, z: 0.391, w: 0.398}
+    hasForward: 0
+    forward: {x: 1, y: 0}
+    projection: billboard
+    tilePeriod: 0
+    tileAxis: x
+    filter: 0
+    texture: {fileID: 2800000, guid: 747fb11173fdf046b1d831c1c857a60f, type: 3}
+    motion: {fileID: 2800000, guid: e89e4b9652f8f512703c998466c4aab9, type: 3}
+    lut: {fileID: 436839272476927409}
+    tierData:
+    - name: high
+      textureGuid: 747fb11173fdf046b1d831c1c857a60f
+      motionGuid: e89e4b9652f8f512703c998466c4aab9
+      cell: 512
+      gutter: 8
+      mipMax: 3
+    - name: standard
+      textureGuid: 3ccd693c5c83a3e9541a85b1defe8bba
+      motionGuid: b3a6cbae9d2eef8c7a0b06ec90a733d8
+      cell: 256
+      gutter: 4
+      mipMax: 2
+    - name: mobile
+      textureGuid: a4d7a3356af51f9b3292f2d68861adb4
+      motionGuid: 4c843cc14e2af26030cd3d81810bb5c2
+      cell: 128
+      gutter: 2
+      mipMax: 1
+  - name: earth_debris
+    folder: 
+    tier: high
+    frameCount: 16
+    cols: 4
+    rows: 4
+    cell: 512
+    gutter: 8
+    mipMax: 3
+    duration: 0.8
+    loop: 1
+    endHold: 0
+    step: 0
+    times:
+    - 0
+    - 0.05
+    - 0.1
+    - 0.15
+    - 0.2
+    - 0.25
+    - 0.3
+    - 0.35
+    - 0.4
+    - 0.45
+    - 0.5
+    - 0.55
+    - 0.6
+    - 0.65
+    - 0.7
+    - 0.75
+    content: lit
+    blend: 1
+    intensity: 1
+    occlusion: 1
+    hasSegments: 0
+    segAppear: {x: 0, y: 0}
+    segLoop: {x: 0, y: 0}
+    segEnd: {x: 0, y: 0}
+    hasMotion: 0
+    motionScale: 0
+    motionStrength: 1
+    pivot: {x: 0.5, y: 0.5}
+    hasExtent: 1
+    extent: {x: 0.5, y: 0.5, z: 0.5, w: 0.5}
+    hasForward: 0
+    forward: {x: 1, y: 0}
+    projection: billboard
+    tilePeriod: 0
+    tileAxis: x
+    filter: 0
+    texture: {fileID: 2800000, guid: 3f17105a4f56c2e5c8b0c23a008f639c, type: 3}
+    motion: {fileID: 0}
+    lut: {fileID: 576767208415038368}
+    tierData:
+    - name: high
+      textureGuid: 3f17105a4f56c2e5c8b0c23a008f639c
+      motionGuid: 
+      cell: 512
+      gutter: 8
+      mipMax: 3
+    - name: standard
+      textureGuid: b9a56c4567bb37ed3b7af5a5805b5bbf
+      motionGuid: 
+      cell: 256
+      gutter: 4
+      mipMax: 2
+    - name: mobile
+      textureGuid: 836c445c8a72e7e9b806f8dba20456d0
+      motionGuid: 
+      cell: 128
+      gutter: 2
+      mipMax: 2
+  - name: fireball_scorch
+    folder: 
+    tier: high
+    frameCount: 16
+    cols: 4
+    rows: 4
+    cell: 512
+    gutter: 8
+    mipMax: 3
+    duration: 6
+    loop: 0
+    endHold: 1
+    step: 0
+    times:
+    - 0
+    - 0.024
+    - 0.048
+    - 0.072
+    - 0.096
+    - 0.12
+    - 0.2733
+    - 0.4267
+    - 0.58
+    - 0.7333
+    - 0.8867
+    - 1.04
+    - 1.1933
+    - 1.3467
+    - 1.5
+    - 6
+    content: lit
+    blend: 1
+    intensity: 1
+    occlusion: 1
+    hasSegments: 0
+    segAppear: {x: 0, y: 0}
+    segLoop: {x: 0, y: 0}
+    segEnd: {x: 0, y: 0}
+    hasMotion: 0
+    motionScale: 0
+    motionStrength: 1
+    pivot: {x: 0.5, y: 0.5}
+    hasExtent: 1
+    extent: {x: 0.5, y: 0.5, z: 0.5, w: 0.5}
+    hasForward: 0
+    forward: {x: 1, y: 0}
+    projection: ground
+    tilePeriod: 0
+    tileAxis: x
+    filter: 0
+    texture: {fileID: 2800000, guid: 232f54ade25aa8ff288364e2439369b3, type: 3}
+    motion: {fileID: 0}
+    lut: {fileID: 1051827163710723697}
+    tierData:
+    - name: high
+      textureGuid: 232f54ade25aa8ff288364e2439369b3
+      motionGuid: 
+      cell: 512
+      gutter: 8
+      mipMax: 3
+    - name: standard
+      textureGuid: ef9a4642a6041a079226715cefb45004
+      motionGuid: 
+      cell: 256
+      gutter: 4
+      mipMax: 2
+    - name: mobile
+      textureGuid: 268d072431048653c578ea3e9a1d8c7b
+      motionGuid: 
+      cell: 128
+      gutter: 2
+      mipMax: 1
+  feel:
+    spellClass: instant
+    castTime: 0.3
+    castEase: 1.6
+    snapScale: 1.3
+    snapTime: 0.05
+    snapLight: 2
+    recoil: 0.05
+    recoilTime: 0.25
+    travelSpeed: 27
+    travelEase: 0.06
+    hitStop: 0.075
+    impactPeak: 0.09
+    shake: 1.2
+    shakeTime: 0.4
+    releaseShake: 0.12
+    flashFrames: 3
+    flashColor: {r: 0.9, g: 0.8, b: 0.65, a: 1}
+    flashColorSet: 1
+    knockback: 30
+    knockbackTime: 0.8
+    lightSpike: 1.2
+    lightSpikeTime: 0.05
+    status: 
+    statusLife: 1
+    propShake: 0.03
+    propRadius: 4
+    screenFlashColor: {r: 0.85, g: 0.92, b: 1, a: 1}
+    screenFlash: 0.35
+    screenFlashFrames: 2
+    telegraph: 0.45
+    fall: 0
+    statusTint: {r: 0.55, g: 0.8, b: 1, a: 1}
+    reaction: 0
+    tintMode: 0
+    statusTintAmount: 0
+    shiver: 0
+    stiffness: 0
+    wardFlash: 1.5
+    wardFlashTime: 0.15
+  shaders: {fileID: 11400000, guid: 43d65087c9c480a3f602ab0104da6a15, type: 2}
+  tier: 0
+  prefab: {fileID: 233285733818814587, guid: cc3590d0ac5758a1c04c47932d08cdb1, type: 3}
+--- !u!28 &5500027306957789
+Texture2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: fireball_smoke_lut
+  m_ImageContentsHash:
+    serializedVersion: 2
+    Hash: 00000000000000000000000000000000
+  m_IsAlphaChannelOptional: 0
+  serializedVersion: 4
+  m_Width: 512
+  m_Height: 1
+  m_CompleteImageSize: 2048
+  m_MipsStripped: 0
+  m_TextureFormat: 18
+  m_MipCount: 1
+  m_IsReadable: 1
+  m_IsPreProcessed: 0
+  m_IgnoreMipmapLimit: 1
+  m_MipmapLimitGroupName: 
+  m_StreamingMipmaps: 0
+  m_StreamingMipmapsPriority: 0
+  m_VTOnly: 0
+  m_AlphaIsTransparency: 0
+  m_ImageCount: 1
+  m_TextureDimension: 2
+  m_TextureSettings:
+    serializedVersion: 2
+    m_FilterMode: 1
+    m_Aniso: 0
+    m_MipBias: 0
+    m_WrapU: 1
+    m_WrapV: 1
+    m_WrapW: 1
+  m_LightmapFormat: 0
+  m_ColorSpace: 0
+  m_PlatformBlob: 
+  image data: 2048
+  _typelessdata: 00000000a98f6e3ea98fee3ebfeb323fa98f6e3fca19953fbfebb23fb4bdd03fa98fee3f68180340e58c0a4062011240df7519405dea2040da5e284057d32f40d547374052bc3e409e614c40994a5b4093336a408e1c7940c402844041778b40bfeb92403d609a40bad4a1403649a940b4bdb0403232b840aea6bf40958dc340d447c7401302cb4052bcce409076d240cf30d6400eebd9404da5dd40275ee140a114e5401acbe8409381ec400c38f04085eef340ffa4f740775bfb40f011ff409f650141be420341de1f0541fcfc06411cda08413bb70a415a940c4179710e41663410417b72114190b01241a4ee1341b92c1541ce6a1641e3a81741f8e618410d251a4122631b4137a11c414cdf1d41611d1f41765b20418a9921419fd72241b4152441c9532541de912641f3cf2741080e29411d4c2a41318a2b4147c82c415b062e4171442f41504e3041290d314102cc3141dc8a3241b54933418f08344168c73441418635411a453641f4033741cdc23741a68138417f40394159ff394132be3a410c7d3b41e53b3c41bffa3c4198b93d4171783e414a373f4124f63f41a09640417535414149d441411e734241f2114341c7b043419c4f444171ee4441458d45411a2c4641eeca4641c3694741980848416ca748414146494116e54941ea834a41bf224b4194c14b4168604c413dff4c41129e4d41e63c4e41bbdb4e41907a4f41cb1550411e9e504170265141c2ae51411337524166bf5241b84753410ad053415c585441aee054410069554152f15541a4795641f7015741488a57419a125841ec9a58413f23594191ab5941e3335a4135bc5a4187445b41d9cc5b412b555c417ddd5c41cf655d4121ee5d4173765e41c5fe5e4118875f41fd0b6041047660410be06041124a614119b46141201e6241278862412ef26241355c63413cc66341423064414a9a644150046541576e65415ed86541664266416cac6641731667417a80674181ea6741885468418fbe6841962869419d926941a4fc6941ab666a41b1d06a41b93a6b41c0a46b41c70e6c41cd786c41d5e26c41dc4c6d41e3b66d41e9206e41f18a6e41f8f46e41ff5e6f4105c96f416039704189b07041b3277141dc9e7141061672412f8d724159047341827b7341acf27341d6697441ffe074412858754152cf75417c467641a5bd7641cf347741f8ab7741222378414b9a7841751179419f887941c8ff7941f2767a411bee7a4145657b416fdc7b4198537c41c2ca7c41ec417d4115b97d413e307e4168a77e41921e7f41bb957f4160078041894b8041b28f8041dbd38041041881412d5c814156a081417fe48141a8288241d16c8241fbb0824124f582414d398341767d83419fc18341c8058441f14984411a8e844143d284416c168541955a8541be9e8541e7e2854110278641396b864162af86418bf38641b4378741de7b874107c08741aa0388414e3f8841f27a884195b6884139f28841dd2d89418169894125a58941c9e089416d1c8a4111588a41b4938a4158cf8a41fc0a8b41a0468b4144828b41e8bd8b418cf98b4130358c41d4708c4177ac8c411be88c41c0238d41645f8d41079b8d41abd68d414f128e41f34d8e4197898e413bc58e41df008f41833c8f4127788f41cbb38f416fef8f412b3190414175904156b990416bfd90418141914196859141abc99141c00d9241d6519241eb95924100da9241161e93412b62934140a6934155ea93416a2e94418072944195b69441aafa9441c03e9541d5829541eac69541000b9641154f96412a9396413fd79641551b97416a5f974180a3974195e79741b72b9841e06f984109b4984132f898415b3c994184809941adc49941d6089a41ff4c9a4128919a4151d59a417a199b41a35d9b41cca19b41f5e59b411e2a9c41476e9c4170b29c4199f69c41c23a9d41eb7e9d4115c39d413e079e41674b9e41908f9e41b9d39e41e2179f410b5c9f4133a09f415de49f417a28a041906ca041a5b0a041baf4a041cf38a141e57ca141fac0a1410f05a2412449a241398da2414fd1a2416415a3417959a3418e9da341a3e1a341b925a441cf69a441e4ada441f9f1a4410e36a541247aa54139bea5414e02a6416446a641798aa6418ecea641a412a741b956a741ce9aa741e3dea7410431a8417190a841deefa8414a4fa941b7aea941240eaa41906daa41fdccaa41692cab41d78bab4143ebab41b04aac411daaac418909ad41f668ad4162c8ad41cf27ae413c87ae41a8e6ae411546af4181a5af412906b041717db041b9f4b041006cb14149e3b141915ab241d9d1b2412149b34168c0b341b037b441f8aeb4413f26b541889db541d014b641188cb6415f03b741a77ab741eff1b7412c54b84198b3b8410513b9417172b941ded1b9414b31ba41b790ba4124f0ba41904fbb41fdaebb416a0ebc41d76dbc4144cdbc41b02cbd411d8cbd4189ebbd41f64abe4163aabe41d009bf413d69bf41a9c8bf41cf42c041d9e1c041e480c141ee1fc241f8bec241045ec3410efdc341189cc441223bc5412ddac5413779c6414118c7414bb7c7411d56c841bcf4c8415b93c941fa31ca4198d0ca41376fcb41d60dcc4175accc41144bcd41b3e9cd415288ce41f126cf4190c5cf417264d0417d03d14187a2d1419341d2419de0d241a87fd341b21ed441bcbdd441c75cd541d1fbd541db9ad641e739d741f2d8d741fab3d84189a2d9411991da41a87fdb41386edc41c75cdd41564bde41e639df41ea50e041082ee241270be44145e8e54163c5e74141d1e841d3bfe94162aeea41f29ceb41818bec41107aed41a068ee412f57ef417d8bf041a268f241c145f441e122f6410000f841
+  m_StreamData:
+    serializedVersion: 2
+    offset: 0
+    size: 0
+    path: 
+--- !u!28 &93917686861258628
+Texture2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: earth_cast_lut
+  m_ImageContentsHash:
+    serializedVersion: 2
+    Hash: 00000000000000000000000000000000
+  m_IsAlphaChannelOptional: 0
+  serializedVersion: 4
+  m_Width: 512
+  m_Height: 1
+  m_CompleteImageSize: 2048
+  m_MipsStripped: 0
+  m_TextureFormat: 18
+  m_MipCount: 1
+  m_IsReadable: 1
+  m_IsPreProcessed: 0
+  m_IgnoreMipmapLimit: 1
+  m_MipmapLimitGroupName: 
+  m_StreamingMipmaps: 0
+  m_StreamingMipmapsPriority: 0
+  m_VTOnly: 0
+  m_AlphaIsTransparency: 0
+  m_ImageCount: 1
+  m_TextureDimension: 2
+  m_TextureSettings:
+    serializedVersion: 2
+    m_FilterMode: 1
+    m_Aniso: 0
+    m_MipBias: 0
+    m_WrapU: 1
+    m_WrapV: 1
+    m_WrapW: 1
+  m_LightmapFormat: 0
+  m_ColorSpace: 0
+  m_PlatformBlob: 
+  image data: 2048
+  _typelessdata: 000000002e08bb3c2e083b3d23468c3d2e08bb3d3bcae93d23460c3e29a7233e2e083b3e3569523e3bca693ea095803e23468c3ea6f6973e29a7a33eac57af3e2e08bb3eb2b8c63e3569d23eb719de3e3bcae93ebd7af53ea095003fe16d063f23460c3f651e123fa6f6173fe7ce1d3f29a7233f6a7f293fac572f3fee2f353f2e083b3f70e0403fb2b8463ff3904c3f3569523f7641583fb7195e3ff9f1633f3bca693f7ca26f3fbd7a753fff527b3fa095803fc181833fe16d863f025a893f23468c3f44328f3f651e923f860a953fa6f6973fc7e29a3fe7ce9d3f08bba03f29a7a33f4993a63f6a7fa93f8b6bac3fac57af3fcd43b23fee2fb53f0f1cb83f2e08bb3f50f4bd3f70e0c03f92ccc33fb2b8c63fd4a4c93ff390cc3f147dcf3f3569d23f5655d53f7641d83f982ddb3fb719de3fd905e13ff9f1e33f1bdee63f3bcae93f5cb6ec3f7ca2ef3f9d8ef23fbd7af53fdf66f83fff52fb3f213ffe3fa0950040b10b0240c1810340d1f70440e16d0640f3e30740025a094012d00a4023460c4033bc0d4044320f4054a81040641e124075941340850a154096801640a6f61740b66c1940c7e21a40d7581c40e7ce1d40f8441f4007bb20401931224028a723403a1d254049932640590928406a7f29407af52a408b6b2c409be12d40ab572f40bccd3040cc433240ddb93340ed2f3540fda536400e1c38401e9239402e083b403e7e3c404ff43d40606a3f406fe040408056424091cc4340a1424540b1b84640c12e4840d3a44940e21a4b40f3904c4002074e40147d4f4024f350403469524044df53405555554066cb56407541584086b75940972d5b40a8a35c40b7195e40c78f5f40d9056140e87b6240f9f16340096865401bde66402a5468403aca69404a406b405bb66c406c2c6e407ca26f408c1871409d8e7240ad047440bd7a7540cdf07640df667840efdc7940ff527b400fc97c40213f7e4030b57f40a0958040a8508140b10b8240b9c68240c1818340c93c8440d1f78440d9b28540e16d8640e9288740f3e38740fa9e8840025a89400a158a4012d08a401b8b8b4023468c402b018d4033bc8d403b778e4044328f404ced8f4054a890405c639140641e92406cd99240759493407d4f9440850a95408dc59540958096409e3b9740a6f69740adb19840b66c9940be279a40c7e29a40ce9d9b40d7589c40df139d40e6ce9d40ef899e40f8449f400000a04007bba0400f76a1401931a24020eca24028a7a3403062a440391da54041d8a5404993a640514ea7405909a84061c4a8406a7fa940723aaa407af5aa4082b0ab408a6bac409326ad409be1ad40a39cae40ab57af40b312b040bccdb040c488b140cc43b240d4feb240ddb9b340e574b440ed2fb540f4eab540fda5b6400661b7400e1cb84015d7b8401e92b940264dba402e08bb4036c3bb403e7ebc404639bd404ff4bd4058afbe40606abf406725c0406fe0c040779bc1408056c2408811c34091ccc3409987c440a142c540a9fdc540b1b8c640b973c740c22ec840c9e9c840d3a4c940da5fca40e21acb40ebd5cb40f390cc40fb4bcd400207ce400bc2ce40147dcf401c38d04024f3d0402daed1403569d2403c24d34044dfd3404c9ad4405655d5405e10d64066cbd6406e86d7407641d8407efcd84086b7d9408e72da40982ddb40a0e8db40a8a3dc40af5edd40b719de40c0d4de40c88fdf40d04ae040d905e140e2c0e140e97be240f136e340f9f1e34001ade4400a68e5401123e6401bdee6402299e7402a54e840330fe9403bcae9404385ea404a40eb4052fbeb405cb6ec406471ed406c2cee4074e7ee407ca2ef40845df0408c18f14094d3f1409d8ef240a549f340ae04f440b6bff440bd7af540c535f640cdf0f640d6abf740df66f840e721f940efdcf940f697fa40ff52fb40070efc400fc9fc401784fd40213ffe4029fafe4030b5ff401c380041a095004124f30041a85001412cae0141b10b024135690241b9c602413d240341c181034145df0341c93c04414d9a0441d1f7044155550541d9b205415e100641e16d064166cb0641e92807416d860741f2e3074176410841fa9e08417efc0841025a094186b709410a150a418e720a4112d00a41972d0b411a8b0b419fe80b4123460c41a6a30c412b010d41ae5e0d4133bc0d41b8190e413b770e41c0d40e4143320f41c78f0f414bed0f41cf4a104154a81041d80511415c631141dfc01141641e1241e87b12416cd91241f036134174941341f9f113417d4f144100ad1441850a1541086815418dc51541112316419580164119de16419e3b174121991741a6f6174129541841adb11841320f1941b66c19413aca1941be271a4142851a41c7e21a414a401b41ce9d1b4152fb1b41d7581c415bb61c41df131d4163711d41e6ce1d416b2c1e41ef891e4173e71e41f8441f417ba21f4100002041458c20418b182141d2a42141173122415ebd2241a5492341ebd523413062244177ee2441bc7a254103072641499326418e1f2741d7ab27411c38284161c42841a8502941eedc294135692a417af52a41c0812b41070e2c414e9a2c4193262d41dab22d411f3f2e4165cb2e41ac572f41f1e32f41d04a304155a83041d80531415d633141e0c03141641e3241e97b32416cd93241f136334176943341f9f133417d4f344101ad3441850a35410a6835418dc5354112233641968036411ade36419e3b374122993741a6f637412a543841aeb13841330f3941b66c39413bca3941be273a4143853a41c7e23a414a403b41cf9d3b4153fb3b41d7583c415cb63c41df133d4164713d41e7ce3d416b2c3e41f0893e4174e73e41f8443f417ca23f4100004041
+  m_StreamData:
+    serializedVersion: 2
+    offset: 0
+    size: 0
+    path: 
+--- !u!28 &406524109711150759
+Texture2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: earth_crack_lut
+  m_ImageContentsHash:
+    serializedVersion: 2
+    Hash: 00000000000000000000000000000000
+  m_IsAlphaChannelOptional: 0
+  serializedVersion: 4
+  m_Width: 512
+  m_Height: 1
+  m_CompleteImageSize: 2048
+  m_MipsStripped: 0
+  m_TextureFormat: 18
+  m_MipCount: 1
+  m_IsReadable: 1
+  m_IsPreProcessed: 0
+  m_IgnoreMipmapLimit: 1
+  m_MipmapLimitGroupName: 
+  m_StreamingMipmaps: 0
+  m_StreamingMipmapsPriority: 0
+  m_VTOnly: 0
+  m_AlphaIsTransparency: 0
+  m_ImageCount: 1
+  m_TextureDimension: 2
+  m_TextureSettings:
+    serializedVersion: 2
+    m_FilterMode: 1
+    m_Aniso: 0
+    m_MipBias: 0
+    m_WrapU: 1
+    m_WrapV: 1
+    m_WrapW: 1
+  m_LightmapFormat: 0
+  m_ColorSpace: 0
+  m_PlatformBlob: 
+  image data: 2048
+  _typelessdata: 000000002850a03c2850203d3d78703d2850a03d3364c83d3d78f03d24460c3e2850203e2e5a343e3364483e386e5c3e3d78703e2141823e24468c3e264b963e2850a03e2b55aa3e2e5ab43e315fbe3e3364c83e3569d23e386edc3e3a73e63e3d78f03e407dfa3e2141023fa243073f24460c3fa548113f264b163fa84d1b3f2850203faa52253f2b552a3fac572f3f2e5a343faf5c393f315f3e3fb161433f3364483fb4664d3f3569523fb76b573f386e5c3fba70613f3a73663fbb756b3f3d78703fbe7a753f407d7a3fc17f7f3f2141823f62c2843fa243873fe3c4893f24468c3f64c78e3fa548913fe5c9933f264b963f67cc983fa84d9b3fe8ce9d3f2850a03f6ad1a23faa52a53febd3a73f2b55aa3f6dd6ac3fac57af3fedd8b13f2e5ab43f6fdbb63faf5cb93ff0ddbb3f315fbe3f71e0c03fb161c33ff3e2c53f3364c83f74e5ca3fb466cd3ff6e7cf3f3569d23f76ead43fb76bd73ff8ecd93f386edc3f79efde3fba70e13ffaf1e33f3a73e63f7cf4e83fbb75eb3ffdf6ed3f3d78f03f7ff9f23fbe7af53ffffbf73f407dfa3f80fefc3fc17fff3f8100014021410240c181034062c2044002030640a243074043840840e2c4094084050b4024460c40c4860d4064c70e4004081040a548114045891240e5c91340860a1540254b1640c78b174067cc1840070d1a40a74d1b40478e1c40e8ce1d40880f1f4028502040c890214069d122400a122440aa52254049932640ead327408a1429402b552a40cb952b406cd62c400c172e40ab572f404c983040edd831408d1933402d5a3440cd9a35406fdb36400e1c3840ae5c39404e9d3a40efdd3b40901e3d40305f3e40cf9f3f4070e0404010214240b161434051a24440f2e245409223474033644840d2a4494073e54a4013264c40b4664d4054a74e40f5e74f409528514034695240d5a9534076ea5440162b5640b66b574057ac5840f8ec5940972d5b40376e5c40d8ae5d4079ef5e4019306040b970614058b16240faf163409a3265403a736640dab367407cf468401c356a40bb756b405bb66c40fdf66d409d376f403d787040ddb871407ef972401e3a7440be7a75405ebb7640fffb7740a03c7940407d7a40dfbd7b4080fe7c40213f7e40c17f7f403060804081008140d1a081402141824071e18240c18183401222844062c28440b16285400203864052a38640a2438740f3e387404384884093248940e2c4894033658a4084058b40d3a58b4024468c4073e68c40c4868d4014278e4064c78e40b4678f400408904055a89040a5489140f4e891404589924095299340e5c99340366a9440860a9540d6aa9540254b964076eb9640c68b9740162c984067cc9840b66c9940070d9a4056ad9a40a74d9b40f7ed9b40478e9c40982e9d40e7ce9d40376f9e40880f9f40d8af9f400810a0401830a0402850a0403870a0404890a04058b0a04068d0a04078f0a0408810a1409830a140a850a140b870a140c890a140d9b0a140e8d0a140f9f0a1400811a2401831a2402951a2403871a2404991a24059b1a24069d1a24079f1a2408911a3409931a340a951a340b971a340c991a340d9b1a340e9d1a340f9f1a3400912a4401932a4402952a4403972a4404992a44059b2a44069d2a44079f2a4408912a5409932a540a952a540b972a540c992a540d9b2a540ead2a540f9f2a5400a13a6401933a6402953a6403a73a6404a93a6405ab3a6406ad3a6407af3a6408a13a7409a33a740aa53a740ba73a740ca93a740dab3a740ead3a740faf3a7400a14a8401a34a8402a54a8403a74a8404a94a8405ab4a8406ad4a8407af4a8408a14a9409a34a940aa54a940ba74a940cb94a940dab4a940ebd4a940fbf4a9400a15aa401b35aa402a55aa403b75aa404b95aa405bb5aa406bd5aa407bf5aa408b15ab409b35ab40ab55ab40bb75ab40cb95ab40dbb5ab40ebd5ab40fbf5ab400b16ac401b36ac402b56ac403b76ac404b96ac405bb6ac406bd6ac407bf6ac408b16ad409b36ad40ab56ad40bb76ad40cb96ad40dcb6ad40ebd6ad40fcf6ad400c17ae401b37ae402c57ae403b77ae404c97ae405cb7ae406cd7ae407cf7ae408c17af409c37af40ac57af40bc77af40cc97af40dcb7af40ecd7af40fcf7af400c18b0401c38b0402c58b0403c78b0404c98b0405cb8b0406cd8b0407cf8b0408c18b1409c38b140ac58b140bc78b140cc98b140dcb8b140edd8b140fcf8b1400d19b2401c39b2402c59b2403d79b2404d99b2405db9b2406dd9b2407df9b2408d19b3409d39b340ad59b340bd79b340cd99b340ddb9b340edd9b340fdf9b3400d1ab4401d3ab4402d5ab4403d7ab4404d9ab4405dbab4406ddab4407dfab4408d1ab5409d3ab540ad5ab540bd7ab540cd9ab540debab540eedab540fefab5400d1bb6401d3bb6402e5bb6403e7bb6404e9bb6405ebbb6406edbb6407efbb6408e1bb7409e3bb740ae5bb740be7bb740ce9bb740debbb740eedbb740fefbb7400e1cb8401e3cb8402e5cb8403e7cb8404e9cb8405ebcb8406edcb8407efcb8408e1cb9409e3cb940ae5cb940be7cb940ce9cb940debcb940efdcb940fffcb9400f1dba401e3dba402e5dba403f7dba404f9dba405fbdba406fddba407ffdba408f1dbb409f3dbb40af5dbb40bf7dbb40cf9dbb40dfbdbb40efddbb40fffdbb400f1ebc401f3ebc402f5ebc403f7ebc404f9ebc405fbebc406fdebc407ffebc408f1ebd409f3ebd40af5ebd40bf7ebd40d09ebd40dfbebd40efdebd4000ffbd40101fbe40203fbe402f5fbe403f7fbe40509fbe4060bfbe4070dfbe4080ffbe40901fbf40a03fbf40b05fbf40c07fbf40d09fbf40e0bfbf40f0dfbf400000c040
+  m_StreamData:
+    serializedVersion: 2
+    offset: 0
+    size: 0
+    path: 
+--- !u!28 &436839272476927409
+Texture2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: ice_burst_lut
+  m_ImageContentsHash:
+    serializedVersion: 2
+    Hash: 00000000000000000000000000000000
+  m_IsAlphaChannelOptional: 0
+  serializedVersion: 4
+  m_Width: 512
+  m_Height: 1
+  m_CompleteImageSize: 2048
+  m_MipsStripped: 0
+  m_TextureFormat: 18
+  m_MipCount: 1
+  m_IsReadable: 1
+  m_IsPreProcessed: 0
+  m_IgnoreMipmapLimit: 1
+  m_MipmapLimitGroupName: 
+  m_StreamingMipmaps: 0
+  m_StreamingMipmapsPriority: 0
+  m_VTOnly: 0
+  m_AlphaIsTransparency: 0
+  m_ImageCount: 1
+  m_TextureDimension: 2
+  m_TextureSettings:
+    serializedVersion: 2
+    m_FilterMode: 1
+    m_Aniso: 0
+    m_MipBias: 0
+    m_WrapU: 1
+    m_WrapV: 1
+    m_WrapW: 1
+  m_LightmapFormat: 0
+  m_ColorSpace: 0
+  m_PlatformBlob: 
+  image data: 2048
+  _typelessdata: 000000003d78703d3d78f03d2e5a343e3d78703e274b963e2e5ab43e3669d23e3d78f03ea243073f274b163faa52253f2e5a343fb161433f3669523fb970613f3d78703fc17f7f3fa243873f64c78e3f274b963fe8ce9d3faa52a53f6cd6ac3f2e5ab43ff0ddbb3fb161c33f73e5ca3f3669d23ff7ecd93fb970e13f7bf4e83f3d78f03ffffbf73fc17fff3fc1810340a243074083050b4064c70e4045891240274b1640070d1a40e8ce1d40c9902140aa5225408b1429406cd62c404c9830402e5a34400f1c3840f0dd3b40d19f3f40b16143409323474073e54a4054a74e4036695240172b5640f7ec5940d8ae5d40b97061409b3265407bf468405cb66c403d7870401f3a7440fffb7740e0bd7b40c17f7f40d1a08140c1818340b2628540a24387409324894083058b4074e68c4064c78e4055a8904045899240366a9440264b9640172c9840070d9a40f8ed9b40e7ce9d40d8af9f40c990a140ba71a340a952a5409b33a7408b14a9407bf5aa406cd6ac405db7ae404c98b0403d79b2402e5ab4401f3bb6400e1cb84000fdb940f0ddbb40e0bebd40d19fbf40c280c140b161c340a242c5409323c7408304c94073e5ca4065c6cc4054a7ce404688d0403669d240264ad440162bd640070cd840f7ecd940e7cddb40d8aedd40c98fdf40b870e140aa51e3409a32e5408b13e7407bf4e8406bd5ea405cb6ec404c97ee403c78f0402d59f2401f3af4400f1bf640fffbf740eedcf940e0bdfb40d09efd40c17fff4059b00041d1a001414a910241c181034139720441b26205412a530641a24307411a340841932409410b150a4183050b41fbf50b4174e60c41ecd60d4164c70e41dbb70f4154a81041cc98114145891241bd791341366a1441ae5a1541264b16419d3b1741162c18418e1c1941070d1a417ffd1a41f8ed1b4170de1c41e7ce1d4160bf1e41d8af1f417035204198852041c0d52041e92521411076214138c621416116224189662241b1b62241d90623410157234129a7234151f7234179472441a1972441cae72441f23725411988254141d825416a28264192782641bac82641e21827410a69274132b927415a09284182592841aba92841d3f92841fb492941229a29414bea2941733a2a419b8a2a41c3da2a41eb2a2b41137b2b413bcb2b41631b2c418b6b2c41b4bb2c41dc0b2d41035c2d412cac2d4154fc2d417c4c2e41a49c2e41ccec2e41f43c2f411c8d2f4144dd2f41112230412f5e30414e9a30416bd630418a123141a74e3141c68a3141e4c6314102033241203f32413e7b32415cb732417af33241982f3341b66b3341d4a73341f2e33341102034412e5c34414c9834416bd4344188103541a74c3541c5883541e3c43541010136411f3d36413d7936415bb5364179f13641972d3741b5693741d3a53741f1e137410f1e38412d5a38414b96384169d23841880e3941a54a3941c4863941e2c2394100ff39411e3b3a413b773a415ab33a4178ef3a41962b3b41b4673b41d2a33b41f0df3b410e1c3c412c583c414a943c4169d03c41860c3d41a5483d41c3843d41e0c03d41fffc3d411c393e413b753e4159b13e4177ed3e4195293f41b3653f41d1a13f41efdd3f41d7144041ef4440410875404120a5404137d5404150054141683541418065414198954141afc54141c8f54141e0254241f85542411086424128b6424140e64241581643417046434188764341a0a64341b8d64341d0064441e8364441006744411897444130c7444149f74441612745417957454191874541a9b74541c1e74541d9174641f14746410978464121a8464139d8464151084741693847418168474199984741b1c84741caf84741e1284841fa5848411289484129b9484142e9484159194941724949418a794941a2a94941bad94941d2094a41ea394a41026a4a411a9a4a4132ca4a414afa4a41622a4b417a5a4b41928a4b41aaba4b41c2ea4b41da1a4c41f24a4c410b7b4c4123ab4c413bdb4c41530b4d416b3b4d41836b4d419b9b4d41b3cb4d41cbfb4d41e32b4e41fb5b4e41138c4e412bbc4e4143ec4e415b1c4f41734c4f418b7c4f41a3ac4f41bcdc4f4108105041264c50414488504162c45041800051419f3c5141bd785141dbb45141f9f05141172d52413569524153a5524171e152418f1d5341ad595341cb955341e9d15341070e5441254a54414386544161c2544180fe54419e3a5541bc765541dab25541f8ee5541162b56413467564152a3564170df56418e1b5741ac575741ca935741e8cf5741060c5841244858414284584161c058417ffc58419d385941bb745941d9b05941f7ec594115295a4133655a4151a15a416fdd5a418d195b41ab555b41c9915b41e7cd5b41050a5c4124465c4142825c4160be5c417efa5c419c365d41ba725d41d8ae5d41f6ea5d4114275e4133635e41509f5e416edb5e418c175f41aa535f41c98f5f41e6cb5f410408604123446041418060415fbc60417cf860419b346141b9706141d7ac6141f5e8614113256241316162414f9d62416dd962418b156341a9516341c78d6341e5c963410306644121426441407e64415eba64417cf6644199326541b76e6541d6aa6541f4e6654112236641305f66414e9b66416cd766418a136741a84f6741c68b6741e5c7674103046841204068413e7c68415cb868417bf4684199306941b66c6941d5a86941f3e4694111216a412e5d6a414d996a416bd56a4189116b41a74d6b41c5896b41e3c56b4101026c41203e6c413d7a6c415bb66c4179f26c41972e6d41b56a6d41d3a66d41f2e26d41101f6e412e5b6e414b976e4169d36e41880f6f41a64b6f41c4876f41e2c36f4100007041
+  m_StreamData:
+    serializedVersion: 2
+    offset: 0
+    size: 0
+    path: 
+--- !u!28 &576767208415038368
+Texture2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: earth_debris_lut
+  m_ImageContentsHash:
+    serializedVersion: 2
+    Hash: 00000000000000000000000000000000
+  m_IsAlphaChannelOptional: 0
+  serializedVersion: 4
+  m_Width: 512
+  m_Height: 1
+  m_CompleteImageSize: 2048
+  m_MipsStripped: 0
+  m_TextureFormat: 18
+  m_MipCount: 1
+  m_IsReadable: 1
+  m_IsPreProcessed: 0
+  m_IgnoreMipmapLimit: 1
+  m_MipmapLimitGroupName: 
+  m_StreamingMipmaps: 0
+  m_StreamingMipmapsPriority: 0
+  m_VTOnly: 0
+  m_AlphaIsTransparency: 0
+  m_ImageCount: 1
+  m_TextureDimension: 2
+  m_TextureSettings:
+    serializedVersion: 2
+    m_FilterMode: 1
+    m_Aniso: 0
+    m_MipBias: 0
+    m_WrapU: 1
+    m_WrapV: 1
+    m_WrapW: 1
+  m_LightmapFormat: 0
+  m_ColorSpace: 0
+  m_PlatformBlob: 
+  image data: 2048
+  _typelessdata: 000000000000003d0000803d0000c03d0000003e0000203e0000403e0000603e0000803e0000903e0000a03e0000b03e0000c03e0100d03e0000e03e0000f03e0000003f0000083f0000103f0000183f0000203f0100283f0000303f0000383f0000403f0000483f0100503f0000583f0000603f0000683f0000703f0100783f0000803f0000843f0000883f00008c3f0000903f0000943f0000983f00009c3f0000a03f0000a43f0100a83f0000ac3f0000b03f0000b43f0000b83f0100bc3f0000c03f0000c43f0000c83f0000cc3f0100d03f0000d43f0000d83f0000dc3f0000e03f0100e43f0000e83f0000ec3f0000f03f0000f43f0100f83f0000fc3f000000400000024000000440000006400000084000000a4000000c4000000e40000010400000124000001440000016400000184000001a4000001c4000001e400000204000002240ffff2340000026400000284000002a4000002c40ffff2d4000003040000032400000344000003640ffff374000003a4000003c4000003e4000004040ffff414000004440000046400000484000004a40ffff4b4000004e40000050400000524000005440ffff55400000584000005a4000005c4000005e40ffff5f4000006240000064400000664000006840ffff694000006c4000006e400000704000007240ffff7340000076400000784000007a4000007c40ffff7d400000804000008140000082400000834000008440000085400000864000008740000088400000894000008a4000008b4000008c4000008d4000008e4000008f400000904000009140000092400000934000009440000095400000964000009740000098400000994000009a4000009b4000009c4000009d4000009e4000009f400000a0400000a1400000a2400100a3400000a4400000a5400000a6400000a7400100a8400000a9400000aa400000ab400000ac400100ad400000ae400000af400000b0400000b1400000b240ffffb2400000b4400000b5400000b6400000b740ffffb7400000b9400000ba400000bb400000bc40ffffbc400000be400000bf400000c0400000c140ffffc1400000c3400000c4400000c5400000c640ffffc6400000c8400000c9400000ca400100cb400000cc400000cd400000ce400000cf400100d0400000d1400000d2400000d3400000d4400100d5400000d6400000d7400000d8400100d9400100da400000db400000dc400000dd400100de400100df400000e0400000e1400000e2400100e3400100e4400000e5400000e6400000e7400100e8400100e9400000ea400000eb400000ec400100ed400100ee400000ef400000f0400000f1400000f2400100f3400000f4400000f5400000f6400000f7400100f8400000f9400000fa400000fb400000fc400100fd400000fe400000ff40000000410080004100000141008001410000024100800241000003410080034100000441008004410000054100800541000006410080064100000741008007410000084100800841000009410080094100000a4100800a4101000b4100800b4100000c4100800c4100000d4101800d4100000e4100800e4100000f4100800f41010010410080104100001141008011410000124101801241000013410080134100001441008014410100154100801541000016410080164100001741018017410000184100801841000019410080194100001a4100801a4100001b4100801b4100001c4100801c4100001d4100801d4100001e4100801e4100001f4100801f41000020410180204100002141008021410000224100802241010023410080234100002441008024410000254101802541000026410080264100002741008027410100284100802841000029410080294100002a4101802a4100002b4100802b4100002c4100802c4101002d4100802d4100002e4100802e4100002f4101802f4100003041ff7f304100003141008031410000324100803241ffff324100803341000034410080344100003541ff7f354100003641008036410000374100803741ffff374100803841000039410080394100003a41ff7f3a4100003b4100803b4100003c4100803c41ffff3c4100803d4100003e4100803e4100003f41ff7f3f4100004041008040410000414100804141ffff414100804241000043410080434100004441008044410000454100804541010046410080464100004741008047410000484101804841000049410080494101004a4100804a4101004b4100804b4100004c4101804c4100004d4101804d4101004e4100804e4101004f4100804f41010050410180504100005141018051410000524101805241010053410080534101005441008054410100554101805541000056410180564100005741018057410100584100805841010059410080594101005a4101805a4100005b4101805b4100005c4101805c4101005d4100805d4101005e4100805e4101005f4101805f41000060410180604100006141018061410000624100806241010063410080634101006441008064410000654101806541000066410180664100006741008067410100684100806841010069410080694100006a4101806a4100006b4101806b4100006c4100806c4101006d4100806d4101006e4100806e4100006f4101806f41000070410180704100007141008071410000724100807241010073410080734100007441008074410000754101807541000076410080764100007741008077410100784100807841000079410080794100007a4101807a4100007b4100807b4100007c4100807c4101007d4100807d4100007e4100807e4100007f4100807f41
+  m_StreamData:
+    serializedVersion: 2
+    offset: 0
+    size: 0
+    path: 
+--- !u!28 &659863337189204391
+Texture2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: earth_spike_lut
+  m_ImageContentsHash:
+    serializedVersion: 2
+    Hash: 00000000000000000000000000000000
+  m_IsAlphaChannelOptional: 0
+  serializedVersion: 4
+  m_Width: 512
+  m_Height: 1
+  m_CompleteImageSize: 2048
+  m_MipsStripped: 0
+  m_TextureFormat: 18
+  m_MipCount: 1
+  m_IsReadable: 1
+  m_IsPreProcessed: 0
+  m_IgnoreMipmapLimit: 1
+  m_MipmapLimitGroupName: 
+  m_StreamingMipmaps: 0
+  m_StreamingMipmapsPriority: 0
+  m_VTOnly: 0
+  m_AlphaIsTransparency: 0
+  m_ImageCount: 1
+  m_TextureDimension: 2
+  m_TextureSettings:
+    serializedVersion: 2
+    m_FilterMode: 1
+    m_Aniso: 0
+    m_MipBias: 0
+    m_WrapU: 1
+    m_WrapV: 1
+    m_WrapW: 1
+  m_LightmapFormat: 0
+  m_ColorSpace: 0
+  m_PlatformBlob: 
+  image data: 2048
+  _typelessdata: 000000003770e03d3770603e2a54a83e3770e03e23460c3f2a54283f3062443f3770603f3f7e7c3f23468c3f264d9a3f2a54a83f2e5bb63f3062c43f3469d23f3770e03f3b77ee3f3f7efc3fa142054023460c40a4491340264d1a40a750214029542840ab572f402d5b3640ae5e3d4030624440b2654b4034695240b66c594037706040b97367403b776e40bd7a75403f7e7c4008bb80401831824029a78340391d85404a9386405a0988406a7f89407bf58a408b6b8c409be18d40ac578f40bccd9040cd439240ddb99340ed2f9540fea596400e1c98401e9299402f089b403f7e9c404ff49d40606a9f403060a0408000a140d0a0a1402141a24071e1a240c181a3401122a44061c2a440b162a5400103a64052a3a640a243a740f2e3a7404284a8409224a940e2c4a9403365aa408305ab40d3a5ab402346ac4073e6ac40c386ad401327ae4064c7ae40b467af400408b04054a8b040a448b140f5e8b1404489b2409529b340e5c9b340356ab440850ab540d6aab540254bb64075ebb640c68bb740162cb84066ccb840b66cb940060dba4057adba40a74dbb40f7edbb40478ebc40972ebd40e7cebd40386fbe40870fbf40d8afbf401c38c04054a8c0408c18c140c488c140fcf8c1403469c2406dd9c240a549c340ddb9c340152ac4404d9ac440850ac540bd7ac540f5eac5402e5bc64066cbc6409e3bc740d6abc7400e1cc840468cc8407efcc840b66cc940eedcc940264dca405fbdca40972dcb40cf9dcb40070ecc403f7ecc4077eecc40af5ecd40e7cecd401f3fce4058afce40901fcf40c88fcf400000d0403870d04070e0d040a850d140e1c0d1401931d24050a1d2408911d340c181d340f9f1d3403162d44069d2d440a242d540d9b2d5401123d6404993d6408203d740ba73d740f2e3d7402a54d84062c4d8409a34d940d2a4d9400a15da404385da407bf5da40b365db40ebd5db402346dc405bb6dc409326dd40cb96dd400407de403c77de4074e7de40ab57df40e4c7df401c38e04054a8e0408c18e140c588e140fcf8e1403469e2406dd9e240a549e340ddb9e340152ae4404d9ae440850ae540bd7ae540f5eae5402e5be64066cbe6409e3be740d6abe7400e1ce840468ce8407efce840b66ce940efdce940274dea405fbdea40972deb40ce9deb40070eec403f7eec4077eeec40af5eed40e8ceed40203fee4057afee408f1fef40c88fef400000f0403870f04070e0f040a950f140e0c0f1401831f24050a1f2408911f340c181f340f9f1f3403162f44069d2f440a142f540d9b2f5401123f6404a93f6408203f740ba73f740f2e3f7402a54f84062c4f8409a34f940d2a4f9400b15fa404385fa407bf5fa40b365fb40ebd5fb402346fc405bb6fc409326fd40cc96fd400407fe403c77fe4073e7fe40ac57ff40e4c7ff40682500413870004108bb0041d8050141a9500141799b014149e6014118310241e87b0241b9c6024189110341595c034129a70341f9f10341c93c04419987044169d20441391d054109680541d9b20541aafd0541794806414a9306411ade0641ea280741ba73074189be07415a0908412a540841fa9e0841cae908419a3409416a7f09413aca09410a150a41da5f0a41abaa0a417bf50a414b400b411b8b0b41ebd50b41bb200c418b6b0c415bb60c412b010d41fb4b0d41cb960d419be10d416b2c0e413b770e410bc20e41db0c0f41ac570f417ca20f414ced0f412a54104162c410419a341141d2a411410a151241438512417af51241b3651341ebd51341234614415bb6144192261541cb961541030716413c77164174e71641ac571741e4c717411b38184154a818418c181941c4881941fdf8194135691a416dd91a41a4491b41ddb91b41152a1c414d9a1c41860a1d41be7a1d41f6ea1d412d5b1e4165cb1e419e3b1f41d6ab1f410e1c2041478c20417ffc2041b66c2141eedc2141274d22415fbd2241972d2341ce9d2341080e24413f7e244177ee2441b05e2541e8ce2541203f264157af26418f1f2741c88f2741000028413870284171e02841a8502941e1c0294118312a4150a12a418a112b41c1812b41f9f12b4132622c4169d22c41a2422d41d9b22d4111232e414a932e4182032f41ba732f41f3e32f412a54304162c430419a343141d2a431410b153241438532417bf53241b4653341ebd53341234634415bb6344193263541cc963541040736413c77364173e73641ac573741e4c737411c38384154a838418d183941c5883941fdf8394134693a416dd93a41a5493b41ddb93b41152a3c414e9a3c41850a3d41be7a3d41f5ea3d412e5b3e4166cb3e419d3b3f41d6ab3f410e1c4041468c40417ffc4041b66c4141efdc4141264d42415ebd4241972d4341cf9d4341070e4441407e444177ee4441af5e4541e7ce45411f3f464158af4641901f4741c88f4741010048413870484170e04841a8504941e0c0494119314a4151a14a4189114b41c0814b41f9f14b4131624c4169d24c41a1424d41d8b24d4112234e414a934e4181034f41ba734f41f2e34f412a54504162c4504199345141d2a451410b155241428552417bf55241b2655341ead55341234654415ab6544193265541cc965541030756413c77564173e75641ab575741e4c757411b38584154a858418d185941c4885941fcf8594134695a416cd95a41a5495b41dcb95b41152a5c414e9a5c41850a5d41bd7a5d41f5ea5d412d5b5e4166cb5e419d3b5f41d6ab5f411b3860418c186141fbf861416dd96241dcb963414b9a6441bc7a65412e5b66419d3b67410f1c68417efc6841efdc69415ebd6a41cd9d6b413f7e6c41b05e6d411f3f6e41911f6f4100007041
+  m_StreamData:
+    serializedVersion: 2
+    offset: 0
+    size: 0
+    path: 
+--- !u!28 &1051827163710723697
+Texture2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: fireball_scorch_lut
+  m_ImageContentsHash:
+    serializedVersion: 2
+    Hash: 00000000000000000000000000000000
+  m_IsAlphaChannelOptional: 0
+  serializedVersion: 4
+  m_Width: 512
+  m_Height: 1
+  m_CompleteImageSize: 2048
+  m_MipsStripped: 0
+  m_TextureFormat: 18
+  m_MipCount: 1
+  m_IsReadable: 1
+  m_IsPreProcessed: 0
+  m_IgnoreMipmapLimit: 1
+  m_MipmapLimitGroupName: 
+  m_StreamingMipmaps: 0
+  m_StreamingMipmapsPriority: 0
+  m_VTOnly: 0
+  m_AlphaIsTransparency: 0
+  m_ImageCount: 1
+  m_TextureDimension: 2
+  m_TextureSettings:
+    serializedVersion: 2
+    m_FilterMode: 1
+    m_Aniso: 0
+    m_MipBias: 0
+    m_WrapU: 1
+    m_WrapV: 1
+    m_WrapW: 1
+  m_LightmapFormat: 0
+  m_ColorSpace: 0
+  m_PlatformBlob: 
+  image data: 2048
+  _typelessdata: 000000003e7dfa3e3e7d7a3fefddbb3f3e7dfa3f478e1c40efdd3b40972d5b403e7d7a4073e68c40478e9c4069e9a140dc5ca4404fd0a640c243a94034b7ab40a72aae401a9eb0408d11b3400085b54073f8b740e56bba4058dfbc40cb52bf40f2c5c140fc38c44006acc640101fc9401b92cb402505ce402f78d04039ebd240435ed5404dd1d7405744da4061b7dc406c2adf40bb9de1402e11e440a084e64013f8e840866beb40f9deed406c52f040dfc5f2405239f540c4acf7403720fa40aa93fc401d07ff4048bd004101f70141bb300341746a04412da40541e7dd0641a01708415a510941138b0a41cdc40b4186fe0c4140380e41f9710f4196ab10411be51141a01e134125581441aa9115412fcb1641b4041841393e1941be771a4143b11b41c9ea1c414e241e41d35d1f41719720412ad12141e30a23419d442441567e254110b82641caf12741832b29413c652a41f69e2b41afd82c4169122e41224c2f41dc85304195bf31414ef9324107333441c16c35417aa6364134e03741ed193941a7533a41608d3b411ac73c41d3003e418c3a3f4132744041b7ad41413ce74241c2204441475a4541cb93464150cd4741d60649415b404a41e0794b4165b34c41eaec4d416f264f4105605041be99514177d35241300d5441ea465541a38056415dba574116f45841cf2d5a4188675b4142a15c41fbda5d41b5145f41ac0260415c0d60410c186041bc2260416c2d60411c386041cc4260417c4d60412c586041dc6260418c6d60413c786041ec8260419c8d60414c986041fca26041acad60415cb860410cc36041bccd60416cd860411ce36041cced60417cf860412c036141dc0d61418c1861413c236141ec2d61419c3861414c436141fc4d6141ac5861415c6361410c6e6141bc7861416c8361411c8e6141cc9861417ca361412cae6141dcb861418cc361413cce6141ecd861419ce361414cee6141fcf86141ac0362415c0e62410d196241bd2362416d2e62411d396241cd4362417d4e62412d596241dd6362418d6e62413d796241ed8362419d8e62414d996241fda36241adae62415db962410dc46241bdce62416dd962411de46241cdee62417df962412d046341dd0e63418d1963413d246341ed2e63419d3963414d446341fd4e6341ad5963415d6463410d6f6341bd7963416d8463411d8f6341cd9963417da463412daf6341ddb963418dc463413dcf6341edd963419de463414def6341fdf96341ad0464415d0f64410d1a6441bd2464416d2f64411d3a6441cd4464417d4f64412d5a6441dd6464418d6f64413d7a6441ed8464419d8f64414d9a6441fda46441adaf64415dba64410dc56441bdcf64416dda64411de56441cdef64417dfa64412d056541dd0f65418d1a65413d256541ed2f65419d3a65414d456541fd4f6541ad5a65415d6565410d706541bd7a65416d8565411d906541cd9a65417da565412db06541ddba65418dc565413dd06541eeda65419ee565414ef06541fefa6541ae0566415e1066410e1b6641be2566416e3066411e3b6641ce4566417e5066412e5b6641de6566418e7066413e7b6641ee8566419e9066414e9b6641fea56641aeb066415ebb66410ec66641bed066416edb66411ee66641cef066417efb66412e066741de1067418e1b67413e266741ee3067419e3b67414e466741fe506741ae5b67415e6667410e716741be7b67416e8667411e916741ce9b67417ea667412eb16741debb67418ec667413ed16741eedb67419ee667414ef16741fefb6741ae0668415e1168410e1c6841be2668416e3168411e3c6841ce4668417e5168412e5c6841de6668418e7168413e7c6841ee8668419e9168414e9c6841fea66841aeb168415ebc68410ec76841bed168416edc68411ee76841cef168417efc68412e076941de1169418e1c69413e276941ee3169419e3c69414e476941fe516941ae5c69415e6769410e726941be7c69416e8769411e926941ce9c69417ea769412eb26941debc69418ec769413ed26941eedc69419ee769414ef26941fefc6941ae076a415e126a410e1d6a41be276a416f326a411f3d6a41cf476a417f526a412f5d6a41df676a418f726a413f7d6a41ef876a419f926a414f9d6a41ffa76a41afb26a415fbd6a410fc86a41bfd26a416fdd6a411fe86a41cff26a417ffd6a412f086b41df126b418f1d6b413f286b41ef326b419f3d6b414f486b41ff526b41af5d6b415f686b410f736b41bf7d6b416f886b411f936b41cf9d6b417fa86b412fb36b41dfbd6b418fc86b413fd36b41efdd6b419fe86b414ff36b41fffd6b41af086c415f136c410f1e6c41bf286c416f336c411f3e6c41cf486c417f536c412f5e6c41df686c418f736c413f7e6c41ef886c419f936c414f9e6c41ffa86c41afb36c415fbe6c410fc96c41bfd36c416fde6c411fe96c41cff36c417ffe6c412f096d41df136d418f1e6d413f296d41ef336d419f3e6d414f496d41ff536d41af5e6d415f696d410f746d41bf7e6d416f896d411f946d41cf9e6d417fa96d412fb46d41dfbe6d418fc96d413fd46d41f0de6d41a0e96d4150f46d4100ff6d41b0096e4160146e41101f6e41c0296e4170346e41203f6e41d0496e4180546e41305f6e41e0696e4190746e41407f6e41f0896e41a0946e41509f6e4100aa6e41b0b46e4160bf6e4110ca6e41c0d46e4170df6e4120ea6e41d0f46e4180ff6e41300a6f41e0146f41901f6f41402a6f41f0346f41a03f6f41504a6f4100556f41b05f6f41606a6f4110756f41c07f6f41708a6f4120956f41d09f6f4180aa6f4130b56f41e0bf6f4190ca6f4140d56f41f0df6f41a0ea6f4150f56f4100007041
+  m_StreamData:
+    serializedVersion: 2
+    offset: 0
+    size: 0
+    path: 
+--- !u!28 &1152862982504408053
+Texture2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: fireball_shockwave_lut
+  m_ImageContentsHash:
+    serializedVersion: 2
+    Hash: 00000000000000000000000000000000
+  m_IsAlphaChannelOptional: 0
+  serializedVersion: 4
+  m_Width: 512
+  m_Height: 1
+  m_CompleteImageSize: 2048
+  m_MipsStripped: 0
+  m_TextureFormat: 18
+  m_MipCount: 1
+  m_IsReadable: 1
+  m_IsPreProcessed: 0
+  m_IgnoreMipmapLimit: 1
+  m_MipmapLimitGroupName: 
+  m_StreamingMipmaps: 0
+  m_StreamingMipmapsPriority: 0
+  m_VTOnly: 0
+  m_AlphaIsTransparency: 0
+  m_ImageCount: 1
+  m_TextureDimension: 2
+  m_TextureSettings:
+    serializedVersion: 2
+    m_FilterMode: 1
+    m_Aniso: 0
+    m_MipBias: 0
+    m_WrapU: 1
+    m_WrapV: 1
+    m_WrapW: 1
+  m_LightmapFormat: 0
+  m_ColorSpace: 0
+  m_PlatformBlob: 
+  image data: 2048
+  _typelessdata: 00000000973d903c973d103d635c583d973d903dfd4cb43d635cd83dc86bfc3d973d103e4a45223efd4c343eb054463e635c583e16646a3ec86b7c3ebe39873e973d903e7141993e4a45a23e2349ab3efd4cb43ed650bd3eb054c63e8958cf3e635cd83e3d60e13e1664ea3eee67f33ec86bfc3ed1b7023fbe39073fabbb0b3f973d103f84bf143f7141193f5ec31d3f4a45223f37c7263f23492b3f10cb2f3ffd4c343feace383fd6503d3fc3d2413fb054463f9dd64a3f89584f3f76da533f635c583f50de5c3f3d60613f29e2653f16646a3f03e66e3fee67733fdbe9773fc86b7c3fdb76803fd1b7823fc7f8843fbe39873fb47a893fabbb8b3fa1fc8d3f973d903f8e7e923f84bf943f7b00973f7141993f68829b3f5ec39d3f5404a03f4a45a23f4186a43f37c7a63f2e08a93f2349ab3f1b8aad3f10cbaf3f080cb23ffd4cb43ff48db63feaceb83fe10fbb3fd650bd3fcd91bf3fc3d2c13fba13c43fb054c63fa795c83f9dd6ca3f9317cd3f8958cf3f8199d13f76dad33f6c1bd63f635cd83f599dda3f50dedc3f461fdf3f3d60e13f33a1e33f29e2e53f2023e83f1664ea3f0da5ec3f03e6ee3ffa26f13fee67f33fe7a8f53fdbe9f73fd32afa3fc86bfc3fc0acfe3fdb76004056970140d1b702404cd80340c7f8044043190640be390740395a0840b47a0940309b0a40abbb0b4026dc0c40a1fc0d401c1d0f40973d1040125e11408e7e1240099f134084bf1440ffdf15407b001740f520184071411940ec611a4068821b40e2a21c405dc31d40d8e31e4054042040cf2421404a452240c565234041862440bca6254036c72640b2e727402e082940a9282a4023492b409e692c401a8a2d4095aa2e4010cb2f408beb3040070c3240822c3340fd4c3440776d3540f38d36406fae3740eace384064ef3940e00f3b405b303c40d6503d4051713e40cd913f4048b24040c3d241403ef34240ba13444034344540b05446402b754740a795484021b649409dd64a4017f74b4093174d400d384e4089584f400479504081995140fab9524076da5340f1fa54406c1b5640e73b5740625c5840de7c5940599d5a40d4bd5b404fde5c40cbfe5d40461f5f40c13f60403c606140b880624033a16340aec1644029e26540a4026740202368409b43694016646a4090846b400da56c4088c56d4003e66e407d067040fa26714075477240ee6773406a887440e6a8754062c97640dbe97740570a7940d32a7a404d4b7b40c86b7c40438c7d40c0ac7e403acd7f4029778040c607814063988140ff2882409cb98240394a8340d6da8340726b84400ffc8440ac8c8540491d8640e6ad8640823e87401fcf8740bc5f884059f08840f580894092118a402fa28a40cc328b4069c38b4005548c40a2e48c403f758d40dc058e4078968e4015278f40b2b78f404e489040ebd890408869914024fa9140c28a92405f1b9340fbab9340973c944034cd9440d15d95406eee95400b7f9640a80f974045a09740e13098407ec198401a529940b7e2994054739a40f0039b408e949b402a259c40c7b59c4064469d4001d79d409d679e4039f89e40d6889f406319a040a1a9a040de39a1401ccaa140595aa24096eaa240d47aa340110ba440509ba4408e2ba540cbbba540094ca64046dca640836ca740c1fca740fe8ca8403d1da9407aada940b83daa40f5cdaa40325eab4070eeab40ae7eac40eb0ead402a9fad40672fae40a4bfae40e24faf401fe0af405d70b0409a00b140d790b1401621b24053b1b2409141b340cfd1b3400c62b4404af2b4408782b540c412b64003a3b6404033b7407ec3b740bb53b840f9e3b8403674b9407304ba40b194ba40ef24bb402db5bb406b45bc40a8d5bc40e565bd4023f6bd406086be409e16bf40dca6bf401a37c04058c7c0409457c140d2e7c1401078c2404d08c3408b98c340c928c44007b9c4404449c54081d9c540bf69c640fdf9c6403a8ac740771ac840b6aac840f33ac94031cbc9406e5bca40acebca40ea7bcb40260ccc40649ccc40a22ccd40e0bccd401d4dce405bddce40986dcf40d6fdcf40138ed040501ed14090aed140cd3ed2400acfd240485fd34085efd340c37fd4400010d5403da0d5407c30d640bac0d640f750d74035e1d7407271d840af01d940ed91d9402a22da4069b2da40a742db40e4d2db402263dc405ff3dc409c83dd40da13de4017a4de405534df4094c4df40d154e0400ee5e0404c75e1408905e240c795e2400426e34042b6e3408146e440bdd6e440fa66e54039f7e5407587e640b417e740f1a7e7402f38e8406cc8e840aa58e940e7e8e9402579ea406209eb409f99eb40dd29ec401cbaec40594aed4097daed40d46aee4012fbee404f8bef408c1bf040caabf040093cf14045ccf140845cf240c1ecf240fd7cf3403c0df440789df440b72df540f5bdf540324ef64070def640ad6ef740eafef740288ff840651ff940a4aff940e23ffa401fd0fa405c60fb409af0fb40d780fc401511fd4052a1fd408f31fe40cfc1fe400c52ff4048e2ff40433900416281004181c900419f110141be590141dda10141fce901411b3202413a7a024158c20241770a034196520341b49a0341d4e20341f32a04411173044130bb04414f0305416d4b05418c930541abdb0541ca230641e96b064108b4064126fc064145440741648c074183d40741a11c0841c1640841e0ac0841fef408411d3d09413c8509415acd094179150a41985d0a41b7a50a41d5ed0a41f5350b41137e0b4132c60b41510e0c416f560c418e9e0c41ade60c41cc2e0d41eb760d410abf0d4129070e41474f0e4166970e4185df0e41a4270f41c26f0f41e2b70f4100001041
+  m_StreamData:
+    serializedVersion: 2
+    offset: 0
+    size: 0
+    path: 

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 907e48382ed5346464ecf8277236551e
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 429574
+  packageName: Real Spells Demo - 10 Free Spell VFX with Light and Sound
+  packageVersion: 1.0.0
+  assetPath: Assets/RealSpellsDemo/Spells/poison_cloud/Materials/poison_cloud_Impact_front.mat
+  uploadId: 1049474

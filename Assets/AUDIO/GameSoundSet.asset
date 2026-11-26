@@ -86,7 +86,7 @@ MonoBehaviour:
     minInterval: 0.05
   fireBallHit:
     clips:
-    - {fileID: 8300000, guid: c11a85a2014670a41b7eb5d74283dfda, type: 3}
+    - {fileID: 8300000, guid: 0c653449f8517a845ab1c2118443d8a2, type: 3}
     volume: 0.306
     pitchRange: {x: 0.96, y: 1.04}
     minInterval: 0

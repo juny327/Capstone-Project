@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 0a8ca619f6422f598222a1cb9f14b915
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 429574
+  packageName: Real Spells Demo - 10 Free Spell VFX with Light and Sound
+  packageVersion: 1.0.0
+  assetPath: Assets/RealSpellsDemo/Spells/fireball/Materials/fireball_Travel_launch.mat
+  uploadId: 1049474

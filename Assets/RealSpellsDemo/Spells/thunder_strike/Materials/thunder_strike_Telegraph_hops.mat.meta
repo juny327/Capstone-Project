@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: b52fee79b61d55e07d21a21a33d3000b
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 429574
+  packageName: Real Spells Demo - 10 Free Spell VFX with Light and Sound
+  packageVersion: 1.0.0
+  assetPath: Assets/RealSpellsDemo/Spells/thunder_strike/Materials/thunder_strike_Telegraph_hops.mat
+  uploadId: 1049474

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 6ee0b62d0048b48b213e9d658a84378a
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 429574
+  packageName: Real Spells Demo - 10 Free Spell VFX with Light and Sound
+  packageVersion: 1.0.0
+  assetPath: Assets/RealSpellsDemo/Spells/meteor/Materials/meteor_Telegraph_heat_embers.mat
+  uploadId: 1049474

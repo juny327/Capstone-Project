@@ -1,0 +1,100 @@
+{
+  "schema": "realspells.sheet/1",
+  "name": "shadow_burst",
+  "style": "realistic",
+  "spell": "shadow_bolt",
+  "layer": "burst",
+  "frameCount": 20,
+  "grid": {
+    "cols": 5,
+    "rows": 4
+  },
+  "tiers": {
+    "high": {
+      "file": "sheet.png",
+      "cell": 512,
+      "gutter": 8,
+      "mipMax": 3
+    },
+    "standard": {
+      "file": "sheet_256.png",
+      "cell": 256,
+      "gutter": 4,
+      "mipMax": 2
+    },
+    "mobile": {
+      "file": "sheet_128.png",
+      "cell": 128,
+      "gutter": 2,
+      "mipMax": 1
+    }
+  },
+  "color": {
+    "space": "sRGB",
+    "alpha": "straight",
+    "content": "emissive"
+  },
+  "blend": {
+    "mode": "glow",
+    "intensity": 2.2,
+    "occlusion": 1.0
+  },
+  "schedule": {
+    "duration": 0.85,
+    "loop": false,
+    "end": "empty",
+    "interpolate": "blend",
+    "nominalFps": 22.4,
+    "times": [
+      0.0,
+      0.0182,
+      0.0273,
+      0.0319,
+      0.0364,
+      0.0455,
+      0.0546,
+      0.0729,
+      0.0956,
+      0.1275,
+      0.1963,
+      0.2737,
+      0.3511,
+      0.4371,
+      0.5232,
+      0.6092,
+      0.6866,
+      0.7554,
+      0.807,
+      0.85
+    ]
+  },
+  "pivot": [
+    0.5171,
+    0.5705
+  ],
+  "extent": [
+    0.385,
+    0.35,
+    0.465,
+    0.325
+  ],
+  "projection": "billboard",
+  "brightness": {
+    "peakLinear": 0.1993,
+    "p99Linear": 0.1734,
+    "meanCoveredLinear": 0.0169,
+    "clippedFraction": 0.0
+  },
+  "motionVectors": {
+    "tiers": {
+      "high": "sheet_mv.png",
+      "standard": "sheet_mv_256.png",
+      "mobile": "sheet_mv_128.png"
+    },
+    "encoding": "rg8",
+    "scale": 0.08,
+    "direction": "forward",
+    "vAxis": "up",
+    "strength": 1.0
+  }
+}
