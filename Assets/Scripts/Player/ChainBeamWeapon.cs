@@ -250,6 +250,7 @@ public class ChainBeamWeapon : WeaponBase
             hitPoint = point,
             hitDirection = dir,
             cameraShake = isFirst ? cfg.cameraShake : 0f,
+            source = DamageSource.Of(this),   // 판 결과 화면 (2026-11-26)
         });
 
         // 조준해서 맞힌 첫 적에서 한 번 흔든다 (2026-11-12 — 피해 정보의 cameraShake 는 적이 쓰지 않아 흔들린 적이 없었다)

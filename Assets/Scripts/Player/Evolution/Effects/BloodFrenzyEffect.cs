@@ -295,7 +295,7 @@ public class BloodFrenzyEffect : AttachmentEffect
 
                 bool wasAlive = CombatFx.IsAlive(t);
                 Vector3 point = CombatFx.Body(t);
-                CombatFx.Damage(t, damage, point, to.sqrMagnitude > 0.0001f ? to.normalized : dir);
+                CombatFx.Damage(t, damage, point, to.sqrMagnitude > 0.0001f ? to.normalized : dir, source: DamageSource.Of(Weapon));
                 SlashHits++;
                 if (cfg.UsesKit && EvoStrikes.Take(6)) KitSlashHit(point, to.sqrMagnitude > 0.0001f ? to.normalized : dir);
 

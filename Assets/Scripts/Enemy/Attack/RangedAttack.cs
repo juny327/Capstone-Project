@@ -118,7 +118,9 @@ public class RangedAttack : EnemyAttack
             transform.rotation = Quaternion.LookRotation(AimDirection());
             float progress = Mathf.Clamp01(elapsed / warningDuration);
             charge.transform.localScale = Vector3.one * Mathf.Lerp(0.2f, 0.7f, progress);
-            properties.SetColor("_BaseColor", Color.Lerp(new Color(1f, 0.35f, 0.05f, 0.8f), new Color(1f, 0.9f, 0.2f, 1f), progress));
+            // 2026-11-27 (남은 작업 7-4) — 충전 구슬도 주황 · 노랑 → 빨강 깜빡임 (DangerTelegraph)
+            properties.SetColor("_BaseColor", DangerTelegraph.Dim(Color.Lerp(new Color(0.8f, 0.04f, 0.03f, 0.85f), new Color(1f, 0.3f, 0.24f, 1f), progress),
+                DangerTelegraph.Blink(elapsed, warningDuration)));
             chargeRenderer.SetPropertyBlock(properties);
             elapsed += Time.deltaTime;
             yield return null;

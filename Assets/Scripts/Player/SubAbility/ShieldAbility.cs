@@ -380,7 +380,7 @@ public class ShieldAbility : SubAbility, IDamageFilter
             away.y = 0f;
             Vector3 push = (away.normalized + Forward).normalized;
 
-            CombatFx.Damage(t, damage, CombatFx.Body(t), Forward, false, 0.15f);
+            CombatFx.Damage(t, damage, CombatFx.Body(t), Forward, false, 0.15f, source: DamageSource.Shield);
             CombatFx.Stun(t, bashStun);
             CombatFx.Push(this, t, push, chargePush, bashPushDuration);
             Spark(CombatFx.Body(t), -Forward);
@@ -464,7 +464,7 @@ public class ShieldAbility : SubAbility, IDamageFilter
         {
             if (!struck.Add(t)) continue;
 
-            CombatFx.Damage(t, damage, CombatFx.Body(t), discDir, false, 0.08f);
+            CombatFx.Damage(t, damage, CombatFx.Body(t), discDir, false, 0.08f, source: DamageSource.Shield);
             CombatFx.Stun(t, throwStun);
             Spark(CombatFx.Body(t), -discDir);
         }

@@ -143,7 +143,7 @@ public class GrenadeLauncherAbility : SubAbility
             Vector3 dir = target.position - to;
             dir.y = 0f;
             CombatFx.Damage(target, damage, CombatFx.Body(target), dir.sqrMagnitude > 0.0001f ? dir.normalized : Forward,
-                false, first ? cameraShake : 0f);
+                false, first ? cameraShake : 0f, source: "sub:Grenade");
             first = false;
         }
 

@@ -62,7 +62,7 @@ public class ExplodeOnHitEffect : AttachmentEffect
             {
                 Vector3 dir = t.position - at;
                 dir.y = 0f;
-                CombatFx.Damage(t, hit.EffectDamage * cfg.damageRatio, CombatFx.Body(t), dir.sqrMagnitude > 0.0001f ? dir.normalized : Vector3.forward);
+                CombatFx.Damage(t, hit.EffectDamage * cfg.damageRatio, CombatFx.Body(t), dir.sqrMagnitude > 0.0001f ? dir.normalized : Vector3.forward, source: DamageSource.Of(Weapon));
             }
 
             FxLine.Ring(cfg.material, at, cfg.radius * 0.25f, cfg.radius, cfg.color, 0.3f, 0.28f);

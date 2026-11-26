@@ -409,9 +409,26 @@ public class ComboHud : MonoBehaviour
         if (weapons == null || !weapons.isActiveAndEnabled) return false;
         if (stats != null && stats.IsDead) return false;
         if (MaintenanceUI.Instance != null && MaintenanceUI.Instance.IsOpen) return false;
+        if (LevelUpOpen()) return false;
 
         string scene = SceneManager.GetActiveScene().name;
         return scene.StartsWith("Stage") || scene == "TestRoom";
+    }
+
+    // 레벨업 창 — 이 HUD 의 캔버스(320)가 레벨업 창이 놓인 스테이지 캔버스(0)보다 위라서 첫 카드의 그림 · 제목을 덮었다 (2026-11-26 해상도 점검에서 찾음).
+    // 정비 창처럼 열려 있는 동안 숨긴다. 레벨업 창은 씬마다 하나 — 씬이 바뀔 때만 다시 찾는다
+    UpgradeUI levelUp;
+    int levelUpScene = -1;
+
+    bool LevelUpOpen()
+    {
+        int scene = SceneManager.GetActiveScene().handle;
+        if (scene != levelUpScene)
+        {
+            levelUpScene = scene;
+            levelUp = FindFirstObjectByType<UpgradeUI>(FindObjectsInactive.Include);
+        }
+        return levelUp != null && levelUp.panel != null && levelUp.panel.activeInHierarchy;
     }
 
     void SetVisible(bool on)

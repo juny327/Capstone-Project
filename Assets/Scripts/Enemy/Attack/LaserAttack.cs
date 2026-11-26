@@ -18,7 +18,8 @@ public sealed class LaserAttack : EnemyAttack
     public Vector3 localFirePoint = new Vector3(0f, 1.1f, 0.65f);
     public Material beamMaterial;
     public Color warningColor = new Color(1f, 0.08f, 0.04f, 0.7f);
-    public Color fireColor = new Color(1f, 0.35f, 0.08f, 1f);
+    // 2026-11-27 (남은 작업 7-4) — 쏘는 빔도 주황 → 빨강 (가운데는 SetBeamStyle 이 하얗게 — 빨강 테두리처럼 보인다)
+    public Color fireColor = new Color(1f, 0.18f, 0.1f, 1f);
 
     public override bool IsBusy => routine != null;
 
@@ -168,8 +169,9 @@ public sealed class LaserAttack : EnemyAttack
             }
             float charge = Mathf.Clamp01(elapsed / warningDuration);
             float pulse = 0.5f + 0.5f * Mathf.Sin(elapsed * (12f + charge * 20f));
-            SetBeamStyle(Color.Lerp(warningColor,
-                new Color(1f, 0.7f, 0.2f, 1f), charge * pulse),
+            // 2026-11-27 (7-4) — 경고 줄은 빨강 그대로 밝아지며 깜빡인다 (예전엔 주황 · 노랑으로 바뀌어 아군 불길과 겹쳤다)
+            SetBeamStyle(DangerTelegraph.Dim(Color.Lerp(warningColor, new Color(1f, 0.32f, 0.26f, 1f), charge),
+                DangerTelegraph.Blink(elapsed, warningDuration)),
                 Mathf.Lerp(0.045f, 0.16f, charge * (0.65f + 0.35f * pulse)));
             muzzleLight.transform.position = FirePoint();
             muzzleLight.intensity = Mathf.Lerp(0.5f, 3f, charge * pulse);

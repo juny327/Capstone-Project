@@ -38,7 +38,7 @@ public static class EvoStrikes
     /// glowRadius 바닥 빛 반경(0 이면 radius × 1.3) · scale 연출 크기와 밝기(보조 칸은 낮춘다).
     /// </summary>
     public static int Lightning(Material material, Color color, Vector3 from, Vector3 at, float radius, float damage, float stun, GameObject vfx = null,
-        float width = 0.24f, int branches = 0, float glowRadius = 0f, float scale = 1f)
+        float width = 0.24f, int branches = 0, float glowRadius = 0f, float scale = 1f, string source = null)
     {
         Vector3 end = at + Vector3.up * 0.2f;
         FxLine.Bolt(material, from, end, color, width * scale, 0.2f, 0.55f);
@@ -67,7 +67,7 @@ public static class EvoStrikes
         CombatFx.FindEnemies(at, radius, found);
         foreach (Transform t in found)
         {
-            CombatFx.Damage(t, damage, CombatFx.Body(t), Vector3.down, sound: HitSound.Electric);
+            CombatFx.Damage(t, damage, CombatFx.Body(t), Vector3.down, sound: HitSound.Electric, source: source);
             CombatFx.Stun(t, stun);
         }
 
@@ -90,7 +90,7 @@ public static class EvoStrikes
             Vector3 dir = t.position - at;
             dir.y = 0f;
             Vector3 away = dir.sqrMagnitude > 0.0001f ? dir.normalized : Vector3.forward;
-            CombatFx.Damage(t, damage, CombatFx.Body(t), away);
+            CombatFx.Damage(t, damage, CombatFx.Body(t), away, source: DamageSource.Of(runner as IWeapon));
             if (push > 0f && runner != null) CombatFx.Push(runner, t, away, push, 0.2f);
         }
 

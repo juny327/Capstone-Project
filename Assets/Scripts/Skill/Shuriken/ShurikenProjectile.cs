@@ -79,6 +79,7 @@ public class ShurikenProjectile : MonoBehaviour
                 hitDirection = (enemy.transform.position - transform.position).normalized
             };
 
+            info.source = "ShurikenUpgrade";   // 판 결과 화면 — 스킬별 피해 몫 (레벨업 카드 이름, 2026-11-26)
             enemy.TakeDamage(info);
             SoundManager.Instance?.ReportHit(false, HitSound.Shuriken);
             hitTimers[enemy] = Time.time + hitInterval;

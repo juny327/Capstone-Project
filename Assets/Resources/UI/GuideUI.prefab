@@ -16667,9 +16667,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "<nobr>\uBB34\uAE30\uB85C</nobr> <nobr>\uC801\uC744</nobr> <nobr>\uCC98\uCE58\uD558\uBA74</nobr>
-    <nobr>10%</nobr> <nobr>\uD655\uB960\uB85C</nobr> <nobr>\uCCB4\uB825\uC744</nobr>
-    6 <nobr>\uD68C\uBCF5\uD55C\uB2E4</nobr>\n<nobr>\uB808\uBCA8\uB9C8\uB2E4</nobr>
+  m_text: "<nobr>\uC801\uC744</nobr> <nobr>\uCC98\uCE58\uD558\uBA74</nobr> <nobr>10%</nobr>
+    <nobr>\uD655\uB960\uB85C</nobr> <nobr>\uCCB4\uB825\uC744</nobr> 6 <nobr>\uD68C\uBCF5\uD55C\uB2E4</nobr>\n<nobr>\uB808\uBCA8\uB9C8\uB2E4</nobr>
     <nobr>\uD655\uB960</nobr> <nobr>+3%,</nobr> <nobr>\uD68C\uBCF5\uB7C9</nobr> <nobr>+2</nobr>"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: b142b49dad0aa7747857b5917f44e1e7, type: 2}
@@ -28042,9 +28041,11 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "<nobr>4\uCD08\uB9C8\uB2E4</nobr> <nobr>\uAC00\uAE4C\uC6B4</nobr> <nobr>\uC801\uC5D0\uAC8C</nobr>
-    <nobr>\uD654\uC5FC\uAD6C\uB97C</nobr> <nobr>\uBC1C\uC0AC\uD55C\uB2E4</nobr>\n<nobr>\uB808\uBCA8\uB9C8\uB2E4</nobr>
-    <nobr>\uD53C\uD574</nobr> <nobr>+25%</nobr>"
+  m_text: "<nobr>4\uCD08\uB9C8\uB2E4</nobr> <nobr>\uD654\uC5FC\uAD6C\uB97C</nobr>
+    <nobr>\uBC1C\uC0AC\uD574</nobr> <nobr>\uB9DE\uC740</nobr> <nobr>\uC790\uB9AC</nobr>
+    <nobr>\uC8FC\uBCC0</nobr> <nobr>\uC801\uC5D0\uAC8C</nobr> <nobr>\uD53C\uD574\uB97C</nobr>
+    <nobr>\uC900\uB2E4</nobr>\n<nobr>\uB808\uBCA8\uB9C8\uB2E4</nobr> <nobr>\uD53C\uD574</nobr>
+    <nobr>+25%</nobr>"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: b142b49dad0aa7747857b5917f44e1e7, type: 2}
   m_sharedMaterial: {fileID: 2100000, guid: 729cd5341613c634f935c898adc51dbc, type: 2}
@@ -32041,7 +32042,7 @@ MonoBehaviour:
       m_Calls: []
   m_text: "<nobr>\uC8FC\uBCC0\uC744</nobr> <nobr>\uD68C\uC804\uD558\uC5EC</nobr>
     <nobr>\uACF5\uACA9\uD558\uB294</nobr> <nobr>\uC288\uB9AC\uCF04\uC744</nobr> <nobr>\uC18C\uD658\uD55C\uB2E4</nobr>\n<nobr>\uB808\uBCA8\uB9C8\uB2E4</nobr>
-    <nobr>\uC288\uB9AC\uCF04</nobr> <nobr>+1</nobr>"
+    <nobr>\uC288\uB9AC\uCF04</nobr> <nobr>+1,</nobr> <nobr>\uD53C\uD574</nobr> <nobr>+50%</nobr>"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: b142b49dad0aa7747857b5917f44e1e7, type: 2}
   m_sharedMaterial: {fileID: 2100000, guid: 729cd5341613c634f935c898adc51dbc, type: 2}

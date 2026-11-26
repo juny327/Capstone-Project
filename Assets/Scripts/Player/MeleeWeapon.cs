@@ -436,6 +436,7 @@ public class MeleeWeapon : WeaponBase
                 hitPoint = point,
                 hitDirection = dir,
                 cameraShake = 0f,   // 흔들림은 휘두름이 끝날 때 한 번 (아래 ShakeCamera) — 적은 이 값을 쓰지 않는다
+                source = DamageSource.Of(this),   // 판 결과 화면 (2026-11-26)
             });
 
             // Drain: 직접 근접 공격으로 적을 처치했을 때만 고정 HP 회복 (이미 쓰러진 적을 다시 벤 것은 세지 않는다)

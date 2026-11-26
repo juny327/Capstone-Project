@@ -43,7 +43,7 @@ public class ShockEmitterAbility : SubAbility
             away.y = 0f;
             if (away.sqrMagnitude < 0.0001f) away = Forward;
 
-            CombatFx.Damage(target, damage, CombatFx.Body(target), away.normalized);
+            CombatFx.Damage(target, damage, CombatFx.Body(target), away.normalized, source: "sub:Shock");
             CombatFx.Stun(target, stun);
             CombatFx.Push(this, target, away, push, pushDuration);
         }

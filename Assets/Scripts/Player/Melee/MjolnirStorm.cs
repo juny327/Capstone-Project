@@ -79,7 +79,8 @@ public class MjolnirStorm : MonoBehaviour
 
         if (cfg.material != null)
             EvoStrikes.Lightning(cfg.material, cfg.color, sky, at, radius, damage * cfg.aftershockDamageMul, cfg.aftershockStun, null,
-                last ? 0.55f : 0.42f, last ? 6 : 4, 0f, s);
+                last ? 0.55f : 0.42f, last ? 6 : 4, 0f, s,
+                source: DamageSource.Of(weapon));   // 무기 콜백 밖(Update)에서 치므로 출처를 직접 — 안 주면 판 결과 화면 '기타' (2026-11-27)
 
         if (cfg.UsesKit)
         {

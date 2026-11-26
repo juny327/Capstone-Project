@@ -14,9 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UpgradeData
   upgradeName: "\uC288\uB9AC\uCF04"
   brief: "\uC8FC\uC704\uB97C \uB3C4\uB294 \uC288\uB9AC\uCF04\uC744 \uC18C\uD658\uD55C\uB2E4"
-  description: "\uC8FC\uBCC0\uC744 \uD68C\uC804\uD558\uC5EC \uACF5\uACA9\uD558\uB294
-    \uC288\uB9AC\uCF04\uC744 \uC18C\uD658\uD55C\uB2E4\n\uB808\uBCA8\uB9C8\uB2E4 \uC288\uB9AC\uCF04
-    +1"
+  description: "\uC8FC\uBCC0\uC744 \uD68C\uC804\uD558\uC5EC \uACF5\uACA9\uD558\uB294 \uC288\uB9AC\uCF04\uC744 \uC18C\uD658\uD55C\uB2E4\n\uB808\uBCA8\uB9C8\uB2E4 \uC288\uB9AC\uCF04 +1, \uD53C\uD574 +50%"
   icon: {fileID: 21300000, guid: 249f9bfcf47ceec48b6db33d2cb3c9b5, type: 3}
   costExp: 15
   maxLevel: 3

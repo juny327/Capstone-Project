@@ -3,7 +3,7 @@ using UnityEngine.Serialization;
 
 /// <summary>
 /// 상위 무기 "공성포" (샷건 + 슬러그) — 슬러그가 굵은 포탄이 된다.
-///  · 적에게 부딪히면 <b>거기서 멈추고 터진다</b> — 둘레 적에게 폭발 피해 · 밀치기 (맞은 적은 포탄 피해를 이미 받았다)
+///  · 적에게 부딪히면 <b>거기서 멈추고 터진다</b> — 둘레 적에게 폭발 피해 · 밀치기, 맞은 적은 포탄 피해 + 폭발 피해 (2026-11-26 — 그 전엔 포탄 피해만)
 ///  · 아무도 못 맞히면 사거리 끝 · 벽에서 같은 폭발
 ///  · 쏠 때 총구 충격파 고리
 ///  · 2026-11-20 — 무기 데이터 자체가 포탄 한 발(탄 수 1 · 퍼짐 0)이다. 그 전에는 산탄 8발 데이터에 슬러그 개조(탄 수 1)를 이어받아 한 발이 됐는데,
@@ -17,9 +17,12 @@ public class SiegeShellEffect : AttachmentEffect
     [Header("폭발 (적 · 벽 · 사거리 끝)")]
     [FormerlySerializedAs("endRadius")]
     [Min(0.5f)] public float blastRadius = 3f;
-    [Tooltip("폭발 피해 = 무기 공격력 × 이 값 (맞은 적은 빼고 둘레 적에게 — 맞은 적은 포탄 피해)")]
+    [Tooltip("폭발 피해 = 무기 공격력 × 이 값 (둘레 적 · 맞은 적 모두 — 맞은 적은 포탄 피해 + 폭발 피해)")]
     [FormerlySerializedAs("endRatio")]
     [Min(0f)] public float blastRatio = 1.5f;
+    [Tooltip("포탄에 직접 맞은 적도 폭발 피해를 받는다 (2026-11-26 사용자 요청 3-7 — 한 방이 강한 무기인데 맞은 적은 포탄 피해만 받아 한 마리 DPS 가 상위 무기 중 가장 낮았다: 30초 8.4).\n" +
+             "밀치기는 맞은 적에게 한 번만(포탄 방향). 끄면 예전처럼 둘레 적에게만")]
+    public bool blastHitsStruck = true;
     [Tooltip("둘레 적을 밀치는 힘 (맞은 적은 포탄 방향으로)")]
     [Min(0f)] public float push = 2.4f;
 
@@ -106,8 +109,16 @@ public class SiegeShellEffect : AttachmentEffect
             }
 
             bool kit = cfg.UsesKit;
-            EvoStrikes.Blast(Weapon, cfg.material, cfg.color, at, cfg.blastRadius, Weapon.Stats.Damage * cfg.blastRatio, cfg.push,
+            float blast = Weapon.Stats.Damage * cfg.blastRatio;
+            EvoStrikes.Blast(Weapon, cfg.material, cfg.color, at, cfg.blastRadius, blast, cfg.push,
                 struck, kit ? null : cfg.explosionPrefab, 1.4f, 0f);
+            // 맞은 적도 폭발 피해 — 밀치기는 OnHit 이 포탄 방향으로 이미 했으니 피해만 (2026-11-26)
+            if (cfg.blastHitsStruck && struck != null)
+            {
+                Vector3 away = struck.position - at;
+                away.y = 0f;
+                CombatFx.Damage(struck, blast, CombatFx.Body(struck), away.sqrMagnitude > 0.0001f ? away.normalized : Vector3.forward, source: DamageSource.Of(Weapon));
+            }
             // 공통 재료 (2026-11-20) — 큰 포탄 한 발의 폭발: 판정 반경을 꽉 채우는 불 덩어리 · 가운데 불기둥 · 겹겹의 충격파 · 튀는 파편
             if (kit)
             {

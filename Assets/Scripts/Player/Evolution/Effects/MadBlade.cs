@@ -16,6 +16,8 @@ using Random = UnityEngine.Random;
 /// </summary>
 public class MadBlade : MonoBehaviour
 {
+    // 판 결과 화면 — 이 오브젝트를 만든 무기 (만들 때의 DamageSource.Current, 2026-11-26)
+    readonly string damageSource = DamageSource.Current;
     enum Phase { Dash, Rip, Prowl, Return }
 
     BloodFrenzyEffect cfg;
@@ -210,7 +212,7 @@ public class MadBlade : MonoBehaviour
             Vector3 point = CombatFx.Body(t);
             if (damage > 0f)
             {
-                CombatFx.Damage(t, damage, point, dir);
+                CombatFx.Damage(t, damage, point, dir, source: damageSource);
                 Stabs++;
                 onStab?.Invoke(t, damage, point, true);
             }

@@ -44,7 +44,7 @@ public class ReloadDischargeEffect : AttachmentEffect
                 Vector3 dir = t.position - center;
                 dir.y = 0f;
 
-                CombatFx.Damage(t, damage, to, dir.sqrMagnitude > 0.0001f ? dir.normalized : owner.forward);
+                CombatFx.Damage(t, damage, to, dir.sqrMagnitude > 0.0001f ? dir.normalized : owner.forward, source: DamageSource.Of(Weapon));
                 CombatFx.Stun(t, cfg.stun);
                 FxLine.Bolt(cfg.material, center + Vector3.up * 1f, to, cfg.color, 0.08f, 0.25f, 0.25f);
             }

@@ -145,7 +145,7 @@ public class KillChainExplosionEffect : AttachmentEffect
                 Vector3 dir = t.position - at;
                 dir.y = 0f;
 
-                CombatFx.Damage(t, damage, CombatFx.Body(t), dir.sqrMagnitude > 0.0001f ? dir.normalized : Vector3.forward);
+                CombatFx.Damage(t, damage, CombatFx.Body(t), dir.sqrMagnitude > 0.0001f ? dir.normalized : Vector3.forward, source: DamageSource.Of(Weapon));
 
                 if (wasAlive && !CombatFx.IsAlive(t)) killed.Add(t.position);
             }

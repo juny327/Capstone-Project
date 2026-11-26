@@ -12,6 +12,8 @@ using UnityEngine;
 /// </summary>
 public class CrescentWave : MonoBehaviour
 {
+    // 판 결과 화면 — 이 오브젝트를 만든 무기 (만들 때의 DamageSource.Current, 2026-11-26)
+    readonly string damageSource = DamageSource.Current;
     // 두께별 초승달 메시 (같은 두께는 나눠 쓴다)
     static readonly Dictionary<int, Mesh> meshes = new Dictionary<int, Mesh>();
     static readonly float[] GhostAlpha = { 0.5f, 0.32f, 0.2f, 0.12f, 0.07f, 0.04f };
@@ -110,7 +112,7 @@ public class CrescentWave : MonoBehaviour
         {
             if (!hit.Add(enemy)) continue;
 
-            CombatFx.Damage(enemy, damage, CombatFx.Body(enemy), direction);
+            CombatFx.Damage(enemy, damage, CombatFx.Body(enemy), direction, source: damageSource);
             FxLine.Ring(cfg.sparkMaterial, enemy.position, 0.1f, 1.1f, cfg.color, 0.12f, 0.16f);
             FxLine.Ring(cfg.sparkMaterial, enemy.position, 0.1f, 0.6f, cfg.coreColor, 0.08f, 0.1f);
             Burst(CombatFx.Body(enemy), cfg.hitSparkles, 3.5f);

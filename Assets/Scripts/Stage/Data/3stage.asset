@@ -18,7 +18,7 @@ MonoBehaviour:
   maxEnemyCount: 140
   spawnInterval: 0.3
   rangedProjectileSpeed: 9
-  enemyHealthMultiplier: 3
+  enemyHealthMultiplier: 3.5
   enemyDamageMultiplier: 1.7
   spawnWeights:
   - enemy: {fileID: 11400000, guid: 9f06c567617c12046bd90f15e64b6016, type: 2}

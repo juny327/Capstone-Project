@@ -132,7 +132,8 @@ public class FireBallProjectile : MonoBehaviour
             isCritical = false,
             hitPoint = enemy.transform.position,
             hitDirection = hitDirection,
-            cameraShake = cameraShake
+            cameraShake = cameraShake,
+            source = "FireBallUpgrade"   // 판 결과 화면 — 스킬별 피해 몫 (레벨업 카드 이름, 2026-11-26)
         };
 
         enemy.TakeDamage(info);

@@ -116,7 +116,8 @@ public class TornadoProjectile : MonoBehaviour
             enemy.TakeDamage(new DamageInfo
             {
                 damage = damage,
-                isCritical = false
+                isCritical = false,
+                source = "TornadoUpgrade",   // 판 결과 화면 — 스킬별 피해 몫 (레벨업 카드 이름, 2026-11-26)
             });
 
             SoundManager.Instance?.ReportHit(false, HitSound.Tornado);

@@ -48,31 +48,31 @@ MonoBehaviour:
     difficulty: 0
     stage: 2
     gold: 52
-    exp: 90
+    exp: 126
   - character: {fileID: 11400000, guid: 23afd2a6b7e1d5f458720ecf74986105, type: 2}
     difficulty: 0
     stage: 3
     gold: 146
-    exp: 293
+    exp: 410
   - character: {fileID: 11400000, guid: 23afd2a6b7e1d5f458720ecf74986105, type: 2}
     difficulty: 0
     stage: 4
     gold: 323
-    exp: 550
+    exp: 770
   - character: {fileID: 11400000, guid: 97d7b8ad3f1d1094d8662ba36ff561a8, type: 2}
     difficulty: 0
     stage: 2
     gold: 53
-    exp: 94
+    exp: 132
   - character: {fileID: 11400000, guid: 97d7b8ad3f1d1094d8662ba36ff561a8, type: 2}
     difficulty: 0
     stage: 3
     gold: 143
-    exp: 281
+    exp: 393
   - character: {fileID: 11400000, guid: 97d7b8ad3f1d1094d8662ba36ff561a8, type: 2}
     difficulty: 0
     stage: 4
     gold: 335
-    exp: 548
+    exp: 767
   rewardPool: {fileID: 11400000, guid: 33668b21cbe7fd34cadec752fe8763c7, type: 2}
   upgradePool: {fileID: 11400000, guid: a4e0b91e269b6984c973c89be9bc6240, type: 2}

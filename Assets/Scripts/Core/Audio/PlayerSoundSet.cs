@@ -31,7 +31,15 @@ public class PlayerSoundSet : ScriptableObject
     public GameSoundSet.Entry staminaReady = new GameSoundSet.Entry();
 
     [Header("피격")]
-    [Tooltip("내가 맞았을 때 — 적을 맞히는 '퍽'과 결이 달라야 한다 (낮은 '쿵' + 슈트 지직, 2026-11-12). " +
+    [Tooltip("내가 맞았을 때 — 몸 타격 '퍽' + 저음 '쿵' (2026-11-27 사용자가 후보 페이지에서 고름, 남은 작업 2-8 · 7-9). " +
              "죽는 순간은 GameSoundSet.playerDead 가 낸다")]
     public GameSoundSet.Entry hurt = new GameSoundSet.Entry();
+
+    [Header("체력 낮음")]
+    [Tooltip("체력이 lowHealthThreshold 아래인 동안 되풀이 — 심장 박동 (2026-11-27 사용자 선택, 남은 작업 2-8). " +
+             "첫 클립 하나를 이어 붙여 튼다 (클립 길이 = 박동 간격). LowHealthHeartbeat 가 낸다")]
+    public GameSoundSet.Entry lowHealthLoop = new GameSoundSet.Entry();
+
+    [Tooltip("이 비율 아래면 심장 박동 (최대 체력 대비)")]
+    [Range(0.05f, 0.9f)] public float lowHealthThreshold = 0.3f;
 }

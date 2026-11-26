@@ -358,10 +358,16 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
             }
         }
 
-        OnTick(deltaTime);
+        // 이 무기와 효과가 주는 피해의 출처 (2026-11-26 판 결과 화면 — DamageSource)
+        string previousSource = DamageSource.Enter(this);
+        try
+        {
+            OnTick(deltaTime);
 
-        for (int i = 0; i < runtimeList.Count; i++)
-            runtimeList[i].Tick(deltaTime);
+            for (int i = 0; i < runtimeList.Count; i++)
+                runtimeList[i].Tick(deltaTime);
+        }
+        finally { DamageSource.Restore(previousSource); }
     }
 
     public void Fire(in WeaponFireContext context)
@@ -369,7 +375,9 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
         WeaponRuntimeStats stats = Stats;
         LastAimDirection = context.AimDirection;
 
-        OnFire(in stats, in context);
+        string previousSource = DamageSource.Enter(this);
+        try { OnFire(in stats, in context); }
+        finally { DamageSource.Restore(previousSource); }
 
         // 연사 가속(회전 기관포 · 팔랑크스)이 걸려 있으면 다음 발까지 그만큼 짧다
         cooldown = stats.FireInterval / Mathf.Max(0.1f, FireRateBoost);
@@ -417,8 +425,13 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
         OnReloadStarted(stats.ReloadTime);
         RaiseAmmoChanged();
 
-        for (int i = 0; i < runtimeList.Count; i++)
-            runtimeList[i].OnReloadStarted();
+        string previousSource = DamageSource.Enter(this);
+        try
+        {
+            for (int i = 0; i < runtimeList.Count; i++)
+                runtimeList[i].OnReloadStarted();
+        }
+        finally { DamageSource.Restore(previousSource); }
     }
 
     /// <summary>탄이 떨어졌고 자동 장전을 쓰는 무기면 장전을 시작한다.</summary>
@@ -819,13 +832,18 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
     /// </summary>
     public void NotifyHit(in WeaponHit hit)
     {
-        for (int i = 0; i < runtimeList.Count; i++)
-            runtimeList[i].OnHit(in hit);
+        string previousSource = DamageSource.Enter(this);
+        try
+        {
+            for (int i = 0; i < runtimeList.Count; i++)
+                runtimeList[i].OnHit(in hit);
 
-        if (!hit.Killed) return;
+            if (!hit.Killed) return;
 
-        for (int i = 0; i < runtimeList.Count; i++)
-            runtimeList[i].OnKill(in hit);
+            for (int i = 0; i < runtimeList.Count; i++)
+                runtimeList[i].OnKill(in hit);
+        }
+        finally { DamageSource.Restore(previousSource); }
     }
 
     /// <summary>
@@ -845,15 +863,25 @@ public abstract class WeaponBase : MonoBehaviour, IWeapon
     /// <summary>탄이 아무것도 못 맞히고(또는 관통을 남긴 채) 사거리 끝에서 사라졌다 — 공성포의 끝 폭발.</summary>
     public void NotifyProjectileExpired(Vector3 position, Vector3 direction)
     {
-        for (int i = 0; i < runtimeList.Count; i++)
-            runtimeList[i].OnProjectileExpired(position, direction);
+        string previousSource = DamageSource.Enter(this);
+        try
+        {
+            for (int i = 0; i < runtimeList.Count; i++)
+                runtimeList[i].OnProjectileExpired(position, direction);
+        }
+        finally { DamageSource.Restore(previousSource); }
     }
 
     /// <summary>쏘거나 휘둘렀다 — 상위 무기 동작(검기 · 중력장)이 받는다.</summary>
     public void NotifyAttack(in WeaponAttack attack)
     {
-        for (int i = 0; i < runtimeList.Count; i++)
-            runtimeList[i].OnAttack(in attack);
+        string previousSource = DamageSource.Enter(this);
+        try
+        {
+            for (int i = 0; i < runtimeList.Count; i++)
+                runtimeList[i].OnAttack(in attack);
+        }
+        finally { DamageSource.Restore(previousSource); }
     }
 
     /// <summary>공격 알림을 무기가 직접 보내는가 — 근접은 판정 순간에 보낸다. 아니면 Fire 가 쏘는 순간 보낸다.</summary>

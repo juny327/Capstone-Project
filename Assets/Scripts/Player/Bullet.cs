@@ -275,7 +275,8 @@ public class Bullet : MonoBehaviour, IPoolable
                 damage = damage,
                 isCritical = isCritical,
                 hitPoint = transform.position,
-                hitDirection = transform.forward
+                hitDirection = transform.forward,
+                source = DamageSource.Of(source),   // 판 결과 화면 — 쏜 무기 (2026-11-26)
             };
 
             d.TakeDamage(info);

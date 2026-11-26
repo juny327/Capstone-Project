@@ -81,8 +81,8 @@ public class DifficultySettings : ScriptableObject
         maxEnemies = 0.85f,
         enemyHealth = 0.7f,
         enemyDamage = 0.75f,
-        killTarget = 0.5f,
-        coinMultiplier = 2f,
+        killTarget = 0.7f,      // 11-27 사용자 (7-1): 이지도 잡을 몬스터를 더 — ×0.5 는 스테이지가 30초 안팎이었다
+        coinMultiplier = 1.43f, // 처치 ×0.7 만큼 한 마리 코인을 낮춰 한 판 수입은 그대로 (0.7 × 1.43 ≈ 1 = 하드와 같음)
         expMultiplier = 2f,
         bossHealth = 4.5f,
     };

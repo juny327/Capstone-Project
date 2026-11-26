@@ -15,9 +15,10 @@ public class DashAttack : EnemyAttack
     public LayerMask obstacleMask = ~0;
     [Header("Telegraph")]
     public Material telegraphMaterial;
-    public Color warningColor = new Color(1f, 0.25f, 0.05f, 0.18f);
-    public Color fillColor = new Color(1f, 0.45f, 0.05f, 0.65f);
-    public Color edgeColor = new Color(1f, 0.8f, 0.15f, 0.95f);
+    // 2026-11-27 (남은 작업 7-4) — 주황 · 노랑이던 경고를 빨강으로 (아군 불길 · 폭발과 겹쳤다), 테두리 · 화살표는 깜빡인다 (DangerTelegraph)
+    public Color warningColor = new Color(0.85f, 0.03f, 0.03f, 0.16f);
+    public Color fillColor = new Color(1f, 0.1f, 0.07f, 0.42f);
+    public Color edgeColor = new Color(1f, 0.06f, 0.05f, 1f);
 
     public override bool IsBusy => routine != null;
     Coroutine routine;
@@ -33,6 +34,8 @@ public class DashAttack : EnemyAttack
     float baseDashSpeed;
     bool baseDashSpeedCaptured;
     readonly List<Mesh> meshes = new List<Mesh>();
+    readonly List<Renderer> edges = new List<Renderer>();   // 깜빡이는 테두리 · 화살표
+    MaterialPropertyBlock blinkBlock;
     readonly HashSet<PlayerStats> victims = new HashSet<PlayerStats>();
     static readonly WaitForFixedUpdate PhysicsStep = new WaitForFixedUpdate();
 
@@ -120,11 +123,13 @@ public class DashAttack : EnemyAttack
             transform.rotation = facing;
             float progress = Mathf.Clamp01(elapsed / warningDuration);
             SetFill(progress);
+            SetEdgeBlink(DangerTelegraph.Blink(elapsed, warningDuration));
             elapsed += Time.deltaTime;
             yield return null;
         }
         if (!CanContinue()) { Finish(); yield break; }
         SetFill(1f);
+        SetEdgeBlink(1f);
         enemy.animator.SetBool("isMove", true);
         enemy.animator.SetFloat("Speed", dashSpeed);
         PlayAttackSound();
@@ -226,18 +231,29 @@ public class DashAttack : EnemyAttack
         fill = AddQuad("Countdown", -width * 0.5f, width * 0.5f, 0f, 1f, 0f, fillColor).transform;
         fill.localPosition = new Vector3(0f, 0.002f, rear);
         float border = Mathf.Min(0.045f, width * 0.1f);
-        AddQuad("Left", -width * 0.5f, -width * 0.5f + border, rear, front, 0.004f, edgeColor);
-        AddQuad("Right", width * 0.5f - border, width * 0.5f, rear, front, 0.004f, edgeColor);
-        AddQuad("Rear", -width * 0.5f, width * 0.5f, rear, rear + border, 0.004f, edgeColor);
-        AddQuad("Front", -width * 0.5f, width * 0.5f, front - border, front, 0.004f, edgeColor);
+        edges.Clear();
+        Edge(AddQuad("Left", -width * 0.5f, -width * 0.5f + border, rear, front, 0.004f, edgeColor));
+        Edge(AddQuad("Right", width * 0.5f - border, width * 0.5f, rear, front, 0.004f, edgeColor));
+        Edge(AddQuad("Rear", -width * 0.5f, width * 0.5f, rear, rear + border, 0.004f, edgeColor));
+        Edge(AddQuad("Front", -width * 0.5f, width * 0.5f, front - border, front, 0.004f, edgeColor));
         float tip = front - border * 2f;
         float arrowLength = Mathf.Min(0.7f, length * 0.4f);
-        AddMesh("Direction", new[] {
+        Edge(AddMesh("Direction", new[] {
             new Vector3(-width * 0.32f, 0.008f, tip - arrowLength),
             new Vector3(0f, 0.008f, tip),
             new Vector3(width * 0.32f, 0.008f, tip - arrowLength)
-        }, new[] { 0, 1, 2 }, edgeColor);
+        }, new[] { 0, 1, 2 }, edgeColor));
         SetFill(0f);
+    }
+
+    void Edge(GameObject part) { if (part != null) edges.Add(part.GetComponent<Renderer>()); }
+
+    /// <summary>테두리 · 화살표 깜빡임 — k = 0.35 ~ 1 (DangerTelegraph.Blink).</summary>
+    void SetEdgeBlink(float k)
+    {
+        if (blinkBlock == null) blinkBlock = new MaterialPropertyBlock();
+        blinkBlock.SetColor("_BaseColor", DangerTelegraph.Dim(edgeColor, k));
+        foreach (Renderer edge in edges) if (edge != null) edge.SetPropertyBlock(blinkBlock);
     }
 
     void SetFill(float progress)
@@ -306,6 +322,7 @@ public class DashAttack : EnemyAttack
     {
         if (visual != null) { visual.SetActive(false); Destroy(visual); }
         foreach (var mesh in meshes) if (mesh != null) Destroy(mesh);
+        edges.Clear();
         meshes.Clear();
         fill = null;
     }

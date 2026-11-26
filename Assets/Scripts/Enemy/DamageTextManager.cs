@@ -25,6 +25,7 @@ public class DamageTextManager : MonoBehaviour
     /// </summary>
     public void ShowDamage(float damage, Vector3 pos, bool isCritical)
     {
+        if (!GameSettings.DamageNumbers) return;   // 설정 '피해 숫자' 끔 (2026-11-26 접근성 — 후반 화면을 덮는 숫자 · 프레임 부담을 줄인다)
         GameObject obj = PoolManager.Instance.Get(damageTextPrefab);
         obj.GetComponent<DamageText>().Show(damage, pos, isCritical);
     }

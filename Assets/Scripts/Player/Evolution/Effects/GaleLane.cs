@@ -4,6 +4,8 @@ using UnityEngine;
 /// <summary>실행 중에 생기는 바람길 하나 (돌풍 저격총). 끝나면 스스로 지운다.</summary>
 public class GaleLane : MonoBehaviour
 {
+    // 판 결과 화면 — 이 오브젝트를 만든 무기 (만들 때의 DamageSource.Current, 2026-11-26)
+    readonly string damageSource = DamageSource.Current;
     static readonly List<GaleLane> lanes = new List<GaleLane>();
 
     GaleLaneEffect cfg;
@@ -215,7 +217,7 @@ public class GaleLane : MonoBehaviour
         CombatFx.FindEnemiesAlong(start, Tip, cfg.halfWidth, found);
         foreach (Transform enemy in found)
         {
-            CombatFx.Damage(enemy, damage, CombatFx.Body(enemy), dir);
+            CombatFx.Damage(enemy, damage, CombatFx.Body(enemy), dir, source: damageSource);
             EnemySlow.Apply(enemy, cfg.slowFactor, cfg.tickInterval + cfg.slowLinger);
             GaleLaneEffect.Ticks++;
             if (cfg.UsesKit && EvoStrikes.Take(6)) KitCut(enemy);
