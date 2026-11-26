@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 5d37780d6b584386e7cd1d4cf32545b7
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 429574
+  packageName: Real Spells Demo - 10 Free Spell VFX with Light and Sound
+  packageVersion: 1.0.0
+  assetPath: Assets/RealSpellsDemo/Spells/meteor/Materials/meteor_Impact_smoke.mat
+  uploadId: 1049474

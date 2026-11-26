@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 43d65087c9c480a3f602ab0104da6a15
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 429574
+  packageName: Real Spells Demo - 10 Free Spell VFX with Light and Sound
+  packageVersion: 1.0.0
+  assetPath: Assets/RealSpellsDemo/Settings/SpellShaders.asset
+  uploadId: 1049474

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 8a382584cb08417dd86ea6e94ead7130
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 429574
+  packageName: Real Spells Demo - 10 Free Spell VFX with Light and Sound
+  packageVersion: 1.0.0
+  assetPath: Assets/RealSpellsDemo/Spells/frozen/Materials/frozen_Cast_gather.mat
+  uploadId: 1049474

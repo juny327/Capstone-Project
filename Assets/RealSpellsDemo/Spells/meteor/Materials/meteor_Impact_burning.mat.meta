@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: a70b12b05c5b2a81228d46421c306c9d
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 429574
+  packageName: Real Spells Demo - 10 Free Spell VFX with Light and Sound
+  packageVersion: 1.0.0
+  assetPath: Assets/RealSpellsDemo/Spells/meteor/Materials/meteor_Impact_burning.mat
+  uploadId: 1049474

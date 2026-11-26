@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: ad868e98f8fc5e5428f78ec8c1c89888
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 429574
+  packageName: Real Spells Demo - 10 Free Spell VFX with Light and Sound
+  packageVersion: 1.0.0
+  assetPath: Assets/RealSpellsDemo/Spells/stone_spikes/Materials/stone_spikes_Impact_chunks.mat
+  uploadId: 1049474

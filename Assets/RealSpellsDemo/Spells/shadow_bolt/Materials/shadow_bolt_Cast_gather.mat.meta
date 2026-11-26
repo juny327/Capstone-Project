@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 987ad56c9638281ddcd987080c0b38f2
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 429574
+  packageName: Real Spells Demo - 10 Free Spell VFX with Light and Sound
+  packageVersion: 1.0.0
+  assetPath: Assets/RealSpellsDemo/Spells/shadow_bolt/Materials/shadow_bolt_Cast_gather.mat
+  uploadId: 1049474

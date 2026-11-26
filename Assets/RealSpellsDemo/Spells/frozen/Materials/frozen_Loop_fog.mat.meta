@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 1677b98e3f8a3ef7ba44f98b36b0ae6a
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 429574
+  packageName: Real Spells Demo - 10 Free Spell VFX with Light and Sound
+  packageVersion: 1.0.0
+  assetPath: Assets/RealSpellsDemo/Spells/frozen/Materials/frozen_Loop_fog.mat
+  uploadId: 1049474

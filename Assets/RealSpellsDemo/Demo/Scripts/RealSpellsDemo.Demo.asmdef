@@ -1,0 +1,16 @@
+{
+    "name": "RealSpellsDemo.Demo",
+    "rootNamespace": "RealSpellsDemo.Demo",
+    "references": [
+        "RealSpellsDemo.Runtime"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

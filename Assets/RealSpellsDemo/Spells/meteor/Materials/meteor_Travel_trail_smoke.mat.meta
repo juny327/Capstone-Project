@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: cf4d8abc992f38fc39bd1668f2613d41
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 429574
+  packageName: Real Spells Demo - 10 Free Spell VFX with Light and Sound
+  packageVersion: 1.0.0
+  assetPath: Assets/RealSpellsDemo/Spells/meteor/Materials/meteor_Travel_trail_smoke.mat
+  uploadId: 1049474

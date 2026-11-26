@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 4d40394325e3900bee29e1708810633c
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 429574
+  packageName: Real Spells Demo - 10 Free Spell VFX with Light and Sound
+  packageVersion: 1.0.0
+  assetPath: Assets/RealSpellsDemo/Spells/thunder_strike/Materials/thunder_strike_Impact_burst.mat
+  uploadId: 1049474

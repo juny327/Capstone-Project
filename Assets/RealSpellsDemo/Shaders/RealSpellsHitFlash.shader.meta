@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: d65b8350bd85b2f6f7c51b3dedd40643
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 429574
+  packageName: Real Spells Demo - 10 Free Spell VFX with Light and Sound
+  packageVersion: 1.0.0
+  assetPath: Assets/RealSpellsDemo/Shaders/RealSpellsHitFlash.shader
+  uploadId: 1049474
