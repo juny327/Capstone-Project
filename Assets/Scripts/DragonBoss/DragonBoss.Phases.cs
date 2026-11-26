@@ -346,9 +346,10 @@ public partial class DragonBoss
                 Jolt(0.28f, points[i], 0.18f);
                 FxRainLand(points[i]);
                 // 불비가 떨어진 자리에는 작은 화염 지대가 잠시 남는다. 피해는 낮고, 예고 범위보다 작아 빠져나갈 수 있다.
-                if (DragonFirePatch.Count < rainPatchCapacity)
+                // 2026-11-26 — 피해 · 남는 시간은 난이도 값 (하드 2 · 3.5초, 이지 1 · 2.5초)
+                if (tune.rainPatchDamage > 0f && DragonFirePatch.Count < rainPatchCapacity)
                     DragonFirePatch.Spawn(this, telegraphMaterial, fireMaterial, points[i], rainRadius * 0.65f,
-                        Mathf.Min(tune.firePatchLife, 3.5f), 0.9f, 2f);
+                        Mathf.Min(tune.firePatchLife, tune.rainPatchLife), 0.9f, tune.rainPatchDamage);
                 if (PlayerInCircle(points[i], rainRadius) && Time.time - lastHit > 0.35f)   // 겹친 원 두 개에 한꺼번에 맞지 않게
                 {
                     lastHit = Time.time;
@@ -394,7 +395,7 @@ public partial class DragonBoss
         AddRainPoint(points, player, 0f);
         AddRainPoint(points, player + heading.normalized * (rainRadius * 1.5f), 1.5f);
 
-        int rainCount = Mathf.Max(1, tune.rainCount) * 2;
+        int rainCount = Mathf.Max(1, Mathf.RoundToInt(tune.rainCount * tune.rainCountScale));   // 하드 ×2 (7 → 14) · 이지 ×1.5 (5 → 8)
         for (int tries = 0; tries < rainCount * 8 && points.Count < rainCount; tries++)
         {
             Vector2 r = Random.insideUnitCircle * rainSpread;
@@ -461,7 +462,7 @@ public partial class DragonBoss
                     PlayerMove playerMove = target.GetComponentInParent<PlayerMove>();
                     Vector3 pushAway = Flat(target.position - center);
                     if (pushAway.sqrMagnitude < 0.001f) pushAway = -Flat(transform.forward);
-                    playerMove?.ApplyKnockback(pushAway, 11f, 0.35f);
+                    if (tune.tailKnockback > 0f) playerMove?.ApplyKnockback(pushAway, tune.tailKnockback, tune.tailKnockbackTime);   // 하드 11 · 이지 5.5 m/s
                 }
             }
             yield return null;
@@ -617,7 +618,7 @@ public partial class DragonBoss
     Pattern ComboAfter(Pattern done)
     {
         // 2페이즈부터 꼬리 휩쓸기로 밀어낸 뒤 돌진한다. 테스트룸의 수동 패턴도 같은 규칙을 쓴다.
-        if (done == Pattern.TailSweep && phase >= 2 && forced == Pattern.None && pendingPhase <= phase && target != null && state != State.Dead)
+        if (done == Pattern.TailSweep && tune.tailChargeWindup > 0f && phase >= 2 && forced == Pattern.None && pendingPhase <= phase && target != null && state != State.Dead)
             return Pattern.Charge;
 
         if (Passive || forced != Pattern.None || pendingPhase > phase || target == null || state == State.Dead)

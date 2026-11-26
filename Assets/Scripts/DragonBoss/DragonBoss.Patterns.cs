@@ -191,8 +191,9 @@ public partial class DragonBoss
         float end = attackLength + hold;
         // 일반 물기는 2배, 지연 물기는 4/3배로 예고 게이지·애니메이션·판정을 함께 진행한다.
         // 지연 물기의 전방 공격 범위도 1/3 늘리며, 땅 물기는 기존 설정을 유지한다.
-        float timeScale = delayed ? 4f / 3f : !ground ? 2f : 1f;
-        float attackFar = delayed ? biteFar * (4f / 3f) : biteFar;
+        // 2026-11-26 — 빠르기 · 범위는 난이도 값 (하드 = 팀원 값 2 · 4/3 · 4/3, 이지 = 중간 1.5 · 1.17 · 1.17)
+        float timeScale = delayed ? tune.delayedBiteSpeed : !ground ? tune.biteSpeed : 1f;
+        float attackFar = delayed ? biteFar * tune.delayedBiteReach : biteFar;
         DragonTelegraph warning = Track(DragonTelegraph.Rect(telegraphMaterial, origin, forward, biteWidth, biteNear, attackFar));
         Vector3 slam = origin + Flat(forward).normalized * groundBiteCenter;
         DragonTelegraph ring = ground ? Track(DragonTelegraph.Circle(telegraphMaterial, slam, groundBiteRadius)) : null;
