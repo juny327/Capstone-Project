@@ -125,6 +125,7 @@ public class GroundGlow : MonoBehaviour
     /// <summary>ground(바닥 높이의 자리)에 반경 radius 의 빛을 duration 동안. strength 는 이 빛만의 세기 (설정의 groundStrength 에 곱한다).</summary>
     public static void Flash(Vector3 ground, float radius, Color color, float duration, float strength = 1f)
     {
+        strength *= GameSettings.FlashScale;   // 설정 '번쩍임 줄이기' (2026-11-26)
         FxGlowSettings s = FxGlow.Settings;
         if (s == null || s.groundMaterial == null || s.groundStrength <= 0f || radius <= 0.01f || strength <= 0f) return;
 
@@ -275,6 +276,7 @@ public class FlashLight : MonoBehaviour
     /// <summary>at(바닥 자리) 위 1.2m 에 조명을 켠다. strength 는 이 조명만의 세기 (설정의 lightIntensity 에 곱한다).</summary>
     public static void Flash(Vector3 at, Color color, float range, float duration = 0.15f, float strength = 1f)
     {
+        strength *= GameSettings.FlashScale;   // 설정 '번쩍임 줄이기' (2026-11-26) — 폭발 · 낙뢰의 순간 조명
         FxGlowSettings s = FxGlow.Settings;
         if (s == null || s.maxLights <= 0 || s.lightIntensity <= 0f || range <= 0.1f || strength <= 0f) return;
 

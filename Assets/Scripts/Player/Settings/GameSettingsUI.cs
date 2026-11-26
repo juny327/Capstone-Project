@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 /// <summary>
-/// 설정창 — 전체 · 배경음 · 효과음 음량.
+/// 설정창 — 왼쪽: 전체 · 배경음 · 효과음 음량 · 화면 흔들림, 오른쪽: 카메라 거리 · 번쩍임 줄이기 · 피해 숫자 · 피격 화면 효과 · 그래픽 품질 · FPS 표시 (2026-11-26 두 칸으로).
 ///
 ///  · 로비: 오른쪽 위 "설정" 버튼 · ESC
 ///  · 게임 중(스테이지 · 테스트 룸): ESC. 여는 동안 게임을 멈추고 닫으면 다시 흐른다 — 제목이 "일시정지" 로 바뀐다
@@ -43,6 +43,14 @@ public class GameSettingsUI : MonoBehaviour
     [SerializeField] private TMP_Text graphicsValue;
     [SerializeField] private Button fpsButton;
     [SerializeField] private TMP_Text fpsValue;
+
+    // 접근성 (2026-11-26) — 카메라 거리(가까이 → 보통 → 멀리) · 번쩍임 줄이기 · 피해 숫자. 예전 프리팹에는 없을 수 있다 (없으면 그 줄만 빠진다)
+    [SerializeField] private Button cameraButton;
+    [SerializeField] private TMP_Text cameraValue;
+    [SerializeField] private Button flashButton;
+    [SerializeField] private TMP_Text flashValue;
+    [SerializeField] private Button damageNumbersButton;
+    [SerializeField] private TMP_Text damageNumbersValue;
 
     [SerializeField] private Button closeButton;
     [SerializeField] private Button resetButton;
@@ -99,6 +107,9 @@ public class GameSettingsUI : MonoBehaviour
         if (hurtFxButton != null) hurtFxButton.onClick.AddListener(() => { GameSettings.SetHurtFx(!GameSettings.HurtFx); ShowValues(); });
         if (graphicsButton != null) graphicsButton.onClick.AddListener(() => { GameSettings.SetGraphics((GraphicsLevel)(((int)GameSettings.Graphics + 1) % 3)); ShowValues(); });
         if (fpsButton != null) fpsButton.onClick.AddListener(() => { GameSettings.SetShowFps(!GameSettings.ShowFps); ShowValues(); });
+        if (cameraButton != null) cameraButton.onClick.AddListener(() => { GameSettings.SetCameraDistance((GameSettings.CameraDistance + 1) % CameraDistance.Count); ShowValues(); });
+        if (flashButton != null) flashButton.onClick.AddListener(() => { GameSettings.SetReduceFlash(!GameSettings.ReduceFlash); ShowValues(); });
+        if (damageNumbersButton != null) damageNumbersButton.onClick.AddListener(() => { GameSettings.SetDamageNumbers(!GameSettings.DamageNumbers); ShowValues(); });
 
         closeButton.onClick.AddListener(Close);
         resetButton.onClick.AddListener(() => { GameSettings.ResetToDefaults(); SyncSliders(); });
@@ -229,6 +240,9 @@ public class GameSettingsUI : MonoBehaviour
         if (hurtFxValue != null) hurtFxValue.text = GameSettings.HurtFx ? "켜짐" : "꺼짐";
         if (graphicsValue != null) graphicsValue.text = GraphicsQuality.Name(GameSettings.Graphics);
         if (fpsValue != null) fpsValue.text = GameSettings.ShowFps ? "켜짐" : "꺼짐";
+        if (cameraValue != null) cameraValue.text = CameraDistance.Name(GameSettings.CameraDistance);
+        if (flashValue != null) flashValue.text = GameSettings.ReduceFlash ? "켜짐" : "꺼짐";
+        if (damageNumbersValue != null) damageNumbersValue.text = GameSettings.DamageNumbers ? "켜짐" : "꺼짐";
     }
 
     static string Percent(float v) => $"{Mathf.RoundToInt(v * 100f)}%";

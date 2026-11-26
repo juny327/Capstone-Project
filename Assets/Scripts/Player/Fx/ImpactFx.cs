@@ -342,6 +342,7 @@ public class ImpactHost : MonoBehaviour
     /// <summary>화면 가장자리가 color 로 잠깐 물든다 (세기 0~1).</summary>
     public void Flash(Color color, float strength)
     {
+        strength *= GameSettings.FlashScale;   // 설정 '번쩍임 줄이기' (2026-11-26) — 큰 한 방 · 보스 가장자리 번쩍
         if (strength <= 0f) return;
         if (vignette == null) vignette = MakeVignette();
 
