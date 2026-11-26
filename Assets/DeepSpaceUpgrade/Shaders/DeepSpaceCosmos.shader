@@ -9,10 +9,13 @@ Shader "DeepSpace/Cosmos"
     }
     SubShader
     {
-        Tags { "RenderPipeline"="UniversalPipeline" "RenderType"="Opaque" }
+        // 2026-11-25 — 바닥 위 우주 창 판(ARMOURED VIEWPORT)이 바닥보다 8cm 높아 그 위의 몬스터 돌진 경고 · 블랙홀 장판 · 바닥 효과를 가렸다.
+        // 바닥(Geometry) 다음에 그리고 깊이는 쓰지 않는다 — 판은 그대로 보이고, 위를 걷는 캐릭터는 판 위에, 투명한 경고 · 효과는 판 위에 그려진다
+        Tags { "RenderPipeline"="UniversalPipeline" "RenderType"="Opaque" "Queue"="Geometry+450" }
         Pass
         {
             Cull Off
+            ZWrite Off
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag

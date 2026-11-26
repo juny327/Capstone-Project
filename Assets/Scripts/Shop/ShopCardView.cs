@@ -47,16 +47,18 @@ public class ShopCardView : MonoBehaviour
         if (button != null) button.onClick.AddListener(() => Clicked?.Invoke(this));
     }
 
-    public void Show(ShopOffer offer, bool canBuy, string reason, Sprite currencyIcon)
+    public void Show(ShopOffer offer, bool canBuy, string reason, Sprite currencyIcon, bool canToggleSold = false)
     {
         Offer = offer;
         gameObject.SetActive(true);
+
+        bool togglingSoldOffer = offer.Sold && canToggleSold;
 
         Color kindColor = attachmentTierColor && offer is AttachmentOffer part
             ? AttachmentData.TierColor(part.Attachment.tier)
             : ColorOf(offer.Kind);
         bool unavailable = !canBuy && !offer.Sold;
-        if (frame != null) frame.color = unavailable ? Color.Lerp(kindColor, Color.black, 0.45f) : kindColor;
+        if (frame != null) frame.color = togglingSoldOffer ? Color.white : unavailable ? Color.Lerp(kindColor, Color.black, 0.45f) : kindColor;
 
         if (icon != null)
         {
@@ -82,19 +84,21 @@ public class ShopCardView : MonoBehaviour
             price.color = poor ? unaffordableColor : affordableColor;
         }
 
-        if (soldOverlay != null) soldOverlay.SetActive(offer.Sold);
+        if (soldOverlay != null) soldOverlay.SetActive(offer.Sold && !togglingSoldOffer);
         if (description != null && price != null) UiTextFit.KeepAbove(description, price.rectTransform);   // 설명이 가격 위에서 끝나게
 
         // 구매함은 덮개가 알려 주므로, 그 밖의 이유(슬롯 가득 등)만 글로
-        bool showReason = !canBuy && !offer.Sold && !poor && !string.IsNullOrEmpty(reason);
+        bool showReason = !canBuy && !poor && !string.IsNullOrEmpty(reason)
+            && (!offer.Sold || (offer is WeaponPurchaseOffer || offer is WeaponUpgradeOffer) && !togglingSoldOffer);
         if (stateText != null)
         {
-            stateText.gameObject.SetActive(showReason);
-            if (showReason) stateText.text = reason;
+            stateText.gameObject.SetActive(togglingSoldOffer || showReason);
+            if (togglingSoldOffer) stateText.text = offer is WeaponUpgradeOffer ? "강화됨 · 클릭 취소" : "담김 · 클릭 취소";
+            else if (showReason) stateText.text = reason;
         }
 
-        if (button != null) button.interactable = !offer.Sold;
-        if (group != null) group.alpha = offer.Sold ? 0.18f : unavailable ? 0.6f : 1f;
+        if (button != null) button.interactable = !offer.Sold || togglingSoldOffer;
+        if (group != null) group.alpha = offer.Sold && !togglingSoldOffer ? 0.18f : unavailable ? 0.6f : 1f;
     }
 
     public void Hide()
@@ -104,18 +108,13 @@ public class ShopCardView : MonoBehaviour
     }
 
     /// <summary>
-    /// 가진 무기의 상위 무기 짝이면 금색 테두리 + 꼬리표 글을 "★ 처형자 짝" 으로 (2026-11-17). label 이 null 이면 끈다.
-    /// Show 다음에 부른다 — 꼬리표 글을 덮어쓴다.
+    /// 가진 무기의 상위 무기 짝이면 표시 (2026-11-17). label 이 null 이면 끈다.
+    /// 2026-11-25 사용자: "'~ 짝' 같은 글 없이 간접적으로" → "노란 테두리는 선택칸과 맞지 않는다 — 카드 모양 그대로 + 작은 별":
+    /// 카드 테두리 그림(frame)을 따라 뒤에서 금빛이 번지고, 아이콘 오른쪽 위에 작은 별. 꼬리표 글은 그대로.
     /// </summary>
     public void SetPairMark(string label)
     {
-        PairHighlight.Set((RectTransform)transform, label);
-
-        if (!string.IsNullOrEmpty(label) && tagText != null && Offer != null && !Offer.Sold)
-        {
-            tagText.text = label;
-            tagText.color = PairHighlight.Gold;
-        }
+        PairHighlight.Mark((RectTransform)transform, !string.IsNullOrEmpty(label), frame, icon != null ? icon.rectTransform : null);
     }
 
     /// <summary>대상 고르기 중인 카드 표시 — 테두리를 밝게.</summary>

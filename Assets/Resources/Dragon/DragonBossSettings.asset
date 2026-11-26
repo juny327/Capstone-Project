@@ -63,6 +63,17 @@ MonoBehaviour:
     firePatchLife: 4
     firePatchMax: 8
     newPatterns: 0
+    biteSpeed: 1.5
+    delayedBiteSpeed: 1.17
+    delayedBiteReach: 1.17
+    rainCountScale: 1.5
+    fireRainWeight: {x: 3.5, y: 4.5}
+    fireRainCooldown: 8.75
+    rainPatchDamage: 1
+    rainPatchLife: 2.5
+    tailKnockback: 5.5
+    tailKnockbackTime: 0.35
+    tailChargeWindup: 0.75
     enrageTempo: 1
   hard:
     tempo: 1
@@ -86,4 +97,15 @@ MonoBehaviour:
     firePatchLife: 6
     firePatchMax: 14
     newPatterns: 1
+    biteSpeed: 2
+    delayedBiteSpeed: 1.3333334
+    delayedBiteReach: 1.3333334
+    rainCountScale: 2
+    fireRainWeight: {x: 5, y: 6}
+    fireRainCooldown: 7.5
+    rainPatchDamage: 2
+    rainPatchLife: 3.5
+    tailKnockback: 11
+    tailKnockbackTime: 0.35
+    tailChargeWindup: 0.5
     enrageTempo: 1.1

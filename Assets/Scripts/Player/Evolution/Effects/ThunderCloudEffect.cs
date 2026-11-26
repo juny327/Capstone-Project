@@ -55,7 +55,7 @@ public class ThunderCloudEffect : AttachmentEffect
     [Range(0f, 0.4f)] public float stormFlash = 0.2f;
     [Tooltip("공통 재료 먹구름의 크기 배율 (cloudRadius 에 곱한다 — 모습만, 낙뢰 범위와 무관). 2026-11-20 사용자: \"뇌운이 내리치는구나 느낌이 확 들 정도로\" 크게")]
     [Range(1f, 4f)] public float kitCloudScale = 2.4f;
-    [Tooltip("공통 재료 먹구름의 진하기 (cloudColor 의 알파에 곱한다)")]
+    [Tooltip("공통 재료 먹구름의 진하기 (cloudColor 의 알파에 곱한다). 2026-11-26 사용자: \"살짝만 투명하게 — 캐릭터 · 몬스터를 가린다\" → 에셋 0.8 → 0.5")]
     [Range(0.2f, 1f)] public float kitCloudAlpha = 0.8f;
     [Tooltip("먹구름 아래 바닥이 어두워지는 정도 (0 = 없음)")]
     [Range(0f, 0.8f)] public float kitShade = 0.45f;

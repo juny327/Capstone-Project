@@ -18,5 +18,7 @@ MonoBehaviour:
   maxEnemyCount: 8
   spawnInterval: 2.5
   enemyHealthMultiplier: 2.5
+  enemyDamageMultiplier: 1.7
   spawnDuringBossFight: 1
   enemyRewards: 0
+  maxRangedEnemies: 0

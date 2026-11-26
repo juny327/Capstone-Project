@@ -137,7 +137,7 @@ public class RangedAttack : EnemyAttack
                 var obj = PoolManager.Instance.Get(projectilePrefab);
                 if (obj == null) continue;
                 Vector3 direction = Quaternion.AngleAxis(index * spreadAngle, Vector3.up) * heading;
-                obj.GetComponent<RangedProjectile>().Initialize(muzzle, direction, speed, enemy.data.attackPower, volley);
+                obj.GetComponent<RangedProjectile>().Initialize(muzzle, direction, speed, enemy.AttackPower, volley);
             }
         }
         Finish();

@@ -645,11 +645,11 @@ public static class EconomyShopSetup
             b.slotIcons[s].enabled = false;
 
             Text(cell.transform, "Label", AttachmentData.SlotName((AttachmentSlot)s), font, 14, Muted, TextAlignmentOptions.Center,
-                new Vector2(0.5f, 0), new Vector2(0, -10), new Vector2(60, 18));   // 11-22 12 → 14 (12px 한글은 뭉개졌다)
+                new Vector2(0.5f, 0), new Vector2(0, -9), new Vector2(60, 18));   // 11-22 12 → 14 (12px 한글은 뭉개졌다) · 11-25 -10 → -9 (아래 '부착물 없음' 줄과 겹쳤다)
         }
 
         b.parts = Text(root.transform, "Parts", "부착물 없음", font, 15, Muted, TextAlignmentOptions.Left,
-            new Vector2(0, 0), new Vector2(12 + 190, 12), new Vector2(380, 20));
+            new Vector2(0, 0), new Vector2(12 + 190, 7), new Vector2(380, 20));   // 11-25 12 → 7 — 칸 이름표(14px)와 겹쳤다
 
         return b;
     }

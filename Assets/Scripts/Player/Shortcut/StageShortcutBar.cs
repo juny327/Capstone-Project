@@ -6,7 +6,7 @@ using UnityEngine.UI;
 /// <summary>
 /// 로비 '바로 가기' 칸 (2026-11-25) — GAME START 오른쪽에 [스테이지 2 | 스테이지 3 | 보스전].
 /// 누르면 고른 주무기 · 캐릭터 · 난이도로 그 스테이지에 들어가 출전 준비 창(StageShortcutPrep)부터 연다.
-/// 버튼 아래 줄에 받을 골드 · 경험치(봇 판 기준, StageShortcutSettings)를 적는다 — 캐릭터 · 난이도를 바꾸면 같이 바뀐다.
+/// 버튼 아래 줄에 받을 크레딧 · 경험치(봇 판 기준, StageShortcutSettings)를 적는다 — 캐릭터 · 난이도를 바꾸면 같이 바뀐다.
 ///
 /// 씬 파일은 고치지 않는다 — 로비가 열릴 때 GAME START 버튼(LobyManager.StartGame)을 찾아 그 옆에 만든다 (난이도 칸과 같은 방식).
 /// </summary>
@@ -108,7 +108,7 @@ public class StageShortcutBar : MonoBehaviour
         for (int i = 0; i < Stages.Length; i++)
         {
             StageShortcutSettings.Entry e = StageShortcut.BudgetFor(Stages[i]);
-            budgetLines[i].text = $"<color=#FFD461>골드 {e.gold}</color> · <color=#76E0FF>경험치 {e.exp}</color>";
+            budgetLines[i].text = $"<color=#FFD461>크레딧 {e.gold}</color> · <color=#76E0FF>경험치 {e.exp}</color>";
         }
     }
 
@@ -134,7 +134,7 @@ public class StageShortcutBar : MonoBehaviour
 
         (TMP_FontAsset font, Material material) = PickFont();
 
-        Text("Header", "바로 가기 — 골드 · 경험치를 받고 준비한 뒤 들어간다", font, material, 19f, Muted, TextAlignmentOptions.BottomLeft,
+        Text("Header", "바로 가기 — 크레딧 · 경험치를 받고 준비한 뒤 들어간다", font, material, 19f, Muted, TextAlignmentOptions.BottomLeft,
              new Vector2(0f, 1f), new Vector2(0f, 0f), new Vector2(width, HeaderH), transform, new Vector2(0f, 1f));
 
         budgetLines = new TMP_Text[Stages.Length];
@@ -175,7 +175,11 @@ public class StageShortcutBar : MonoBehaviour
             Text("Label", StageShortcut.NameOf(stage), font, material, 27f, TextMain, TextAlignmentOptions.Center,
                  new Vector2(0.5f, 1f), new Vector2(0f, -6f), new Vector2(ButtonW, 32f), frameGo.transform, new Vector2(0.5f, 1f));
             budgetLines[i] = Text("Budget", "", font, material, 16f, Muted, TextAlignmentOptions.Center,
-                                  new Vector2(0.5f, 0f), new Vector2(0f, 7f), new Vector2(ButtonW, 22f), frameGo.transform, new Vector2(0.5f, 0f));
+                                  new Vector2(0.5f, 0f), new Vector2(0f, 7f), new Vector2(ButtonW - 12f, 22f), frameGo.transform, new Vector2(0.5f, 0f));
+            // 2026-11-26 '골드' → '크레딧' 으로 한 글자 길어져 보스전 단추(크레딧 330 · 경험치 553)가 테두리를 넘었다 — 단추 안쪽 넓이에 맞춰 줄인다
+            budgetLines[i].enableAutoSizing = true;
+            budgetLines[i].fontSizeMax = 16f;
+            budgetLines[i].fontSizeMin = 11f;
         }
     }
 

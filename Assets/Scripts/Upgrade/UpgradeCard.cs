@@ -117,13 +117,10 @@ public class UpgradeCard : MonoBehaviour
     /// </summary>
     public void ShowPairMark(string label)
     {
-        // 꼬리표는 위쪽 '스킬 강화' 탭 자리 — 탭은 몸통 위 가장자리보다 조금 아래(몸통 높이의 2.6%)가 가운데, 너비 58%
-        PairHighlight.Set((RectTransform)transform, label, true, title, 0.58f, CardArtInsets, 0.026f);
+        // 2026-11-25 사용자: "'~ 짝' 글 없이" → "노란 테두리가 카드 모양과 맞지 않는다 — 카드 모양 그대로 + 작은 별":
+        // 카드 그림(가장 큰 그림 — 깎인 모서리 · 위 탭)을 따라 뒤에서 금빛이 번지고, 스킬 아이콘 오른쪽 위에 작은 별
+        PairHighlight.Mark((RectTransform)transform, !string.IsNullOrEmpty(label), null, icon != null ? icon.rectTransform : null);
     }
-
-    // 카드 그림(Space_Exploration_GUI_Kit/Containers/Small/UpgradeCard.png)의 투명한 여백 — 왼쪽 · 위(탭 아래 몸통) · 오른쪽 · 아래.
-    // 그림을 바꾸면 이 값도 다시 잰다 (알파 40 넘는 칸이 줄의 70% 이상인 곳)
-    static readonly Vector4 CardArtInsets = new Vector4(0.058f, 0.103f, 0.052f, 0.026f);
 
     /// <summary>최대 레벨 — 더 살 수 없다 (2026-11-04).</summary>
     public void ShowMaxed()

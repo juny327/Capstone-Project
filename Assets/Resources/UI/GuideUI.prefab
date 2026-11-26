@@ -26515,10 +26515,11 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "<nobr>4\uCD08\uB9C8\uB2E4</nobr> <nobr>\uC804\uACA9</nobr> <nobr>\uACF5\uACA9\uC744</nobr>
-    <nobr>\uD558\uC5EC</nobr> \uC801 <nobr>1\uBA85\uC744</nobr> <nobr>2\uCD08\uAC04</nobr>
-    <nobr>\uACBD\uC9C1\uC2DC\uD0A8\uB2E4</nobr>\n<nobr>\uB808\uBCA8\uB9C8\uB2E4</nobr>
-    <nobr>\uACBD\uC9C1</nobr> <nobr>+1\uCD08</nobr>"
+  m_text: "<nobr>4\uCD08\uB9C8\uB2E4</nobr> <nobr>\uC804\uACA9\uC774</nobr> <nobr>\uD3ED\uBC1C\uD574</nobr>
+    <nobr>\uC8FC\uBCC0</nobr> <nobr>\uC801\uC744</nobr> <nobr>\uACF5\uACA9\uD558\uACE0</nobr>
+    <nobr>\uAC10\uC804\uC2DC\uD0A8\uB2E4.</nobr> <nobr>\uB808\uBCA8\uB9C8\uB2E4</nobr>
+    <nobr>\uBC94\uC704\uC640</nobr> <nobr>\uD0C0\uACA9</nobr> <nobr>\uC218\uAC00</nobr>
+    <nobr>\uC99D\uAC00\uD55C\uB2E4.</nobr>"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: b142b49dad0aa7747857b5917f44e1e7, type: 2}
   m_sharedMaterial: {fileID: 2100000, guid: 729cd5341613c634f935c898adc51dbc, type: 2}

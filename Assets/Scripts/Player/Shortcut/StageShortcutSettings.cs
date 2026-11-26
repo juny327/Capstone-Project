@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 
 /// <summary>
-/// 스테이지 바로 가기 값 (2026-11-25) — 들어갈 스테이지마다 쥐여 줄 골드 · 경험치.
+/// 스테이지 바로 가기 값 (2026-11-25) — 들어갈 스테이지마다 쥐여 줄 크레딧 · 경험치.
 ///
 /// 값은 봇 판(Logs/evo_resume/kept_BalanceRun)이 그 스테이지 직전 정비까지 모은 양이다 —
 /// 스테이지 2 = 스테이지 1 클리어 정비, 스테이지 3 = 스테이지 2 클리어 정비, 보스전 = 스테이지 3 클리어 정비 때의 누적 수입 · 누적 경험치.
@@ -23,7 +23,7 @@ public class StageShortcutSettings : ScriptableObject
         [Tooltip("들어갈 스테이지 — 2 · 3 · 4(보스전)")]
         [Range(2, 4)] public int stage;
 
-        [Tooltip("쥐여 줄 골드 (봇 판의 그때까지 누적 수입)")]
+        [Tooltip("쥐여 줄 크레딧 (봇 판의 그때까지 누적 수입)")]
         [Min(0)] public int gold;
 
         [Tooltip("쥐여 줄 경험치 (봇 판의 그때까지 누적 경험치) — 레벨도 이 값으로 정해진다")]

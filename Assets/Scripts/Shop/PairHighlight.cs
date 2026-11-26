@@ -3,156 +3,198 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// 카드 테두리 강조 — "지금 가진 무기의 상위 무기 짝"인 카드에 금색 테두리 (2026-11-17 밸런스 결정 6).
-/// 정비 창 상품 카드(ShopCardView)와 레벨업 카드(UpgradeCard)가 같이 쓴다.
+/// 카드 강조 — "지금 가진 무기의 상위 무기 짝"인 카드 · 줄 (2026-11-17 밸런스 결정 6).
+/// 정비 창 상품 카드(ShopCardView) · 레벨업 카드(UpgradeCard) · 출전 준비 창 줄(StageShortcutPrep)이 같이 쓴다.
 ///
-/// 카드 안쪽 가장자리를 따라 금색 띠 네 개를 그리고 천천히 밝아졌다 어두워진다 (게임이 멈춘 창에서도 — unscaled 시간).
-/// 꼬리표(badge)는 넣을 글이 있을 때만 카드 위쪽 안에 작게. 크기는 카드 너비에 비례해서 정비 창 카드(230)와
-/// 레벨업 카드(작은 단위로 그려 크게 늘린 것) 모두 같은 비율로 보인다. 클릭은 막지 않는다.
-/// 씬 · 프리팹을 고치지 않고 처음 쓸 때 카드 아래에 스스로 만든다.
+/// 2026-11-25 사용자 — ① "'~ 짝' 글보다 노란 테두리만" → ② "노란 테두리가 선택칸과 맞지 않아 부자연스럽다" → "카드 모양 그대로 + 작은 별":
+///  · 카드 그림 모양 그대로 뒤에서 금빛이 번진다 (PairGlow — 카드 그림을 복사해 금색 · 사방으로 겹쳐 그림)
+///  · 아이콘 오른쪽 위에 작은 금색 별 (그림으로 그린다 — 글꼴마다 ★ 글자가 없을 수 있다)
+///  · 글자는 붙이지 않는다. 함께 천천히 밝아졌다 어두워진다 (창이 멈춘 동안에도)
+/// 씬 · 프리팹을 고치지 않고 처음 쓸 때 스스로 만든다. 클릭은 막지 않는다.
 /// </summary>
 public class PairHighlight : MonoBehaviour
 {
     public static readonly Color Gold = new Color(1f, 0.80f, 0.25f, 1f);
-
     const string ChildName = "PairHighlight";
 
-    Image[] edges;
-    Image badge;
-    TMP_Text badgeText;
-    float badgeWidth = 0.8f;
-    float badgeDrop;
+    PairGlow glow;
+    RectTransform star;
 
-    /// <summary>
-    /// label 이 null 이면 강조를 끈다. badge = 위쪽 가장자리 가운데에 꼬리표를 그릴지, fontSource = 꼬리표 글꼴을 빌릴 글 (한글 글꼴),
-    /// badgeWidth = 꼬리표 너비 (테두리 너비에 대한 비율), insets = 카드 칸 안쪽으로 들일 비율 (왼쪽, 위, 오른쪽, 아래) —
-    /// 카드 그림에 투명한 여백이 있으면 그만큼 들여 그림 가장자리에 맞춘다. badgeDrop = 꼬리표를 위 가장자리에서 내릴 비율 (테두리 높이 기준).
-    /// </summary>
+    /// <summary>예전 꼴 (label 이 비면 끈다) — 실루엣 · 아이콘을 스스로 찾는다.</summary>
     public static void Set(RectTransform card, string label, bool badge = false, TMP_Text fontSource = null, float badgeWidth = 0.8f,
                            Vector4 insets = default, float badgeDrop = 0f)
     {
-        if (card == null) return;
+        Mark(card, !string.IsNullOrEmpty(label));
+    }
 
+    /// <summary>
+    /// 짝 표시를 켜고 끈다. silhouette = 금빛이 따라갈 카드 그림 (비우면 카드에서 가장 큰 그림), icon = 별을 붙일 아이콘 (비우면 카드 오른쪽 위).
+    /// </summary>
+    public static void Mark(RectTransform card, bool on, Graphic silhouette = null, RectTransform icon = null)
+    {
+        if (card == null) return;
         Transform found = card.Find(ChildName);
         PairHighlight h = found != null ? found.GetComponent<PairHighlight>() : null;
 
-        if (string.IsNullOrEmpty(label))
+        if (!on)
         {
-            if (h != null) h.gameObject.SetActive(false);
+            if (h != null) h.Show(false);
             return;
         }
 
-        if (h == null) h = Create(card, fontSource);
+        if (h == null)
+        {
+            var go = new GameObject(ChildName, typeof(RectTransform));
+            go.transform.SetParent(card, false);
+            h = go.AddComponent<PairHighlight>();
+        }
 
-        h.transform.SetAsLastSibling();   // 카드 내용 위에
-        h.gameObject.SetActive(true);
-        h.badgeWidth = badgeWidth;
-        h.badgeDrop = badgeDrop;
-
-        Vector2 size = card.rect.size;
-        var rt = (RectTransform)h.transform;
-        rt.offsetMin = new Vector2(insets.x * size.x, insets.w * size.y);
-        rt.offsetMax = new Vector2(-insets.z * size.x, -insets.y * size.y);
-        h.Layout(new Vector2(size.x * (1f - insets.x - insets.z), size.y * (1f - insets.y - insets.w)));
-
-        bool showBadge = badge && h.badgeText != null;
-        if (h.badge != null) h.badge.gameObject.SetActive(showBadge);
-        if (showBadge) h.badgeText.text = label;
+        if (h.glow == null)
+        {
+            Graphic shape = silhouette != null ? silhouette : FindSilhouette(card, icon);
+            h.glow = PairGlow.Create(shape);
+        }
+        if (h.star == null) h.star = MakeStar(icon != null ? icon : card, icon == null);
+        if (h.glow != null) h.glow.Star = h.star;
+        h.Show(true);
     }
 
-    static PairHighlight Create(RectTransform card, TMP_Text fontSource)
+    void Show(bool on)
     {
-        var go = new GameObject(ChildName, typeof(RectTransform));
-        go.transform.SetParent(card, false);
+        if (glow != null) glow.Show(on);
+        if (star != null) star.gameObject.SetActive(on);
+    }
+
+    void OnDestroy()
+    {
+        if (glow != null) Destroy(glow.gameObject);
+    }
+
+    /// <summary>카드에서 가장 큰 그림 (아이콘 · 금빛 자신 빼고) — 레벨업 카드의 카드 그림. 없으면 카드 자신의 그림.</summary>
+    static Graphic FindSilhouette(RectTransform card, RectTransform icon)
+    {
+        Graphic best = card.GetComponent<Graphic>();
+        float bestArea = best != null ? Area(best.rectTransform) : 0f;
+        foreach (Image img in card.GetComponentsInChildren<Image>(true))
+        {
+            if (img == null || img.sprite == null || img.GetComponent<PairGlow>() != null) continue;
+            if (icon != null && (img.transform == icon || img.transform.IsChildOf(icon))) continue;
+            float area = Area(img.rectTransform);
+            if (area > bestArea * 1.001f) { best = img; bestArea = area; }
+        }
+        return best;
+    }
+
+    static float Area(RectTransform rt)
+    {
+        Vector3 s = rt.lossyScale;
+        return Mathf.Abs(rt.rect.width * s.x * rt.rect.height * s.y);
+    }
+
+    // ───────── 별 ─────────
+
+    static Sprite starSprite;
+
+    /// <summary>아이콘(또는 카드) 오른쪽 위 모서리에 작은 금색 별.</summary>
+    static RectTransform MakeStar(RectTransform host, bool insideCard)
+    {
+        var go = new GameObject(insideCard ? CardStarName : StarName, typeof(RectTransform), typeof(Image), typeof(LayoutElement));
+        go.transform.SetParent(host, false);
+        go.GetComponent<LayoutElement>().ignoreLayout = true;
         var rt = (RectTransform)go.transform;
-        rt.anchorMin = Vector2.zero;
-        rt.anchorMax = Vector2.one;
-        rt.offsetMin = rt.offsetMax = Vector2.zero;
-
-        var h = go.AddComponent<PairHighlight>();
-        h.edges = new Image[4];
-        for (int i = 0; i < 4; i++)
-            h.edges[i] = NewImage(go.transform, $"Edge{i}");
-
-        if (fontSource != null && fontSource.font != null)
-        {
-            h.badge = NewImage(go.transform, "Badge");
-            var textGo = new GameObject("Text", typeof(RectTransform));
-            textGo.transform.SetParent(h.badge.transform, false);
-            var trt = (RectTransform)textGo.transform;
-            trt.anchorMin = Vector2.zero;
-            trt.anchorMax = Vector2.one;
-            trt.offsetMin = trt.offsetMax = Vector2.zero;
-
-            var text = textGo.AddComponent<TextMeshProUGUI>();
-            text.font = fontSource.font;
-            if (fontSource.fontSharedMaterial != null) text.fontSharedMaterial = fontSource.fontSharedMaterial;
-            text.alignment = TextAlignmentOptions.Center;
-            text.color = new Color(0.12f, 0.08f, 0.02f, 1f);
-            text.fontStyle = FontStyles.Bold;
-            text.textWrappingMode = TextWrappingModes.NoWrap;
-            text.overflowMode = TextOverflowModes.Ellipsis;
-            text.enableAutoSizing = true;   // 꼬리표 너비에 맞춰 줄인다
-            text.fontSizeMin = 0.1f;
-            text.raycastTarget = false;
-            h.badgeText = text;
-        }
-
-        return h;
-    }
-
-    static Image NewImage(Transform parent, string name)
-    {
-        var go = new GameObject(name, typeof(RectTransform), typeof(Image));
-        go.transform.SetParent(parent, false);
+        rt.anchorMin = rt.anchorMax = new Vector2(1f, 1f);
+        rt.pivot = new Vector2(0.5f, 0.5f);
+        FitStar(rt);
         var image = go.GetComponent<Image>();
-        image.color = Gold;
+        image.sprite = StarSprite;
         image.raycastTarget = false;
-        return image;
+        image.preserveAspect = true;
+        go.transform.SetAsLastSibling();
+        return rt;
     }
 
-    /// <summary>카드 크기에 맞춰 띠 굵기 · 꼬리표 크기를 정한다 (카드 너비 230 기준 띠 8 · 꼬리표 높이 30).</summary>
-    void Layout(Vector2 size)
+    const string StarName = "PairStar", CardStarName = "PairStarCard";
+
+    /// <summary>
+    /// 별 크기 · 자리 — 화면에 보이는 크기로 (캔버스 기준 14 ~ 34, 아이콘 칸의 30% · 카드 위라면 짧은 변의 12%).
+    /// 레벨업 카드는 작은 단위로 그려 크게 늘리고 열릴 때 크기 애니메이션도 있어서, 칸 크기로 한 번만 정하면 별이 탭을 가릴 만큼 컸다 → 매 프레임 (PairGlow).
+    /// </summary>
+    public static void FitStar(RectTransform star)
     {
-        float w = Mathf.Max(1f, size.x);
-        float t = w * 0.035f;
+        if (star == null || !(star.parent is RectTransform host)) return;
+        bool insideCard = star.name == CardStarName;
+        Canvas canvas = host.GetComponentInParent<Canvas>();
+        float canvasScale = canvas != null ? Mathf.Max(0.0001f, Mathf.Abs(canvas.rootCanvas.transform.lossyScale.x)) : 1f;
+        float hostScale = Mathf.Max(0.0001f, Mathf.Abs(host.lossyScale.x)) / canvasScale;   // 아이콘 1단위 = 캔버스 몇 단위
+        if (hostScale < 0.05f) return;   // 열리는 중 (거의 0 크기)
+        Rect r = host.rect;
+        float shown = Mathf.Min(Mathf.Abs(r.width), Mathf.Abs(r.height)) * hostScale;
+        float want = Mathf.Clamp(shown * (insideCard ? 0.12f : 0.3f), 14f, 34f);
+        float size = want / hostScale;
+        star.sizeDelta = new Vector2(size, size);
+        star.anchoredPosition = insideCard ? new Vector2(-size * 0.9f, -size * 0.9f) : new Vector2(-size * 0.3f, -size * 0.35f);
+        star.localEulerAngles = new Vector3(0f, 0f, -host.localEulerAngles.z);   // 눕힌 아이콘(근접)이어도 별은 바로 서게
+    }
 
-        // 위 · 아래 · 왼쪽 · 오른쪽 — 카드 안쪽 가장자리를 따라
-        Place(edges[0], new Vector2(0, 1), new Vector2(1, 1), new Vector2(0, -t), Vector2.zero);
-        Place(edges[1], new Vector2(0, 0), new Vector2(1, 0), Vector2.zero, new Vector2(0, t));
-        Place(edges[2], new Vector2(0, 0), new Vector2(0, 1), Vector2.zero, new Vector2(t, 0));
-        Place(edges[3], new Vector2(1, 0), new Vector2(1, 1), new Vector2(-t, 0), Vector2.zero);
-
-        if (badge != null)
+    /// <summary>금색 다섯 꼭짓점 별 + 짙은 갈색 테두리 (한 번 만들어 둔다).</summary>
+    static Sprite StarSprite
+    {
+        get
         {
-            var rt = badge.rectTransform;
-            rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 1f);
-            rt.pivot = new Vector2(0.5f, 0.5f);   // 위쪽 가장자리에 걸치게
-            // 높이는 카드 높이에 비례 — 레벨업 카드는 가로로 더 늘려 그려서(비율이 다른 크기) 너비로 잡으면 탭을 다 못 덮는다
-            float bh = Mathf.Max(1f, size.y) * 0.11f;
-            rt.sizeDelta = new Vector2(w * badgeWidth, bh);
-            rt.anchoredPosition = new Vector2(0f, -badgeDrop * size.y);
-            badgeText.fontSizeMax = bh * 0.62f;
-            badgeText.margin = new Vector4(bh * 0.2f, 0f, bh * 0.2f, 0f);
+            if (starSprite != null) return starSprite;
+            const int N = 64;
+            var tex = new Texture2D(N, N, TextureFormat.RGBA32, false) { name = "PairStar", wrapMode = TextureWrapMode.Clamp, filterMode = FilterMode.Bilinear };
+            var pts = new Vector2[10];
+            for (int i = 0; i < 10; i++)
+            {
+                float a = Mathf.PI * 0.5f + i * Mathf.PI / 5f;
+                float rad = i % 2 == 0 ? 0.47f : 0.2f;
+                pts[i] = new Vector2(0.5f + Mathf.Cos(a) * rad, 0.47f + Mathf.Sin(a) * rad);
+            }
+            var fill = new Color(1f, 0.84f, 0.3f, 1f);
+            var edge = new Color(0.35f, 0.18f, 0.02f, 1f);
+            var px = new Color[N * N];
+            for (int y = 0; y < N; y++)
+                for (int x = 0; x < N; x++)
+                {
+                    // 4 × 4 표본으로 가장자리를 부드럽게
+                    float inFill = 0f, inEdge = 0f;
+                    for (int sy = 0; sy < 4; sy++)
+                        for (int sx = 0; sx < 4; sx++)
+                        {
+                            var p = new Vector2((x + (sx + 0.5f) / 4f) / N, (y + (sy + 0.5f) / 4f) / N);
+                            float d = SignedDistance(p, pts);
+                            if (d < -0.035f) inFill += 1f;
+                            else if (d < 0.02f) inEdge += 1f;
+                        }
+                    inFill /= 16f;
+                    inEdge /= 16f;
+                    float alpha = inFill + inEdge;
+                    Color c = alpha > 0f ? Color.Lerp(edge, fill, inFill / Mathf.Max(0.0001f, alpha)) : Color.clear;
+                    c.a = alpha;
+                    px[y * N + x] = c;
+                }
+            tex.SetPixels(px);
+            tex.Apply(false, true);
+            starSprite = Sprite.Create(tex, new Rect(0, 0, N, N), new Vector2(0.5f, 0.5f), 100f);
+            starSprite.name = "PairStar";
+            return starSprite;
         }
     }
 
-    static void Place(Image image, Vector2 anchorMin, Vector2 anchorMax, Vector2 offsetMin, Vector2 offsetMax)
+    /// <summary>다각형까지의 거리 (안쪽 음수).</summary>
+    static float SignedDistance(Vector2 p, Vector2[] poly)
     {
-        var rt = image.rectTransform;
-        rt.anchorMin = anchorMin;
-        rt.anchorMax = anchorMax;
-        rt.offsetMin = offsetMin;
-        rt.offsetMax = offsetMax;
-    }
-
-    void Update()
-    {
-        // 숨 쉬듯 — 0.4 ~ 1 (정비 · 레벨업 창은 시간이 멈춰 있으므로 unscaled). 노란 등급 테두리와 구별되게 크게 깜빡인다
-        float a = 0.4f + 0.6f * (0.5f + 0.5f * Mathf.Sin(Time.unscaledTime * 4f));
-        Color c = new Color(Gold.r, Gold.g, Gold.b, a);
-        if (edges != null)
-            foreach (Image e in edges)
-                if (e != null) e.color = c;
+        float best = float.MaxValue;
+        bool inside = false;
+        for (int i = 0, j = poly.Length - 1; i < poly.Length; j = i++)
+        {
+            Vector2 a = poly[j], b = poly[i];
+            Vector2 ab = b - a;
+            float t = Mathf.Clamp01(Vector2.Dot(p - a, ab) / ab.sqrMagnitude);
+            best = Mathf.Min(best, (p - (a + ab * t)).magnitude);
+            if ((b.y > p.y) != (a.y > p.y) && p.x < (a.x - b.x) * (p.y - b.y) / (a.y - b.y) + b.x) inside = !inside;
+        }
+        return inside ? -best : best;
     }
 }

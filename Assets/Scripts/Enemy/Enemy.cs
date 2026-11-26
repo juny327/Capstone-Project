@@ -71,9 +71,44 @@ public class Enemy : MonoBehaviour, IDamageable, IPoolable
     // The imported low-poly clips contain a scale curve on Bip01 that resets
     // the rig to 1 during playback. Re-apply the import scale after Animator
     // evaluation so attack/idle animations cannot make A/B huge again.
+    //
+    // 2026-11-26 최적화 — 예전엔 여기서 매 프레임 ApplyImportedEnemyVisualScale 전체를 돌렸다: 이름 문자열을 여러 번 새로 만들고
+    // (Object.name 은 부를 때마다 새 문자열 — A · B 가 아닌 몬스터도 두 번), 자식마다 GetComponentInChildren, 캡슐 충돌체 크기를 다시 넣었다.
+    // 적 30 ~ 37마리에서 프레임마다 생기는 메모리 할당의 91% (36 ~ 42KB) · 스크립트 처리 시간 1위였다.
+    // 측정(kept_EnemyScaleProbe, 11만 표본): 애니메이션이 끝난 뒤 뿌리 크기 · Bip01 · 자식 · Canvas · 충돌체가 어긋난 프레임은 0 이었다.
+    // → 전체 맞춤은 Awake · OnSpawn 에서, 매 프레임엔 뿌리 크기와 Bip01 만 보고 어긋났을 때만 전체를 다시 맞춘다 (위 지킴은 그대로).
     void LateUpdate()
     {
-        ApplyImportedEnemyVisualScale();
+        if (Rig == ImportedRig.None) return;
+        if (ImportedScaleDrifted()) ApplyImportedEnemyVisualScale();
+    }
+
+    enum ImportedRig : byte { Unknown, None, MonsterA, MonsterB }
+    ImportedRig importedRig;
+    Transform importedBip01;
+    const float ImportedRootScale = 0.1f;
+
+    /// <summary>몬스터 A · B (가져온 저폴리 리그) 인가 — 이름은 처음 한 번만 본다.</summary>
+    ImportedRig Rig
+    {
+        get
+        {
+            if (importedRig == ImportedRig.Unknown)
+            {
+                string n = name;
+                importedRig = n.StartsWith("MonsterA", StringComparison.Ordinal) ? ImportedRig.MonsterA
+                    : n.StartsWith("MonsterB", StringComparison.Ordinal) ? ImportedRig.MonsterB
+                    : ImportedRig.None;
+            }
+            return importedRig;
+        }
+    }
+
+    /// <summary>뿌리 크기가 0.1 이 아니거나 Bip01 이 다시 커졌나 (애니메이션 · 풀 재사용 등) — 할당 없이 값만 본다.</summary>
+    bool ImportedScaleDrifted()
+    {
+        if (transform.localScale != new Vector3(ImportedRootScale, ImportedRootScale, ImportedRootScale)) return true;
+        return importedBip01 != null && (importedBip01.localScale != Vector3.one || importedBip01.localPosition.sqrMagnitude > 4f);
     }
 
 
@@ -136,8 +171,16 @@ public class Enemy : MonoBehaviour, IDamageable, IPoolable
         currentHp = MaxHp;
     }
 
+    // 2026-11-25 — 스테이지별 몬스터 피해 배율 (나올 때의 스테이지 값). 공격 · 탄이 모두 AttackPower 를 쓴다
+    float damageMultiplier = 1f;
+
+    /// <summary>이 몬스터의 공격력 — 몬스터 데이터 × 스테이지 피해 배율 (StageData.enemyDamageMultiplier). 난이도 배율은 PlayerStats 가 따로 곱한다.</summary>
+    public float AttackPower => data != null ? data.attackPower * damageMultiplier : 0f;
+
     public void OnSpawn()
     {
+        damageMultiplier = EnemyManager.Instance != null ? EnemyManager.Instance.damageMultiplier : 1f;
+
         RestoreBodyColliders();   // 지난번에 쓰러지며 끈 충돌체를 다시 (2026-11-23)
 
         float multiplier = EnemyManager.Instance != null ? EnemyManager.Instance.healthMultiplier : 1f;
@@ -158,25 +201,23 @@ public class Enemy : MonoBehaviour, IDamageable, IPoolable
     // retain an old root scale or an unscaled imported visual.
     void ApplyImportedEnemyVisualScale()
     {
-        if (!name.StartsWith("MonsterA", StringComparison.Ordinal) &&
-            !name.StartsWith("MonsterB", StringComparison.Ordinal))
+        ImportedRig rig = Rig;   // 2026-11-26 — 이름 판별은 한 번만 (예전엔 여기서 이름 문자열을 다섯 번 만들었다)
+        if (rig == ImportedRig.None)
             return;
+        bool isA = rig == ImportedRig.MonsterA;
 
         // Put the reduction on the root. The imported clips animate Bip01's
         // local scale back to 1, so reducing only child meshes is not stable.
-        const float importedRootScale = 0.1f;
-        transform.localScale = Vector3.one * importedRootScale;
+        transform.localScale = Vector3.one * ImportedRootScale;
 
         var capsule = GetComponent<CapsuleCollider>();
         if (capsule != null)
         {
             // Keep the collider's world size unchanged after shrinking the
             // root transform. These are the original prefab values x10.
-            capsule.radius = name.StartsWith("MonsterA", StringComparison.Ordinal)
-                ? 3.6779785f : 3.9538574f;
-            capsule.height = name.StartsWith("MonsterA", StringComparison.Ordinal)
-                ? 15.819435f : 16.207235f;
-            capsule.center = name.StartsWith("MonsterA", StringComparison.Ordinal)
+            capsule.radius = isA ? 3.6779785f : 3.9538574f;
+            capsule.height = isA ? 15.819435f : 16.207235f;
+            capsule.center = isA
                 ? new Vector3(-0.030517578f, 7.8513927f, 0f)
                 : new Vector3(-0.040283203f, 7.8875935f, 0f);
         }
@@ -203,6 +244,7 @@ public class Enemy : MonoBehaviour, IDamageable, IPoolable
                 continue;
             }
 
+            if (child.name == "Bip01") importedBip01 = child;   // 매 프레임 확인용 (ImportedScaleDrifted)
             if (child.name == "Bip01" || child.name.StartsWith("Mesh_", StringComparison.Ordinal) ||
                 child.GetComponentInChildren<Renderer>(true) != null)
             {

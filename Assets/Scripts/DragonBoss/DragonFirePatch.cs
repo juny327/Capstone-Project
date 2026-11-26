@@ -3,22 +3,23 @@ using UnityEngine;
 
 /// <summary>
 /// 드래곤 보스 불 장판 (3페이즈, 2026-11-14) — 브레스 · 돌진이 지나간 자리에 몇 초 남아, 안에 서 있으면 주기적으로 피해를 준다.
-/// 싸울 자리를 좁히는 것이 목적이라 피해는 작다. 바닥 원(예고 재질 · 주황)과 불꽃 파티클로 보인다.
+/// 싸울 자리를 좁히는 것이 목적이라 피해는 작다. 어두운 적색 코어 · 맥동하는 붉은 테두리 · 불꽃과 불티로 보인다.
 /// </summary>
 public class DragonFirePatch : MonoBehaviour
 {
     static readonly List<DragonFirePatch> all = new List<DragonFirePatch>();
     public static int Count => all.Count;
 
-    static readonly Color GroundColor = new Color(1f, 0.42f, 0.08f, 0.34f);
+    static readonly Color GroundColor = new Color(0.34f, 0.008f, 0.04f, 0.62f);
+    static readonly Color RimColor = new Color(1f, 0.055f, 0.12f, 0.92f);
     const float FadeIn = 0.25f, FadeOut = 0.7f;
 
     DragonBoss owner;
     float radius, life, tick, damage, age, nextTick;
-    MeshRenderer ground;
-    Mesh mesh;
-    MaterialPropertyBlock block;
-    ParticleSystem flames;
+    MeshRenderer ground, rim;
+    Mesh groundMesh, rimMesh;
+    MaterialPropertyBlock groundBlock, rimBlock;
+    ParticleSystem flames, embers;
 
     public float Radius => radius;
 
@@ -55,36 +56,89 @@ public class DragonFirePatch : MonoBehaviour
     {
         if (groundMaterial != null)
         {
-            const int segments = 40;
-            var vertices = new Vector3[segments + 1];
-            var triangles = new int[segments * 3];
-            vertices[0] = Vector3.zero;
-            for (int i = 0; i < segments; i++)
-            {
-                float a = i / (float)segments * Mathf.PI * 2f;
-                vertices[i + 1] = new Vector3(Mathf.Sin(a), 0f, Mathf.Cos(a)) * radius;
-                triangles[i * 3] = 0;
-                triangles[i * 3 + 1] = i + 1;
-                triangles[i * 3 + 2] = i == segments - 1 ? 1 : i + 2;
-            }
-            mesh = new Mesh { name = "FirePatch", vertices = vertices, triangles = triangles };
-            mesh.RecalculateBounds();
-            gameObject.AddComponent<MeshFilter>().sharedMesh = mesh;
+            const int segments = 48;
+            groundMesh = BuildDisc(radius, segments);
+            gameObject.AddComponent<MeshFilter>().sharedMesh = groundMesh;
             ground = gameObject.AddComponent<MeshRenderer>();
             ground.sharedMaterial = groundMaterial;
             ground.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             ground.receiveShadows = false;
-            block = new MaterialPropertyBlock();
+            groundBlock = new MaterialPropertyBlock();
+
+            var rimObject = new GameObject("CrimsonRim");
+            rimObject.layer = 2;
+            rimObject.transform.SetParent(transform, false);
+            rimObject.transform.localPosition = Vector3.up * 0.012f;
+            rimMesh = BuildRing(radius * 0.72f, radius * 0.98f, segments);
+            rimObject.AddComponent<MeshFilter>().sharedMesh = rimMesh;
+            rim = rimObject.AddComponent<MeshRenderer>();
+            rim.sharedMaterial = groundMaterial;
+            rim.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            rim.receiveShadows = false;
+            rimBlock = new MaterialPropertyBlock();
         }
-        if (fireMaterial != null) flames = DragonFx.Flames(transform, fireMaterial, radius);
+        if (fireMaterial != null)
+        {
+            flames = DragonFx.Flames(transform, fireMaterial, radius);
+            embers = DragonFx.PatchEmbers(transform, fireMaterial, radius);
+        }
         Tint(0f);
+    }
+
+    static Mesh BuildDisc(float size, int segments)
+    {
+        var vertices = new Vector3[segments + 1];
+        var triangles = new int[segments * 3];
+        vertices[0] = Vector3.zero;
+        for (int i = 0; i < segments; i++)
+        {
+            float a = i / (float)segments * Mathf.PI * 2f;
+            vertices[i + 1] = new Vector3(Mathf.Sin(a), 0f, Mathf.Cos(a)) * size;
+            triangles[i * 3] = 0;
+            triangles[i * 3 + 1] = i + 1;
+            triangles[i * 3 + 2] = i == segments - 1 ? 1 : i + 2;
+        }
+        var result = new Mesh { name = "FirePatchCore", vertices = vertices, triangles = triangles };
+        result.RecalculateBounds();
+        result.RecalculateNormals();
+        return result;
+    }
+
+    static Mesh BuildRing(float inner, float outer, int segments)
+    {
+        var vertices = new Vector3[segments * 2];
+        var triangles = new int[segments * 6];
+        for (int i = 0; i < segments; i++)
+        {
+            float a = i / (float)segments * Mathf.PI * 2f;
+            float x = Mathf.Sin(a), z = Mathf.Cos(a);
+            vertices[i * 2] = new Vector3(x, 0f, z) * outer;
+            vertices[i * 2 + 1] = new Vector3(x, 0f, z) * inner;
+
+            int next = (i + 1) % segments;
+            int tri = i * 6;
+            triangles[tri] = i * 2;
+            triangles[tri + 1] = next * 2;
+            triangles[tri + 2] = i * 2 + 1;
+            triangles[tri + 3] = next * 2;
+            triangles[tri + 4] = next * 2 + 1;
+            triangles[tri + 5] = i * 2 + 1;
+        }
+        var result = new Mesh { name = "FirePatchCrimsonRim", vertices = vertices, triangles = triangles };
+        result.RecalculateBounds();
+        result.RecalculateNormals();
+        return result;
     }
 
     void Update()
     {
         age += Time.deltaTime;
         if (age >= life) { Destroy(gameObject); return; }
-        if (flames != null && flames.isEmitting && age >= life - FadeOut) flames.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+        if (age >= life - FadeOut)
+        {
+            if (flames != null && flames.isEmitting) flames.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+            if (embers != null && embers.isEmitting) embers.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+        }
 
         float alpha = Mathf.Clamp01(age / FadeIn) * Mathf.Clamp01((life - age) / FadeOut);
         Tint(alpha * (0.85f + 0.15f * Mathf.Sin(Time.time * 11f + transform.position.x)));
@@ -105,14 +159,23 @@ public class DragonFirePatch : MonoBehaviour
 
     void Tint(float alpha)
     {
-        if (ground == null) return;
-        block.SetColor("_BaseColor", new Color(GroundColor.r, GroundColor.g, GroundColor.b, GroundColor.a * alpha));
-        ground.SetPropertyBlock(block);
+        float pulse = 0.86f + 0.14f * Mathf.Sin(Time.time * 13f + transform.position.x * 1.7f + transform.position.z);
+        if (ground != null)
+        {
+            groundBlock.SetColor("_BaseColor", new Color(GroundColor.r, GroundColor.g, GroundColor.b, GroundColor.a * alpha));
+            ground.SetPropertyBlock(groundBlock);
+        }
+        if (rim != null)
+        {
+            rimBlock.SetColor("_BaseColor", new Color(RimColor.r, RimColor.g, RimColor.b, RimColor.a * alpha * pulse));
+            rim.SetPropertyBlock(rimBlock);
+        }
     }
 
     void OnDestroy()
     {
-        if (mesh != null) Destroy(mesh);
+        if (groundMesh != null) Destroy(groundMesh);
+        if (rimMesh != null) Destroy(rimMesh);
     }
 }
 
@@ -136,7 +199,8 @@ public class DragonMeteor : MonoBehaviour
         meteor.time = Mathf.Max(0.05f, seconds);
         meteor.burstRadius = burstRadius;
         go.transform.position = meteor.from;
-        meteor.trail = DragonFx.MeteorTrail(go.transform, fire);
+        float trailScale = Mathf.Clamp(burstRadius / 2.2f, 1f, 2.2f);
+        meteor.trail = DragonFx.MeteorTrail(go.transform, fire, trailScale);
         meteor.trail.Play(true);
     }
 

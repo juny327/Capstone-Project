@@ -17,6 +17,8 @@ public class EnemyManager : MonoBehaviour
     [Min(0.1f)] public float rangedProjectileSpeed = 3.5f;
     [Tooltip("새로 나오는 몬스터의 체력 배율 — StageManager 가 스테이지 데이터 값으로 채운다 (2026-11-12)")]
     [Min(0.1f)] public float healthMultiplier = 1f;
+    /// <summary>새로 나오는 몬스터의 공격력 배율 — StageManager 가 StageData.enemyDamageMultiplier 로 채운다 (2026-11-25).</summary>
+    [System.NonSerialized] public float damageMultiplier = 1f;
 
     // 2026-11-17 — 스테이지별 등장 비율 (StageManager 가 StageData.spawnWeights 를 넣는다).
     // 비어 있으면 몬스터 데이터의 spawnWeight 그대로, 적혀 있으면 목록에 없는 몬스터는 나오지 않는다.
@@ -38,6 +40,13 @@ public class EnemyManager : MonoBehaviour
     // 켜져 있으면 살아 있는 원거리가 그 종류의 등장 비율만큼 차 있을 때 이번에는 그 종류를 빼고 고른다 — 근접끼리는 비율 그대로.
     /// <summary>살아 있는 원거리 몬스터가 등장 비율을 넘지 않게 한다 (시험에서 끄고 비교한다).</summary>
     [System.NonSerialized] public bool capRangedShare = true;
+    /// <summary>
+    /// 동시에 살아 있을 수 있는 원거리 몬스터 수 — StageManager 가 StageData.maxRangedEnemies 로 채운다 (0 = 제한 없음).
+    /// 2026-11-25 사용자: "비율을 낮춰도 쌓이다 보면 원거리 공격이 너무 많이 들어온다 — 일단 10마리". 다 차면 근접만 나온다.
+    /// </summary>
+    [System.NonSerialized] public int maxRangedAlive;
+    /// <summary>지금 살아 있는 원거리 몬스터 수 (마지막으로 뽑을 때 센 값 — 시험).</summary>
+    public int RangedAlive { get; private set; }
     /// <summary>원거리가 비율만큼 차서 다른 몬스터로 바꿔 내보낸 횟수 (시험).</summary>
     public int RangedCapSkips { get; private set; }
     readonly Dictionary<Enemy, bool> rangedPrefab = new Dictionary<Enemy, bool>();
@@ -247,12 +256,14 @@ public class EnemyManager : MonoBehaviour
         // 살아 있는 원거리가 비율만큼 차 있는 종류는 이번에 빼고 고른다 (2026-11-25) — 모두 빠지면 원래 비율 그대로
         if (pickWeights == null || pickWeights.Length != enemyPrefabs.Length) pickWeights = new int[enemyPrefabs.Length];
         CountAlive();
+        RangedAlive = CountRangedAlive();
+        bool rangedAtMax = maxRangedAlive > 0 && RangedAlive >= maxRangedAlive;   // 원거리 동시 최대 (2026-11-25)
         int pickTotal = 0;
         bool skipped = false;
         for (int i = 0; i < enemyPrefabs.Length; i++)
         {
             int weight = WeightOf(enemyPrefabs[i]);
-            if (weight > 0 && RangedFull(enemyPrefabs[i], weight, totalWeight)) { weight = 0; skipped = true; }
+            if (weight > 0 && ((rangedAtMax && IsRanged(enemyPrefabs[i])) || RangedFull(enemyPrefabs[i], weight, totalWeight))) { weight = 0; skipped = true; }
             pickWeights[i] = weight;
             pickTotal += weight;
         }
@@ -297,6 +308,19 @@ public class EnemyManager : MonoBehaviour
     }
 
     int aliveTotal;
+
+    /// <summary>살아 있는 원거리 몬스터 수 — 내보낼 수 있는 몬스터 중 원거리인 종류를 더한다 (CountAlive 뒤에).</summary>
+    int CountRangedAlive()
+    {
+        int n = 0;
+        for (int i = 0; i < enemyPrefabs.Length; i++)
+        {
+            Enemy prefab = enemyPrefabs[i];
+            if (prefab == null || prefab.data == null || !IsRanged(prefab)) continue;
+            if (aliveByData.TryGetValue(prefab.data, out int c)) n += c;
+        }
+        return n;
+    }
 
     /// <summary>원거리 몬스터(원거리 · 레이저 공격)인가 — 프리팹마다 한 번만 본다.</summary>
     public bool IsRanged(Enemy prefab)

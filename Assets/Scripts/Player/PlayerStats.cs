@@ -23,7 +23,11 @@ public class PlayerStats : MonoBehaviour, IDamageable
     [Tooltip("이번 레벨 게이지 — 구슬로 차고, expToNextLevel 을 넘으면 레벨업 (보유 경험치는 그대로)")]
     public int levelExp = 0;
 
-    public int expToNextLevel = 10;
+    // 2026-11-25 사용자: "업그레이드 경험치 요구량이 늘어났으니 창을 띄우는 임계치도 올려 — 첫 창은 경험치 15" → 10 → 15.
+    // 카드 값을 11-24 에 스킬 10 → 15 (×1.5) 로 올렸으니 레벨 기준도 모두 ×1.5 (15 · 20 · 26 · 34 · 45 …, 늘어나는 비율 1.3 그대로).
+    // 값은 Player 프리팹에 적혀 있다 (여기 기본값만 바꾸면 안 바뀐다)
+    [Tooltip("다음 레벨까지 필요한 경험치 (첫 레벨업 기준) — 레벨이 오를 때마다 × expGrowthRate")]
+    public int expToNextLevel = 15;
     public float expGrowthRate = 1.3f;
 
     public int maxHp = 100;

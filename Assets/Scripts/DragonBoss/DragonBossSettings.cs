@@ -72,6 +72,32 @@ public class DragonBossSettings : ScriptableObject
         [Header("새 패턴 (2단계 — 불의 벽 · 퍼지는 고리 · 도약 내려찍기)")]
         public bool newPatterns;
 
+        // 2026-11-26 팀원(parkjunyoung) '보스 공격패턴 수정' — 코드에 박혀 있던 값을 난이도 값으로. 기본값(Legacy)은 그 전 동작.
+        // 사용자: "보스 변경은 하드에 적용, 일부 수치는 조금 낮춰 이지에" → 하드 = 팀원 값, 이지 = 예전 값과 팀원 값의 중간
+        [Header("팀원 보스 공격패턴 (11-26) — 하드 = 팀원 값 · 이지 = 중간")]
+        [Tooltip("일반 물기 진행 빠르기 (예고 · 동작 · 판정이 같이). 2 면 예고가 절반 — 예전 1")]
+        [Range(1f, 3f)] public float biteSpeed = 1f;
+        [Tooltip("지연 물기 진행 빠르기 — 예전 1")]
+        [Range(1f, 2f)] public float delayedBiteSpeed = 1f;
+        [Tooltip("지연 물기 앞쪽 범위 배율 — 예전 1")]
+        [Range(1f, 2f)] public float delayedBiteReach = 1f;
+        [Tooltip("흩뿌리는 불비 수 배율 (rainCount 에 곱한다) — 예전 1")]
+        [Range(1f, 3f)] public float rainCountScale = 1f;
+        [Tooltip("불비를 고르는 무게 — x 중간 거리 · y 먼 거리 (예전 2 · 3)")]
+        public Vector2 fireRainWeight = new Vector2(2f, 3f);
+        [Tooltip("불비 쿨타임 (초, cooldownScale 을 곱한다) — 예전 10")]
+        [Min(1f)] public float fireRainCooldown = 10f;
+        [Tooltip("불비가 떨어진 자리에 남는 작은 불 장판의 피해 (0.9초마다). 0 이면 안 남는다 — 예전 0")]
+        [Min(0f)] public float rainPatchDamage = 0f;
+        [Tooltip("그 불 장판이 남는 시간 (초, firePatchLife 보다 길지 않게)")]
+        [Min(0.5f)] public float rainPatchLife = 3.5f;
+        [Tooltip("꼬리 휩쓸기에 맞으면 밀려나는 빠르기 (m/s). 0 이면 안 밀린다 — 예전 0")]
+        [Min(0f)] public float tailKnockback = 0f;
+        [Tooltip("밀려나는 시간 (초)")]
+        [Min(0f)] public float tailKnockbackTime = 0.35f;
+        [Tooltip("2페이즈부터 꼬리 휩쓸기 뒤 바로 돌진 — 그 돌진의 예고 (초). 0 이면 이 연계를 하지 않는다 — 예전 0")]
+        [Min(0f)] public float tailChargeWindup = 0f;
+
         [Header("마지막 발악 — 남은 체력이 Staging.enrageAt 아래로 내려가면")]
         [Tooltip("패턴 진행 속도에 곱한다 (1 = 없음). 몸이 달아오르는 표시는 연출(Staging)이 낸다")]
         [Range(1f, 1.5f)] public float enrageTempo = 1f;
@@ -164,6 +190,10 @@ public class DragonBossSettings : ScriptableObject
         minionsPhase2 = 2, minionsPhase3 = 3, minionCap = 4,
         minionMeleeHealth = 3f,
         firePatchLife = 4f, firePatchMax = 8,
+        // 11-26 팀원 보스 공격패턴 — 예전 값과 팀원(하드) 값의 중간
+        biteSpeed = 1.5f, delayedBiteSpeed = 1.17f, delayedBiteReach = 1.17f, rainCountScale = 1.5f,
+        fireRainWeight = new Vector2(3.5f, 4.5f), fireRainCooldown = 8.75f,
+        rainPatchDamage = 1f, rainPatchLife = 2.5f, tailKnockback = 5.5f, tailKnockbackTime = 0.35f, tailChargeWindup = 0.75f,
     };
 
     public static Tuning DefaultHard() => new Tuning
@@ -178,5 +208,9 @@ public class DragonBossSettings : ScriptableObject
         newPatterns = true,
         minionMeleeHealth = 3f,
         enrageTempo = 1.1f,
+        // 11-26 팀원 보스 공격패턴 — 팀원 값 그대로
+        biteSpeed = 2f, delayedBiteSpeed = 4f / 3f, delayedBiteReach = 4f / 3f, rainCountScale = 2f,
+        fireRainWeight = new Vector2(5f, 6f), fireRainCooldown = 7.5f,
+        rainPatchDamage = 2f, rainPatchLife = 3.5f, tailKnockback = 11f, tailKnockbackTime = 0.35f, tailChargeWindup = 0.5f,
     };
 }

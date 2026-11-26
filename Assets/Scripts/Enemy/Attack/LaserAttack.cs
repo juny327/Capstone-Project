@@ -235,7 +235,7 @@ public sealed class LaserAttack : EnemyAttack
                 if (player != null && victims.Add(player))
                 {
                     player.TakeDamage(new DamageInfo {
-                        damage = enemy.data.attackPower,
+                        damage = enemy.AttackPower,
                         hitPoint = hit.point,
                         hitDirection = direction,
                         cameraShake = 0.2f

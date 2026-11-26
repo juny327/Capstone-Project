@@ -79,7 +79,7 @@ public class EvolutionPairSource : ShopOfferSource
     }
 }
 
-/// <summary>진화 짝 개조 — 보통 부착물 카드와 같고 꼬리표만 "진화 짝".</summary>
+/// <summary>진화 짝 개조 — 보통 부착물 카드와 같다 (2026-11-25 꼬리표 "진화 짝 · …" 뺌 — 짝은 정비 창 금색 테두리로만 알린다).</summary>
 public class EvolutionPairAttachmentOffer : AttachmentOffer
 {
     readonly WeaponEvolutionData evolution;
@@ -89,10 +89,10 @@ public class EvolutionPairAttachmentOffer : AttachmentOffer
         this.evolution = evolution;
     }
 
-    public override string Tag => $"진화 짝 · {evolution.Title}";
+    public WeaponEvolutionData Evolution => evolution;
 }
 
-/// <summary>진화 짝 서브 능력 (거울칼날 = 에너지 방패).</summary>
+/// <summary>진화 짝 서브 능력 (거울칼날 = 에너지 방패). 꼬리표는 보통 서브 능력과 같다 (2026-11-25).</summary>
 public class EvolutionPairSubAbilityOffer : SubAbilityOffer
 {
     readonly WeaponEvolutionData evolution;
@@ -102,7 +102,7 @@ public class EvolutionPairSubAbilityOffer : SubAbilityOffer
         this.evolution = evolution;
     }
 
-    public override string Tag => $"진화 짝 · {evolution.Title}";
+    public WeaponEvolutionData Evolution => evolution;
 }
 
 /// <summary>
@@ -122,13 +122,14 @@ public class SkillPairOffer : ShopOffer
     }
 
     public UpgradeData Card => card;
+    public WeaponEvolutionData Evolution => evolution;
 
     public override string Title => SkillPairs.NameOf(card);
-    // 간단 = 스킬이 하는 일 (짝이라는 것은 꼬리표가 알려 준다) · 상세 = 스킬 설명 + 짝 안내 (2026-11-22)
+    // 간단 = 스킬이 하는 일 · 상세 = 스킬 설명 + 얻는 방식 (2026-11-22). 2026-11-25 사용자: "'~ 짝' 같은 글보다 노란 테두리만" — 짝이라는 글은 뺐다
     public override string Description => DescriptionMode.Pick(card.brief,
-        DescText.Join(card.description, $"{evolution.Title} 의 짝 스킬 — 지금 바로 얻는다 (레벨업 카드 Lv1 과 같다)"));
+        DescText.Join(card.description, "지금 바로 얻는다 (레벨업 카드 Lv1 과 같다)"));
     public override Sprite Icon => card.icon;
-    public override string Tag => $"진화 짝 · {evolution.Title}";
+    public override string Tag => "스킬";
     public override ShopOfferKind Kind => ShopOfferKind.Skill;
     public override Object PairItem => card;
 

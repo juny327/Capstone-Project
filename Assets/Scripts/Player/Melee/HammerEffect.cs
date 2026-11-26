@@ -4,8 +4,9 @@ using UnityEngine;
 /// <summary>
 /// 전투 망치 · 묠니르의 동작 (2026-11-20 근접 신규 무기).
 ///  · 맞힌 적을 잠깐 기절시킨다 (경직 — 보스는 없음). 세 번째 공격(마무리 내려찍기)은 더 길게 + 친 자리 둘레 충격파 (직접 안 맞은 적 50%)
-///  · 묠니르 (lightning) — 맞힐 때 40% 로 둘레 적 둘에게 번개가 튄다 · 내려찍은 자리에 낙뢰 (반경 3m · 150% · 기절 1초)
-///  · 묠니르 (throwAfterFinisher) — 낙뢰 뒤 망치를 던진다. 곧게 날아갔다가(벽에서 멈춤) 손으로 돌아오며, 가는 길 · 오는 길의 적을 모두 친다
+///  · 묠니르 (lightning) — 맞힐 때 40% 로 둘레 적 둘에게 번개가 튄다 · 내려찍은 자리에 낙뢰, 이어서 둘레 적에게 낙뢰가 몇 번 더 (쾅 · 쾅 · 쾅 — MjolnirStorm)
+///  · 묠니르 (throwAfterFinisher) — 낙뢰 뒤 망치를 던진다. 몸 둘레를 휭 돌다 놓고, 앞쪽 적들 사이를 휘어 튕겨 다니다 손으로 돌아오며
+///    가는 길 · 오는 길의 적을 모두 친다 (앞에 적이 없으면 곧게 갔다 온다 — ThrownHammer)
 ///  · 묠니르 — 머리에 전기가 튄다. 다음 공격이 마무리 내려찍기면 세진다 (낙뢰 신호)
 /// 기본 망치는 단촐하게 (충격파 고리 · 별), 묠니르는 화려하게 (번개 · 먹구름 번쩍 · 큰 순간).
 /// 손에 든 망치 · 떠 있는 보조 망치 모두 같다 (보조 칸도 연출을 줄이지 않는다 — EvoFxScale).
@@ -41,13 +42,27 @@ public class HammerEffect : AttachmentEffect
     [Min(0f)] public float chainDamageMul = 0.4f;
     [Tooltip("낙뢰 반경 (마무리 내려찍기)")]
     [Min(0f)] public float strikeRadius = 3f;
-    [Tooltip("낙뢰 피해 = 무기 공격력 × 이 값")]
+    [Tooltip("첫 낙뢰 피해 = 무기 공격력 × 이 값")]
     [Min(0f)] public float strikeDamageMul = 1.5f;
     [Min(0f)] public float strikeStun = 1f;
     [Tooltip("낙뢰 줄기 높이 (m) — 화면 위에서 떨어진다")]
     [Min(1f)] public float boltHeight = 14f;
     [Tooltip("머리에 튀는 전기 알갱이 — 초당 수. 다음이 마무리 내려찍기면 ×3")]
     [Min(0f)] public float idleSparks = 14f;
+
+    // 2026-11-25 사용자: "번개도 한 번 빵 찍기보다는 찍고 몇 번 쾅쾅쾅"
+    [Header("묠니르 — 이어지는 낙뢰 (첫 낙뢰 뒤)")]
+    [Tooltip("첫 낙뢰 뒤 더 떨어지는 수 (0 이면 예전처럼 한 번). 마지막 한 번은 더 크게")]
+    [Min(0)] public int aftershocks = 3;
+    [Tooltip("낙뢰 사이 간격 (초)")]
+    [Min(0.03f)] public float aftershockInterval = 0.14f;
+    [Tooltip("이어지는 낙뢰 반경 (마지막은 ×1.3)")]
+    [Min(0f)] public float aftershockRadius = 2.2f;
+    [Tooltip("이어지는 낙뢰 한 번의 피해 = 무기 공격력 × 이 값")]
+    [Min(0f)] public float aftershockDamageMul = 0.3f;
+    [Tooltip("이어지는 낙뢰가 적을 찾는 범위 (내려찍은 자리에서) — 적이 없으면 둘레 빈자리에 떨어진다")]
+    [Min(0f)] public float aftershockRange = 6f;
+    [Min(0f)] public float aftershockStun = 0.4f;
 
     [Header("묠니르 — 던지기 (마무리 내려찍기 뒤)")]
     public bool throwAfterFinisher;
@@ -68,6 +83,26 @@ public class HammerEffect : AttachmentEffect
     public float spinSpeed = 1080f;
     [Min(0f)] public float flyHeight = 1.1f;
 
+    // 2026-11-25 사용자: "던지는 걸 단순히 던지기보다는 마블처럼 휭휭 돌면서 난리치는 느낌"
+    [Header("묠니르 — 휘돌리기 · 튕기기")]
+    [Tooltip("놓기 전에 몸 둘레를 도는 바퀴 수 (평균 — 손 위치에 따라 ±반 바퀴). 0 이면 바로 던진다")]
+    [Min(0f)] public float whirlTurns = 1f;
+    [Tooltip("한 바퀴 도는 시간 (초)")]
+    [Min(0.05f)] public float whirlTime = 0.3f;
+    [Min(0.5f)] public float whirlRadius = 1.8f;
+    [Tooltip("휘돌릴 때 둘레 적 피해 = 무기 공격력 × 이 값")]
+    [Min(0f)] public float whirlDamageMul = 0.3f;
+    [Tooltip("튕겨 다니며 맞히는 적 수 (첫 적 포함). 0 이면 예전처럼 곧게 던진 거리까지")]
+    [Min(0)] public int bounces = 4;
+    [Tooltip("맞힌 적에서 다음 적을 찾는 범위")]
+    [Min(1f)] public float bounceRange = 7f;
+    [Tooltip("날아가는 길이 옆으로 휘는 정도 (구간 길이 × 이 값, 구간마다 반대쪽)")]
+    [Range(0f, 0.8f)] public float curve = 0.35f;
+    [Tooltip("날아가며 위아래로 뒤집히는 기울기 (도)")]
+    [Range(0f, 80f)] public float tumbleTilt = 40f;
+    [Tooltip("날아가는 망치 크기 (손에 든 것 × 이 값 — 위에서 잘 보이게)")]
+    [Min(0.5f)] public float flyScale = 1.35f;
+
     [Header("소리")]
     public GameSoundSet.Entry slamSound = new GameSoundSet.Entry();
     public GameSoundSet.Entry chainSound = new GameSoundSet.Entry();
@@ -77,11 +112,11 @@ public class HammerEffect : AttachmentEffect
 
     public bool UsesKit => kit && FxKit.Ready;
 
-    /// <summary>시험 집계 — 기절 · 내려찍기 · 튄 번개 · 낙뢰 · 던지기 · 맞힘 · 받기.</summary>
-    public static int Stunned, Slams, Chains, Strikes, Thrown, ThrowHits, ReturnHits, Caught;
+    /// <summary>시험 집계 — 기절 · 내려찍기 · 튄 번개 · 낙뢰 · 이어진 낙뢰 · 던지기 · 휘돌리기(맞힘) · 튕김 · 맞힘 · 받기.</summary>
+    public static int Stunned, Slams, Chains, Strikes, Aftershocks, Thrown, Whirls, WhirlHits, Bounces, ThrowHits, ReturnHits, Caught;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-    static void ResetStatics() { Stunned = Slams = Chains = Strikes = Thrown = ThrowHits = ReturnHits = Caught = 0; }
+    static void ResetStatics() { Stunned = Slams = Chains = Strikes = Aftershocks = Thrown = Whirls = WhirlHits = Bounces = ThrowHits = ReturnHits = Caught = 0; }
 
     public override AttachmentRuntime CreateRuntime() => new Runtime(this);
 
@@ -250,6 +285,9 @@ public class HammerEffect : AttachmentEffect
 
             ImpactFx.Play(ImpactMoment.MjolnirStrike, Weapon, cfg.color, 0.5f);
             CombatFx.PlaySound(cfg.strikeSound);
+
+            // 쾅 · 쾅 · 쾅 — 둘레 적에게 낙뢰가 이어서 떨어진다
+            MjolnirStorm.Begin(cfg, Weapon, at, damage, s);
         }
 
         /// <summary>묠니르 머리의 전기 — 다음이 마무리 내려찍기면 세진다 (낙뢰 신호).</summary>
