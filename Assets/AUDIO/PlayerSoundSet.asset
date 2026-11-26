@@ -69,3 +69,10 @@ MonoBehaviour:
     volume: 1
     pitchRange: {x: 0.95, y: 1.05}
     minInterval: 0.25
+  lowHealthLoop:
+    clips:
+    - {fileID: 8300000, guid: 13a57af148504c08bddd454e1f16eef7, type: 3}
+    volume: 1
+    pitchRange: {x: 1, y: 1}
+    minInterval: 0
+  lowHealthThreshold: 0.3

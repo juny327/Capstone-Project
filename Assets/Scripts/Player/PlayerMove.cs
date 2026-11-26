@@ -91,6 +91,8 @@ public class PlayerMove : MonoBehaviour
     [Header("Sound")]
     [Tooltip("플레이어 몸에서 나는 소리. 비우면 조용히 넘어간다")]
     [SerializeField] private PlayerSoundSet sounds;
+    /// <summary>플레이어 몸 소리 묶음 — 체력 낮음 심장 박동(LowHealthHeartbeat)이 읽는다.</summary>
+    public PlayerSoundSet Sounds => sounds;
 
     [Tooltip("발 뼈가 가장 낮았던 높이보다 이만큼(m) 올라가면 '발을 들었다'로 본다")]
     [Min(0.01f)] [SerializeField] private float footLiftHeight = 0.08f;
@@ -386,6 +388,8 @@ public class PlayerMove : MonoBehaviour
     void Awake()
     {
         playerInput = new PlayerInput();
+        // 2026-11-27 체력이 낮을 때 심장 박동 (남은 작업 2-8) — 프리팹을 고치지 않고 여기서 붙인다
+        if (GetComponent<LowHealthHeartbeat>() == null) gameObject.AddComponent<LowHealthHeartbeat>();
         rb = GetComponent<Rigidbody>();
         // Y 축 회전도 물리에서 잠근다 (프리팹은 X · Z 만 잠겨 있었다) — 구르다 부딪히면 팽이처럼 돌던 원인 (2026-11-04).
         // 바라보는 방향은 늘 MoveRotation 이 정하므로 물리가 돌릴 일은 없다
@@ -475,7 +479,7 @@ public class PlayerMove : MonoBehaviour
     }
 
     /// <summary>
-    /// 맞았다 — 낮은 '쿵' + 슈트 지직 (PlayerSoundSet.hurt · 최소 간격으로 연속 피격을 솎는다).
+    /// 맞았다 — 몸 타격 '퍽' + 저음 (PlayerSoundSet.hurt, 2026-11-27 바꿈 · 최소 간격으로 연속 피격을 솎는다).
     /// 전용 칸으로 내고 잠깐 총소리를 줄인다 — 총소리에 묻혀 안 들렸다 (2026-11-12 사용자 피드백).
     /// </summary>
     void OnDamaged(int amount)
