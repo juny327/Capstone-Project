@@ -353,7 +353,9 @@ public class StageShortcutPrep : MonoBehaviour
         var scaler = root.GetComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         scaler.referenceResolution = new Vector2(1920f, 1080f);
-        scaler.matchWidthOrHeight = 0.5f;
+        // Expand — 1920×1080 판이 어느 화면비에서도 다 들어가게 (16:9 는 그대로, 넓은 화면은 양옆 · 16:10 은 위아래가 남는다).
+        // 가로세로 반반(0.5)이던 때는 21:9 에서 제목 · 단추가 위아래로, 16:10 에서 상위 무기 띠가 오른쪽으로 잘렸다 (2026-11-26 해상도 점검)
+        scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.Expand;
 
         Image dim = NewImage("Dim", root.transform, Dim);
         Stretch(dim.rectTransform, 0f);
