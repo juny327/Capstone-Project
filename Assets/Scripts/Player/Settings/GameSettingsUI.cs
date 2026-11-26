@@ -148,6 +148,7 @@ public class GameSettingsUI : MonoBehaviour
 
         if (Keyboard.current == null || !Keyboard.current.escapeKey.wasPressedThisFrame) return;
         if (GuideUI.HandlesEscape) return;   // 조작 가이드 창이 이 ESC 로 닫힌다 (2026-11-16)
+        if (TutorialUI.HandlesEscape) return;   // 튜토리얼 창도 같다 (2026-11-27)
 
         if (IsOpen) Close();
         else Open();
