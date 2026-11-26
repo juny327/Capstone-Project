@@ -435,31 +435,32 @@ public class EndingFlow : MonoBehaviour
 
     // ───────── ③ 결과 ─────────
 
+    /// <summary>
+    /// 결과 — 2026-11-26 부터 판 결과 화면(RunResultScreen, 사용자가 고른 B안: 무기 카드 · 피해 몫 고리 · 하이라이트)을 띄운다.
+    /// 예전 결과 창(resultPanel — 무기 이름 목록 · 숫자 다섯 줄)은 프리팹에 남겨 두고 켜지 않는다.
+    /// 움직이는 도중의 '계속'(Enter · Space · 단추)은 끝 모습으로 바로 채운다 — 한 번 더 누르면 크레딧.
+    /// </summary>
     IEnumerator ShowResult()
     {
         Current = Step.Result;
         advance = false;
 
-        resultTitle.text = settings.resultTitle;
-        resultSubtitle.text = rift && !string.IsNullOrEmpty(settings.riftResultSubtitle) ? settings.riftResultSubtitle : settings.resultSubtitle;
-        characterText.text = string.IsNullOrEmpty(RunStats.Character) ? "" : RunStats.Character;
-        BuildWeapons();
-        resultPanel.SetActive(true);
+        string subtitle = rift && !string.IsNullOrEmpty(settings.riftResultSubtitle) ? settings.riftResultSubtitle : settings.resultSubtitle;
+        if (resultPanel != null) resultPanel.SetActive(false);
+        RunResultScreen screen = RunResultScreen.Open(RunResultScreen.Mode.Win, settings.resultTitle, subtitle, Advance, null);
+        WeaponRows = screen.CardCount;
         if (settings.resultSound != null && SoundManager.Instance != null)
             SoundManager.Instance.PlayClip(settings.resultSound, settings.resultVolume);
 
-        // 숫자가 올라간다
-        float seconds = settings.countUp;
-        for (float t = 0f; t < seconds && !advance; t += Time.unscaledDeltaTime)
+        while (screen != null && screen.Animating)
         {
-            WriteNumbers(Mathf.SmoothStep(0f, 1f, t / seconds));
+            if (TakeAdvance()) screen.Finish();
             yield return null;
         }
-        WriteNumbers(1f);
         advance = false;
 
         while (!TakeAdvance()) yield return null;
-        resultPanel.SetActive(false);
+        if (screen != null) screen.Close();
     }
 
     void WriteNumbers(float k)
