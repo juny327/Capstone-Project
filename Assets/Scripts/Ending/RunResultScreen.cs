@@ -70,6 +70,7 @@ public class RunResultScreen : MonoBehaviour
         }
         hooked = false;
         host = null;
+        hiddenButtons.Clear();
         Current = null;
         Opened = 0;
         RetryPending = false;
@@ -96,15 +97,45 @@ public class RunResultScreen : MonoBehaviour
     static void OnPlayerDeadEnd()
     {
         if (!RunStats.Active || !RunStats.Died || RunStats.Won) return;
+        HideGameOverButtons();
         Host().StartCoroutine(OpenAfterGameOver());
     }
 
     static IEnumerator OpenAfterGameOver()
     {
         yield return new WaitForSecondsRealtime(LoseDelay);
-        if (!RunStats.Active || !RunStats.Died || Current != null) yield break;
+        if (!RunStats.Active || !RunStats.Died || Current != null) { if (Current == null) RestoreGameOverButtons(); yield break; }
         string where = RunStats.StageLog.Count > 0 ? RunStats.StageName(RunStats.StageLog[RunStats.StageLog.Count - 1].scene) : "";
-        Open(Mode.Lose, "임무 실패", string.IsNullOrEmpty(where) ? "다음 판에서 다시" : $"{where} 에서 쓰러졌다", Retry, ToLobby);
+        RunResultScreen screen = null;
+        try { screen = Open(Mode.Lose, "임무 실패", string.IsNullOrEmpty(where) ? "다음 판에서 다시" : $"{where} 에서 쓰러졌다", Retry, ToLobby); }
+        finally { if (screen == null) RestoreGameOverButtons(); }   // 결과 화면이 안 뜨면 Game Over 버튼을 되돌린다 (갇히지 않게)
+    }
+
+    // 2026-11-27 사용자: "게임 오버 화면에서 바로 로비로 가면 (결과를) 볼 수가 없어, 막아 줘"
+    // 팀원 Game Over 그림의 '로비로' 버튼을 결과 화면이 뜨기 전 2초 사이에 누르면 결과를 못 보고 로비로 갔다.
+    // 결과 화면이 뜰 판이면 그 버튼을 숨기고, 나가는 길은 결과 화면의 '다시 하기 · 로비로' 하나로 (둘 다 GameOverUI.OnClickReturnLobby 를 그대로 부른다).
+    static readonly List<GameObject> hiddenButtons = new List<GameObject>();
+
+    /// <summary>숨긴 Game Over 버튼 수 (시험).</summary>
+    public static int HiddenGameOverButtons => hiddenButtons.Count;
+
+    static void HideGameOverButtons()
+    {
+        RestoreGameOverButtons();
+        GameOverUI gameOver = Object.FindFirstObjectByType<GameOverUI>(FindObjectsInactive.Include);
+        if (gameOver == null) return;
+        foreach (Button button in gameOver.GetComponentsInChildren<Button>(true))
+        {
+            if (!button.gameObject.activeSelf) continue;
+            button.gameObject.SetActive(false);
+            hiddenButtons.Add(button.gameObject);
+        }
+    }
+
+    static void RestoreGameOverButtons()
+    {
+        foreach (GameObject go in hiddenButtons) if (go != null) go.SetActive(true);
+        hiddenButtons.Clear();
     }
 
     /// <summary>다시 하기 — 로비로 나간 뒤 같은 캐릭터 · 무기 · 난이도로 스테이지 1 부터 (팀원 Game Over 의 로비 길을 그대로 탄다).</summary>
@@ -125,6 +156,7 @@ public class RunResultScreen : MonoBehaviour
 
     static void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
+        RestoreGameOverButtons();
         if (Current != null && scene.name != "EndingScene") Current.Close();
         if (scene.name == "Loby" && RetryPending) Host().StartCoroutine(StartAgain());
     }
