@@ -130,8 +130,7 @@ public partial class DragonBoss
     void SetBreathCone(float halfAngle)
     {
         if (breathFx == null) return;
-        var shape = breathFx.shape;
-        shape.angle = halfAngle * 0.8f;
+        DragonFx.SetBreathCone(breathFx, halfAngle);
     }
 
     // ───────── 전환 포효 ─────────
@@ -312,6 +311,7 @@ public partial class DragonBoss
         const float rise = 0.6f, fall = 0.4f;   // fall — 불비 소리(DragonRainDrop)의 휘익 길이와 같다
         Sfx(DragonSfx.Roar, 0.85f);
         List<Vector3> points = RainPoints();
+        int rainPatchCapacity = Mathf.Max(tune.firePatchMax, points.Count);
         var marks = new List<DragonTelegraph>();
         var falling = new bool[points.Count];
         var landed = new bool[points.Count];
@@ -336,7 +336,7 @@ public partial class DragonBoss
                 if (!falling[i] && u >= 1f - fall * tune.tempo / rainWarn)
                 {
                     falling[i] = true;
-                    if (fireMaterial != null) DragonMeteor.Drop(fireMaterial, points[i], fall, rainRadius);
+                    if (fireMaterial != null) DragonMeteor.Drop(fireMaterial, points[i], fall, rainRadius * 1.5f);
                     Sfx(DragonSfx.Rain);
                     FxRainFall(points[i]);
                 }
@@ -345,6 +345,10 @@ public partial class DragonBoss
                 marks[i].Flash();
                 Jolt(0.28f, points[i], 0.18f);
                 FxRainLand(points[i]);
+                // 불비가 떨어진 자리에는 작은 화염 지대가 잠시 남는다. 피해는 낮고, 예고 범위보다 작아 빠져나갈 수 있다.
+                if (DragonFirePatch.Count < rainPatchCapacity)
+                    DragonFirePatch.Spawn(this, telegraphMaterial, fireMaterial, points[i], rainRadius * 0.65f,
+                        Mathf.Min(tune.firePatchLife, 3.5f), 0.9f, 2f);
                 if (PlayerInCircle(points[i], rainRadius) && Time.time - lastHit > 0.35f)   // 겹친 원 두 개에 한꺼번에 맞지 않게
                 {
                     lastHit = Time.time;
@@ -371,13 +375,18 @@ public partial class DragonBoss
 
         if (tune.rainRing)
         {
-            // 둘러싸기 (하드 — 2026-11-20) — 둘레 여섯 칸 가운데 다섯 칸이 먼저 떨어지고 가운데(지금 자리)가 마지막에 떨어진다.
-            // 빈 칸 하나가 살 길이다. 가는 쪽과 그 양옆은 늘 막으므로(빈 칸은 옆 · 뒤) 걷던 대로 걸으면 맞는다
+            // 둘러싸기 (하드) — 불덩이 수를 두 배로 늘린다. 뒤쪽에 넓은 회피 통로를 남기고, 중앙은 마지막에 떨어진다.
             float ringRadius = rainRadius * 1.9f;
             float yaw = Mathf.Atan2(heading.x, heading.z) * Mathf.Rad2Deg;
-            int gap = Random.Range(2, 5);
-            for (int i = 0; i < 6; i++)
-                if (i != gap) AddRainPoint(points, player + Quaternion.Euler(0f, yaw + i * 60f, 0f) * Vector3.forward * ringRadius, 0.5f);
+            const int ringSlots = 14;
+            int gapStart = Random.Range(5, 8);
+            for (int i = 0; i < ringSlots; i++)
+            {
+                bool inEscapeGap = i == gapStart || i == gapStart + 1 || i == gapStart + 2;
+                if (inEscapeGap) continue;
+                float angle = yaw + i * (360f / ringSlots);
+                AddRainPoint(points, player + Quaternion.Euler(0f, angle, 0f) * Vector3.forward * ringRadius, 0.5f);
+            }
             AddRainPoint(points, player, 0f);
             return points;
         }
@@ -385,7 +394,7 @@ public partial class DragonBoss
         AddRainPoint(points, player, 0f);
         AddRainPoint(points, player + heading.normalized * (rainRadius * 1.5f), 1.5f);
 
-        int rainCount = Mathf.Max(1, tune.rainCount);
+        int rainCount = Mathf.Max(1, tune.rainCount) * 2;
         for (int tries = 0; tries < rainCount * 8 && points.Count < rainCount; tries++)
         {
             Vector2 r = Random.insideUnitCircle * rainSpread;
@@ -442,7 +451,18 @@ public partial class DragonBoss
             if (!hit && PlayerInCircle(center, tailRadius))
             {
                 hit = true;
+                PlayerStats playerStats = target != null ? target.GetComponentInParent<PlayerStats>() : null;
+                int hpBefore = playerStats != null ? playerStats.currentHp : -1;
                 HitPlayer(tailDamage, center, 0.5f);
+
+                // 실제 피해를 받은 경우에만 꼬리로 바깥쪽에 밀려난다.
+                if (playerStats != null && playerStats.currentHp < hpBefore)
+                {
+                    PlayerMove playerMove = target.GetComponentInParent<PlayerMove>();
+                    Vector3 pushAway = Flat(target.position - center);
+                    if (pushAway.sqrMagnitude < 0.001f) pushAway = -Flat(transform.forward);
+                    playerMove?.ApplyKnockback(pushAway, 11f, 0.35f);
+                }
             }
             yield return null;
         }
@@ -596,8 +616,16 @@ public partial class DragonBoss
     /// <summary>방금 끝난 패턴 뒤에 빈틈 없이 이을 패턴 (없으면 None).</summary>
     Pattern ComboAfter(Pattern done)
     {
+        // 2페이즈부터 꼬리 휩쓸기로 밀어낸 뒤 돌진한다. 테스트룸의 수동 패턴도 같은 규칙을 쓴다.
+        if (done == Pattern.TailSweep && phase >= 2 && forced == Pattern.None && pendingPhase <= phase && target != null && state != State.Dead)
+            return Pattern.Charge;
+
+        if (Passive || forced != Pattern.None || pendingPhase > phase || target == null || state == State.Dead)
+            return Pattern.None;
+
+        // 꼬리로 밀어낸 뒤 몸을 낮추고 0.5초 조준 예고를 준 다음 돌진한다.
         float chance = ComboChance;
-        if (chance <= 0f || Passive || forced != Pattern.None || pendingPhase > phase || target == null || state == State.Dead) return Pattern.None;
+        if (chance <= 0f) return Pattern.None;
         float distance = FlatDistance(target.position);
         // 도약 내려찍기 → 꼬리 휩쓸기 (3페이즈 · 늘 절반) — 착지 뒤 빈틈이 진짜인지 읽게 한다. 붙어서 때리던 사람을 벌한다
         if (done == Pattern.Leap) return phase >= 3 && distance <= tailRadius + 1.5f && Random.value < 0.5f ? Pattern.TailSweep : Pattern.None;
@@ -609,7 +637,6 @@ public partial class DragonBoss
             case Pattern.RingWave: next = phase >= 3 ? Pattern.FireRain : Pattern.None; break;
             case Pattern.Charge: next = !chargeBlocked && distance <= tailRadius + 1.5f ? Pattern.TailSweep : Pattern.None; break;
             case Pattern.Fireball: next = distance >= 6f ? Pattern.Charge : Pattern.None; break;
-            case Pattern.TailSweep: next = distance <= groundBiteReach ? Pattern.GroundBite : Pattern.None; break;
             default: next = Pattern.None; break;
         }
         return next != Pattern.None && IntroducedIn(next) <= phase ? next : Pattern.None;
